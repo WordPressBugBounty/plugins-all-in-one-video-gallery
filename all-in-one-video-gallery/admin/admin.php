@@ -38,6 +38,10 @@ class AIOVG_Admin {
 
 			$new_player_settings = array();
 			
+			if ( ! array_key_exists( 'theme', $player_settings ) ) {
+				$new_player_settings['theme'] = 'default';				
+			}
+
 			if ( ! array_key_exists( 'muted', $player_settings ) ) {
 				$new_player_settings['muted'] = $defaults['aiovg_player_settings']['muted'];				
 			}
@@ -57,10 +61,6 @@ class AIOVG_Admin {
 			if ( ! array_key_exists( 'force_js_initialization', $player_settings ) ) {
 				$new_player_settings['player'] = 'videojs';
 				$new_player_settings['force_js_initialization'] = ( isset( $player_settings['player'] ) && 'standard' == $player_settings['player'] ) ? 1 : 0;				
-			}
-
-			if ( ! array_key_exists( 'lazyloading', $player_settings ) ) {
-				$new_player_settings['lazyloading'] = 0;				
 			}
 
 			if ( count( $new_player_settings ) ) {
@@ -107,8 +107,12 @@ class AIOVG_Admin {
 				$new_categories_settings['hierarchical'] = $defaults['aiovg_categories_settings']['hierarchical'];				
 			}
 
-			if ( ! array_key_exists( 'back_button', $categories_settings ) ) {
-				$new_categories_settings['back_button'] = 1;				
+			if ( ! array_key_exists( 'breadcrumbs', $categories_settings ) ) {
+				if ( array_key_exists( 'back_button', $categories_settings ) ) {
+					$new_categories_settings['breadcrumbs'] = $categories_settings['back_button'];
+				} else {
+					$new_categories_settings['breadcrumbs'] = $defaults['aiovg_categories_settings']['breadcrumbs'];
+				}				
 			}
 
 			if ( count( $new_categories_settings ) ) {
@@ -204,6 +208,14 @@ class AIOVG_Admin {
 			$general_settings = get_option( 'aiovg_general_settings' );
 
 			$new_general_settings = array();
+
+			if ( ! array_key_exists( 'lazyloading', $general_settings ) ) {
+				if ( array_key_exists( 'lazyloading', $player_settings ) ) {
+					$new_general_settings['lazyloading'] = $player_settings['lazyloading'];
+				} else {
+					$new_general_settings['lazyloading'] = $defaults['aiovg_general_settings']['lazyloading'];
+				}				
+			}
 
 			if ( ! array_key_exists( 'maybe_flush_rewrite_rules', $general_settings ) ) {
 				$new_general_settings['maybe_flush_rewrite_rules'] = $defaults['aiovg_general_settings']['maybe_flush_rewrite_rules'];

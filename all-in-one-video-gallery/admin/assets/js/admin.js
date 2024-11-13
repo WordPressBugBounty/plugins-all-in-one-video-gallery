@@ -508,6 +508,12 @@
 			$( this ).attr( 'id', id );
 		});
 		
+		// Settings: Toggle fields based on the selected player library.
+		$( '#aiovg-player-settings tr.player input[type=radio]' ).on( 'change', function() {			
+			var value = $( '#aiovg-player-settings tr.player input[type=radio]:checked' ).val();			
+			$( '#aiovg-player-settings' ).aiovgReplaceClass( /\aiovg-player-\S+/ig, 'aiovg-player-' + value );
+		}).trigger( 'change' );
+
 		// Settings: Toggle fields based on the selected categories template.
 		$( '#aiovg-categories-settings tr.template select' ).on( 'change', function() {			
 			var value = $( this ).val();			

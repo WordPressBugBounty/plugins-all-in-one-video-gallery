@@ -185,7 +185,6 @@ class AIOVG_Widget_Video extends WP_Widget {
 			'post_type'              => 'aiovg_videos',
 			'post_status'            => 'publish',
 			'numberposts'            => 100,
-			'cache_results'          => false,  
     		'update_post_meta_cache' => false, 
     		'update_post_term_cache' => false
 		);

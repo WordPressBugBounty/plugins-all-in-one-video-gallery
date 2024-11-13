@@ -58,22 +58,34 @@ class AIOVG_Widget_Search extends WP_Widget {
 		$page_settings = get_option( 'aiovg_page_settings' );
 		
 		$attributes = array(
-			'template'       => isset( $instance['template'] ) ? sanitize_text_field( $instance['template'] ) : 'vertical',
-			'search_page_id' => $page_settings['search'],
-			'has_keyword'    => isset( $instance['has_keyword'] ) ? (int) $instance['has_keyword'] : 1,
-			'has_category'   => isset( $instance['has_category'] ) ? (int) $instance['has_category'] : 0,
-			'has_tag'        => isset( $instance['has_tag'] ) ? (int) $instance['has_tag'] : 0
+			'template'          => isset( $instance['template'] ) ? sanitize_text_field( $instance['template'] ) : 'vertical',
+			'search_page_id'    => $page_settings['search'],
+			'has_keyword'       => isset( $instance['has_keyword'] ) ? (int) $instance['has_keyword'] : 1,
+			'has_category'      => isset( $instance['has_category'] ) ? (int) $instance['has_category'] : 0,
+			'has_tag'           => isset( $instance['has_tag'] ) ? (int) $instance['has_tag'] : 0,
+			'has_sort'          => isset( $instance['has_sort'] ) ? (int) $instance['has_sort'] : 0,
+			'has_search_button' => isset( $instance['has_search_button'] ) ? (int) $instance['has_search_button'] : 1,
+			'target'            => isset( $instance['target'] ) ? sanitize_text_field( $instance['target'] ) : 'default'
 		);
 
-		if ( ! $attributes['has_category'] && ! $attributes['has_tag'] ) {
+		if ( ! $attributes['has_category'] && ! $attributes['has_tag'] && ! $attributes['has_sort'] ) {
 			$attributes['template'] = 'compact';
+		}
+
+		if ( 'current' == $attributes['target'] ) {
+			global $wp_query;
+			$attributes['search_page_id'] = $wp_query->get_queried_object_id();
 		}
 		
 		// Enqueue dependencies
 		wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-public' );
 
-		if ( $attributes['has_tag'] ) {
-			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-autocomplete' );
+		if ( ! $attributes['has_search_button'] ) {
+			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-public' );
+		}
+
+		if ( $attributes['has_category'] || $attributes['has_tag'] ) {
+			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-select' );
 		}
 
 		// Process output
@@ -98,11 +110,14 @@ class AIOVG_Widget_Search extends WP_Widget {
 	public function update( $new_instance, $old_instance ) {	
 		$instance = array();
 		
-		$instance['title']        = isset( $new_instance['title'] ) ? strip_tags( $new_instance['title'] ) : '';
-		$instance['template']     = isset( $new_instance['template'] ) ? sanitize_text_field( $new_instance['template'] ) : 'vertical';
-		$instance['has_keyword']  = isset( $new_instance['has_keyword'] ) ? (int) $new_instance['has_keyword'] : 0;
-		$instance['has_category'] = isset( $new_instance['has_category'] ) ? (int) $new_instance['has_category'] : 0;
-		$instance['has_tag']      = isset( $new_instance['has_tag'] ) ? (int) $new_instance['has_tag'] : 0;
+		$instance['title']             = isset( $new_instance['title'] ) ? strip_tags( $new_instance['title'] ) : '';
+		$instance['template']          = isset( $new_instance['template'] ) ? sanitize_text_field( $new_instance['template'] ) : 'vertical';
+		$instance['has_keyword']       = isset( $new_instance['has_keyword'] ) ? (int) $new_instance['has_keyword'] : 0;
+		$instance['has_category']      = isset( $new_instance['has_category'] ) ? (int) $new_instance['has_category'] : 0;
+		$instance['has_tag']           = isset( $new_instance['has_tag'] ) ? (int) $new_instance['has_tag'] : 0;
+		$instance['has_sort']          = isset( $new_instance['has_sort'] ) ? (int) $new_instance['has_sort'] : 0;
+		$instance['has_search_button'] = isset( $new_instance['has_search_button'] ) ? (int) $new_instance['has_search_button'] : 0;
+		$instance['target']            = isset( $new_instance['target'] ) ? sanitize_text_field( $new_instance['target'] ) : 'default';
 		
 		return $instance;		
 	}
@@ -116,11 +131,14 @@ class AIOVG_Widget_Search extends WP_Widget {
 	public function form( $instance ) {	
 		// Define the array of defaults
 		$defaults = array(
-			'title'        => __( 'Search Videos', 'all-in-one-video-gallery' ),
-			'template'     => 'vertical',
-			'has_keyword'  => 1,
-			'has_category' => 0,
-			'has_tag'      => 0
+			'title'             => __( 'Search Videos', 'all-in-one-video-gallery' ),
+			'template'          => 'vertical',
+			'has_keyword'       => 1,
+			'has_category'      => 0,
+			'has_tag'           => 0,
+			'has_sort'          => 0,
+			'has_search_button' => 1,
+			'target'            => 'default'
 		);
 		
 		// Parse incoming $instance into an array and merge it with $defaults

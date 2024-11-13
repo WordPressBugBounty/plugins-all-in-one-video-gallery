@@ -12,38 +12,37 @@
 $image = '';
 
 if ( isset( $_GET['poster'] ) ) {
-	$image = $_GET['poster'];
+	$image = aiovg_base64_decode( $_GET['poster'] );
 } elseif ( ! empty( $post_meta ) ) {
     $image_data = aiovg_get_image( $post_id, 'large' );
 	$image = $image_data['src'];
 }
 
 if ( ! empty( $image ) ) {
-    $image = aiovg_resolve_url( $image );
+    $image = aiovg_make_url_absolute( $image );
 } else {
     // YouTube
     if ( isset( $_GET['youtube'] ) ) {
-        $src = urldecode( $_GET['youtube'] );
+        $src = aiovg_base64_decode( $_GET['youtube'] );
         $image = aiovg_get_youtube_image_url( $src );	
     }
 
     // Vimeo
     if ( isset( $_GET['vimeo'] ) ) {
-        $src = urldecode( $_GET['vimeo'] );
+        $src = aiovg_base64_decode( $_GET['vimeo'] );
         $image = aiovg_get_vimeo_image_url( $src );
     }
 
     // Dailymotion
     if ( isset( $_GET['dailymotion'] ) ) {
-        $src = urldecode( $_GET['dailymotion'] );
+        $src = aiovg_base64_decode( $_GET['dailymotion'] );
         $image = aiovg_get_dailymotion_image_url( $src );
     }
 
     // Rumble
     if ( isset( $_GET['rumble'] ) ) {
-        $src = urldecode( $_GET['rumble'] );
-        $oembed = aiovg_get_rumble_oembed_data( $src );
-        $image = $oembed['thumbnail_url'];
+        $src = aiovg_base64_decode( $_GET['rumble'] );
+        $image = aiovg_get_rumble_image_url( $src );
     }
 }
 

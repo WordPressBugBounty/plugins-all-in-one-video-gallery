@@ -16,9 +16,8 @@ $is_video_found = 0;
 
 $args = array(				
     'post_type' => 'aiovg_videos',			
-    'posts_per_page' => 500,
-    'orderby' => 'title', 
-    'order' => 'ASC', 
+    'posts_per_page' => 1,
+    'fields' => 'ids',
     'no_found_rows' => true,
     'update_post_term_cache' => false,
     'update_post_meta_cache' => false

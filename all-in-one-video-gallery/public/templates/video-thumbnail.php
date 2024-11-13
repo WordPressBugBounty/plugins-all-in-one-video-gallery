@@ -9,7 +9,8 @@
  * @package All_In_One_Video_Gallery
  */
 
-$images_settings = get_option( 'aiovg_images_settings' );
+$general_settings = get_option( 'aiovg_general_settings' );
+$images_settings  = get_option( 'aiovg_images_settings' );
 
 $post_meta = get_post_meta( $post->ID );
 
@@ -17,11 +18,13 @@ $image_size = ! empty( $images_settings['size'] ) ? $images_settings['size'] : '
 $image_data = aiovg_get_image( $post->ID, $image_size, 'post', true );
 $image = $image_data['src'];
 $image_alt = ! empty( $image_data['alt'] ) ? $image_data['alt'] : $post->post_title;
+
+$lazyloading = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' : '';
 ?>
 
 <div class="aiovg-thumbnail aiovg-thumbnail-style-image-top">
     <a href="<?php the_permalink(); ?>" class="aiovg-responsive-container" style="padding-bottom: <?php echo esc_attr( $attributes['ratio'] ); ?>;">
-        <img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( $image_alt ); ?>" class="aiovg-responsive-element" />                    
+        <img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( $image_alt ); ?>" class="aiovg-responsive-element" <?php echo $lazyloading; ?>/>                    
         
         <?php if ( $attributes['show_duration'] && ! empty( $post_meta['duration'][0] ) ) : ?>
             <div class="aiovg-duration">
@@ -38,7 +41,7 @@ $image_alt = ! empty( $image_data['alt'] ) ? $image_data['alt'] : $post->post_ti
         <?php if ( $attributes['show_title'] ) : ?>
             <div class="aiovg-title">
                 <a href="<?php the_permalink(); ?>" class="aiovg-link-title">
-                    <?php echo esc_html( aiovg_truncate( get_the_title(), $attributes['title_length'] ) ); ?>
+                    <?php echo wp_kses_post( aiovg_truncate( get_the_title(), $attributes['title_length'] ) ); ?>
                 </a>
             </div>
         <?php endif; ?>

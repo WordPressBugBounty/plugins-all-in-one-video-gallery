@@ -74,14 +74,15 @@ class AIOVG_Init {
 		 require_once AIOVG_PLUGIN_DIR . 'includes/roles.php';
 		
 		/**
-		 * The class responsible for extending the 'wp_terms_checklist' function.
+		 * The custom walker class for the 'wp_terms_checklist' function.
 		 */
 		require_once AIOVG_PLUGIN_DIR . 'includes/walker-terms-checklist.php';
 
 		/**
-		 * The class responsible for extending the 'wp_dropdown_categories' function.
+		 * The custom walker classes for the 'wp_dropdown_categories' function.
 		 */
 		require_once AIOVG_PLUGIN_DIR . 'includes/walker-terms-dropdown.php';
+		require_once AIOVG_PLUGIN_DIR . 'includes/walker-terms-multiselect.php';
 		
 		/**
 		 * The class responsibe for the video player related functionalities.
@@ -89,9 +90,10 @@ class AIOVG_Init {
 		require_once AIOVG_PLUGIN_DIR . 'includes/player.php';
 		
 		/**
-		 * The file that holds the general helper functions.
+		 * The files with the helper functions.
 		 */
 		require_once AIOVG_PLUGIN_DIR . 'includes/functions.php';
+		require_once AIOVG_PLUGIN_DIR . 'includes/providers.php';
 
 		/**
 		 * The classes responsible for defining all actions that occur in the admin area.

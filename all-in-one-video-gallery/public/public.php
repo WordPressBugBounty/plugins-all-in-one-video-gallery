@@ -225,16 +225,16 @@ class AIOVG_Public {
 		);
 
 		wp_register_script( 
-			AIOVG_PLUGIN_SLUG . '-autocomplete', 
-			AIOVG_PLUGIN_URL . 'public/assets/js/autocomplete.min.js', 
+			AIOVG_PLUGIN_SLUG . '-select', 
+			AIOVG_PLUGIN_URL . 'public/assets/js/select.min.js', 
 			array( 'jquery' ), 
 			AIOVG_PLUGIN_VERSION, 
 			array( 'strategy' => 'defer' ) 
-		);			
+		);
 
 		wp_localize_script( 
-			AIOVG_PLUGIN_SLUG . '-autocomplete', 
-			'aiovg_autocomplete', 
+			AIOVG_PLUGIN_SLUG . '-select', 
+			'aiovg_select', 
 			array(
 				'ajax_url'   => $ajax_url,
 				'ajax_nonce' => $ajax_nonce,
@@ -940,6 +940,21 @@ class AIOVG_Public {
 			if ( $post->ID == $page_settings['category'] ) {
 				if ( $slug = get_query_var( 'aiovg_category' ) ) {
 					if ( $term = get_term_by( 'slug', $slug, 'aiovg_categories' ) ) {
+						// Include the parent categories if available
+						if ( $ancestors = get_ancestors( $term->term_id, 'aiovg_categories' ) ) {
+							$ancestors = array_reverse( $ancestors );
+
+							foreach ( $ancestors as $term_id ) {
+								if ( $parent_term = get_term_by( 'term_id', $term_id, 'aiovg_categories' ) ) {
+									$crumbs[] = array(
+										'text' => $parent_term->name,
+										'url'  => aiovg_get_category_page_url( $parent_term )
+									);
+								}
+							}
+						}
+
+						// Include the current category page
 						$crumbs[] = array(
 							'text' => $term->name
 						);	
@@ -1106,10 +1121,10 @@ class AIOVG_Public {
 			return $title;
 		}
 
-		global $post;
+		$post_id = get_the_ID();
 
 		if ( ! empty( $id ) ) {
-			if ( $id != $post->ID ) {
+			if ( $id != $post_id ) {
 				return $title;
 			}
 		}
@@ -1117,7 +1132,7 @@ class AIOVG_Public {
 		$page_settings = get_option( 'aiovg_page_settings' );
 		
 		// Change category page title
-		if ( $post->ID == $page_settings['category'] ) {		
+		if ( $post_id == $page_settings['category'] ) {		
 			if ( $slug = get_query_var( 'aiovg_category' ) ) {
 				if ( $term = get_term_by( 'slug', $slug, 'aiovg_categories' ) ) {
 					$title = $term->name;	
@@ -1126,7 +1141,7 @@ class AIOVG_Public {
 		}
 
 		// Change tag page title
-		if ( $post->ID == $page_settings['tag'] ) {		
+		if ( $post_id == $page_settings['tag'] ) {		
 			if ( $slug = get_query_var( 'aiovg_tag' ) ) {
 				if ( $term = get_term_by( 'slug', $slug, 'aiovg_tags' ) ) {
 					$title = $term->name;
@@ -1135,7 +1150,7 @@ class AIOVG_Public {
 		}
 		
 		// Change search page title
-		if ( $post->ID == $page_settings['search'] ) {		
+		if ( $post_id == $page_settings['search'] ) {		
 			$queries = array();
 			
 			if ( ! empty( $_GET['vi'] ) ) {
@@ -1143,13 +1158,20 @@ class AIOVG_Public {
 			}
 			
 			if ( ! empty( $_GET['ca'] ) ) {
-				if ( $term = get_term_by( 'id', (int) $_GET['ca'], 'aiovg_categories' ) ) {
-					$queries[] = $term->name;		
+				$categories = array_map( 'intval', (array) $_GET['ca'] );
+				$categories = array_filter( $categories );
+
+				if ( ! empty( $categories ) ) {
+					foreach ( $categories as $category ) {
+						if ( $term = get_term_by( 'id', $category, 'aiovg_categories' ) ) {
+							$queries[] = $term->name;	
+						}
+					}	
 				}		
 			}
 
 			if ( isset( $_GET['ta'] ) ) {
-				$tags = array_map( 'intval', $_GET['ta'] );
+				$tags = array_map( 'intval', (array) $_GET['ta'] );
 				$tags = array_filter( $tags );
 
 				if ( ! empty( $tags ) ) {
@@ -1167,7 +1189,7 @@ class AIOVG_Public {
 		}
 		
 		// Change user videos page title
-		if ( $post->ID == $page_settings['user_videos'] ) {		
+		if ( $post_id == $page_settings['user_videos'] ) {		
 			if ( $slug = get_query_var( 'aiovg_user' ) ) {
 				$user = get_user_by( 'slug', $slug );
 				$title = $user->display_name;		

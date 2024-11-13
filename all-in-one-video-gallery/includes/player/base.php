@@ -212,7 +212,7 @@ class AIOVG_Player_Base {
 					$sources = get_post_meta( $this->post_id, 'sources', true );
 					if ( ! empty( $sources ) && is_array( $sources ) ) {
 						foreach ( $sources as $index => $source ) {
-							$sources[ $index ]['src'] = aiovg_resolve_url( $source['src'] );
+							$sources[ $index ]['src'] = aiovg_make_url_absolute( $source['src'] );
 						}
 
 						$videos['sources'] = $sources;
@@ -221,17 +221,17 @@ class AIOVG_Player_Base {
 			}
 		}
 
-		// Resolve relative file paths as absolute URLs
+		// Convert relative file paths into absolute URLs
 		if ( ! empty( $videos['mp4'] ) ) {
-			$videos['mp4'] = aiovg_resolve_url( $videos['mp4'] );
+			$videos['mp4'] = aiovg_make_url_absolute( $videos['mp4'] );
 		}
 
 		if ( ! empty( $videos['webm'] ) ) {
-			$videos['webm'] = aiovg_resolve_url( $videos['webm'] );
+			$videos['webm'] = aiovg_make_url_absolute( $videos['webm'] );
 		}
 
 		if ( ! empty( $videos['ogv'] ) ) {
-			$videos['ogv'] = aiovg_resolve_url( $videos['ogv'] );
+			$videos['ogv'] = aiovg_make_url_absolute( $videos['ogv'] );
 		}
 
 		// Set embed URL if available
@@ -260,7 +260,7 @@ class AIOVG_Player_Base {
 		if ( $this->post_id > 0 && 'aiovg_videos' == $this->post_type ) {
 			$tracks = get_post_meta( $this->post_id, 'track' );
 			foreach ( $tracks as $index => $track ) {
-				$tracks[ $index ]['src'] = aiovg_resolve_url( $track['src'] );
+				$tracks[ $index ]['src'] = aiovg_make_url_absolute( $track['src'] );
 			}
 		}
 
@@ -310,14 +310,14 @@ class AIOVG_Player_Base {
 		$poster = '';
 
 		if ( ! empty( $this->args['poster'] ) ) {
-			$poster = aiovg_resolve_url( $this->args['poster'] );
+			$poster = aiovg_make_url_absolute( $this->args['poster'] );
 		} else {
 			// Is a video post?
 			if ( $this->post_id > 0 && 'aiovg_videos' == $this->post_type ) {
 				$image_data = aiovg_get_image( $this->post_id, 'large' );
 
 				if ( ! empty( $image_data['src'] ) ) {
-					$poster = aiovg_resolve_url( $image_data['src'] );
+					$poster = aiovg_make_url_absolute( $image_data['src'] );
 				}
 			}
 		}
@@ -342,8 +342,7 @@ class AIOVG_Player_Base {
 
 			// Rumble
 			if ( ! empty( $videos['rumble'] ) ) {
-				$oembed = aiovg_get_rumble_oembed_data( $videos['rumble'] );
-				$poster = $oembed['thumbnail_url'];
+				$poster = aiovg_get_rumble_image_url( $videos['rumble'] );
 			}
 		}
 
@@ -363,11 +362,13 @@ class AIOVG_Player_Base {
 			return $this->cache['player_settings'];
 		}
 
-		$player_settings = get_option( 'aiovg_player_settings' );		
+		$player_settings  = get_option( 'aiovg_player_settings' );
+		$general_settings = get_option( 'aiovg_general_settings' );			
 
 		$defaults = array(
 			'width' 			  => $player_settings['width'],
 			'ratio' 			  => $player_settings['ratio'],
+			'theme'               => ( isset( $player_settings['theme'] ) && 'custom' == $player_settings['theme'] ) ? 'custom' : 'default',
 			'preload'             => $player_settings['preload'],
 			'playsinline'         => isset( $player_settings['playsinline'] ) ? $player_settings['playsinline'] : 0,
 			'autoplay'            => $player_settings['autoplay'],
@@ -391,7 +392,7 @@ class AIOVG_Player_Base {
 			'hotkeys'             => isset( $player_settings['hotkeys'] ) ? $player_settings['hotkeys'] : 0,
 			'cc_load_policy'      => $player_settings['cc_load_policy'],
 			'use_native_controls' => $player_settings['use_native_controls'],
-			'lazyloading'         => isset( $player_settings['lazyloading'] ) ? $player_settings['lazyloading'] : 0
+			'lazyloading'         => isset( $general_settings['lazyloading'] ) ? $general_settings['lazyloading'] : 0
 		);
 
 		$settings = shortcode_atts( $defaults, $this->args );
@@ -456,7 +457,7 @@ class AIOVG_Player_Base {
 		$settings = shortcode_atts( $brand_settings, $this->args );
 
 		if ( ! empty( $settings['logo_image'] ) ) {
-			$settings['logo_image'] = aiovg_resolve_url( $settings['logo_image'] );
+			$settings['logo_image'] = aiovg_make_url_absolute( $settings['logo_image'] );
 		} else {
 			$settings['show_logo'] = false;
 		}

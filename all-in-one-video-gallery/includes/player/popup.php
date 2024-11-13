@@ -40,8 +40,10 @@ class AIOVG_Player_Popup extends AIOVG_Player_Base {
  	 * @return string $html Player HTML.
 	 */
 	public function get_player() {		
-		$player_settings = $this->get_player_settings();
+		$player_settings  = $this->get_player_settings();
+		$general_settings = get_option( 'aiovg_general_settings' );
 		
+		$lazyloading   = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' : '';
 		$popup_content = __( 'Open Popup', 'all-in-one-video-gallery' );
 
 		if ( ! isset( $this->args['content'] ) ) {
@@ -49,13 +51,13 @@ class AIOVG_Player_Popup extends AIOVG_Player_Base {
 			$poster = $this->get_poster();
 
 			if ( ! empty( $poster ) ) {
-				$popup_content = sprintf( '<img src="%s" alt="" />', esc_url( $poster ) );
+				$popup_content = sprintf( '<img src="%s" alt="" %s/>', esc_url( $poster ), $lazyloading );
 			}
 		} else {
 			$popup_content = trim( $this->args['content'] );
 
 			if ( ! filter_var( $popup_content, FILTER_VALIDATE_URL ) === FALSE ) {
-				$popup_content = sprintf( '<img src="%s" alt="" />', esc_url( $popup_content ) );
+				$popup_content = sprintf( '<img src="%s" alt="" %s/>', esc_url( $popup_content ), $lazyloading );
 			}
 		}
 

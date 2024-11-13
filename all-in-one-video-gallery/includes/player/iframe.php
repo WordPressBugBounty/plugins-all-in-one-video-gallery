@@ -62,9 +62,10 @@ class AIOVG_Player_Iframe extends AIOVG_Player_Base {
 		);	
 
 		$html .= sprintf( 
-			'<iframe src="%s" title="%s" width="560" height="315" frameborder="0" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>', 
+			'<iframe src="%s" title="%s" width="560" height="315" frameborder="0" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen%s></iframe>', 
 			esc_url( $this->embed_url ),
-			esc_attr( $this->post_title ) 
+			esc_attr( $this->post_title ),
+			( ! empty( $player_settings['lazyloading'] ) ? ' loading="lazy"' : '' )
 		);	
 
 		$html .= '</div>';

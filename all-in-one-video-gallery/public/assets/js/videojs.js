@@ -74,7 +74,7 @@
 							addSrtTextTrack( player, track, mode );
 						} else {
 							var obj = {
-								kind: 'subtitles',
+								kind: 'captions',
 								src: track.src,									
 								label: track.label,
 								srclang: track.srclang
@@ -99,11 +99,11 @@
 			if ( settings.hasOwnProperty( 'chapters' ) ) {
 				try {
 					player.getDescendant([
-						'controlBar',
-						'progressControl',
-						'seekBar',
-						'mouseTimeDisplay',
-						'timeTooltip',
+						'ControlBar',
+						'ProgressControl',
+						'SeekBar',
+						'MouseTimeDisplay',
+						'TimeTooltip',
 					]).update = function( seekBarRect, seekBarPoint, time ) {
 						var markers = settings.chapters;
 						var markerIndex = markers.findIndex(({ time: markerTime }) => markerTime == formatedTimeToSeconds( time ));
@@ -129,7 +129,7 @@
 				hasVideoStarted = true;
 				$el.removeClass( 'vjs-waiting' );
 
-				updateViewsCount( settings );
+				updateViewsCount( settings, player );
 
 				$( '.aiovg-player-standard' ).trigger( 'playRequested', { playerId: playerId } );
 			});
@@ -284,7 +284,7 @@
 				}
 
 				if ( settings.hasOwnProperty( 'embed' ) ) {
-					$el.find( '.vjs-copy-embed-code' ).on( 'focus', function() {
+					$el.find( '.vjs-input-embed-code' ).on( 'focus', function() {
 						$( this ).select();	
 						document.execCommand( 'copy' );					
 					});
@@ -386,7 +386,7 @@
 					var src = URL.createObjectURL( blob );
 
 					var obj = {
-						kind: 'subtitles',
+						kind: 'captions',
 						src: src,							
 						label: track.label,
 						srclang: track.srclang							
@@ -532,7 +532,7 @@
 	/**
 	 * Update video views count.
 	 */
-	function updateViewsCount( settings ) {
+	function updateViewsCount( settings, player ) {
 		if ( 'aiovg_videos' !== settings.post_type ) {
 			return false;
 		}
@@ -543,23 +543,14 @@
 			'security': aiovg_player.ajax_nonce
 		};
 
+		if ( typeof player !== 'undefined' ) {
+			data.duration = player.duration() || 0;
+		}
+
 		$.post( aiovg_player.ajax_url, data, function( response ) {
 			/** console.log( response ); */
 		});
 	}
-
-	/**
-	 * Merge attributes.
-	 */
-	function mergeAttributes( attributes ) {
-		var str = '';
-
-		for ( var key in attributes ) {
-			str += ( key + '="' + attributes[ key ] + '" ' );
-		}
-
-		return str;
-	} 
 
 	/**
 	 * Refresh iframe player elements upon cookie confirmation.

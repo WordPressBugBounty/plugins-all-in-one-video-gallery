@@ -26,7 +26,7 @@
 					'horizontal' => __( 'Horizontal', 'all-in-one-video-gallery' )	
 				);
 			
-				foreach( $options as $key => $value ) {
+				foreach ( $options as $key => $value ) {
 					printf( 
 						'<option value="%s"%s>%s</option>', 
 						$key, 
@@ -57,6 +57,42 @@
 				<input type="checkbox" name="<?php echo esc_attr( $this->get_field_name( 'has_tag' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'has_tag' ) ); ?>" class="aiovg-widget-input-has_tag" value="1" <?php checked( 1, $instance['has_tag'] ); ?> /> 
 				<?php esc_html_e( 'Search By Tags', 'all-in-one-video-gallery' ); ?>
 			</label>
+		</div>
+
+		<div class="aiovg-widget-field aiovg-widget-field-has_sort">		
+			<label for="<?php echo esc_attr( $this->get_field_id( 'has_sort' ) ); ?>">
+				<input type="checkbox" name="<?php echo esc_attr( $this->get_field_name( 'has_sort' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'has_sort' ) ); ?>" class="aiovg-widget-input-has_sort" value="1" <?php checked( 1, $instance['has_sort'] ); ?> /> 
+				<?php esc_html_e( 'Sort By Dropdown', 'all-in-one-video-gallery' ); ?>
+			</label>
+		</div>
+
+		<div class="aiovg-widget-field aiovg-widget-field-has_search_button">		
+			<label for="<?php echo esc_attr( $this->get_field_id( 'has_search_button' ) ); ?>">
+				<input type="checkbox" name="<?php echo esc_attr( $this->get_field_name( 'has_search_button' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'has_search_button' ) ); ?>" class="aiovg-widget-input-has_search_button" value="1" <?php checked( 1, $instance['has_search_button'] ); ?> /> 
+				<?php esc_html_e( 'Search Button', 'all-in-one-video-gallery' ); ?>
+			</label>
+		</div>
+
+		<div class="aiovg-widget-field aiovg-widget-field-target">
+			<label class="aiovg-widget-label" for="<?php echo esc_attr( $this->get_field_id( 'target' ) ); ?>"><?php esc_html_e( 'Search Results Page', 'all-in-one-video-gallery' ); ?></label>
+			<select name="<?php echo esc_attr( $this->get_field_name( 'target' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'target' ) ); ?>" class="widefat aiovg-widget-input-target"> 
+				<?php
+				$options = array(
+					'default' => __( "Use Plugin's Default Search Results Page", 'all-in-one-video-gallery' ),
+					'current' => __( 'Display Results on Current Page', 'all-in-one-video-gallery' )	
+				);
+			
+				foreach ( $options as $key => $value ) {
+					printf( 
+						'<option value="%s"%s>%s</option>', 
+						$key, 
+						selected( $key, $instance['target'], false ), 
+						esc_html( $value )
+					);
+				}
+				?>
+			</select>
+			<p class="description"><?php esc_html_e( 'The selected "Search Results Page" must include the [aiovg_search] shortcode, which will be replaced by the search results.', 'all-in-one-video-gallery' ); ?></p>
 		</div>
 	</div>
 </div>

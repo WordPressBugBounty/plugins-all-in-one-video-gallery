@@ -21,6 +21,18 @@
 		"tag": {
 			"type": "boolean",
 			"default": true
+		},
+		"sort": {
+			"type": "boolean",
+			"default": false
+		},
+		"search_button": {
+			"type": "boolean",
+			"default": true
+		},
+		"target": {
+			"type": "string",
+			"default": "default"
 		}
 	},
 	"keywords": [ "search", "videos", "all-in-one-video-gallery", "aiovg" ],

@@ -31,7 +31,7 @@ if ( ! empty( $post_meta ) ) {
 } else {
     if ( in_array( $current_video_provider, $thirdparty_providers_all ) ) {
         if ( isset( $_GET[ $current_video_provider ] ) ) {
-            $embed_url = urldecode( $_GET[ $current_video_provider ] );
+            $embed_url = aiovg_base64_decode( $_GET[ $current_video_provider ] );
         }
     }
 }

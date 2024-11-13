@@ -94,6 +94,7 @@ class AIOVG_Public_Video {
 			$attributes = array();
 		}
 
+		$attributes['shortcode'] = 'aiovg_video';
 		$post_id = 0;
 		
 		if ( isset( $attributes['id'] ) && ! empty( $attributes['id'] ) ) {
@@ -164,11 +165,23 @@ class AIOVG_Public_Video {
 			}
 			
 			if ( 0 == $is_video_available ) {
+				$is_singular   = is_singular( 'aiovg_videos' );
 				$in_the_loop   = apply_filters( 'aiovg_the_content_in_the_loop', in_the_loop() );
 				$is_main_query = apply_filters( 'aiovg_the_content_is_main_query', is_main_query() );
 
-				if ( is_singular( 'aiovg_videos' ) && $in_the_loop && $is_main_query ) {
-					$attributes['id'] = get_the_ID();
+				$category = isset( $attributes['category'] ) ? $attributes['category'] : '';
+				$tag      = isset( $attributes['tag'] ) ? $attributes['tag'] : '';
+				$featured = isset( $attributes['featured'] ) ? (int) $attributes['featured'] : 0;
+				$orderby  = isset( $attributes['orderby'] ) ? sanitize_text_field( $attributes['orderby'] ) : '';
+				$order    = isset( $attributes['order'] ) ? sanitize_text_field( $attributes['order'] ) : 'desc';
+
+				if ( ! empty( $category ) || ! empty( $tag ) || ! empty( $featured ) || ! empty( $orderby ) ) {
+					$is_singular = false;
+				}
+
+				if ( $is_singular && $in_the_loop && $is_main_query ) {
+					$post_id = get_the_ID();
+					$attributes['id'] = $post_id;
 				} else {
 					$args = array(				
 						'post_type' => 'aiovg_videos',			
@@ -180,6 +193,107 @@ class AIOVG_Public_Video {
 						'update_post_meta_cache' => false
 					);
 			
+					// Taxonomy Parameters
+					$tax_queries = array();		
+
+					if ( ! empty( $category ) ) { // Category
+						$tax_queries[] = array(
+							'taxonomy'         => 'aiovg_categories',
+							'field'            => 'term_id',
+							'terms'            => is_array( $category ) ? array_map( 'intval', $category ) : array_map( 'intval', explode( ',', $category ) ),
+							'include_children' => false
+						);
+					}
+
+					if ( ! empty( $tag ) ) { // Tag
+						$tax_queries[] = array(
+							'taxonomy'         => 'aiovg_tags',
+							'field'            => 'term_id',
+							'terms'            => is_array( $tag ) ? array_map( 'intval', $tag ) : array_map( 'intval', explode( ',', $tag ) ),
+							'include_children' => false
+						);
+					}
+					
+					$count_tax_queries = count( $tax_queries );
+					if ( $count_tax_queries ) {
+						$args['tax_query'] = ( $count_tax_queries > 1 ) ? array_merge( array( 'relation' => 'AND' ), $tax_queries ) : $tax_queries;
+					}
+
+					// Custom Field (post meta) Parameters
+					$meta_queries = array();
+
+					if ( 'likes' == $orderby ) { // Likes			
+						$meta_queries['likes'] = array(
+							'relation' => 'OR',
+							array(
+								'key'     => 'likes',
+								'compare' => 'NOT EXISTS'
+							),
+							array(
+								'key'     => 'likes',
+								'type'    => 'NUMERIC',
+								'compare' => 'EXISTS'
+							)
+						);				
+					}
+
+					if ( 'dislikes' == $orderby ) { // Dislikes			
+						$meta_queries['dislikes'] = array(
+							'relation' => 'OR',
+							array(
+								'key'     => 'dislikes',
+								'compare' => 'NOT EXISTS'
+							),
+							array(
+								'key'     => 'dislikes',
+								'type'    => 'NUMERIC',
+								'compare' => 'EXISTS'
+							)
+						);				
+					}
+
+					if ( ! empty( $featured ) ) { // Featured			
+						$meta_queries['featured'] = array(
+							'key'     => 'featured',
+							'value'   => 1,
+							'compare' => '='
+						);				
+					}		
+
+					$count_meta_queries = count( $meta_queries );
+					if ( $count_meta_queries ) {
+						$args['meta_query'] = ( $count_meta_queries > 1 ) ? array_merge( array( 'relation' => 'AND' ), $meta_queries ) : $meta_queries;
+					}
+
+					// Order & Orderby Parameters
+					switch ( $orderby ) {
+						case 'likes':
+						case 'dislikes':
+							$args['orderby'] = array(
+								$orderby => $order,
+								'date'   => 'DESC'
+							);			
+							break;
+
+						case 'views':
+							$args['meta_key'] = $orderby;
+							$args['orderby']  = 'meta_value_num';
+						
+							$args['order']    = $order;
+							break;
+
+						case 'rand':
+							$args['orderby']  = 'rand';
+							break;
+
+						default:
+							if ( ! empty( $orderby ) ) {
+								$args['orderby'] = $orderby;
+								$args['order']   = $order;
+							}
+					}
+			
+					$args = apply_filters( 'aiovg_query_args', $args, $attributes );
 					$aiovg_query = new WP_Query( $args );
 					
 					if ( $aiovg_query->have_posts() ) {
@@ -193,8 +307,52 @@ class AIOVG_Public_Video {
 		}
 			
 		// Output
+		$show_title = isset( $attributes['show_title'] ) ? (int) $attributes['show_title'] : 0;
+		if ( $show_title && $post_id > 0 ) {
+			$attributes['title'] = get_the_title( $post_id );
+		}
+
 		$attributes = apply_filters( 'shortcode_atts_aiovg_video', $attributes, $content );
-		return aiovg_get_player_html( $post_id, $attributes );		
+		
+		$player_html = aiovg_get_player_html( $post_id, $attributes );
+
+		$html = $player_html;
+
+		if ( isset( $attributes['title'] ) && ! empty( $attributes['title'] ) ) {
+			$title_position = isset( $attributes['title_position'] ) ? sanitize_text_field( $attributes['title_position'] ) : '';
+
+			$allowed_title_tags = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'p' );
+			$title_tag = isset( $attributes['title_tag'] ) ? sanitize_key( $attributes['title_tag'] ) : 'h2';
+			if ( ! in_array( $title_tag, $allowed_title_tags) ) {
+				$title_tag = 'h2';
+			}			
+
+			$html = '<div class="aiovg aiovg-video-shortcode">';
+			
+			switch ( $title_position ) {
+				case 'bottom':
+					$html .= sprintf( 
+						'%1$s<%2$s class="aiovg-player-title">%3$s</%2$s>', 
+						$player_html,
+						$title_tag,
+						esc_html( $attributes['title'] )						 
+					);
+					break;
+
+				default: // top
+					$html .= sprintf( 
+						'<%1$s class="aiovg-player-title">%2$s</%1$s>%3$s',
+						$title_tag,
+						esc_html( $attributes['title'] ), 
+						$player_html
+					);
+					
+			}
+
+			$html .= '</div>';			
+		}
+
+		return $html;
 	}
 
 	/**
@@ -382,6 +540,19 @@ class AIOVG_Public_Video {
 			if ( $post_id > 0 ) {
 				check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
 				aiovg_update_views_count( $post_id );
+
+				// Update video duration if applicable
+				if ( isset( $_REQUEST['duration'] ) ) {		
+					$duration = (float) $_REQUEST['duration'];
+								
+					if ( $duration > 0 ) {
+						$current_duration = get_post_meta( $post_id, 'duration', true );
+						if ( empty( $current_duration ) ) {
+							$duration = aiovg_convert_seconds_to_human_time( $duration );
+							update_post_meta( $post_id, 'duration', $duration );
+						}
+					}		
+				}
 			}		
 		}
 		
@@ -400,7 +571,7 @@ class AIOVG_Public_Video {
 		
 		if ( is_numeric( $_GET['vdl'] ) ) {
 			$file = get_post_meta( (int) $_GET['vdl'], 'mp4', true );
-			$file = aiovg_resolve_url( $file );
+			$file = aiovg_make_url_absolute( $file );
 		} else {
 			$file = get_transient( sanitize_text_field( $_GET['vdl'] ) );
 		}

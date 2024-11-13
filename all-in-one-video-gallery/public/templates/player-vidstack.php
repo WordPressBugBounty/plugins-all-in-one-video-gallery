@@ -123,7 +123,8 @@ if ( ! empty( $post_meta ) ) {
 					$mime_type = "video/{$type}";
 			}
 
-			$src = aiovg_sanitize_url( aiovg_resolve_url( $_GET[ $type ] ) );
+			$src = aiovg_base64_decode( $_GET[ $type ] );
+			$src = aiovg_sanitize_url( aiovg_make_url_absolute( $src ) );
 
 			$sources[ $type ] = array(
 				'type' => $mime_type,
@@ -214,14 +215,14 @@ if ( $playsinline ) {
 
 $poster = '';
 if ( isset( $_GET['poster'] ) ) {
-	$poster = $_GET['poster'];
+	$poster = aiovg_base64_decode( $_GET['poster'] );
 } elseif ( ! empty( $post_meta ) ) {
 	$image_data = aiovg_get_image( $post_id, 'large' );
 	$poster = $image_data['src'];
 }
 
 if ( ! empty( $poster ) ) {
-	$attributes['data-poster'] = aiovg_sanitize_url( aiovg_resolve_url( $poster ) );
+	$attributes['data-poster'] = aiovg_sanitize_url( aiovg_make_url_absolute( $poster ) );
 }
 
 $attributes = apply_filters( 'aiovg_iframe_vidstack_player_attributes', $attributes );
@@ -333,6 +334,11 @@ if ( $has_pip ) {
 
 if ( $has_fullscreen ) {
 	$controls[] = 'fullscreen';
+
+	$settings['player']['fullscreen'] = array(
+        'enabled'   => true,
+        'iosNative' => true
+    );
 }
 
 $settings['player']['controls'] = $controls;
@@ -524,7 +530,7 @@ if ( ! empty( $brand_settings ) ) {
 	$has_logo = ! empty( $brand_settings['logo_image'] ) ? (int) $brand_settings['show_logo'] : 0;
 	if ( $has_logo ) {
 		$settings['logo'] = array(
-			'image'    => esc_url( aiovg_resolve_url( $brand_settings['logo_image'] ) ),
+			'image'    => esc_url( aiovg_make_url_absolute( $brand_settings['logo_image'] ) ),
 			'link'     => ! empty( $brand_settings['logo_link'] ) ? esc_url( $brand_settings['logo_link'] ) : 'javascript:void(0)',
 			'position' => sanitize_text_field( $brand_settings['logo_position'] ),
 			'margin'   => ! empty( $brand_settings['logo_margin'] ) ? (int) $brand_settings['logo_margin'] : 15
@@ -907,7 +913,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 		foreach ( $sources as $source ) {
 			printf( 
 				'<source src="%s" type="%s" size="%d" />', 				
-				esc_url( aiovg_resolve_url( $source['src'] ) ),
+				esc_url( aiovg_make_url_absolute( $source['src'] ) ),
 				esc_attr( $source['type'] ), 
 				( isset( $source['label'] ) ? (int) $source['label'] : '' )
 			);
@@ -917,7 +923,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 		foreach ( $tracks as $index => $track ) {
         	printf( 
 				'<track kind="captions" src="%s" label="%s" srclang="%s" />', 
-				esc_url( aiovg_resolve_url( $track['src'] ) ), 				
+				esc_url( aiovg_make_url_absolute( $track['src'] ) ), 				
 				esc_attr( $track['label'] ),
 				esc_attr( $track['srclang'] )
 			);
@@ -964,7 +970,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 	<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/vidstack/plyr.polyfilled.js?v=3.7.8" type="text/javascript" defer></script>
 
 	<?php if ( isset( $sources['hls'] ) ) : ?>
-		<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/vidstack/hls.min.js?v=1.5.13" type="text/javascript" defer></script>
+		<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/vidstack/hls.min.js?v=1.5.17" type="text/javascript" defer></script>
 	<?php endif; ?>
 
 	<?php if ( isset( $sources['dash'] ) ) : ?>
@@ -986,7 +992,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 		 * Helper Functions.
 		 */ 
 
-		function updateViewsCount() {
+		function updateViewsCount( player ) {
 			var xmlhttp;
 
 			if ( window.XMLHttpRequest ) {
@@ -1001,7 +1007,9 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 				}					
 			}	
 
-			xmlhttp.open( 'GET', '<?php echo admin_url( 'admin-ajax.php' ); ?>?action=aiovg_update_views_count&post_id=<?php echo $post_id; ?>&security=<?php echo wp_create_nonce( 'aiovg_ajax_nonce' ); ?>', true );
+			var duration = player.duration || 0;
+
+			xmlhttp.open( 'GET', '<?php echo admin_url( 'admin-ajax.php' ); ?>?action=aiovg_update_views_count&post_id=<?php echo $post_id; ?>&duration=' + duration + '&security=<?php echo wp_create_nonce( 'aiovg_ajax_nonce' ); ?>', true );
 			xmlhttp.send();							
 		}
 
@@ -1099,34 +1107,34 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 				}
 			});
 
-			// Update views count.
+			// On playing.
 			var viewed = false;
 
 			player.on( 'playing', function() {
-				if ( viewed ) return false;
-				viewed = true;
-
 				if ( settings.post_type == 'aiovg_videos' ) {
-					updateViewsCount();
+					if ( ! viewed ) {
+						viewed = true;
+						updateViewsCount( player );
+					}
+
+					window.parent.postMessage({ 				
+						message: 'aiovg-video-playing',			
+						id: settings.uid,
+						post_id: settings.post_id
+					}, '*');
 				}
 			});
 
 			// On ended.
-			var hasMessageSent = false;
-
 			player.on( 'ended', function() {
 				plyr.className += ' plyr--stopped';
 
 				// Autoplay next video.
 				if ( settings.hasOwnProperty( 'autoadvance' ) ) {
-					if ( ! hasMessageSent ) {
-						hasMessageSent = true;
-
-						window.parent.postMessage({ 				
-							message: 'aiovg-video-ended',			
-							id: settings.uid
-						}, '*'); 
-					}
+					window.parent.postMessage({ 				
+						message: 'aiovg-video-ended',			
+						id: settings.uid
+					}, '*'); 
 				}
 			});
 
@@ -1192,6 +1200,31 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 					contextmenu.style.display = 'none';								 
 				});	
 			}
+
+			// Api methods
+			window.addEventListener( 'message', function( event ) {
+				if ( ! event.data.hasOwnProperty( 'message' ) ) {
+					return false;
+				}
+
+				if ( event.data.id != settings.uid ) {
+					return false;
+				}
+
+				if ( event.data.post_id != settings.post_id ) {
+					return false;
+				}
+
+				switch ( event.data.message ) {
+					case 'aiovg-video-play':
+						player.play();
+						break;
+
+					case 'aiovg-video-pause':
+						player.pause();
+						break;
+				}
+			});
 		}			
 		
 		document.addEventListener( 'DOMContentLoaded', function() {

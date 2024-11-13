@@ -89,8 +89,11 @@ class AIOVG_Public_Videos {
 	 * @since 1.0.0
 	 * @param array $atts An associative array of attributes.
 	 */
-	public function run_shortcode_category( $atts ) {	
+	public function run_shortcode_category( $atts ) {
+		$categories_settings = get_option( 'aiovg_categories_settings' );
+
 		$term_slug = get_query_var( 'aiovg_category' );
+		$content   = '';
 		
 		if ( ! empty( $term_slug ) ) {
 			$term = get_term_by( 'slug', sanitize_title( $term_slug ), 'aiovg_categories' );
@@ -98,37 +101,35 @@ class AIOVG_Public_Videos {
 			$term = get_term_by( 'id', (int) $atts['id'], 'aiovg_categories' );
 		}
 		
-		if ( isset( $term ) && ! empty( $term ) ) {
-			$categories_settings = get_option( 'aiovg_categories_settings' );
-
-			$content = '';
-			
-			if ( ! empty( $categories_settings['back_button'] ) ) {
+		if ( isset( $term ) && ! empty( $term ) ) {			
+			if ( ! empty( $categories_settings['breadcrumbs'] ) ) {
 				$page_settings = get_option( 'aiovg_page_settings' );
+				
+				// An ugly fallback for the users who have overwritten the deprecated "Back to Categories" link
+				$back_button_url = apply_filters( 'aiovg_back_to_categories_link', '#' );
+				if ( '#' !== $back_button_url ) {
+					if ( ! empty( $back_button_url ) ) {
+						$back_button_text = __( 'All Categories', 'all-in-one-video-gallery' );
 
-				$back_button_url  = get_permalink( $page_settings['category'] );
-				$back_button_text = __( 'All Categories', 'all-in-one-video-gallery' );
+						if ( $term->parent > 0 ) {
+							$parent_term = get_term_by( 'id', $term->parent, 'aiovg_categories' );
+							$back_button_text = $parent_term->name;
+						}
 
-				if ( $term->parent > 0 ) {
-					$parent_term = get_term_by( 'id', $term->parent, 'aiovg_categories' );
+						$icon = '<svg xmlns="http://www.w3.org/2000/svg" width="12px" height="12px" viewBox="0 0 20 20" fill="currentColor" class="aiovg-flex-shrink-0">
+							<path fill-rule="evenodd" d="M4.72 9.47a.75.75 0 0 0 0 1.06l4.25 4.25a.75.75 0 1 0 1.06-1.06L6.31 10l3.72-3.72a.75.75 0 1 0-1.06-1.06L4.72 9.47Zm9.25-4.25L9.72 9.47a.75.75 0 0 0 0 1.06l4.25 4.25a.75.75 0 1 0 1.06-1.06L11.31 10l3.72-3.72a.75.75 0 0 0-1.06-1.06Z" clip-rule="evenodd" />
+						</svg>';
 
-					$back_button_url  = aiovg_get_category_page_url( $parent_term );
-					$back_button_text = $parent_term->name;
-				}
-
-				$back_button_url = apply_filters( 'aiovg_back_to_categories_link', $back_button_url );
-
-				if ( ! empty( $back_button_url ) ) {
-					$icon = '<svg xmlns="http://www.w3.org/2000/svg" width="12px" height="12px" viewBox="0 0 20 20" fill="currentColor" class="aiovg-flex-shrink-0">
-						<path fill-rule="evenodd" d="M4.72 9.47a.75.75 0 0 0 0 1.06l4.25 4.25a.75.75 0 1 0 1.06-1.06L6.31 10l3.72-3.72a.75.75 0 1 0-1.06-1.06L4.72 9.47Zm9.25-4.25L9.72 9.47a.75.75 0 0 0 0 1.06l4.25 4.25a.75.75 0 1 0 1.06-1.06L11.31 10l3.72-3.72a.75.75 0 0 0-1.06-1.06Z" clip-rule="evenodd" />
-					</svg>';
-
-					$content .= sprintf( 
-						'<div class="aiovg aiovg-categories-nav"><a href="%s" class="aiovg-flex aiovg-gap-1 aiovg-items-center">%s %s</a></div>',
-						esc_url( $back_button_url ),
-						$icon,
-						esc_html( $back_button_text )
-					);						
+						$content .= sprintf( 
+							'<p class="aiovg aiovg-categories-nav"><a href="%s" class="aiovg-flex aiovg-gap-1 aiovg-items-center">%s %s</a></p>',
+							esc_url( $back_button_url ),
+							$icon,
+							esc_html( $back_button_text )
+						);						
+					}
+				} else {
+					$breadcrumbs = aiovg_get_category_breadcrumbs( $term );
+					$content .= $breadcrumbs;
 				}
 			}
 
@@ -164,19 +165,30 @@ class AIOVG_Public_Videos {
 					esc_html( aiovg_get_message( 'videos_empty' ) )
 				);
 			} else {
-				$content .= $videos;
-
+				$separator = '';
 				if ( ! empty( $videos ) && ! empty( $sub_categories ) ) {
-					$content .= '<br />';
+					$separator = '<br />';
 				}
 
-				$content .= $sub_categories;
+				if ( 'dropdown' == $categories_settings['template'] ) {
+					$content .= "{$sub_categories}{$separator}{$videos}";
+				} else {
+					$content .= "{$videos}{$separator}{$sub_categories}";
+				}
+			}
+		} else {
+			if ( ! empty( $categories_settings['breadcrumbs'] ) ) {
+				$back_button_url = apply_filters( 'aiovg_back_to_categories_link', '#' );
+				if ( '#' === $back_button_url ) {
+					$breadcrumbs = aiovg_get_category_breadcrumbs();
+					$content .= $breadcrumbs;
+				}
 			}
 
-			return $content;
+			$content .= do_shortcode( '[aiovg_categories]' );
 		}
 		
-		return do_shortcode( '[aiovg_categories]' );	
+		return $content;	
 	}
 
 	/**
@@ -276,6 +288,20 @@ class AIOVG_Public_Videos {
 
 		if ( isset( $_GET['ta'] ) ) {
 			$attributes['tag'] = $_GET['ta'];
+		}
+		
+		if ( isset( $_GET['sort'] ) ) {
+			$sort = explode( '-', $_GET['sort'] );
+			$sort = array_map( 'trim', $sort );
+			$sort = array_filter( $sort );
+
+			if ( ! empty( $sort ) ) {
+				$attributes['orderby'] = $sort[0];
+				
+				if ( count( $sort ) > 1 ) {
+					$attributes['order'] = $sort[1];
+				}
+			}
 		}
 		
 		$content = $this->get_content( $attributes );

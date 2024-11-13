@@ -5,11 +5,7 @@
  *--------------------------------------------------------------------------------------------*/
 .aiovg {	
 	box-sizing: border-box;
-	margin-bottom: 1rem;
-}
-
-.aiovg,
-.aiovg * {
+	margin-bottom: 1em;
 	line-height: 1.5;
 }
 
@@ -29,7 +25,7 @@
 .aiovg h2,
 .aiovg h3 {
 	margin: 0;
-	margin-bottom: 1rem;
+	margin-bottom: 1em;
 }
 
 .aiovg a.aiovg-link-title {
@@ -62,23 +58,23 @@
 }
 
 .aiovg .aiovg-gap-1 {
-	gap: 0.25rem;
+	gap: 0.25em;
 }
 
 .aiovg .aiovg-gap-2 {
-	gap: 0.5rem;
+	gap: 0.5em;
 }
 
 .aiovg .aiovg-gap-3 {
-	gap: 0.75rem;
+	gap: 0.75em;
 }
 
 .aiovg .aiovg-gap-4 {
-	gap: 1rem;
+	gap: 1em;
 }
 
 .aiovg .aiovg-gap-6 {
-	gap: 1.5rem;
+	gap: 1.5em;
 }
 
 .aiovg .aiovg-items-center {
@@ -108,23 +104,23 @@
 }
 
 .aiovg .aiovg-margin {
-	margin: 1rem;
+	margin: 1em;
 }
 
 .aiovg .aiovg-margin-top {
-	margin-top: 1rem;
+	margin-top: 1em;
 }
 
 .aiovg .aiovg-margin-right {
-	margin-right: 1rem;
+	margin-right: 1em;
 }
 
 .aiovg .aiovg-margin-bottom {
-	margin-bottom: 1rem;
+	margin-bottom: 1em;
 }
 
 .aiovg .aiovg-margin-left {
-	margin-left: 1rem;
+	margin-left: 1em;
 }
 
 .aiovg .aiovg-no-padding {
@@ -132,23 +128,23 @@
 }
 
 .aiovg .aiovg-padding {
-	padding: 1rem;
+	padding: 1em;
 }
 
 .aiovg .aiovg-padding-top {
-	padding-top: 1rem;
+	padding-top: 1em;
 }
 
 .aiovg .aiovg-padding-right {
-	padding-right: 1rem;
+	padding-right: 1em;
 }
 
 .aiovg .aiovg-padding-bottom {
-	padding-bottom: 1rem;
+	padding-bottom: 1em;
 }
 
 .aiovg .aiovg-padding-left {
-	padding-left: 1rem;
+	padding-left: 1em;
 }
 
 .aiovg .aiovg-text-left {
@@ -176,7 +172,7 @@
 }
 
 .aiovg .aiovg-text-error {
-	color:#b31105;
+	color:#e80000;
 }
 
 .aiovg .aiovg-text-small {
@@ -184,7 +180,7 @@
 }
 
 .aiovg .aiovg-text-separator {
-	margin: 0 0.125rem;
+	margin: 0 0.125em;
 	color: #ccc;
 	font-size: 90%;
 }
@@ -223,7 +219,7 @@
 	stroke: none;
 	stroke-width: 0;
 	fill: #666;
-	width: 1rem;
+	width: 1em;
 	vertical-align: middle;
 }
 
@@ -238,7 +234,7 @@
 	z-index: 3;	
 	margin: auto;
 	fill: #fff;
-	width: 2rem;
+	width: 32px;
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -368,7 +364,7 @@
  *
  *--------------------------------------------------------------------------------------------*/
 .aiovg-grid {
-    margin: -0.75rem;
+    margin: -0.75em;
 }
 
 .aiovg-row {
@@ -462,8 +458,8 @@
 .aiovg-thumbnail {
 	display: flex;
 	flex-direction: column;
-	gap: 0.75rem;
-	margin: 0.75rem;
+	gap: 0.75em;
+	margin: 0.75em;
 }
 
 .aiovg-responsive-container {	
@@ -486,47 +482,51 @@ img.aiovg-responsive-element {
 	object-fit: cover;	
 }
 
-.aiovg-duration {
+.aiovg-duration,
+.aiovg-now-playing {
 	pointer-events: none;
 	position: absolute;
-	right: 0.25rem;
-	bottom: 0.25rem;
+	right: 5px;
+	bottom: 5px;
 	z-index: 2;
-	border-radius: 1px;
+	border-radius: 2px;
 	background-color: rgba(0, 0, 0, 0.5);
-	padding: 0.25rem 0.5rem;	
+	padding: 0.25em 0.5em;	
 	line-height: 1;
 	color: #fff;
-	font-size: 90%;	
+	font-size: 0.85em;	
 }
 
 .aiovg-caption {
 	display: flex;
 	flex-direction: column;
-	gap: 0.35rem;
+	gap: 0.35em;
 }
 
 .aiovg-caption .aiovg-title {
 	margin: 0;
-	font-size: 1.125rem;
-	line-height: 1.75rem;
+	font-size: 1.125em;
 }
 
 .aiovg-caption .aiovg-excerpt,
 .aiovg-caption .aiovg-description,
 .aiovg-caption .aiovg-content-after-thumbnail {
-	margin-top: 0.5rem;
+	margin-top: 0.5em;
 }
 
 .aiovg-thumbnail-style-image-left .aiovg-caption {
 	margin: 0;
-	margin-top: 0.75rem;
+	margin-top: 0.75em;
+}
+
+.aiovg-active .aiovg-thumbnail .aiovg-svg-icon-play {
+    display: none;
 }
 
 @media only screen and (min-width: 768px) {
     .aiovg-thumbnail-style-image-left .aiovg-caption {
 		margin: 0;
-		margin-left: 0.75rem;
+		margin-left: 0.75em;
 	}
 }
 
@@ -538,12 +538,12 @@ img.aiovg-responsive-element {
 .aiovg-pagination,
 .aiovg-more {
 	display: block;
-	margin-top: 2rem;
+	margin-top: 2em;
 }
 
 .aiovg-pagination .aiovg-pagination-links {
 	display: flex;
-	gap: 0.25rem;
+	gap: 0.25em;
 	align-items: center;
 	justify-content: center;
 }
@@ -551,7 +551,7 @@ img.aiovg-responsive-element {
 .aiovg-pagination-links .page-numbers {
 	border: 1px solid #ddd;
 	border-radius: 2px;
-	padding: 0.5rem 0.75rem;		
+	padding: 0.5em 0.75em;		
 	text-decoration: none;	
 	line-height: 1;
 }
@@ -569,7 +569,7 @@ img.aiovg-responsive-element {
 
 .aiovg-pagination .aiovg-pagination-info {
 	margin: 0;
-	margin-top: 0.5rem;
+	margin-top: 0.5em;
 }
 
 .aiovg-pagination.aiovg-spinner,
@@ -591,9 +591,9 @@ img.aiovg-responsive-element {
 .aiovg-social {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.25rem;
+	gap: 0.25em;
 	align-items: center;
-    margin-top: 1rem;
+    margin-top: 1em;
 }
 
 .aiovg-link-social,
@@ -601,11 +601,11 @@ img.aiovg-responsive-element {
 .aiovg-link-social:active {
 	border-radius: 2px;
 	cursor: pointer;	
-    padding: 0.5rem;	
+    padding: 0.5em;	
 	text-decoration: none;
 	line-height: 1;
 	color: white;
-	font-size: 1.5rem;
+	font-size: 1.5em;
 }
  
 .aiovg-link-social:hover,
@@ -651,6 +651,122 @@ img.aiovg-responsive-element {
 
 /*----------------------------------------------------------------------------------------------
  *
+ *	Custom Select
+ *
+ *--------------------------------------------------------------------------------------------*/
+.aiovg-dropdown-terms {
+	position: relative;
+}
+
+.aiovg-dropdown-terms .aiovg-dropdown-input {
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+	background-position: right 0.5em center;
+	background-repeat: no-repeat;
+	background-size: 1.5em 1.5em;
+	cursor: default;
+	padding-right: 2.5em !important;
+	width: 100%;
+	text-overflow: ellipsis;
+}
+
+.aiovg-dropdown-terms .aiovg-dropdown-list {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	z-index: 99999;	
+	margin-top: 1px;	
+	border: 1px solid #9ca3af;
+	border-radius: 3px;	
+	box-shadow: 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+	background-color: #fff;
+	max-height: 200px;
+	overflow-x: hidden;
+	overflow-y: auto;	
+}
+
+.aiovg-dropdown-list .aiovg-dropdown-item {
+	display: flex;	
+	flex-wrap: nowrap;
+	gap: 1em;
+	align-items: center;
+	border-bottom: 1px solid #eee;
+	background-color: #fff;
+	padding: 0.65em 1em;	
+	line-height: 1.25em;
+	color: #000;
+	font-size: 0.95em;
+}
+
+.aiovg-dropdown-list .aiovg-dropdown-item:last-child {
+	border-bottom: none;
+}
+
+.aiovg-dropdown-list .aiovg-dropdown-item.aiovg-item-selected {
+	background-color: #0073e6;
+	color: #fff;
+}
+
+.aiovg-dropdown-list .aiovg-dropdown-item:hover {
+	background-color: #0461cf;
+	color: #fff;
+}
+
+.aiovg-dropdown-list .aiovg-dropdown-item .aiovg-item-name {
+	pointer-events: none;
+	margin-right: auto;
+}
+
+.aiovg-dropdown-list .aiovg-dropdown-item input[type="checkbox"] {
+	-webkit-appearance: none;
+	appearance: none;
+	display: inline-block;
+	clear: none;
+	transition: .05s border-color ease-in-out;
+	margin: 0;
+	outline: 0;
+	border: 1px solid #8c8f94;
+	border-radius: 0;
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+	background: #fff;
+	cursor: default;
+	padding: 0 !important;
+	width: 1em;
+	min-width: 1em;
+	height: 1em;
+	vertical-align: middle;
+	text-align: center;
+	line-height: 0;
+	color: #50575e;	
+}
+
+.aiovg-dropdown-list .aiovg-dropdown-item.aiovg-item-selected input[type="checkbox"],
+.aiovg-dropdown-list .aiovg-dropdown-item:hover input[type="checkbox"] {
+	border: 1px solid #50575e;
+}
+
+.aiovg-dropdown-list .aiovg-dropdown-item input[type="checkbox"]:checked::before {	
+	display: inline-block;
+	margin: -0.1875em 0 0 -0.25em;	
+	width: 1.3125em;
+	height: 1.3125em;
+	vertical-align: middle;	
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	/* Use the "Yes" SVG Dashicon */
+	content: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2020%2020%27%3E%3Cpath%20d%3D%27M14.83%204.89l1.34.94-5.81%208.38H9.02L5.78%209.67l1.34-1.25%202.57%202.4z%27%20fill%3D%27%233582c4%27%2F%3E%3C%2Fsvg%3E");
+	speak: never;
+}
+
+.aiovg-dropdown-list .aiovg-dropdown-item input[type="checkbox"]:focus {
+	/* Only visible in Windows High Contrast mode */
+	outline: 2px solid transparent;
+	border-color: #50575e;
+	box-shadow: 0 0 0 1px #50575e;	
+}
+
+/*----------------------------------------------------------------------------------------------
+ *
  *	Autocomplete
  *
  *--------------------------------------------------------------------------------------------*/
@@ -677,7 +793,7 @@ img.aiovg-responsive-element {
 	border-bottom: 1px solid #eee;
 	background-color: #fff;
 	cursor: pointer;
-	padding: 0.5rem 0.75rem;	
+	padding: 0.5em 0.75em;	
 	line-height: 1;
 	color: #000;
 	font-size: 90%;
@@ -704,9 +820,9 @@ img.aiovg-responsive-element {
 .aiovg-autocomplete-tags {
 	display: flex;
 	flex-wrap: wrap;
-	row-gap: 0.5rem;
-	column-gap: 0.75rem;
-	margin-top: 0.5rem;
+	row-gap: 0.5em;
+	column-gap: 0.75em;
+	margin-top: 0.5em;
 }
 
 .aiovg-tag-item {		
@@ -715,7 +831,7 @@ img.aiovg-responsive-element {
 
 .aiovg-tag-item a {
 	display: flex;
-	gap: 0.25rem;
+	gap: 0.25em;
 	align-items: center;
 }
 
@@ -732,7 +848,7 @@ img.aiovg-responsive-element {
 }
 
 .aiovg-categories-template-list .children {
-	margin-left: 1.25rem;
+	margin-left: 1.25em;
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -741,7 +857,7 @@ img.aiovg-responsive-element {
  *
  *--------------------------------------------------------------------------------------------*/
 .aiovg-videos .aiovg-count {
-	margin-bottom: 1rem;
+	margin-bottom: 1em;
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -752,20 +868,20 @@ img.aiovg-responsive-element {
 .aiovg-content-after-player {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 1rem;
+	gap: 1em;
 	align-items: center;
 }
 
 /* Likes / Dislikes */
 aiovg-like-button {
 	display: flex;
-	gap: 0.25rem;
+	gap: 0.25em;
 	align-items: center;
 }
 
 aiovg-like-button button {
 	display: flex;
-    gap: 0.35rem;
+    gap: 0.35em;
     align-items: center;
     justify-content: center;
 	margin: 0;
@@ -783,7 +899,19 @@ aiovg-like-button:not([loaded]) {
  *--------------------------------------------------------------------------------------------*/
 .aiovg-search-form form {
 	display: flex;
-	gap: 0.5rem;
+	gap: 0.5em;
+}
+
+.aiovg-search-form select {
+	-webkit-appearance: none;
+	   -moz-appearance: none;   
+            appearance: none;
+
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+	background-position: right 0.5em center;
+	background-repeat: no-repeat;
+	background-size: 1.5em 1.5em;
+	padding-right: 2.5em !important;
 }
 
 .aiovg-search-form .aiovg-form-group {	
@@ -816,7 +944,7 @@ aiovg-like-button:not([loaded]) {
 	background-color: transparent;
 	background-image: none;
 	padding: 0;
-	width: 2rem;
+	width: 2em;
 	height: 100%;
 	line-height: 1;
 }
@@ -832,6 +960,15 @@ aiovg-like-button:not([loaded]) {
 	align-items: center;
 }
 
+.aiovg-search-form-template-horizontal .aiovg-field-keyword {
+	flex-grow: 4;
+}
+
+.aiovg-search-form-template-horizontal .aiovg-field-category,
+.aiovg-search-form-template-horizontal .aiovg-field-tag {
+	flex-grow: 2;
+}
+
 .aiovg-search-form-template-horizontal .aiovg-autocomplete-tags {
 	margin-top: 0;
 	width: 100%;
@@ -839,9 +976,16 @@ aiovg-like-button:not([loaded]) {
 
 /*----------------------------------------------------------------------------------------------
  *
- *	Third-party theme conflicts
+ *	Third-party conflicts
  *
  *--------------------------------------------------------------------------------------------*/
+.aiovg .wp-video-shortcode .mejs-controls .mejs-time,
+.aiovg .wp-audio-shortcode .mejs-controls .mejs-time {
+	padding: 0 6px;
+    height: 40px;
+	line-height: 40px;
+}
+
 .mfp-bg { 
 	z-index: 999999 !important; 
 }

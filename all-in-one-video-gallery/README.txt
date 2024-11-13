@@ -4,9 +4,9 @@ Contributors: plugins360, wpvideogallery, freemius
 Donate link: https://plugins360.com
 Tags: video player, video gallery, youtube gallery, vimeo gallery, live stream
 Requires at least: 6.3
-Tested up to: 6.6
+Tested up to: 6.7
 Requires PHP: 5.6.20
-Stable tag: 3.8.3
+Stable tag: 3.9.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,7 +68,7 @@ Similarly, the front-end gallery layouts added by our plugin can be customized b
  
 ### [+] PREMIUM FEATURES
 
-* Gallery Templates: [Popup](https://demo.plugins360.com/popup/), [Slider](https://demo.plugins360.com/slider/), [Playlist](https://demo.plugins360.com/playlist/), [Compact (Modern)](https://demo.plugins360.com/compact/)
+* Gallery Templates: [Popup](https://demo.plugins360.com/popup/), [Inline](https://demo.plugins360.com/inline/), [Slider](https://demo.plugins360.com/slider/), [Playlist](https://demo.plugins360.com/playlist/), [Compact (Modern)](https://demo.plugins360.com/compact/)
 * Auto import videos from YouTube & Vimeo websites.
 * Video SEO: Schema.org Markup (via JSON-LD)
 * Auto Thumbnail Generator
@@ -115,9 +115,10 @@ Still, Having Issues? We are just an email away. Please write to us describing y
 Yes, you can. Kindly refer to the instructions below,
 
 1. [Popup](https://plugins360.com/all-in-one-video-gallery/popup/)
-2. [Slider](https://plugins360.com/all-in-one-video-gallery/slider/)
-3. [Playlist](https://plugins360.com/all-in-one-video-gallery/playlist/)
-4. [Compact](https://plugins360.com/all-in-one-video-gallery/compact/)
+2. [Inline](https://plugins360.com/all-in-one-video-gallery/inline/)
+3. [Slider](https://plugins360.com/all-in-one-video-gallery/slider/)
+4. [Playlist](https://plugins360.com/all-in-one-video-gallery/playlist/)
+5. [Compact](https://plugins360.com/all-in-one-video-gallery/compact/)
 
 = 3. Can I upload large video files using this plugin? =
 Sure, the plugin doesn't apply any restriction on the uploaded file size. If you're not able to upload large files, then it must be your server configuration that is not suitable for large file uploads. Simply write to your HOST and ask them to increase the upload file size limit.
@@ -144,6 +145,21 @@ Also, the videos from third-party services like "YouTube", "Vimeo", "Dailymotion
 7. Plugin Settings.
 
 == Changelog ==
+
+= 3.9.0 =
+
+* New: Added a custom player skin for the Video.js library.
+* New: Added "Lazyloading" for images and iframes used by the plugin, improving page load times and performance.
+* New: Enhanced the [aiovg_video] single video shortcode to support dynamic video display based on specified "category," "tag," and "sort" attributes, giving users more control over which videos are shown.
+* New: Added multi-category filtering to the search form, enabling users to refine video search results with enhanced flexibility.
+* New: Added new configuration options to the search form, including the ability to set video sorting preferences, hide the submit button, and enable automatic submission when a form element is modified.
+* New: Added new developer hooks, significantly increasing the plugin's extensibility and customization potential.
+* Tweak: Significantly improved the responsiveness of the video.js player skin, enhancing playback experience on smaller devices.
+* Tweak: Improved Yoast breadcrumbs support for category pages, now displaying child categories in the breadcrumb trail for better navigation clarity.
+* Tweak: Applied various CSS style updates to improve the visual appearance and user experience across the plugin.
+* Tweak: Updated Video.js player library (8.18.1).
+* Tweak: Updated Freemius SDK (2.9.0).
+* Fix: [+] a few minor bug fixes.
 
 = 3.8.3 =
 
@@ -443,6 +459,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 3.8.3 =
+= 3.9.0 =
 
 Introduces several new features, bug fixes & enhancements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

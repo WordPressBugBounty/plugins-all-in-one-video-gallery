@@ -20,6 +20,7 @@ $settings = array(
 	),
 	'player' => array(
 		'controlBar'                => array(),
+		'textTrackSettings'         => false,
 		'playbackRates'             => array( 0.5, 0.75, 1, 1.5, 2 ),
 		'techCanOverridePoster'     => true,
 		'suppressNotSupportedError' => true
@@ -131,7 +132,8 @@ if ( ! empty( $post_meta ) ) {
 					$mime_type = "video/{$type}";
 			}
 
-			$src = aiovg_sanitize_url( aiovg_resolve_url( $_GET[ $type ] ) );
+			$src = aiovg_base64_decode( $_GET[ $type ] );
+			$src = aiovg_sanitize_url( aiovg_make_url_absolute( $src ) );
 
 			$sources[ $type ] = array(
 				'type' => $mime_type,
@@ -195,11 +197,14 @@ if ( $has_chapters && ! empty( $post_meta['chapter'] ) ) {
 // Video Attributes
 $attributes = array( 
 	'id'       => 'player',
-	'class'    => 'vjs-fill',
+	'class'    => 'video-js vjs-fill',
 	'style'    => 'width: 100%; height: 100%;',
 	'controls' => '',
 	'preload'  =>  esc_attr( $player_settings['preload'] )
 );
+
+$theme = ( isset( $player_settings['theme'] ) && 'custom' == $player_settings['theme'] ) ? 'custom' : 'default';
+$attributes['class'] .= ' vjs-theme-' . $theme;
 
 $autoplay = isset( $_GET['autoplay'] ) ? (int) $_GET['autoplay'] : (int) $player_settings['autoplay'];
 if ( $autoplay ) {
@@ -223,14 +228,14 @@ if ( $playsinline ) {
 
 $poster = '';
 if ( isset( $_GET['poster'] ) ) {
-	$poster = $_GET['poster'];
+	$poster = aiovg_base64_decode( $_GET['poster'] );
 } elseif ( ! empty( $post_meta ) ) {
 	$image_data = aiovg_get_image( $post_id, 'large' );
 	$poster = $image_data['src'];
 }
 
 if ( ! empty( $poster) ) {
-	$attributes['poster'] = esc_url( aiovg_resolve_url( $poster ) );
+	$attributes['poster'] = esc_url( aiovg_make_url_absolute( $poster ) );
 }
 
 if ( ! empty( $brand_settings ) && ! empty( $brand_settings['copyright_text'] ) ) {
@@ -238,29 +243,26 @@ if ( ! empty( $brand_settings ) && ! empty( $brand_settings['copyright_text'] ) 
 	$attributes['oncontextmenu'] = 'return false;';
 }
 
-$attributes = apply_filters( 'aiovg_video_attributes', $attributes );  // Backward compatibility to 3.3.0
-$attributes = apply_filters( 'aiovg_iframe_videojs_player_attributes', $attributes ); 
-
 // Player Settings
 $controls = array( 
 	'playpause'  => 'PlayToggle', 
 	'current'    => 'CurrentTimeDisplay', 
-	'progress'   => 'progressControl', 
-	'duration'   => 'durationDisplay',
-	'tracks'     => 'SubtitlesButton',
-	'audio'      => 'AudioTrackButton',
+	'progress'   => 'ProgressControl', 
+	'duration'   => 'DurationDisplay',	
+	'spacer'     => 'CustomControlSpacer', 
+	'tracks'     => 'CaptionsButton',
 	'speed'      => 'PlaybackRateMenuButton', 
-	'quality'    => 'qualitySelector',	 
+	'quality'    => 'QualitySelector',
 	'volume'     => 'VolumePanel',
 	'pip'        => 'PictureInPictureToggle', 
-	'fullscreen' => 'fullscreenToggle'
+	'fullscreen' => 'FullscreenToggle'
 );
 
 foreach ( $controls as $index => $control ) {
 	$enabled = isset( $_GET[ $index ] ) ? (int) $_GET[ $index ] : isset( $player_settings['controls'][ $index ] );
 
-	if ( $enabled && 'tracks' == $index ) {
-		$player_settings['controls']['audio'] = 1;
+	if ( 'spacer' == $index ) {
+		$enabled = 1;
 	}
 
 	if ( $enabled && 'pip' == $index ) {
@@ -274,10 +276,32 @@ foreach ( $controls as $index => $control ) {
 	}	
 }
 
-$settings['player']['controlBar']['children'] = array_values( $controls );
-if ( empty( $settings['player']['controlBar']['children'] ) ) {
-	$attributes['class'] = 'vjs-no-control-bar';
+if ( isset( $controls['current'] ) && isset( $controls['duration'] ) ) {
+	if ( 'custom' == $theme || ! isset( $controls['progress'] ) ) {
+		$controls = aiovg_insert_array_after( 'current', $controls, array( 
+			'timedivider' => 'TimeDivider'
+		));
+	}
 }
+
+if ( isset( $controls['tracks'] ) ) {
+	$controls = aiovg_insert_array_after( 'tracks', $controls, array( 
+		'audio' => 'AudioTrackButton'
+	));
+}
+
+$settings['player']['controlBar']['children'] = array_values( $controls );
+
+if ( ! isset( $controls['progress'] ) ) {
+	$attributes['class'] .= ' vjs-no-progress-control';
+}
+
+if ( empty( $controls ) || ( 1 == count( $controls ) && isset( $controls['spacer'] ) ) ) {
+	$attributes['class'] .= ' vjs-no-control-bar';
+}
+
+$attributes = apply_filters( 'aiovg_video_attributes', $attributes );  // Backward compatibility to 3.3.0
+$attributes = apply_filters( 'aiovg_iframe_videojs_player_attributes', $attributes ); 
 
 // YouTube
 if ( isset( $sources['youtube'] ) ) {
@@ -464,7 +488,7 @@ if ( ! empty( $brand_settings ) ) {
 	$has_logo = ! empty( $brand_settings['logo_image'] ) ? (int) $brand_settings['show_logo'] : 0;
 	if ( $has_logo ) {
 		$settings['logo'] = array(
-			'image'    => esc_url( aiovg_resolve_url( $brand_settings['logo_image'] ) ),
+			'image'    => esc_url( aiovg_make_url_absolute( $brand_settings['logo_image'] ) ),
 			'link'     => ! empty( $brand_settings['logo_link'] ) ? esc_url( $brand_settings['logo_link'] ) : 'javascript:void(0)',
 			'position' => sanitize_text_field( $brand_settings['logo_position'] ),
 			'margin'   => ! empty( $brand_settings['logo_margin'] ) ? (int) $brand_settings['logo_margin'] : 15
@@ -494,9 +518,9 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
         <link rel="canonical" href="<?php echo esc_url( $post_url ); ?>" />
     <?php endif; ?>
 
-	<link rel="stylesheet" href="<?php echo AIOVG_PLUGIN_URL; ?>vendor/videojs/video-js.min.css?v=8.16.1" />
+	<link rel="stylesheet" href="<?php echo AIOVG_PLUGIN_URL; ?>vendor/videojs/video-js.min.css?v=8.18.1" />
 
-	<?php if ( in_array( 'qualitySelector', $settings['player']['controlBar']['children'] ) ) : ?>
+	<?php if ( in_array( 'QualitySelector', $settings['player']['controlBar']['children'] ) ) : ?>
 		<?php if ( isset( $sources['mp4'] ) || isset( $sources['webm'] ) || isset( $sources['ogv'] ) ) : ?>
 			<link rel="stylesheet" href="<?php echo AIOVG_PLUGIN_URL; ?>vendor/videojs/plugins/quality-selector/quality-selector.min.css?v=1.3.1" />
 		<?php endif; ?>
@@ -523,11 +547,11 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		/* Icons */
 		@font-face {
 			font-family: 'aiovg-icons';
-			src: url('<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.eot?2afx3z');
-			src: url('<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.eot?2afx3z#iefix') format('embedded-opentype'),
-				url('<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.ttf?2afx3z') format('truetype'),
-				url('<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.woff?2afx3z') format('woff'),
-				url('<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.svg?2afx3z#aiovg-icons') format('svg');
+			src: url( '<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.eot?2afx3z' );
+			src: url( '<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.eot?2afx3z#iefix' ) format( 'embedded-opentype' ),
+				url( '<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.ttf?2afx3z' ) format( 'truetype' ),
+				url( '<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.woff?2afx3z' ) format( 'woff' ),
+				url( '<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.svg?2afx3z#aiovg-icons' ) format( 'svg' );
 			font-weight: normal;
 			font-style: normal;
 			font-display: swap;
@@ -583,6 +607,40 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
             text-decoration: none;
         }
 
+		.aiovg-player .video-js *:not(.vjs-input-embed-code):focus {
+			outline: none;
+		}
+
+		/* Poster */
+		.aiovg-player .video-js .vjs-poster {
+			background-color: #000;
+		}
+
+		.aiovg-player .video-js.vjs-ended .vjs-poster {
+			display: inline-block;
+		}
+
+		/* Text Track */
+		.aiovg-player .video-js:not(.vjs-has-started) .vjs-text-track-display {
+			display: none;
+		}
+
+		.aiovg-player .video-js.vjs-ended .vjs-text-track-display {
+			display: none;
+		}
+
+		.aiovg-player .video-js .vjs-text-track-cue {
+			top: unset !important;
+			bottom: 1em !important;
+			width: 100% !important;
+			height: auto !important;
+			font-size: 2em !important;
+		}
+
+		.aiovg-player .video-js .vjs-text-track-cue > div {
+			background-color: rgba( 8, 8, 8, 0.75 ) !important;
+		}
+
 		/* Spinner */
 		.aiovg-player .vjs-waiting.vjs-paused .vjs-loading-spinner {
 			display: none;
@@ -597,23 +655,18 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 			transform: translate3d( -50%, -50%, 0 );
 			margin: 0;
 			border: 0;
-			border-radius: 40px;
-			background-color: rgba( 13, 13, 13, 0.6 );
-			background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8.56047 5.09337C8.34001 4.9668 8.07015 4.96875 7.85254 5.10019C7.63398 5.23162 7.5 5.47113 7.5 5.73011L7.5 18.2698C7.5 18.5298 7.63398 18.7693 7.85254 18.9007C7.96372 18.9669 8.0882 19 8.21268 19C8.33241 19 8.45309 18.9688 8.56047 18.9075L18.1351 12.6377C18.3603 12.5082 18.5 12.2648 18.5 12C18.5 11.7361 18.3603 11.4917 18.1351 11.3632L8.56047 5.09337Z' fill='%23fff'%3E%3C/path%3E%3C/svg%3E");
+			border-radius: 50%;
+			background-color: rgba( 0, 0, 0, 0.5 );
+			background-image: url( "data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8.56047 5.09337C8.34001 4.9668 8.07015 4.96875 7.85254 5.10019C7.63398 5.23162 7.5 5.47113 7.5 5.73011L7.5 18.2698C7.5 18.5298 7.63398 18.7693 7.85254 18.9007C7.96372 18.9669 8.0882 19 8.21268 19C8.33241 19 8.45309 18.9688 8.56047 18.9075L18.1351 12.6377C18.3603 12.5082 18.5 12.2648 18.5 12C18.5 11.7361 18.3603 11.4917 18.1351 11.3632L8.56047 5.09337Z' fill='%23fff'%3E%3C/path%3E%3C/svg%3E" );
 			background-position: center;
-			background-size: 64px;
-			width: 80px;
-			height: 80px;
+			background-size: 75%;
+			width: 3em;
+			height: 3em;
 		}
 
 		.aiovg-player .video-js:hover .vjs-big-play-button,
 		.aiovg-player .video-js .vjs-big-play-button:focus {
-			opacity: 0.8;
-			background-color: rgba( 13, 13, 13, 0.6 );			
-		}
-
-		.aiovg-player .video-js .vjs-big-play-button .vjs-icon-placeholder:before {
-			content: "";
+			background-color: rgba( 0, 0, 0, 0.8 );			
 		}		
 
 		.aiovg-player .vjs-waiting.vjs-paused .vjs-big-play-button,
@@ -624,28 +677,12 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		.aiovg-player.vjs-waiting .vjs-big-play-button {
 			display: none !important;
 		}
-
-		/* Poster */
-		.aiovg-player .video-js.vjs-ended .vjs-poster {
-			display: inline-block;
-		}		
-
-		/* Text Track */
-		.aiovg-player .video-js:not(.vjs-has-started) .vjs-text-track-display {
-			display: none;
+		
+		.aiovg-player .video-js .vjs-big-play-button .vjs-icon-placeholder:before {
+			content: "";
 		}
 
-		.aiovg-player .video-js.vjs-ended .vjs-text-track-display {
-			display: none;
-		}
-
-		.aiovg-player .video-js .vjs-text-track-cue > div {  
-			background: transparent !important;
-			text-shadow: 0 0 .2em rgba( 0, 0, 0, 0.8 );
-			font-weight: 600;
-		}		
-
-		/* Control bar */
+		/* Control Bar */
 		.aiovg-player .video-js.vjs-no-control-bar .vjs-control-bar {
 			display: none;
 		}		
@@ -654,16 +691,69 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 			display: none;
 		}
 
-		/* Current time & Duration */
-		.aiovg-player .video-js .vjs-current-time,
-		.aiovg-player .video-js .vjs-duration {
-			display: block;
+		/* Menu */
+		.aiovg-player .video-js .vjs-menu-button-popup .vjs-menu ul {
+			background-color: transparent;	
+			max-height: 20em;		
 		}
 
-		/* Progressbar */
-		.aiovg-player .vjs-progress-control:hover .vjs-mouse-display .vjs-time-tooltip {
+		.aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li,
+		.aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li:hover,
+		.aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li:focus {
+			margin-bottom: 1px;
+			border-radius: 2px;			
+			background-color: rgba( 0, 0, 0, 0.8 );			
+			padding: 0.5em;
+			color: #fff;
+			text-transform: initial;
+		}	
+
+		.aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li:hover,
+		.aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li:focus {
+			background-color: #000;
+		}
+
+		.aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li.vjs-selected,
+		.aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li.vjs-selected:hover,
+		.aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li.vjs-selected:focus {			
+			background-color: #fff;	
+			color: #000;
+		}
+
+		/* Current Time & Duration */
+		.aiovg-player .video-js .vjs-current-time {
 			display: flex;
-			left: 50%;
+		}
+
+		.aiovg-player .video-js:not(.vjs-live) .vjs-time-divider {
+			display: flex;
+			margin: 0;
+			padding-right: 0;
+			padding-left: 0;
+			min-width: auto;
+		}
+
+		.aiovg-player .video-js:not(.vjs-live) .vjs-duration {
+			display: flex;
+		}
+
+		/* Progress Control */
+		.aiovg-player .video-js .vjs-progress-control {
+			width: 100%;
+			-webkit-tap-highlight-color: rgba( 0, 0, 0, 0 );
+		}
+
+		.aiovg-player .video-js .vjs-play-progress:before {
+			top: 50%;
+			transform: translateY( -50% );
+		}		
+
+		.aiovg-player .video-js .vjs-progress-control .vjs-time-tooltip {
+			padding: 0.5em;
+		}
+
+		.aiovg-player .video-js .vjs-progress-control:hover .vjs-time-tooltip {
+			display: flex;
 			gap: 0.2em;
 			transform: translateX( -50% );
 			width: max-content;
@@ -677,28 +767,25 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 			opacity: 0.8;
 			z-index: 1;
 			background: #ffff00;
-			width: 4px;	
+			width: 3px;	
 		}
 
-		/* Menu Items List */
-		.aiovg-player .video-js .vjs-menu li {
-			text-transform: Capitalize;
-		}
-
-		.aiovg-player .video-js .vjs-menu li.vjs-selected:focus,
-		.aiovg-player .video-js .vjs-menu li.vjs-selected:hover {
-			background-color: #fff;
-			color: #2b333f;
-		}
-
-		/* Subtitles Button */
-		.aiovg-player .video-js .vjs-subtitles-button .vjs-icon-placeholder:before {
-			content: "\f10c";
+		/* Spacer */
+		.aiovg-player .video-js .vjs-custom-control-spacer {
+			display: flex;
+			flex: 1 1 auto;
 		}
 
 		/* Playback Rate */
+		.aiovg-player .video-js .vjs-playback-rate .vjs-menu {
+			left: -3em;
+			width: 10em;
+		}
+
 		.aiovg-player .video-js .vjs-playback-rate .vjs-playback-rate-value {
-			line-height: 2.6em;
+			display: flex;
+			align-items: center;
+			justify-content: center;
 			font-size: 1.2em;
 		}
 
@@ -706,9 +793,12 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		.aiovg-player .video-js.vjs-4k .vjs-quality-selector:after, 
 		.aiovg-player .video-js.vjs-hd .vjs-quality-selector:after {
 			pointer-events: none; 
+			display: flex;
 			position: absolute;
 			top: 0.5em;
-			right: 0;			
+			right: 0;
+			align-items: center;
+			justify-content: center;			
 			border-radius: 2em;	
 			background-color: #f00;
 			padding: 0;
@@ -716,7 +806,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 			height: 2.2em;
 			text-align: center; 
 			letter-spacing: 0.1em;
-			line-height: 2.2em;
+			line-height: 1;
 			color: inherit;								 
 			font-size: 0.7em;
 			font-weight: 300;   
@@ -744,39 +834,32 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		/* Quality Menu (HLS / MPEG-DASH) */
 		.aiovg-player .video-js.vjs-quality-menu .vjs-quality-menu-button-4K-flag:after, 
 		.aiovg-player .video-js.vjs-quality-menu .vjs-quality-menu-button-HD-flag:after {
+			display: flex;
+			align-items: center;
+			justify-content: center;
 			background-color: #f00;
+			line-height: 1;
+		}
+
+		/* Volume Panel */
+		.aiovg-player .video-js .vjs-slider-horizontal .vjs-volume-level:before {
+			top: 50%;
+			transform: translateY( -50% );
+		}
+		
+		.aiovg-player .video-js .vjs-slider-horizontal .vjs-volume-tooltip {
+			padding: 0.5em;
 		}
 
 		/* Share & Embed */
 		.aiovg-player .video-js .vjs-share {
-			margin: 5px;
-		}	
-
-		.aiovg-player .video-js .vjs-share button {
-			display: flex;
-			margin: 0;
-			border: 0;		
-			border-radius: 2px;
-			box-shadow: none;
-			background: rgba( 0, 0, 0, 0.5 );
-			cursor: pointer;	
-			padding: 10px;
-			line-height: 1;
-			color: #fff;
-			font-size: 16px;
+			display: none;
+			margin: 0.5em;
 		}
-
-		.aiovg-player .video-js .vjs-share:hover button {
-			background-color: rgba( 0, 0, 0, 0.7 );
-		}
-
-		.aiovg-player .video-js .vjs-share .vjs-icon-share {
-			line-height: 1;
-		}
-
+		
 		.aiovg-player .video-js.vjs-has-started .vjs-share {
 			display: block;			
-			transition: visibility .1s, opacity .1s;
+			transition: visibility 0.1s, opacity 0.1s;
 			visibility: visible;
 			opacity: 1;
 		}
@@ -785,41 +868,74 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 			transition: visibility 1s, opacity 1s;
 			visibility: visible;
 			opacity: 0;
-		}		
+		}
+
+		.aiovg-player .video-js .vjs-share button {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin: 0;
+			border: 0;		
+			border-radius: 2px;
+			box-shadow: none;
+			background: rgba( 0, 0, 0, 0.5 );
+			cursor: pointer;	
+			padding: 0;
+			width: 4em;
+			height: 4em;
+			line-height: 1;
+			color: #fff;
+		}
+
+		.aiovg-player .video-js .vjs-share:hover button {
+			background-color: rgba( 0, 0, 0, 0.8 );
+		}
+
+		.aiovg-player .video-js .vjs-share .vjs-icon-share {
+			line-height: 1;
+			font-size: 1.8em;
+		}				
 
 		.aiovg-player .video-js .vjs-modal-dialog-share-embed {
             background: #222 !important;
         }
 
+		.aiovg-player .video-js .vjs-modal-dialog-share-embed .vjs-modal-dialog-content {
+			line-height: 1;
+			font-size: 1em;
+		}
+
 		.aiovg-player .video-js .vjs-modal-dialog-share-embed .vjs-close-button {
-            margin: 7px;
+            margin: 1em;
         }
 
 		.aiovg-player .video-js .vjs-share-embed {
             display: flex !important;
-            flex-direction: column;            
+            flex-direction: column; 
             align-items: center;
 			justify-content: center;
-            width: 100%;
-            height: 100%;   
-        }
-
-		.aiovg-player .video-js .vjs-share-embed-content {
-            width: 100%;
+			gap: 2.5em;
+			width: 100%;
+			height: 100%;
         }
 
 		.aiovg-player .video-js .vjs-share-buttons {
-            text-align: center;
+            display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: center;
+			gap: 0.5em;
         }
 
 		.aiovg-player .video-js .vjs-share-button {
-            display: inline-block;
-			margin: 2px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
 			border-radius: 2px;
-            width: 40px;
-			height: 40px;            
-			vertical-align: middle;
+            width: 4em;
+			height: 4em;            
 			line-height: 1;
+			color: #fff;
         }       
 
 		.aiovg-player .video-js .vjs-share-button:hover {
@@ -851,28 +967,29 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
         }  
 
         .aiovg-player .video-js .vjs-share-button span {            
-			line-height: 40px;
-			color: #fff;
-            font-size: 24px;
+			line-height: 1;
+            font-size: 2em;
         }
 
         .aiovg-player .video-js .vjs-embed-code {
-            margin: 20px;
+            display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 1em;
+			width: 100%;
+			max-width: 640px;
         }
 
         .aiovg-player .video-js .vjs-embed-code label {
-			display: block;
-			margin: 0 0 7px 0;			
-            text-align: center;
 			text-transform: uppercase;
 			font-size: 11px;
         }
 
         .aiovg-player .video-js .vjs-embed-code input {            
             border: 1px solid #fff;
-			border-radius: 1px;
+			border-radius: 2px;
 			background: #fff;
-			padding: 7px;
+			padding: 0.5em;
 			width: 100%;            
 			line-height: 1;
 			color: #000;
@@ -884,36 +1001,18 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 
 		/* Download Button */
 		.aiovg-player .video-js .vjs-download {
-			margin: 5px;
+			display: none;
+			margin: 0.5em;
 			cursor: pointer;
 		}
 
 		.aiovg-player .video-js .vjs-has-share.vjs-download {
-			margin-top: 50px;
-		}
-
-		.aiovg-player .video-js .vjs-download a {
-			display: flex;
-			margin: 0;
-			border-radius: 2px;
-			background-color: rgba( 0, 0, 0, 0.5 );	
-			padding: 8px;
-			line-height: 1;
-			color: #fff;
-			font-size: 20px;
-		}	
-		
-		.aiovg-player .video-js .vjs-download:hover a {
-			background-color: rgba( 0, 0, 0, 0.7 );
-		}
-
-		.aiovg-player .video-js .vjs-download .vjs-icon-file-download {
-			line-height: 1;
+			margin-top: 5em;
 		}
 
 		.aiovg-player .video-js.vjs-has-started .vjs-download {
 			display: block;			
-			transition: visibility .1s, opacity .1s;
+			transition: visibility 0.1s, opacity 0.1s;
 			visibility: visible;
 			opacity: 1;
 		}
@@ -922,6 +1021,29 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 			transition: visibility 1s, opacity 1s;
 			visibility: visible;
 			opacity: 0;
+		}
+
+		.aiovg-player .video-js .vjs-download a {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin: 0;
+			border-radius: 2px;
+			background-color: rgba( 0, 0, 0, 0.5 );	
+			padding: 0;
+			width: 4em;
+			height: 4em;
+			line-height: 1;
+			color: #fff;
+		}	
+		
+		.aiovg-player .video-js .vjs-download:hover a {
+			background-color: rgba( 0, 0, 0, 0.8 );	
+		}
+
+		.aiovg-player .video-js .vjs-download .vjs-icon-file-download {
+			line-height: 1;
+			font-size: 1.8em;
 		}	
 
 		/* Custom Logo & Branding */
@@ -961,6 +1083,93 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 			background: #222 !important;
 		}
 
+		/* Theme: Custom */
+		.aiovg-player .video-js.vjs-theme-custom .vjs-text-track-display {
+			bottom: 4.5em;
+		}
+
+		.aiovg-player .video-js.vjs-theme-custom.vjs-no-progress-control .vjs-text-track-display,
+		.aiovg-player .video-js.vjs-theme-custom.vjs-live .vjs-text-track-display {
+			bottom: 3.6em;
+		}
+
+		.aiovg-player .video-js.vjs-theme-custom .vjs-overlay-bottom-right,
+		.aiovg-player .video-js.vjs-theme-custom .vjs-overlay-bottom-left {
+			bottom: 4.5em;
+		}
+
+		.aiovg-player .video-js.vjs-theme-custom.vjs-no-progress-control .vjs-overlay-bottom-right,
+		.aiovg-player .video-js.vjs-theme-custom.vjs-live .vjs-overlay-bottom-right,
+		.aiovg-player .video-js.vjs-theme-custom.vjs-no-progress-control .vjs-overlay-bottom-left,
+		.aiovg-player .video-js.vjs-theme-custom.vjs-live .vjs-overlay-bottom-left {
+			bottom: 3.6em;
+		}
+
+		.aiovg-player .video-js.vjs-theme-custom .vjs-control-bar {
+			background-color: transparent;
+			background-image: linear-gradient( 180deg, rgba( 0, 0, 0, 0 ) 0, rgba( 0, 0, 0, 0 ) 100% );			
+			font-size: 12px;
+		}
+
+		.aiovg-player .video-js.vjs-theme-custom.vjs-no-progress-control .vjs-control-bar,
+		.aiovg-player .video-js.vjs-theme-custom.vjs-live .vjs-control-bar {
+			background-color: rgba( 43, 51, 63, 0.7 );
+			background-image: none;
+		}
+		
+		.aiovg-player .video-js.vjs-theme-custom .vjs-menu-button-popup .vjs-menu {
+			margin-bottom: 2.1em;			
+			font-size: 10px;
+		}
+
+		.aiovg-player .video-js.vjs-theme-custom .vjs-menu-button-popup .vjs-menu ul {
+			padding-bottom: 0.9em;
+		}
+
+		.aiovg-player .video-js.vjs-theme-custom.vjs-no-progress-control .vjs-menu-button-popup .vjs-menu ul,
+		.aiovg-player .video-js.vjs-theme-custom.vjs-live .vjs-menu-button-popup .vjs-menu ul {
+			padding-bottom: 0;
+		}
+
+		.aiovg-player .video-js.vjs-theme-custom .vjs-progress-control {
+			position: absolute;
+			top: -2em;
+			right: 0;
+			left: 0;
+		}
+
+		.aiovg-player .video-js.vjs-theme-custom .vjs-progress-control .vjs-time-tooltip {
+			top: -3em;
+		}
+
+		.aiovg-player .video-js.vjs-theme-custom .vjs-volume-tooltip {
+			top: -4.2em;
+		}
+
+		.aiovg-player .video-js.vjs-theme-custom.vjs-no-progress-control .vjs-volume-tooltip,
+		.aiovg-player .video-js.vjs-theme-custom.vjs-live .vjs-volume-tooltip {
+			top: -3.4em;
+		}
+
+		/* Media Queries */
+		@media only screen and ( max-width: 1024px ) {
+			.aiovg-player .video-js .vjs-text-track-cue {
+				font-size: 1.8em !important;
+			}
+		}
+
+		@media only screen and ( max-width: 767px ) {
+			.aiovg-player .video-js .vjs-text-track-cue {
+				font-size: 1.5em !important;
+			}
+		}
+
+		@media only screen and ( max-width: 480px ) {
+			.aiovg-player .video-js .vjs-text-track-cue {
+				font-size: 1.3em !important;
+			}
+		}
+
 		/* Custom ContextMenu */
 		#aiovg-contextmenu {
             position: absolute;
@@ -969,8 +1178,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 			z-index: 9999999999; /* make sure it shows on fullscreen */
             margin: 0;
 			border-radius: 2px;
-            background-color: #2B333F;
-  			background-color: rgba( 43, 51, 63, 0.7 );
+  			background-color: rgba( 0, 0, 0, 0.5 );
             padding: 0;			
         }
         
@@ -996,7 +1204,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 			printf( 
 				'<source type="%s" src="%s" label="%s" />', 
 				esc_attr( $source['type'] ), 
-				esc_url( aiovg_resolve_url( $source['src'] ) ),
+				esc_url( aiovg_make_url_absolute( $source['src'] ) ),
 				( isset( $source['label'] ) ? esc_attr( $source['label'] ) : '' ) 
 			);
 		}
@@ -1004,8 +1212,8 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		// Video Tracks
 		foreach ( $tracks as $index => $track ) {
         	printf( 
-				'<track kind="subtitles" src="%s" label="%s" srclang="%s" %s/>', 
-				esc_url( aiovg_resolve_url( $track['src'] ) ), 				
+				'<track kind="captions" src="%s" label="%s" srclang="%s" %s/>', 
+				esc_url( aiovg_make_url_absolute( $track['src'] ) ), 				
 				esc_attr( $track['label'] ),
 				esc_attr( $track['srclang'] ), 
 				( 0 == $index && 1 == $settings['cc_load_policy'] ? 'default' : '' )
@@ -1016,32 +1224,30 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 
 	<?php if ( ! empty( $settings['share'] ) || ! empty( $settings['embed'] ) ) : ?>
 		<div id="vjs-share-embed" class="vjs-share-embed" style="display: none;">
-			<div class="vjs-share-embed-content">
-				<?php if ( isset( $settings['share'] ) ) : ?>
-					<!-- Share Buttons -->
-					<div class="vjs-share-buttons">
-						<?php
-						foreach ( $share_buttons as $button ) {
-							printf( 
-								'<a href="%1$s" class="vjs-share-button vjs-share-button-%2$s" title="%3$s" target="_blank"><span class="%4$s" aria-hidden="true"></span><span class="vjs-control-text" aria-live="polite">%3$s</span></a>',							
-								esc_url( $button['url'] ), 
-								esc_attr( $button['service'] ),
-								esc_attr( $button['text'] ),
-								esc_attr( $button['icon'] )
-							);
-						}
-						?>
-					</div>
-				<?php endif; ?>
+			<?php if ( isset( $settings['share'] ) ) : ?>
+				<!-- Share Buttons -->
+				<div class="vjs-share-buttons">
+					<?php
+					foreach ( $share_buttons as $button ) {
+						printf( 
+							'<a href="%1$s" class="vjs-share-button vjs-share-button-%2$s" title="%3$s" target="_blank"><span class="%4$s" aria-hidden="true"></span><span class="vjs-control-text" aria-live="polite">%3$s</span></a>',							
+							esc_url( $button['url'] ), 
+							esc_attr( $button['service'] ),
+							esc_attr( $button['text'] ),
+							esc_attr( $button['icon'] )
+						);
+					}
+					?>
+				</div>
+			<?php endif; ?>
 
-				<?php if ( isset( $settings['embed'] ) ) : ?>
-					<!-- Embed Code -->
-					<div class="vjs-embed-code">
-						<label for="vjs-copy-embed-code"><?php esc_html_e( 'Paste this code in your HTML page', 'all-in-one-video-gallery' ); ?></label>
-						<input type="text" id="vjs-copy-embed-code" value="<?php echo htmlspecialchars( $embed_code ); ?>" readonly />
-					</div>
-				<?php endif; ?>
-			</div>
+			<?php if ( isset( $settings['embed'] ) ) : ?>
+				<!-- Embed Code -->
+				<div class="vjs-embed-code">
+					<label for="vjs-input-embed-code"><?php esc_html_e( 'Paste this code in your HTML page', 'all-in-one-video-gallery' ); ?></label>
+					<input type="text" id="vjs-input-embed-code" class="vjs-input-embed-code" value="<?php echo htmlspecialchars( $embed_code ); ?>" readonly />
+				</div>
+			<?php endif; ?>
 		</div>
 	<?php endif; ?>
 
@@ -1051,9 +1257,9 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
         </div>
 	<?php endif; ?>
     
-	<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/videojs/video.min.js?v=8.16.1" type="text/javascript" defer></script>
+	<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/videojs/video.min.js?v=8.18.1" type="text/javascript" defer></script>
 
-	<?php if ( in_array( 'qualitySelector', $settings['player']['controlBar']['children'] ) ) : ?>
+	<?php if ( in_array( 'QualitySelector', $settings['player']['controlBar']['children'] ) ) : ?>
 		<?php if ( isset( $sources['mp4'] ) || isset( $sources['webm'] ) || isset( $sources['ogv'] ) ) : ?>
 			<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/videojs/plugins/quality-selector/silvermine-videojs-quality-selector.min.js?v=1.3.1" type="text/javascript" defer></script>
 		<?php endif; ?>
@@ -1064,7 +1270,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 	<?php endif; ?>
 
 	<?php if ( isset( $sources['youtube'] ) ) : ?>
-		<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/videojs/plugins/youtube/Youtube.min.js?v=3.0.1" type="text/javascript" defer></script>
+		<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/videojs/plugins/youtube/Youtube.min.js?v=3.1.0" type="text/javascript" defer></script>
 	<?php endif; ?>
 
 	<?php if ( isset( $settings['start'] ) || isset( $settings['end'] ) ) : ?>
@@ -1072,7 +1278,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 	<?php endif; ?>
 
 	<?php if ( isset( $sources['vimeo'] ) ) : ?>
-		<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/videojs/plugins/vimeo/Vimeo.min.js?v=3.0.0" type="text/javascript" defer></script>
+		<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/videojs/plugins/vimeo/Vimeo.min.js?v=3.1.0" type="text/javascript" defer></script>
 	<?php endif; ?>
 
 	<?php if ( isset( $settings['share'] ) || isset( $settings['embed'] ) || isset( $settings['download'] ) || isset( $settings['logo'] ) ) : ?>
@@ -1080,7 +1286,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 	<?php endif; ?>
 
 	<?php if ( ! empty( $settings['hotkeys'] ) ) : ?>
-		<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/videojs/plugins/hotkeys/videojs.hotkeys.min.js?v=0.2.28" type="text/javascript" defer></script>
+		<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/videojs/plugins/hotkeys/videojs.hotkeys.min.js?v=0.2.30" type="text/javascript" defer></script>
 	<?php endif; ?> 
 
 	<?php do_action( 'aiovg_player_footer', $settings, $attributes, $sources, $tracks ); // Backward compatibility to 3.3.0 ?>
@@ -1129,10 +1335,10 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 						var src  = URL.createObjectURL( blob );
 
 						var obj = {
+							kind: 'captions',
 							src: src,
-							srclang: track.srclang,
 							label: track.label,
-							kind: 'subtitles'
+							srclang: track.srclang													
 						};
 
 						if ( mode ) {
@@ -1261,7 +1467,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		/**
 		 * Update video views count.
 		 */
-		function updateViewsCount() {
+		function updateViewsCount( player ) {
 			var xmlhttp;
 
 			if ( window.XMLHttpRequest ) {
@@ -1276,7 +1482,9 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 				}					
 			};
 
-			xmlhttp.open( 'GET', '<?php echo admin_url( 'admin-ajax.php' ); ?>?action=aiovg_update_views_count&post_id=<?php echo $post_id; ?>&security=<?php echo wp_create_nonce( 'aiovg_ajax_nonce' ); ?>', true );
+			var duration = player.duration() || 0;
+
+			xmlhttp.open( 'GET', '<?php echo admin_url( 'admin-ajax.php' ); ?>?action=aiovg_update_views_count&post_id=<?php echo $post_id; ?>&duration=' + duration + '&security=<?php echo wp_create_nonce( 'aiovg_ajax_nonce' ); ?>', true );
 			xmlhttp.send();							
 		}		
 
@@ -1361,7 +1569,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 							addSrtTextTrack( player, track, mode );
 						} else {
 							var obj = {
-								kind: 'subtitles',
+								kind: 'captions',
 								src: track.src,								
 								label: track.label,
 								srclang: track.srclang
@@ -1386,11 +1594,11 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 			if ( settings.hasOwnProperty( 'chapters' ) ) {
 				try {
 					player.getDescendant([
-						'controlBar',
-						'progressControl',
-						'seekBar',
-						'mouseTimeDisplay',
-						'timeTooltip',
+						'ControlBar',
+						'ProgressControl',
+						'SeekBar',
+						'MouseTimeDisplay',
+						'TimeTooltip',
 					]).update = function( seekBarRect, seekBarPoint, time ) {
 						var markers = settings.chapters;
 						var markerIndex = markers.findIndex(({ time: markerTime }) => markerTime == formatedTimeToSeconds( time ));
@@ -1411,13 +1619,22 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 				}
 			}
 
-			// Fired the first time a video is played.
-			player.one( 'play', function() {
-				hasVideoStarted = true;
-				body.classList.remove( 'vjs-waiting' );
+			player.on( 'play', function() {
+				if ( ! hasVideoStarted ) {
+					hasVideoStarted = true;
+					body.classList.remove( 'vjs-waiting' );
+
+					if ( settings.post_type == 'aiovg_videos' ) {
+						updateViewsCount( player );
+					}
+				}
 
 				if ( settings.post_type == 'aiovg_videos' ) {
-					updateViewsCount();
+					window.parent.postMessage({ 				
+						message: 'aiovg-video-playing',			
+						id: settings.uid,
+						post_id: settings.post_id
+					}, '*');
 				}
 			});
 
@@ -1425,21 +1642,15 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 				player.trigger( 'controlsshown' );
 			});
 
-			var hasMessageSent = false;
-			
 			player.on( 'ended', function() {
 				player.trigger( 'controlshidden' );
 
 				// Autoplay next video.
 				if ( settings.hasOwnProperty( 'autoadvance' ) ) {
-					if ( ! hasMessageSent ) {
-						hasMessageSent = true;
-
-						window.parent.postMessage({ 				
-							message: 'aiovg-video-ended',			
-							id: settings.uid
-						}, '*'); 
-					}
+					window.parent.postMessage({ 				
+						message: 'aiovg-video-ended',			
+						id: settings.uid
+					}, '*'); 
 				}
 			});
 
@@ -1461,7 +1672,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 			var src = player.src();
 
 			if ( /.m3u8/.test( src ) || /.mpd/.test( src ) ) {
-				if ( settings.player.controlBar.children.indexOf( 'qualitySelector' ) !== -1 ) {
+				if ( settings.player.controlBar.children.indexOf( 'QualitySelector' ) !== -1 ) {
 					player.qualityMenu();
 				}
 			}
@@ -1579,7 +1790,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 				}
 
 				if ( settings.hasOwnProperty( 'embed' ) ) {
-					document.getElementById( 'vjs-copy-embed-code' ).addEventListener( 'focus', function() {
+					document.getElementById( 'vjs-input-embed-code' ).addEventListener( 'focus', function() {
 						this.select();	
 						document.execCommand( 'copy' );					
 					});
@@ -1648,6 +1859,31 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 				}
 				
 				return error;
+			});
+
+			// Api methods
+			window.addEventListener( 'message', function( event ) {
+				if ( ! event.data.hasOwnProperty( 'message' ) ) {
+					return false;
+				}
+
+				if ( event.data.id != settings.uid ) {
+					return false;
+				}
+
+				if ( event.data.post_id != settings.post_id ) {
+					return false;
+				}
+
+				switch ( event.data.message ) {
+					case 'aiovg-video-play':
+						player.play();
+						break;
+
+					case 'aiovg-video-pause':
+						player.pause();
+						break;
+				}
 			});
 		}
 

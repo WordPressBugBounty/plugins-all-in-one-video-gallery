@@ -34,7 +34,7 @@ THE SOFTWARE. */
 }( this, function( videojs ) {
   'use strict';
 
-  var _isOnMobile = videojs.browser.IS_IOS || videojs.browser.IS_NATIVE_ANDROID;
+  var _isIPhone = videojs.browser.IS_IPHONE;
   var Tech = videojs.getTech( 'Tech' );
 
   class Youtube extends Tech {
@@ -50,10 +50,6 @@ THE SOFTWARE. */
       this.setTimeout(function() {
         if ( this.el_ ) {
           this.el_.parentNode.className += ' vjs-youtube';
-
-          if ( _isOnMobile ) {
-            this.el_.parentNode.className += ' vjs-youtube-mobile';
-          }
 
           if ( Youtube.isApiReady ) {
             this.initYTPlayer();
@@ -84,10 +80,7 @@ THE SOFTWARE. */
 
       this.ytPlayer = null;
 
-      this.el_.parentNode.className = this.el_.parentNode.className
-        .replace( ' vjs-youtube', '' )
-        .replace( ' vjs-youtube-mobile', '' );
-
+      this.el_.parentNode.className = this.el_.parentNode.className.replace( ' vjs-youtube', '' );
       this.el_.parentNode.removeChild( this.el_ );
 
       //Needs to be called after the YouTube player is destroyed, otherwise there will be a null reference exception
@@ -102,7 +95,7 @@ THE SOFTWARE. */
       var divWrapper = document.createElement( 'div' );
       divWrapper.appendChild( div );
 
-      if ( ! _isOnMobile && ! this.options_.ytControls ) {
+      if ( ! this.options_.ytControls ) {
         var divBlocker = document.createElement( 'div' );
         divBlocker.setAttribute( 'class', 'vjs-iframe-blocker' );
         divBlocker.setAttribute( 'style', 'position:absolute;top:0;left:0;width:100%;height:100%' );
@@ -194,6 +187,10 @@ THE SOFTWARE. */
 
       if ( typeof this.options_.playsinline !== 'undefined' ) {
         playerVars.playsinline = this.options_.playsinline;
+      }
+
+      if ( _isIPhone && this.el_.parentNode.querySelector( '.vjs-fullscreen-control' ) !== null ) {
+        playerVars.playsinline = 0;
       }
 
       if ( typeof this.options_.rel !== 'undefined' ) {
@@ -398,12 +395,6 @@ THE SOFTWARE. */
     }
 
     poster() {
-      // You can't start programmaticlly a video with a mobile
-      // through the iframe so we hide the poster and the play button (with CSS)
-      if ( _isOnMobile ) {
-        return null;
-      }
-
       return this.poster_;
     }
 
@@ -431,7 +422,7 @@ THE SOFTWARE. */
         }
       }
 
-      if ( this.options_.autoplay && ! _isOnMobile ) {
+      if ( this.options_.autoplay ) {
         if ( this.isReady_ ) {
           this.play();
         } else {
@@ -662,13 +653,6 @@ THE SOFTWARE. */
       }
     }
 
-    supportsFullScreen() {
-      return document.fullscreenEnabled ||
-          document.webkitFullscreenEnabled ||
-          document.mozFullScreenEnabled ||
-          document.msFullscreenEnabled;
-    }
-
     // Tries to get the highest resolution thumbnail available for the video
     checkHighResPoster() {
       var uri = 'https://img.youtube.com/vi/' + this.url.videoId + '/maxresdefault.jpg';
@@ -775,7 +759,7 @@ THE SOFTWARE. */
     // iframe blocker to catch mouse events
     var css = '.vjs-youtube .vjs-iframe-blocker { display: none; }' +
       '.vjs-youtube.vjs-has-started .vjs-iframe-blocker { display: block; }' +
-      '.vjs-youtube-mobile .vjs-big-play-button { display: none; }';
+      '.vjs-youtube.vjs-device-iphone .vjs-fullscreen-control { display: none; }';
 
     var head = document.head || document.getElementsByTagName( 'head' )[0];
 

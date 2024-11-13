@@ -33,8 +33,8 @@
 		var scripts = [
 			{ 
 				selector: '.aiovg-autocomplete', 
-				id: 'all-in-one-video-gallery-autocomplete-js',
-				src: plugin_url + 'public/assets/js/autocomplete.min.js?ver=' + plugin_version
+				id: 'all-in-one-video-gallery-select-js',
+				src: plugin_url + 'public/assets/js/select.min.js?ver=' + plugin_version
 			}, 
 			{
 				selector: '.aiovg-more-ajax', 
@@ -54,6 +54,24 @@
 				loadScript( script );
 			}
 		}
+		
+		// Search Form
+		$( '.aiovg-search-form-type-filter' ).each(function() {
+			var $this = $( this );
+			var $form = $this.find( 'form' );
+
+			$this.find( 'input[name="vi"]' ).on( 'blur', function() {
+				$form.submit();
+			});
+
+			$this.find( 'input[type="checkbox"]' ).on( 'change', function() {
+				$form.submit();
+			});
+
+			$this.find( 'select' ).on( 'change', function() {
+				$form.submit();
+			});
+		});
 		
 		// Categories Dropdown.
 		$( '.aiovg-categories-template-dropdown select' ).on( 'change', function() {

@@ -118,7 +118,9 @@ class AIOVG_Public_Categories {
 					esc_html( aiovg_get_message( 'categories_empty' ) )
 				);
 			}
-		} elseif ( 'dropdown' == $template ) {		
+		} elseif ( 'dropdown' == $template ) {
+			$attributes['id'] = 0;
+
 			ob_start();
 			include apply_filters( 'aiovg_load_template', AIOVG_PLUGIN_DIR . 'public/templates/categories-template-dropdown.php', $attributes );
 			return ob_get_clean();	

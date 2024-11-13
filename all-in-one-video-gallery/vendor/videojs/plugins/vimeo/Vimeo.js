@@ -33,6 +33,10 @@
       this.setPoster( options.poster );
       this.setSrc( this.options_.source );    
       
+      this.supportsFullScreen = function() {
+        return true;
+      }
+      
       // Set the vjs-vimeo class to the player
       // Parent is not set yet so we have to wait a tick
       this.setTimeout(function() {
@@ -510,11 +514,20 @@
       }
     }
     
-    supportsFullScreen() {
-      return document.fullscreenEnabled ||
-        document.webkitFullscreenEnabled ||
-        document.mozFullScreenEnabled ||
-        document.msFullscreenEnabled;
+    enterFullScreen() {
+      if ( ! this.vimeoPlayer ) {
+        return;
+      }
+
+      this.vimeoPlayer.requestFullscreen();
+    }
+
+    exitFullScreen() {
+      if ( ! this.vimeoPlayer ) {
+        return;
+      }
+
+      this.vimeoPlayer.exitFullscreen();
     }
 
   }

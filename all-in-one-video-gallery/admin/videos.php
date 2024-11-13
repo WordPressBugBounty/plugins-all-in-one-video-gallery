@@ -33,7 +33,15 @@ class AIOVG_Admin_Videos {
 			__( 'All Videos', 'all-in-one-video-gallery' ),
 			'manage_aiovg_options',
 			'edit.php?post_type=aiovg_videos'
-		);	
+		);
+		
+		add_submenu_page(
+			'all-in-one-video-gallery',
+			__( 'Add New Video', 'all-in-one-video-gallery' ),
+			__( 'Add New', 'all-in-one-video-gallery' ),
+			'manage_aiovg_options',
+			'post-new.php?post_type=aiovg_videos'
+		);
 	}
 
 	/**
@@ -213,6 +221,7 @@ class AIOVG_Admin_Videos {
 		$player_settings = get_option( 'aiovg_player_settings' );
 
 		$post_meta = get_post_meta( $post->ID );
+		$post_meta = apply_filters( 'aiovg_get_post_meta', $post_meta, $post->ID, '', false, 'aiovg_videos' );
 
 		$quality_levels = explode( "\n", $player_settings['quality_levels'] );
 		$quality_levels = array_filter( $quality_levels );
@@ -399,7 +408,24 @@ class AIOVG_Admin_Videos {
 				update_post_meta( $post_id, 'embedcode', $embedcode );
 				remove_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
 				
-				$duration = isset( $_POST['duration'] ) ? sanitize_text_field( $_POST['duration'] ) : '';
+				$duration = '';
+
+				if ( ! empty( $_POST['duration'] ) ) {
+					$duration = sanitize_text_field( $_POST['duration'] );
+				} else {
+					if ( 'vimeo' == $type && ! empty( $vimeo ) ) {
+						$duration = aiovg_get_vimeo_video_duration( $vimeo );
+					} elseif ( 'dailymotion' == $type && ! empty( $dailymotion ) ) {
+						$duration = aiovg_get_dailymotion_video_duration( $dailymotion );
+					} elseif ( 'rumble' == $type && ! empty( $rumble ) ) {
+						$duration = aiovg_get_rumble_video_duration( $rumble );
+					} elseif ( 'embedcode' == $type && ! empty( $embedcode ) ) {
+						$duration = aiovg_get_embedcode_video_duration( $embedcode );
+					}
+
+					$duration = aiovg_convert_seconds_to_human_time( $duration );
+				}
+
 				update_post_meta( $post_id, 'duration', $duration );
 				
 				$views = isset( $_POST['views'] ) ? (int) $_POST['views'] : 0;
@@ -433,8 +459,7 @@ class AIOVG_Admin_Videos {
 							} elseif ( 'dailymotion' == $type && ! empty( $dailymotion ) ) {
 								$image = aiovg_get_dailymotion_image_url( $dailymotion );
 							} elseif ( 'rumble' == $type && ! empty( $rumble ) ) {
-								$oembed = aiovg_get_rumble_oembed_data( $rumble );
-								$image = $oembed['thumbnail_url'];
+								$image = aiovg_get_rumble_image_url( $rumble );
 							} elseif ( 'embedcode' == $type && ! empty( $embedcode ) ) {
 								$image = aiovg_get_embedcode_image_url( $embedcode );
 							}
@@ -611,7 +636,7 @@ class AIOVG_Admin_Videos {
 				);			
     		}
 			
-			// Sortby views
+			// Sort by views
 			if ( isset( $_GET['orderby'] ) && 'views' == $_GET['orderby'] ) {
 				$query->query_vars['meta_query']['views'] = array(
 					'key'     => 'views',

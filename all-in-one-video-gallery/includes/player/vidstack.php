@@ -296,6 +296,11 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 
 		if ( ! empty( $player_settings['fullscreen'] ) ) {
 			$controls[] = 'fullscreen';
+
+			$settings['player']['fullscreen'] = array(
+				'enabled'   => true,
+				'iosNative' => true
+			);
 		}
 		
 		$settings['player']['controls'] = $controls;
@@ -432,7 +437,7 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 				AIOVG_PLUGIN_SLUG . '-hls', 
 				AIOVG_PLUGIN_URL . 'vendor/vidstack/hls.min.js', 
 				array(), 
-				'1.5.13', 
+				'1.5.17', 
 				array( 'strategy' => 'defer' ) 
 			);	
 		}

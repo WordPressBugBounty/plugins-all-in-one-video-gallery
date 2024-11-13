@@ -240,6 +240,10 @@ class AIOVGVideoElement extends HTMLElement {
 			adsManager.addEventListener( google.ima.AdEvent.Type.PAUSED, ( event ) => {
 				playButton.style.display = '';
 			});
+
+			adsManager.addEventListener( google.ima.AdEvent.Type.RESUMED, ( event ) => {
+				playButton.style.display = 'none';
+			});
 		});
 	}
 
@@ -455,6 +459,7 @@ class AIOVGVideoElement extends HTMLElement {
             let formData = new FormData();
             formData.append( 'action', 'aiovg_update_views_count' );
             formData.append( 'post_id', parseInt( this._params.post_id ) );
+			formData.append( 'duration', ( this._player.duration || 0 ) );			
             formData.append( 'security', this._params.ajax_nonce );
 
             fetch( this._params.ajax_url, { method: 'POST', body: formData } );

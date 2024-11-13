@@ -90,6 +90,7 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 			'hotkeys'        => (int) $player_settings['hotkeys'],
 			'player'         => array(
 				'controlBar'                => array(),
+				'textTrackSettings'         => false,
 				'playbackRates'             => array( 0.5, 0.75, 1, 1.5, 2 ),
 				'techCanOverridePoster'     => true,
 				'suppressNotSupportedError' => true
@@ -201,7 +202,7 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 		// Video Attributes
 		$attributes = array(
 			'id'       => 'aiovg-player-' . (int) $this->reference_id,
-			'class'    => 'vjs-fill',
+			'class'    => 'video-js vjs-fill vjs-theme-' . sanitize_text_field( $player_settings['theme'] ),
 			'style'    => 'width: 100%; height: 100%;',
 			'controls' => '',
 			'preload'  => esc_attr( $player_settings['preload'] )
@@ -232,59 +233,65 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 			$attributes['oncontextmenu'] = 'return false;';
 		}
 
-		$attributes = apply_filters( 'aiovg_player_attributes', $attributes, $params ); // Backward compatibility to 3.3.0
-		$attributes = apply_filters( 'aiovg_videojs_player_attributes', $attributes, $params );
-
 		// Player Settings
-		$controls = array();
+		$controls = array( 
+			'playpause'  => 'PlayToggle', 
+			'current'    => 'CurrentTimeDisplay', 
+			'progress'   => 'ProgressControl', 
+			'duration'   => 'DurationDisplay',	
+			'spacer'     => 'CustomControlSpacer', 
+			'tracks'     => 'CaptionsButton',
+			'speed'      => 'PlaybackRateMenuButton', 
+			'quality'    => 'QualitySelector',
+			'volume'     => 'VolumePanel',
+			'pip'        => 'PictureInPictureToggle', 
+			'fullscreen' => 'FullscreenToggle'
+		);
 
-		if ( ! empty( $player_settings['playpause'] ) ) {
-			$controls[] = 'PlayToggle';
-		}
+		foreach ( $controls as $index => $control ) {
+			$enabled = ( isset( $player_settings[ $index ] ) && ! empty( $player_settings[ $index ] ) ) ? 1 : 0;
 
-		if ( ! empty( $player_settings['current'] ) ) {
-			$controls[] = 'CurrentTimeDisplay';
-		}
+			if ( 'spacer' == $index ) {
+				$enabled = 1;
+			}
 
-		if ( ! empty( $player_settings['progress'] ) ) {
-			$controls[] = 'progressControl';
-		}
+			if ( $enabled && 'pip' == $index ) {
+				if ( isset( $sources['youtube'] ) || isset( $sources['vimeo'] ) ) {
+					$enabled = 0;
+				}
+			}
 
-		if ( ! empty( $player_settings['duration'] ) ) {
-			$controls[] = 'durationDisplay';
-		}
-
-		if ( ! empty( $player_settings['tracks'] ) ) {
-			$controls[] = 'SubtitlesButton';
-			$controls[] = 'AudioTrackButton';			
-		}
-
-		if ( ! empty( $player_settings['speed'] ) ) {
-			$controls[] = 'PlaybackRateMenuButton';
-		}
-
-		if ( ! empty( $player_settings['quality'] ) ) {
-			$controls[] = 'qualitySelector';
-		}
-
-		if ( ! empty( $player_settings['volume'] ) ) {
-			$controls[] = 'VolumePanel';
-		}
-
-		if ( ! empty( $player_settings['pip'] ) ) {
-			if ( ! isset( $sources['youtube'] ) && ! isset( $sources['vimeo'] ) ) {
-				$controls[] = 'PictureInPictureToggle';
+			if ( ! $enabled ) {	
+				unset( $controls[ $index ] );	
 			}
 		}
-
-		if ( ! empty( $player_settings['fullscreen'] ) ) {
-			$controls[] = 'fullscreenToggle';
+		
+		if ( isset( $controls['current'] ) && isset( $controls['duration'] ) ) {
+			if ( 'custom' == $player_settings['theme'] || ! isset( $controls['progress'] ) ) {
+				$controls = aiovg_insert_array_after( 'current', $controls, array( 
+					'timedivider' => 'TimeDivider'
+				));
+			}
 		}
 		
-		$settings['player']['controlBar']['children'] = $controls;
-		if ( empty( $controls ) ) {
-			$attributes['class'] = 'vjs-no-control-bar';
+		if ( isset( $controls['tracks'] ) ) {
+			$controls = aiovg_insert_array_after( 'tracks', $controls, array( 
+				'audio' => 'AudioTrackButton'
+			));
 		}
+
+		$settings['player']['controlBar']['children'] = array_values( $controls );
+
+		if ( ! isset( $controls['progress'] ) ) {
+			$attributes['class'] .= ' vjs-no-progress-control';
+		}
+		
+		if ( empty( $controls ) || ( 1 == count( $controls ) && isset( $controls['spacer'] ) ) ) {
+			$attributes['class'] .= ' vjs-no-control-bar';
+		}
+
+		$attributes = apply_filters( 'aiovg_player_attributes', $attributes, $params ); // Backward compatibility to 3.3.0
+		$attributes = apply_filters( 'aiovg_videojs_player_attributes', $attributes, $params );
 
 		if ( ! empty( $player_settings['share'] ) ) {
 			$settings['share'] = 1;
@@ -311,7 +318,7 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 
 		if ( ! empty( $logo_settings['copyright_text'] ) ) {
 			$settings['contextmenu'] = array(
-				'content' => esc_attr( $logo_settings['copyright_text'] )
+				'content' => htmlspecialchars( esc_attr( $logo_settings['copyright_text'] ) )
 			);
 		}
 
@@ -363,11 +370,11 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 			AIOVG_PLUGIN_SLUG . '-videojs', 
 			AIOVG_PLUGIN_URL . 'vendor/videojs/video-js.min.css', 
 			array(), 
-			'8.16.1', 
+			'8.18.1', 
 			'all' 
 		);
 
-		if ( in_array( 'qualitySelector', $settings['player']['controlBar']['children'] ) ) {
+		if ( in_array( 'QualitySelector', $settings['player']['controlBar']['children'] ) ) {
 			if ( isset( $sources['mp4'] ) || isset( $sources['webm'] ) || isset( $sources['ogv'] ) ) {
 				wp_enqueue_style( 
 					AIOVG_PLUGIN_SLUG . '-quality-selector', 
@@ -417,11 +424,11 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 			AIOVG_PLUGIN_SLUG . '-videojs', 
 			AIOVG_PLUGIN_URL . 'vendor/videojs/video.min.js', 
 			array(), 
-			'8.16.1', 
+			'8.18.1', 
 			array( 'strategy' => 'defer' ) 
 		);
 
-		if ( in_array( 'qualitySelector', $settings['player']['controlBar']['children'] ) ) {
+		if ( in_array( 'QualitySelector', $settings['player']['controlBar']['children'] ) ) {
 			if ( isset( $sources['mp4'] ) || isset( $sources['webm'] ) || isset( $sources['ogv'] ) ) {
 				wp_enqueue_script( 
 					AIOVG_PLUGIN_SLUG . '-quality-selector', 
@@ -448,7 +455,7 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 				AIOVG_PLUGIN_SLUG . '-youtube', 
 				AIOVG_PLUGIN_URL . 'vendor/videojs/plugins/youtube/Youtube.min.js', 
 				array( AIOVG_PLUGIN_SLUG . '-videojs' ), 
-				'3.0.1',
+				'3.1.0',
 				array( 'strategy' => 'defer' ) 
 			);
 		}
@@ -468,7 +475,7 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 				AIOVG_PLUGIN_SLUG . '-vimeo', 
 				AIOVG_PLUGIN_URL . 'vendor/videojs/plugins/vimeo/Vimeo.min.js', 
 				array( AIOVG_PLUGIN_SLUG . '-videojs' ), 
-				'3.0.0', 
+				'3.1.0', 
 				array( 'strategy' => 'defer' ) 
 			);
 		}
@@ -488,7 +495,7 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 				AIOVG_PLUGIN_SLUG . '-hotkeys', 
 				AIOVG_PLUGIN_URL . 'vendor/videojs/plugins/hotkeys/videojs.hotkeys.min.js', 
 				array( AIOVG_PLUGIN_SLUG . '-videojs' ), 
-				'0.2.28', 
+				'0.2.30', 
 				array( 'strategy' => 'defer' ) 
 			);
 		}
@@ -518,7 +525,7 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 		
 		foreach ( $tracks as $index => $track ) { // Tracks
 			$player_html .= sprintf( 
-				'<track kind="subtitles" src="%s" label="%s" srclang="%s" %s/>', 
+				'<track kind="captions" src="%s" label="%s" srclang="%s" %s/>', 
 				esc_url( $track['src'] ), 				
 				esc_attr( $track['label'] ),
 				esc_attr( $track['srclang'] ), 
@@ -530,7 +537,6 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 		
 		if ( isset( $settings['share'] ) || isset( $settings['embed'] ) ) { // Share / Embed
 			$player_html .= '<div class="vjs-share-embed" style="display: none;">';
-			$player_html .= '<div class="vjs-share-embed-content">';
 			
 			if ( isset( $settings['share'] ) ) { // Share Buttons
 				$share_buttons = $this->get_share_buttons();
@@ -552,12 +558,11 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 				$embedcode = $this->get_embedcode();
 
 				$player_html .= '<div class="vjs-embed-code">';
-				$player_html .= '<label for="vjs-copy-embed-code-' . $this->reference_id . '">' . esc_html__( 'Paste this code in your HTML page', 'all-in-one-video-gallery' ) . '</label>';
-				$player_html .= '<input type="text" id="vjs-copy-embed-code-' . $this->reference_id . '" class="vjs-copy-embed-code" value="' . htmlspecialchars( $embedcode ) . '" readonly />';
+				$player_html .= '<label for="vjs-input-embed-code-' . $this->reference_id . '">' . esc_html__( 'Paste this code in your HTML page', 'all-in-one-video-gallery' ) . '</label>';
+				$player_html .= '<input type="text" id="vjs-input-embed-code-' . $this->reference_id . '" class="vjs-input-embed-code" value="' . htmlspecialchars( $embedcode ) . '" readonly />';
 				$player_html .= '</div>';
 			}
 
-			$player_html .= '</div>';
 			$player_html .= '</div>';
 		}
 

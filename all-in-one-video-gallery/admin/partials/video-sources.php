@@ -87,54 +87,56 @@
 							</div>
 						</div>
 
-						<?php if ( ! empty( $sources ) ) : 
-							foreach ( $sources as $index => $source ) :	?>
-								<div class="aiovg-source aiovg-flex aiovg-flex-col aiovg-gap-2">
-									<?php
-									echo '<div class="aiovg-quality-selector aiovg-flex aiovg-flex-col aiovg-gap-2">';
+						<?php if ( ! empty( $quality_levels ) ) : ?>
+							<?php if ( ! empty( $sources ) ) : 
+								foreach ( $sources as $index => $source ) :	?>
+									<div class="aiovg-source aiovg-flex aiovg-flex-col aiovg-gap-2">
+										<?php
+										echo '<div class="aiovg-quality-selector aiovg-flex aiovg-flex-col aiovg-gap-2">';
 
-									echo '<p class="aiovg-no-margin">';
-									echo '<span class="aiovg-text-muted dashicons dashicons-video-alt3"></span> ';
-									echo esc_html__( 'Select a Quality Level', 'all-in-one-video-gallery' );
-									echo '</p>';
+										echo '<p class="aiovg-no-margin">';
+										echo '<span class="aiovg-text-muted dashicons dashicons-video-alt3"></span> ';
+										echo esc_html__( 'Select a Quality Level', 'all-in-one-video-gallery' );
+										echo '</p>';
 
-									echo '<div class="aiovg-flex aiovg-flex-wrap aiovg-gap-3">';
+										echo '<div class="aiovg-flex aiovg-flex-wrap aiovg-gap-3">';
 
-									echo sprintf( 
-										'<label><input type="radio" name="quality_levels[%d]" value=""%s/>%s</label>',
-										$index,
-										checked( $source['quality'], '', false ),
-										esc_html__( 'None', 'all-in-one-video-gallery' )
-									);
-
-									foreach ( $quality_levels as $quality ) {
 										echo sprintf( 
-											'<label><input type="radio" name="quality_levels[%d]" value="%s"%s/>%s</label>',
+											'<label><input type="radio" name="quality_levels[%d]" value=""%s/>%s</label>',
 											$index,
-											esc_attr( $quality ),
-											checked( $source['quality'], $quality, false ),
-											esc_html( $quality )
+											checked( $source['quality'], '', false ),
+											esc_html__( 'None', 'all-in-one-video-gallery' )
 										);
-									}
-									
-									echo '</div>';
-									echo '</div>';
-									?>
-									<div class="aiovg-media-uploader">
-										<input type="text" name="sources[<?php echo $index; ?>]" class="widefat" placeholder="<?php esc_attr_e( 'Enter your direct file URL (OR) upload your file using the button here', 'all-in-one-video-gallery' ); ?> &rarr;" value="<?php echo esc_attr( $source['src'] ); ?>" />
-										<button type="button" class="aiovg-upload-media button" data-format="mp4">
-											<?php esc_html_e( 'Upload File', 'all-in-one-video-gallery' ); ?>
-										</button>
-									</div>
-								</div>
-							<?php endforeach; ?>
-						<?php endif; ?>
 
-						<?php if ( ! empty( $quality_levels ) && count( $sources ) < ( count( $quality_levels ) - 1 ) ) : ?>
-							<a href="javascript:;" id="aiovg-add-new-source" class="aiovg-text-small" data-limit="<?php echo count( $quality_levels ); ?>">
-								<?php esc_html_e( '[+] Add More Quality Levels', 'all-in-one-video-gallery' ); ?>
-							</a>
-						<?php endif; ?> 
+										foreach ( $quality_levels as $quality ) {
+											echo sprintf( 
+												'<label><input type="radio" name="quality_levels[%d]" value="%s"%s/>%s</label>',
+												$index,
+												esc_attr( $quality ),
+												checked( $source['quality'], $quality, false ),
+												esc_html( $quality )
+											);
+										}
+										
+										echo '</div>';
+										echo '</div>';
+										?>
+										<div class="aiovg-media-uploader">
+											<input type="text" name="sources[<?php echo $index; ?>]" class="widefat" placeholder="<?php esc_attr_e( 'Enter your direct file URL (OR) upload your file using the button here', 'all-in-one-video-gallery' ); ?> &rarr;" value="<?php echo esc_attr( $source['src'] ); ?>" />
+											<button type="button" class="aiovg-upload-media button" data-format="mp4">
+												<?php esc_html_e( 'Upload File', 'all-in-one-video-gallery' ); ?>
+											</button>
+										</div>
+									</div>
+								<?php endforeach; ?>
+							<?php endif; ?>
+
+							<?php if ( count( $sources ) < ( count( $quality_levels ) - 1 ) ) : ?>
+								<a href="javascript:;" id="aiovg-add-new-source" class="aiovg-text-small" data-limit="<?php echo count( $quality_levels ); ?>">
+									<?php esc_html_e( '[+] Add More Quality Levels', 'all-in-one-video-gallery' ); ?>
+								</a>
+							<?php endif; ?>
+						<?php endif; ?>  
 					</div>
 				</td>
 			</tr>
@@ -253,7 +255,7 @@
 					<label for="aiovg-duration"><?php esc_html_e( 'Video Duration', 'all-in-one-video-gallery' ); ?></label>
 				</th>
 				<td>
-					<input type="text" name="duration" id="aiovg-duration" class="widefat" placeholder="6:30" value="<?php echo esc_attr( $duration ); ?>" />
+					<input type="text" name="duration" id="aiovg-duration" class="widefat" placeholder="00:00" value="<?php echo esc_attr( $duration ); ?>" />
 				</td>
 			</tr>
 			<tr>

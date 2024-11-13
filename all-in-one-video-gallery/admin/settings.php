@@ -258,6 +258,17 @@ class AIOVG_Admin_Settings {
                     ),
                     'sanitize_callback' => 'sanitize_key'
                 ),
+                array(
+                    'name'              => 'theme',
+                    'label'             => __( 'Video.js Theme', 'all-in-one-video-gallery' ),
+                    'description'       => '',
+                    'type'              => 'radio',
+                    'options'           => array(
+                        'default' => __( 'Default', 'all-in-one-video-gallery' ),
+                        'custom'  => __( 'Custom (Recommended)', 'all-in-one-video-gallery' )
+                    ),
+                    'sanitize_callback' => 'sanitize_key'
+                ),
 				array(
                     'name'              => 'width',
                     'label'             => __( 'Width', 'all-in-one-video-gallery' ),
@@ -402,13 +413,6 @@ class AIOVG_Admin_Settings {
                     'description'       => __( 'By default, the plugin adds the player as an iframe to avoid conflicts with other javascript-based libraries on your website. Check this option to force the standard javascript-based player initialization if you are not a fan of the iframes.', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
-                ),
-                array(
-                    'name'              => 'lazyloading',
-                    'label'             => __( 'Lazyload Videos', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'This is an experimental feature and currently works only with the javascript-based initialization for the Vidstack or the embeddable players.', 'all-in-one-video-gallery' ),
-                    'type'              => 'checkbox',
-					'sanitize_callback' => 'intval'
                 )
 			),
             'aiovg_images_settings' => array(
@@ -523,7 +527,7 @@ class AIOVG_Admin_Settings {
                 array(
                     'name'              => 'template',
                     'label'             => __( 'Select Template', 'all-in-one-video-gallery' ),
-                    'description'       => ( aiovg_fs()->is_not_paying() ? sprintf( __( '<a href="%s" target="_blank">Upgrade Pro</a> for more templates (Popup, Slider, Playlist, Compact, etc.)', 'all-in-one-video-gallery' ), esc_url( aiovg_fs()->get_upgrade_url() ) ) : '' ),
+                    'description'       => ( aiovg_fs()->is_not_paying() ? sprintf( __( '<a href="%s" target="_blank">Upgrade Pro</a> for more templates (Popup, Inline, Slider, Playlist, Compact, etc.)', 'all-in-one-video-gallery' ), esc_url( aiovg_fs()->get_upgrade_url() ) ) : '' ),
                     'type'              => 'select',
 					'options'           => $video_templates,
 					'sanitize_callback' => 'sanitize_key'
@@ -702,9 +706,9 @@ class AIOVG_Admin_Settings {
 					'sanitize_callback' => 'intval'
                 ),
                 array(
-                    'name'              => 'back_button',
-                    'label'             => __( 'Link to Parent Category', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Add a link to the parent category page on the single category pages. When there is no parent, links to the "All Categories" page.', 'all-in-one-video-gallery' ),
+                    'name'              => 'breadcrumbs',
+                    'label'             => __( 'Enable Breadcrumbs', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Check this option to display breadcrumbs on category pages', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
                 )
@@ -859,6 +863,13 @@ class AIOVG_Admin_Settings {
                 ),
 			),			
             'aiovg_general_settings' => array(
+                array(
+                    'name'              => 'lazyloading',
+                    'label'             => __( 'Lazyload Images / Videos', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enable this option to lazy load images and videos added by the plugin to enhance page load speed and performance. If you experience any issues with content display, try disabling this option.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+					'sanitize_callback' => 'intval'
+                ),
                 array(
                     'name'              => 'datetime_format',
                     'label'             => __( 'DateTime Format', 'all-in-one-video-gallery' ),

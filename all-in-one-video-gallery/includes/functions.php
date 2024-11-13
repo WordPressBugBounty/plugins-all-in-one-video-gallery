@@ -92,6 +92,28 @@ function aiovg_allow_iframe_script_tags( $allowed_tags ) {
 }
 
 /**
+ * Base64 decode a string.
+ * 
+ * @since  3.8.4
+ * @param  string $string The string to be decoded.
+ * @return string         Decoded string.
+ */
+function aiovg_base64_decode( $string ) {
+	return base64_decode( str_replace( array( '-', '_', '.' ), array( '+', '/', '=' ), $string ) );
+}
+
+/**
+ * Base64 encode a string.
+ * 
+ * @since  3.8.4
+ * @param  string $string The string to be encoded.
+ * @return string         Encoded string.
+ */
+function aiovg_base64_encode( $string ) {
+	return str_replace( array( '+', '/', '=' ), array(  '-', '_', '.' ), base64_encode( $string ) );
+}
+
+/**
  * Check if Yoast SEO plugin is active and AIOVG can use that.
  *
  * @since  1.5.6
@@ -339,23 +361,46 @@ function aiovg_delete_video_attachments( $post_id ) {
 }
 
 /**
- * Extract iframe src from the given HTML string.
- *
- * @since  1.0.0
- * @param  string $html HTML string.
- * @return string $src  Iframe URL.
+ * Displays or retrieves the HTML dropdown list of terms.
+ * 
+ * @since  3.8.4
+ * @param  array  $args Array of arguments to generate a terms drop-down element. 
+ * @return string       HTML dropdown list of terms.
  */
-function aiovg_extract_iframe_src( $html ) {
-	$src = '';
+function aiovg_dropdown_terms( $args ) {
+	$multiple = isset( $args['multiple'] ) ? (bool) $args['multiple'] : true;
+	$echo     = isset( $args['echo'] ) ? (bool) $args['echo'] : true;	
 
-	if ( ! empty( $html ) && strpos( $html, '<iframe' ) !== false ) {
-		preg_match( '/src="([^"]+)"/', $html, $matches );
-		if ( $matches ) {
-			$src = $matches[1];
+	if ( ! $multiple ) {
+		if ( $echo ) {
+			wp_dropdown_categories( $args );
+			return false;
+		} else {
+			return wp_dropdown_categories( $args );
 		}
-	}
+	} 
 
-	return $src;
+	$input_placeholder = isset( $args['show_option_none'] ) ? $args['show_option_none'] : '';
+	
+	unset( $args['show_option_none'], $args['option_none_value'] );
+
+	$args['walker'] = new AIOVG_Walker_Terms_MultiSelect();
+	$args['echo']   = false;
+
+	$dropdown = wp_dropdown_categories( $args );
+	$dropdown = preg_replace( '/<select(.*?)>(.*?)<\/select>/s', '<div class="aiovg-dropdown-list" style="display:none;">$2</div>', $dropdown );
+
+	// Output
+	$html  = '<div class="aiovg-dropdown-terms">';
+	$html .= sprintf( '<input type="text" class="aiovg-dropdown-input aiovg-form-control" placeholder="%s" readonly />', esc_attr( $input_placeholder )	);	
+	$html .= $dropdown;
+	$html .= '</div>';
+
+	if ( $echo ) {
+		echo $html;
+	} else {
+		return $html;
+	}
 }
 
 /**
@@ -427,6 +472,93 @@ function aiovg_get_attachment_id( $url, $media = 'image' ) {
 }
 
 /**
+ * Get the category breadcrumbs.
+ *
+ * @since  3.8.4
+ * @param  object $term The current term object.
+ * @return string       Category breadcrumbs.
+ */
+function aiovg_get_category_breadcrumbs( $term = null ) {
+	$page_settings = get_option( 'aiovg_page_settings' );
+
+	$id = $page_settings['category'];
+	if ( empty( $id ) )	return '';
+
+	$crumbs = array();
+
+	// Home Page
+	$crumbs[] = array(
+		'text' => __( 'Home', 'all-in-one-video-gallery' ),
+		'url'  => home_url()
+	);	
+
+	// Single Category Page
+	if ( $term ) {
+		// Include the main categories page
+		$post = get_post( $id );
+
+		$crumbs[] = array(
+			'text' => $post->post_title,
+			'url'  => get_permalink( $id )
+		);
+
+		// Include the parent categories if available
+		if ( $ancestors = get_ancestors( $term->term_id, 'aiovg_categories' ) ) {
+			$ancestors = array_reverse( $ancestors );
+
+			foreach ( $ancestors as $term_id ) {
+				if ( $parent_term = get_term_by( 'term_id', $term_id, 'aiovg_categories' ) ) {
+					$crumbs[] = array(
+						'text' => $parent_term->name,
+						'url'  => aiovg_get_category_page_url( $parent_term )
+					);
+				}
+			}
+		}
+
+		// Include the current category page
+		$crumbs[] = array(
+			'text' => $term->name
+		);
+	} else {
+		// Include the main categories page
+		$post = get_post( $id );
+
+		$crumbs[] = array(
+			'text' => $post->post_title
+		);
+	}
+
+	// Output
+	$html = '';
+
+	$crumbs = apply_filters( 'aiovg_breadcrumb_links', $crumbs, $term, 'aiovg_categories' );
+	if ( ! empty( $crumbs ) ) {
+		$links = array();
+
+		foreach ( $crumbs as $crumb ) {
+			if ( isset( $crumb['url'] ) ) {
+				$links[] = sprintf(
+					'<span><a href="%s">%s</a></span>',
+					esc_url( $crumb['url'] ),
+					wp_kses_post( $crumb['text'] )
+				);
+			} else {
+				$links[] = sprintf(
+					'<span>%s</span>',
+					wp_kses_post( $crumb['text'] )
+				);
+			}
+		}
+
+		$separator = apply_filters( 'aiovg_breadcrumb_separator', ' » ' );
+		$html = '<p class="aiovg-breadcrumbs">' . implode( $separator, $links ) . '</p>';
+	}
+
+	return $html;
+}
+
+/**
  * Get the category page URL.
  *
  * @since  1.0.0
@@ -485,59 +617,6 @@ function aiovg_get_custom_pages_list() {
 }
 
 /**
- * Get Dailymotion ID from URL.
- *
- * @since  1.5.0
- * @param  string $url Dailymotion video URL.
- * @return string $id  Dailymotion video ID.
- */
-function aiovg_get_dailymotion_id_from_url( $url ) {	
-	$id = '';
-	
-	if ( preg_match( '!^.+dailymotion\.com/(video|hub)/([^_]+)[^#]*(#video=([^_&]+))?|(dai\.ly/([^_]+))!', $url, $m ) ) {
-        if ( isset( $m[6] ) ) {
-            $id = $m[6];
-        }
-		
-        if ( isset( $m[4] ) ) {
-            $id = $m[4];
-        }
-		
-        $id = $m[2];
-    }
-
-	return $id;	
-}
-
-/**
- * Get Dailymotion image from URL.
- *
- * @since  1.5.0
- * @param  string $url Dailymotion video URL.
- * @return string $url Dailymotion image URL.
- */
-function aiovg_get_dailymotion_image_url( $url ) {	
-	$id  = aiovg_get_dailymotion_id_from_url( $url );		
-	$url = '';
-	
-	if ( ! empty( $id ) ) {
-		$dailymotion_response = wp_remote_get( 'https://api.dailymotion.com/video/' . $id . '?fields=thumbnail_large_url,thumbnail_medium_url', array( 'sslverify' => false ) );
-
-		if ( ! is_wp_error( $dailymotion_response ) ) {
-			$dailymotion_response = json_decode( $dailymotion_response['body'] );
-
-			if ( isset( $dailymotion_response->thumbnail_large_url ) ) {
-				$url = $dailymotion_response->thumbnail_large_url;
-			} else {
-				$url = $dailymotion_response->thumbnail_medium_url;
-			}
-		}
-	}
-    	
-	return $url;	
-}
-
-/**
  * Get default plugin settings.
  *
  * @since  1.5.3
@@ -559,6 +638,7 @@ function aiovg_get_default_settings() {
 	$defaults = array(		
 		'aiovg_player_settings' => array(
 			'player'      => 'videojs',
+			'theme'       => 'custom',
 			'width'       => '',
 			'ratio'       => 56.25,
 			'autoplay'    => 0,
@@ -582,8 +662,7 @@ function aiovg_get_default_settings() {
 			'cc_load_policy' => 0,
 			'quality_levels' => implode( "\n", array( '360p', '480p', '720p', '1080p' ) ),
 			'use_native_controls'     => array(),
-			'force_js_initialization' => 0,
-			'lazyloading'    => 1
+			'force_js_initialization' => 0			
 		),
 		'aiovg_socialshare_settings' => array(				
 			'services' => array( 
@@ -625,7 +704,7 @@ function aiovg_get_default_settings() {
 			'show_description' => 0,
 			'show_count'       => 1,				
 			'hide_empty'       => 0,
-			'back_button'      => 0
+			'breadcrumbs'      => 0
 		),	
 		'aiovg_images_settings' => array(
 			'width' => '',
@@ -675,6 +754,7 @@ function aiovg_get_default_settings() {
 			'disable_cookies'      => array()
 		),
 		'aiovg_general_settings' => array(
+			'lazyloading'               => 0,
 			'datetime_format'           => '',
 			'maybe_flush_rewrite_rules' => 1,
 			'delete_plugin_data'        => 1,
@@ -688,44 +768,6 @@ function aiovg_get_default_settings() {
 	);
 		
 	return $defaults;		
-}
-
-/**
- * Get image from the Third-Party Player Code.
- *
- * @since  1.0.0
- * @param  string $embedcode Player Code.
- * @return string $url       Image URL.
- */
-function aiovg_get_embedcode_image_url( $embedcode ) {
-	$url = '';
-
-	$iframe_src = aiovg_extract_iframe_src( $embedcode );
-	if ( $iframe_src ) {
-		// YouTube
-		if ( false !== strpos( $iframe_src, 'youtube.com' ) || false !== strpos( $iframe_src, 'youtu.be' ) ) {
-			$url = aiovg_get_youtube_image_url( $iframe_src );
-		}
-
-		// Vimeo
-		elseif ( false !== strpos( $iframe_src, 'vimeo.com' ) ) {
-			$url = aiovg_get_vimeo_image_url( $iframe_src );
-		}
-
-		// Dailymotion
-		elseif ( false !== strpos( $iframe_src, 'dailymotion.com' ) ) {
-			$url = aiovg_get_dailymotion_image_url( $iframe_src );
-		}
-
-		// Rumble
-		elseif ( false !== strpos( $iframe_src, 'rumble.com' ) ) {
-			$oembed = aiovg_get_rumble_oembed_data( $iframe_src );
-			$url = $oembed['thumbnail_url'];
-		}
-	}
-    	
-	// Return image url
-	return $url;	
 }
 
 /**
@@ -925,7 +967,7 @@ function aiovg_get_image_url( $id, $size = "large", $default = '', $type = 'gall
 	
 	// Set default image
 	if ( ! empty( $default ) ) {
-		$default = aiovg_resolve_url( $default );
+		$default = aiovg_make_url_absolute( $default );
 	} else {
 		if ( 'gallery' == $type ) {
 			$default = AIOVG_PLUGIN_URL . 'public/assets/images/placeholder-image.png';
@@ -1168,7 +1210,7 @@ function aiovg_get_player_page_url( $post_id = 0, $atts = array() ) {
 				case 'rumble':
 				case 'facebook':
 				case 'poster':
-					$query_args[ $key ] = urlencode( $atts[ $key ] );
+					$query_args[ $key ] = aiovg_base64_encode( $atts[ $key ] );
 					break;
 				case 'ratio':
 					$query_args[ $key ] = (float) $atts[ $key ];
@@ -1207,55 +1249,41 @@ function aiovg_get_player_page_url( $post_id = 0, $atts = array() ) {
 }
 
 /**
- * Get Rumble data using oEmbed.
- *
- * @since  2.6.3
- * @param  string $url  Rumble URL.
- * @return string $data Rumble oEmbed response data.
+ * Get the sorting options for the search form.
+ * 
+ * @since  3.8.4
+ * @return array $options Array of options.
  */
-function aiovg_get_rumble_oembed_data( $url ) {
-	$cache_key = 'aiovg_' . md5( $url );
-	$data = wp_cache_get( $cache_key );
+function aiovg_get_search_form_sort_options() {
+	$options = array(
+		'title-asc'  => __( 'Title - Ascending', 'all-in-one-video-gallery' ),
+		'title-desc' => __( 'Title - Descending', 'all-in-one-video-gallery' ),		
+		'date-desc'  => __( 'Newest First', 'all-in-one-video-gallery' ), 
+		'date-asc'   => __( 'Oldest First', 'all-in-one-video-gallery' ),                       
+		'views-desc' => __( 'Most Viewed', 'all-in-one-video-gallery' ),
+		'likes-desc' => __( 'Most Liked', 'all-in-one-video-gallery' )
+	);
 
-	if ( false === $data ) {
-		$data = array(		
-			'thumbnail_url' => '',
-			'html'          => ''
-		);
-
-		$rumble_response = wp_remote_get( 'https://rumble.com/api/Media/oembed.json?url=' . urlencode( $url ) );
-
-		if ( is_array( $rumble_response ) && ! is_wp_error( $rumble_response ) ) {
-			$rumble_response = json_decode( $rumble_response['body'] );
-			
-			if ( isset( $rumble_response->thumbnail_url ) ) {
-				$data['thumbnail_url'] = $rumble_response->thumbnail_url;
-			}
-
-			if ( isset( $rumble_response->html ) ) {
-				$data['html'] = $rumble_response->html;
-			}
-
-			wp_cache_set( $cache_key, $data, '', HOUR_IN_SECONDS );
-		}		
-	}
-	
-	return $data;
+	return $options;
 }
 
 /**
  * Generate the search results page URL.
  *
  * @since  1.0.0
- * @return string Search results page URL.
+ * @param  int    $page_id Search page ID.
+ * @return string          Search results page URL.
  */
-function aiovg_get_search_page_url() {
-	$page_settings = get_option( 'aiovg_page_settings' );
+function aiovg_get_search_page_url( $page_id = 0 ) {
+	if ( empty( $page_id ) ) {
+		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_id = $page_settings['search'];
+	}	
 	
 	$url = '/';
 	
-	if ( $page_settings['search'] > 0 ) {
-		$url = get_permalink( $page_settings['search'] );
+	if ( $page_id > 0 ) {
+		$url = get_permalink( $page_id );
 	}
 	
 	return apply_filters( 'aiovg_search_page_url', $url );	
@@ -1518,7 +1546,7 @@ function aiovg_get_shortcode_fields() {
 						array(
 							'name'        => 'template',
 							'label'       => __( 'Select Template', 'all-in-one-video-gallery' ),
-							'description' => ( aiovg_fs()->is_not_paying() ? sprintf( __( '<a href="%s" target="_blank">Upgrade Pro</a> for more templates (Popup, Slider, Playlist, Compact, etc.)', 'all-in-one-video-gallery' ), esc_url( aiovg_fs()->get_upgrade_url() ) ) : '' ),
+							'description' => ( aiovg_fs()->is_not_paying() ? sprintf( __( '<a href="%s" target="_blank">Upgrade Pro</a> for more templates (Popup, Inline, Slider, Playlist, Compact, etc.)', 'all-in-one-video-gallery' ), esc_url( aiovg_fs()->get_upgrade_url() ) ) : '' ),
 							'type'        => 'select',
 							'options'     => $video_templates,
 							'value'       => $videos_settings['template']
@@ -1940,7 +1968,32 @@ function aiovg_get_shortcode_fields() {
 							'description' => '',
 							'type'        => 'checkbox',
 							'value'       => 0
-						)
+						),
+						array(
+							'name'        => 'sort',
+							'label'       => __( 'Sort By Dropdown', 'all-in-one-video-gallery' ),
+							'description' => '',
+							'type'        => 'checkbox',
+							'value'       => 0
+						),						
+						array(
+							'name'        => 'search_button',
+							'label'       => __( 'Search Button', 'all-in-one-video-gallery' ),
+							'description' => '',
+							'type'        => 'checkbox',
+							'value'       => 1
+						),
+						array(
+							'name'        => 'target',
+							'label'       => __( 'Search Results Page', 'all-in-one-video-gallery' ),
+							'description' => __( 'The selected "Search Results Page" must include the [aiovg_search] shortcode, which will be replaced by the search results.', 'all-in-one-video-gallery' ),
+							'type'        => 'select',
+							'options'     => array(
+								'default' => __( "Use Plugin's Default Search Results Page", 'all-in-one-video-gallery' ),
+								'current' => __( 'Display Results on Current Page', 'all-in-one-video-gallery' )
+							),
+							'value'       => 'default'
+						),
 					)
 				)
 			)
@@ -2094,205 +2147,6 @@ function aiovg_get_video_templates() {
 }
 
 /**
- * Get Vimeo ID from URL.
- *
- * @since  3.5.0
- * @param  string $url Vimeo video URL.
- * @return string $id  Vimeo video ID.
- */
-function aiovg_get_vimeo_id_from_url( $url ) {
-	$id = '';
-
-	// Use regexp to programmatically parse the ID. So, we can avoid an oEmbed API request
-	if ( strpos( $url, 'player.vimeo.com' ) !== false ) {
-		if ( preg_match( '#(?:https?://)?(?:www.)?(?:player.)?vimeo.com/(?:[a-z]*/)*([0-9]{6,11})[?]?.*#', $url, $matches ) ) {
-			$id = $matches[1];
-		}
-	}
-
-	// Let us ask the Vimeo itself using their oEmbed API
-	if ( empty( $id ) ) {
-		$oembed = aiovg_get_vimeo_oembed_data( $url );
-		$id = $oembed['video_id'];
-	}
-
-	return $id;
-}
-
-/**
- * Get Vimeo image from URL.
- *
- * @since  3.5.0
- * @param  string $url Vimeo video URL.
- * @return string      Vimeo image URL.
- */
-function aiovg_get_vimeo_image_url( $url ) {
-	$data = aiovg_get_vimeo_oembed_data( $url );	
-
-	// Find large thumbnail using the Vimeo API v2
-	if ( ! empty( $data['video_id'] ) ) {			
-		$vimeo_response = wp_remote_get( 'https://vimeo.com/api/v2/video/' . $data['video_id'] . '.php' );
-		
-		if ( ! is_wp_error( $vimeo_response ) ) {
-			$vimeo_response = maybe_unserialize( $vimeo_response['body'] );
-
-			if ( is_array( $vimeo_response ) && isset( $vimeo_response[0]['thumbnail_large'] ) ) {
-				$data['thumbnail_url'] = $vimeo_response[0]['thumbnail_large'];
-			}
-		}
-	}
-
-	// Get images from private videos
-	if ( ! empty( $data['video_id'] ) && empty( $data['thumbnail_url'] ) ) {
-		$api_settings = get_option( 'aiovg_api_settings' );	
-
-		if ( isset( $api_settings['vimeo_access_token'] ) && ! empty( $api_settings['vimeo_access_token'] ) ) {
-			$args = array(
-				'headers' => array(
-					'Authorization' => 'Bearer ' . sanitize_text_field( $api_settings['vimeo_access_token'] )
-				)
-			);
-
-			$vimeo_response = wp_remote_get( 'https://api.vimeo.com/videos/' . $data['video_id'] . '/pictures', $args );
-			
-			if ( is_array( $vimeo_response ) && ! is_wp_error( $vimeo_response ) ) {
-				$vimeo_response = json_decode( $vimeo_response['body'] );					
-
-				if ( isset( $vimeo_response->data ) ) {
-					$bypass = false;
-		
-					foreach ( $vimeo_response->data as $item ) {
-						foreach ( $item->sizes as $picture ) {
-							$data['thumbnail_url'] = $picture->link;
-	
-							if ( $picture->width >= 400 ) {
-								$bypass = true;
-								break;
-							}
-						}
-	
-						if ( $bypass ) break;
-					}
-				}
-			}
-		}
-	}
-
-	if ( ! empty( $data['thumbnail_url'] ) ) {
-		$data['thumbnail_url'] = add_query_arg( 'isnew', 1, $data['thumbnail_url'] );
-	}
-
-	return $data['thumbnail_url'];
-}
-
-/**
- * Get Vimeo data using oEmbed.
- *
- * @since  1.6.6
- * @param  string $url  Vimeo URL.
- * @return string $data Vimeo oEmbed response data.
- */
-function aiovg_get_vimeo_oembed_data( $url ) {
-	$cache_key = 'aiovg_' . md5( $url );
-	$data = wp_cache_get( $cache_key );
-
-	if ( false === $data ) {
-		$data = array(		
-			'video_id'      => '',
-			'thumbnail_url' => '',
-			'html'          => ''
-		);
-
-		$vimeo_response = wp_remote_get( 'https://vimeo.com/api/oembed.json?url=' . urlencode( $url ) );
-
-		if ( is_array( $vimeo_response ) && ! is_wp_error( $vimeo_response ) ) {
-			$vimeo_response = json_decode( $vimeo_response['body'] );
-
-			if ( isset( $vimeo_response->video_id ) ) {
-				$data['video_id'] = $vimeo_response->video_id;
-			}	
-			
-			if ( isset( $vimeo_response->thumbnail_url ) ) {
-				$data['thumbnail_url'] = $vimeo_response->thumbnail_url;
-			}
-
-			if ( isset( $vimeo_response->html ) ) {
-				$data['html'] = $vimeo_response->html;
-			}
-		}
-
-		// Fallback to our old method to get the Vimeo ID
-		if ( empty( $data['video_id'] ) ) {			
-			$is_vimeo = preg_match( '/vimeo\.com/i', $url );  
-			if ( $is_vimeo ) {
-				$data['video_id'] = preg_replace( '/[^\/]+[^0-9]|(\/)/', '', rtrim( $url, '/' ) );
-			}
-		}
-
-		if ( ! empty( $data['video_id'] ) ) {	
-			wp_cache_set( $cache_key, $data, '', HOUR_IN_SECONDS );
-		}
-	}
-	
-	return $data;
-}
-
-/**
- * Get YouTube ID from URL.
- *
- * @since  1.0.0
- * @param  string $url YouTube video URL.
- * @return string $id  YouTube video ID.
- */
-function aiovg_get_youtube_id_from_url( $url ) {	
-	$id  = '';
-    $url = parse_url( $url );
-		
-    if ( 0 === strcasecmp( $url['host'], 'youtu.be' ) ) {
-       	$id = substr( $url['path'], 1 );
-    } elseif ( 0 === strcasecmp( $url['host'], 'www.youtube.com' ) || 0 === strcasecmp( $url['host'], 'youtube.com' ) ) {
-       	if ( isset( $url['query'] ) ) {
-       		parse_str( $url['query'], $url['query'] );
-           	if ( isset( $url['query']['v'] ) ) {
-           		$id = $url['query']['v'];
-           	}
-       	}
-			
-       	if ( empty( $id ) ) {
-           	$url['path'] = explode( '/', substr( $url['path'], 1 ) );
-           	if ( in_array( $url['path'][0], array( 'e', 'embed', 'v', 'shorts', 'live' ) ) ) {
-               	$id = $url['path'][1];
-           	}
-       	}
-    }
-    	
-	return $id;	
-}
-
-/**
- * Get YouTube image from URL.
- *
- * @since  1.0.0
- * @param  string $url YouTube video URL.
- * @return string $url YouTube image URL.
- */
-function aiovg_get_youtube_image_url( $url ) {	
-	$id  = aiovg_get_youtube_id_from_url( $url );
-	$url = '';
-
-	if ( ! empty( $id ) ) {
-		$url = "https://img.youtube.com/vi/$id/maxresdefault.jpg";
-		$response = wp_remote_get( $url );
-
-		if ( 200 != wp_remote_retrieve_response_code( $response ) ) {
-			$url = "https://img.youtube.com/vi/$id/mqdefault.jpg"; 
-		}
-	}
-	   	
-	return $url;	
-}
-
-/**
  * Inserts a new key/value after the key in the array.
  *
  * @since  1.0.0
@@ -2414,6 +2268,32 @@ function aiovg_is_gutenberg_page() {
 }
 
 /**
+ * Convert relative file paths into absolute URLs.
+ * 
+ * @since  3.8.4
+ * @param  string $url Input file URL.
+ * @return string $url Absolute file URL.
+ */
+function aiovg_make_url_absolute( $url ) {
+    if ( empty( $url ) ) {
+        return $url;
+    }
+
+    // Trim any unnecessary whitespaces
+    $url = trim( $url );
+
+    // If there's no host, it's likely a relative URL
+	$host = parse_url( $url, PHP_URL_HOST );
+
+	if ( empty( $host ) ) {
+		// Prepend the site URL to make it absolute
+		$url = get_site_url( null, $url );
+	}
+
+    return $url;
+}
+
+/**
   * Removes an item or list from the query string.
   *
   * @since  1.0.0
@@ -2435,45 +2315,15 @@ function aiovg_remove_query_arg( $key, $query = false ) {
 }
 
 /**
- * Resolve YouTube URLs.
+ * Convert relative file paths into absolute URLs.
  * 
- * @since  2.5.6
- * @param  string $url YouTube URL.
- * @return string $url Resolved YouTube URL.
- */
-function aiovg_resolve_youtube_url( $url ) {
-	if ( false !== strpos( $url, '/shorts/' ) || false !== strpos( $url, '/live/' ) ) {
-		$id = aiovg_get_youtube_id_from_url( $url );
-
-		if ( ! empty( $id ) ) {
-			$url = 'https://www.youtube.com/watch?v=' . $id; 
-		}
-	}
-
-	return $url;
-}
-
-/**
- * Resolve relative file paths as absolute URLs.
- * 
- * @since  2.4.0
- * @param  string $url Input file URL.
- * @return string $url Absolute file URL.
+ * @since      2.4.0
+ * @deprecated 3.8.4  Use aiovg_make_url_absolute() instead.
+ * @param      string $url Input file URL.
+ * @return     string      Absolute file URL.
  */
 function aiovg_resolve_url( $url ) {
-	if ( empty( $url ) ) {
-		return $url;
-	}
-
-	$url = urldecode( $url );
-
-	// Is relative path?
-	$host = parse_url( $url, PHP_URL_HOST );
-	if ( empty( $host ) ) {
-		$url = get_site_url( null, $url );
-	}
-
-	return $url;
+	return aiovg_make_url_absolute( $url );
 }
 
 /**

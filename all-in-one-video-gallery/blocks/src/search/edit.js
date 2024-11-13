@@ -22,7 +22,10 @@ export default function Edit( { attributes, setAttributes } ) {
 		template, 
 		keyword,
 		category,
-		tag 
+		tag,
+		sort,
+		search_button,
+		target 
 	} = attributes;
 	
 	return (
@@ -62,6 +65,34 @@ export default function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.search_by_tags }
 							checked={ tag }
 							onChange={ () => setAttributes( { tag: ! tag } ) }
+						/>
+					</PanelRow>
+
+					<PanelRow>
+						<ToggleControl
+							label={ aiovg_blocks.i18n.sort_by_dropdown }
+							checked={ sort }
+							onChange={ () => setAttributes( { sort: ! sort } ) }
+						/>
+					</PanelRow>
+
+					<PanelRow>
+						<ToggleControl
+							label={ aiovg_blocks.i18n.search_button }
+							checked={ search_button }
+							onChange={ () => setAttributes( { search_button: ! search_button } ) }
+						/>
+					</PanelRow>
+
+					<PanelRow>
+						<SelectControl
+							label={ aiovg_blocks.i18n.search_results_page }
+							value={ target }
+							options={ [
+								{ label: aiovg_blocks.i18n.default_page, value: 'default' },
+								{ label: aiovg_blocks.i18n.current_page, value: 'current' }
+							] }
+							onChange={ ( value ) => setAttributes( { target: value } ) }
 						/>
 					</PanelRow>
 				</PanelBody>

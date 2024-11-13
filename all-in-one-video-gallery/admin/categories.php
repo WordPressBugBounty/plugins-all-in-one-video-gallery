@@ -165,7 +165,11 @@ class AIOVG_Admin_Categories {
 	 * @param  array $columns Array of default table columns.
 	 * @return array $columns Updated list of table columns.
 	 */
-	public function get_columns( $columns ) {	
+	public function get_columns( $columns ) {
+		$columns = aiovg_insert_array_after( 'cb', $columns, array( 
+			'image' => ''
+		));
+
 		$columns['tax_id'] = __( 'ID', 'all-in-one-video-gallery' );
     	return $columns;		
 	}
@@ -178,10 +182,21 @@ class AIOVG_Admin_Categories {
 	 * @param string $column  Name of the column.
 	 * @param string $term_id Term ID.
 	 */
-	public function custom_column_content( $content, $column, $term_id ) {		
-		if ( 'tax_id' == $column ) {
-        	$content = $term_id;
-    	}
+	public function custom_column_content( $content, $column, $term_id ) {
+		switch ( $column ) {
+			case 'image':
+				$image_data = aiovg_get_image( $term_id, 'thumbnail', 'term', true );
+
+				$content = sprintf(
+					'<img src="%s" alt="" style="width: 75px;" />',
+					$image_data['src']
+				);
+				break;
+
+			case 'tax_id':
+				$content = $term_id;
+				break;
+		}	
 		
 		return $content;	
 	}
