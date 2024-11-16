@@ -645,7 +645,6 @@ class AIOVG_Public_Videos {
 				),
 				array(
 					'key'     => 'likes',
-					'type'    => 'NUMERIC',
 					'compare' => 'EXISTS'
 				)
 			);				
@@ -653,16 +652,9 @@ class AIOVG_Public_Videos {
 
 		if ( 'dislikes' == $orderby ) { // Dislikes			
 			$meta_queries['dislikes'] = array(
-				'relation' => 'OR',
-				array(
-					'key'     => 'dislikes',
-					'compare' => 'NOT EXISTS'
-				),
-				array(
-					'key'     => 'dislikes',
-					'type'    => 'NUMERIC',
-					'compare' => 'EXISTS'
-				)
+				'key'     => 'dislikes',
+				'value'   => 0,
+				'compare' => '>'
 			);				
 		}
 
@@ -682,17 +674,19 @@ class AIOVG_Public_Videos {
 		// Order & Orderby Parameters
 		switch ( $orderby ) {
 			case 'likes':
+				$args['orderby']  = 'meta_value_num';			
+				$args['order']    = $order;		
+				break;
+
 			case 'dislikes':
-				$args['orderby'] = array(
-					$orderby => $order,
-					'date'   => 'DESC'
-				);			
+				$args['meta_key'] = $orderby;
+				$args['orderby']  = 'meta_value_num';			
+				$args['order']    = $order;
 				break;
 
 			case 'views':
 				$args['meta_key'] = $orderby;
-				$args['orderby']  = 'meta_value_num';
-			
+				$args['orderby']  = 'meta_value_num';			
 				$args['order']    = $order;
 				break;
 

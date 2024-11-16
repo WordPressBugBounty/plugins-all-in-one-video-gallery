@@ -194,7 +194,6 @@ class AIOVG_Widget_Videos extends WP_Widget {
 				),
 				array(
 					'key'     => 'likes',
-					'type'    => 'NUMERIC',
 					'compare' => 'EXISTS'
 				)
 			);				
@@ -202,16 +201,9 @@ class AIOVG_Widget_Videos extends WP_Widget {
 
 		if ( 'dislikes' == $orderby ) { // Dislikes			
 			$meta_queries['dislikes'] = array(
-				'relation' => 'OR',
-				array(
-					'key'     => 'dislikes',
-					'compare' => 'NOT EXISTS'
-				),
-				array(
-					'key'     => 'dislikes',
-					'type'    => 'NUMERIC',
-					'compare' => 'EXISTS'
-				)
+				'key'     => 'dislikes',
+				'value'   => 0,
+				'compare' => '>'
 			);				
 		}
 
@@ -231,17 +223,19 @@ class AIOVG_Widget_Videos extends WP_Widget {
 		// Order & Orderby Parameters
 		switch ( $orderby ) {
 			case 'likes':
+				$query['orderby']  = 'meta_value_num';				
+				$query['order']    = $order;
+				break;
+
 			case 'dislikes':
-				$query['orderby'] = array(
-					$orderby => $order,
-					'date'   => 'DESC'
-				);
+				$query['meta_key'] = $orderby;
+				$query['orderby']  = 'meta_value_num';				
+				$query['order']    = $order;
 				break;
 
 			case 'views':
 				$query['meta_key'] = $orderby;
-				$query['orderby']  = 'meta_value_num';
-				
+				$query['orderby']  = 'meta_value_num';				
 				$query['order']    = $order;
 				break;
 

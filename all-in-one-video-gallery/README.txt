@@ -6,7 +6,7 @@ Tags: video player, video gallery, youtube gallery, vimeo gallery, live stream
 Requires at least: 6.3
 Tested up to: 6.7
 Requires PHP: 5.6.20
-Stable tag: 3.9.0
+Stable tag: 3.9.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -145,6 +145,13 @@ Also, the videos from third-party services like "YouTube", "Vimeo", "Dailymotion
 7. Plugin Settings.
 
 == Changelog ==
+
+= 3.9.1 =
+
+* New: Added the ability to use shortcodes from third-party plugins within video descriptions for greater flexibility and functionality.
+* Fix: Addressed problems with subtitle styling to ensure a consistent and improved viewing experience.
+* Fix: Fixed a bug causing incorrect ordering of videos based on Likes/Dislikes.
+* Fix: [+] a few minor bug fixes.
 
 = 3.9.0 =
 
@@ -459,6 +466,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 3.9.0 =
+= 3.9.1 =
 
 Introduces several new features, bug fixes & enhancements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

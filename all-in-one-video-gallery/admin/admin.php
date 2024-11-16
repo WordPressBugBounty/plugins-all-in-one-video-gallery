@@ -39,7 +39,7 @@ class AIOVG_Admin {
 			$new_player_settings = array();
 			
 			if ( ! array_key_exists( 'theme', $player_settings ) ) {
-				$new_player_settings['theme'] = 'default';				
+				$new_player_settings['theme'] = $defaults['aiovg_player_settings']['theme'];				
 			}
 
 			if ( ! array_key_exists( 'muted', $player_settings ) ) {
@@ -47,7 +47,7 @@ class AIOVG_Admin {
 			}
 			
 			if ( ! array_key_exists( 'cc_load_policy', $player_settings ) ) {
-				$new_player_settings['cc_load_policy'] = 0;				
+				$new_player_settings['cc_load_policy'] = $defaults['aiovg_player_settings']['cc_load_policy'];				
 			}
 			
 			if ( ! array_key_exists( 'quality_levels', $player_settings ) ) {

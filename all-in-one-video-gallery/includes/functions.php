@@ -638,7 +638,7 @@ function aiovg_get_default_settings() {
 	$defaults = array(		
 		'aiovg_player_settings' => array(
 			'player'      => 'videojs',
-			'theme'       => 'custom',
+			'theme'       => 'default',
 			'width'       => '',
 			'ratio'       => 56.25,
 			'autoplay'    => 0,
@@ -1260,11 +1260,15 @@ function aiovg_get_search_form_sort_options() {
 		'title-desc' => __( 'Title - Descending', 'all-in-one-video-gallery' ),		
 		'date-desc'  => __( 'Newest First', 'all-in-one-video-gallery' ), 
 		'date-asc'   => __( 'Oldest First', 'all-in-one-video-gallery' ),                       
-		'views-desc' => __( 'Most Viewed', 'all-in-one-video-gallery' ),
-		'likes-desc' => __( 'Most Liked', 'all-in-one-video-gallery' )
+		'views-desc' => __( 'Most Viewed', 'all-in-one-video-gallery' )
 	);
 
-	return $options;
+	$likes_settings = get_option( 'aiovg_likes_settings' );
+	if ( ! empty( $likes_settings['like_button'] ) ) {
+		$options['likes-desc'] = __( 'Most Liked', 'all-in-one-video-gallery' );
+	}
+
+	return apply_filters( 'aiovg_search_form_sort_options', $options );
 }
 
 /**
