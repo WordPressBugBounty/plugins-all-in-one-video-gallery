@@ -1,91 +1,155 @@
-(function( $ ) {
-	'use strict';	
+'use strict';
 
-	var aiovg = window.aiovg_pagination || window.aiovg_public;
+/**
+ * Pagination
+ */
+class AIOVGPaginationElement extends HTMLElement {
+
+	/**
+     * Element created.
+     */
+    constructor() {
+        super();
+
+		// Set references to the DOM elements used by the component
+		this.$el = null;
+		this.$container = null;
+
+		// Set references to the private properties used by the component
+		const aiovg = window.aiovg_pagination || window.aiovg_public;
+
+        this._params = {};
+		this._isAjaxEnabled = false;
+		this._ajaxUrl = aiovg.ajax_url;
+		this._ajaxNonce = aiovg.ajax_nonce;
+		this._pageTopOffset = parseInt( aiovg.scroll_to_top_offset );
+
+		// Bind the event handlers to ensure the reference remains stable		
+		this._onNextOrPreviousPageButtonClicked = this._onNextOrPreviousPageButtonClicked.bind( this );
+		this._onMoreButtonClicked = this._onMoreButtonClicked.bind( this );
+	}
+
+	/**
+     * Browser calls this method when the element is added to the document.
+     * (can be called many times if an element is repeatedly added/removed)
+     */
+    connectedCallback() {
+		this.$el = jQuery( this );		
+
+		this._params = this.$el.data( 'params' );
+		this._params.action = 'aiovg_load_more_' + this._params.source;
+		this._params.security = this._ajaxNonce;
+
+		this.$container = jQuery( '#aiovg-' + this._params.uid );
+
+		if ( this.$el.hasClass( 'aiovg-pagination-ajax' ) || this.$el.hasClass( 'aiovg-more-ajax' ) ) {
+			this._isAjaxEnabled = true;
+		}
+
+		if ( this._isAjaxEnabled ) {
+			this.$el.on( 'click', 'a.page-numbers', this._onNextOrPreviousPageButtonClicked );
+			this.$el.on( 'click', 'button', this._onMoreButtonClicked );
+		}
+	}
+
+	/**
+     * Browser calls this method when the element is removed from the document.
+     * (can be called many times if an element is repeatedly added/removed)
+     */
+	disconnectedCallback() {
+		if ( this._isAjaxEnabled ) {
+			this.$el.off( 'click', 'a.page-numbers', this._onNextOrPreviousPageButtonClicked );
+			this.$el.off( 'click', 'button', this._onMoreButtonClicked );
+		}
+	}
+
+	/**
+     * Define private methods.
+     */
+
+	_onNextOrPreviousPageButtonClicked( event ) {
+		event.preventDefault();
+
+		const $this = jQuery( event.target );
+
+		this.$el.addClass( 'aiovg-spinner' );
+
+		let current = parseInt( this.$el.data( 'current' ) );			
+		
+		let paged = parseInt( $this.html() );
+		this._params.paged = paged;
+
+		if ( $this.hasClass( 'prev' ) ) {
+			this._params.paged = current - 1;
+		}
+		
+		if ( $this.hasClass( 'next' ) ) {
+			this._params.paged = current + 1;
+		}		
+
+		this._fetch( this._params, ( response ) => {
+			if ( response.success ) {
+				const html = jQuery( response.data.html ).html();
+				this.$container.html( html );
+				
+				this.$el.trigger( 'AIOVG.onGalleryUpdated' );
+
+				jQuery( 'html, body' ).animate({
+					scrollTop: this.$container.offset().top - this._pageTopOffset
+				}, 500);
+			} else {
+				this.$el.removeClass( 'aiovg-spinner' );
+			}
+		});
+	}
+
+	_onMoreButtonClicked( event ) {
+		event.preventDefault();
+
+		const $this = jQuery( event.target );
+
+		this.$el.addClass( 'aiovg-spinner' );
+
+		const numpages = parseInt( $this.data( 'numpages' ) );			
+		
+		let paged = parseInt( $this.data( 'paged' ) );
+		this._params.paged = ++paged;		
+
+		this._fetch( this._params, ( response ) => {
+			this.$el.removeClass( 'aiovg-spinner' );						
+			
+			if ( response.success ) {	
+				const html = jQuery( response.data.html ).find( '.aiovg-grid' ).html();				
+				this.$container.find( '.aiovg-grid' ).append( html );
+				
+				if ( paged < numpages ) {
+					$this.data( 'paged', this._params.paged );	
+				} else {
+					$this.hide();
+				}
+				
+				this.$el.trigger( 'AIOVG.onGalleryUpdated' );
+			}
+		});
+	}
+
+	_fetch( data, callback ) {
+        jQuery.post( this._ajaxUrl, data, callback ); 						
+    }
+
+}
+
+// jQuery
+(function( $ ) {
 
 	/**
 	 * Called when the page has loaded.
 	 */
-	$(function() {		
+	$(function() {
 
-		// Pagination
-		$( document ).on( 'click', '.aiovg-pagination-ajax a.page-numbers', function( event ) {
-			event.preventDefault();
+		// Register custom element
+		customElements.define( 'aiovg-pagination', AIOVGPaginationElement );
 
-			var $this = $( this );	
-			var $pagination = $this.closest( '.aiovg-pagination-ajax' );			
-			var current = parseInt( $pagination.data( 'current' ) );			
-			
-			var params = $pagination.data( 'params' );
-			params.action = 'aiovg_load_more_' + params.source;
-			params.security = aiovg.ajax_nonce;
-			
-			var paged = parseInt( $this.html() );
-			params.paged = paged++;
-
-			if ( $this.hasClass( 'prev' ) ) {
-				params.paged = current - 1;
-			}
-			
-			if ( $this.hasClass( 'next' ) ) {
-				params.paged = current + 1;
-			}
-
-			var $gallery = $( '#aiovg-' + params.uid );	
-
-			$pagination.addClass( 'aiovg-spinner' );
-
-			$.post( aiovg.ajax_url, params, function( response ) {
-				if ( response.success ) {
-					var html = $( response.data.html ).html();
-					$gallery.html( html );
-					
-					$pagination.trigger( 'AIOVG.onGalleryUpdated' );
-
-					$( 'html, body' ).animate({
-						scrollTop: $gallery.offset().top - parseInt( aiovg.scroll_to_top_offset )
-					}, 500);
-				} else {
-					$pagination.removeClass( 'aiovg-spinner' );
-				}
-			});
-		});
-
-		// Load More.
-		$( document ).on( 'click', '.aiovg-more-ajax button', function( event ) {
-			event.preventDefault();
-
-			var $this = $( this );
-			var $pagination = $this.closest( '.aiovg-more-ajax' );			
-			var numpages = parseInt( $this.data( 'numpages' ) );			
-			
-			var params = $pagination.data( 'params' );
-			params.action = 'aiovg_load_more_' + params.source;
-			params.security = aiovg.ajax_nonce;	
-			
-			var paged = parseInt( $this.data( 'paged' ) );
-			params.paged = ++paged;
-			
-			$pagination.addClass( 'aiovg-spinner' );
-
-			$.post( aiovg.ajax_url, params, function( response ) {
-				$pagination.removeClass( 'aiovg-spinner' );
-
-				if ( paged < numpages ) {
-					$this.data( 'paged', params.paged );	
-				} else {
-					$this.hide();
-				}			
-				
-				if ( response.success ) {	
-					var html = $( response.data.html ).find( '.aiovg-grid' ).html();				
-					$( '#aiovg-' + params.uid + ' .aiovg-grid' ).append( html );
-					
-					$pagination.trigger( 'AIOVG.onGalleryUpdated' );
-				}
-			});
-		});
-		
 	});
 
 })( jQuery );

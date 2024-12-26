@@ -51,8 +51,7 @@ class AIOVG_Public {
 	public function init() {
 		global $aiovg;
 
-		$page_settings = get_option( 'aiovg_page_settings' );
-		$privacy_settings = get_option( 'aiovg_privacy_settings' );
+		$page_settings = get_option( 'aiovg_page_settings' );		
 
 		$url = home_url();
 		
@@ -107,27 +106,6 @@ class AIOVG_Public {
 		add_rewrite_tag( '%aiovg_user%', '([^/]+)' );
 		add_rewrite_tag( '%aiovg_type%', '([^/]+)' );
 		add_rewrite_tag( '%aiovg_video%', '([^/]+)' );
-		
-		// Set MySQL's RAND function seed value in a cookie
-		if ( isset( $privacy_settings['disable_cookies'] ) && isset( $privacy_settings['disable_cookies']['aiovg_rand_seed'] ) ) {
-			unset( $aiovg['rand_seed'] );
-			return; // Disable the random ordering
-		}
-		
-		if ( isset( $_COOKIE['aiovg_rand_seed'] ) ) {
-			$aiovg['rand_seed'] = sanitize_text_field( $_COOKIE['aiovg_rand_seed'] );
-			$transient_seed = get_transient( 'aiovg_rand_seed_' . $aiovg['rand_seed'] );
-
-			if ( ! empty( $transient_seed ) ) {
-				delete_transient( 'aiovg_rand_seed_' . $aiovg['rand_seed'] );
-
-				$aiovg['rand_seed'] = sanitize_text_field( $transient_seed );
-				@setcookie( 'aiovg_rand_seed', $aiovg['rand_seed'], time() + ( 86400 * 1 ), COOKIEPATH, COOKIE_DOMAIN );				
-			}
-		} else {
-			$aiovg['rand_seed'] = wp_rand();
-			@setcookie( 'aiovg_rand_seed', $aiovg['rand_seed'], time() + ( 86400 * 1 ), COOKIEPATH, COOKIE_DOMAIN );
-		}
 	}
 	
 	/**
@@ -313,6 +291,33 @@ class AIOVG_Public {
 			) 
 		);		
 	}	
+
+	/**
+	 * Set MySQL's RAND function seed value in a cookie.
+	 *
+	 * @since 3.9.3
+	 */
+	public function set_mysql_rand_seed_value() {
+		$privacy_settings = get_option( 'aiovg_privacy_settings' );
+		
+		if ( isset( $privacy_settings['disable_cookies'] ) && isset( $privacy_settings['disable_cookies']['aiovg_rand_seed'] ) ) {
+			unset( $_COOKIE['aiovg_rand_seed'] );
+			return false;
+		}
+		
+		if ( headers_sent() ) {
+			return false;
+		}
+		
+		$paged = aiovg_get_page_number();
+		if ( ! isset( $_COOKIE['aiovg_rand_seed'] ) || $paged == 1 ) {
+			$seed = wp_rand();
+			setcookie( 'aiovg_rand_seed', $seed, time() + ( 86400 * 1 ), COOKIEPATH, COOKIE_DOMAIN );
+
+			// Update $_COOKIE for immediate use in this request
+			$_COOKIE['aiovg_rand_seed'] = $seed;
+		}
+	}
 
 	/**
 	 * Enqueue Gutenberg block assets for backend editor.

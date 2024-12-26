@@ -90,6 +90,7 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 			'hotkeys'        => (int) $player_settings['hotkeys'],
 			'player'         => array(
 				'controlBar'                => array(),
+				'liveui'                    => true,
 				'textTrackSettings'         => false,
 				'playbackRates'             => array( 0.5, 0.75, 1, 1.5, 2 ),
 				'techCanOverridePoster'     => true,
@@ -165,10 +166,11 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 		$sources = apply_filters( 'aiovg_player_sources', $sources, $params ); // Backward compatibility to 3.3.0
 		$sources = apply_filters( 'aiovg_videojs_player_sources', $sources, $params );
 
-		// Video Tracks		
+		// Video Tracks  
+		$has_tracks	= ! empty( $player_settings['tracks'] ) || ! empty( $settings['cc_load_policy'] );
 		$tracks = array();
 
-		if ( ! empty( $player_settings['tracks'] ) ) {
+		if ( $has_tracks ) {
 			$tracks = $this->get_tracks();
 
 			$has_srt_found = 0;
@@ -266,6 +268,14 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 			}
 		}
 		
+		if ( isset( $sources['hls'] ) || isset( $sources['dash'] ) ) {
+			if ( isset( $controls['progress'] ) ) {
+				$controls = aiovg_insert_array_after( 'progress', $controls, array( 
+					'liveui' => 'SeekToLive'
+				));
+			}
+		}
+
 		if ( isset( $controls['current'] ) && isset( $controls['duration'] ) ) {
 			if ( 'custom' == $player_settings['theme'] || ! isset( $controls['progress'] ) ) {
 				$controls = aiovg_insert_array_after( 'current', $controls, array( 
@@ -529,7 +539,7 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 				esc_url( $track['src'] ), 				
 				esc_attr( $track['label'] ),
 				esc_attr( $track['srclang'] ), 
-				( 0 == $index && 1 == (int) $settings['cc_load_policy'] ? 'default' : '' ) 
+				( 0 == $index && 1 == $settings['cc_load_policy'] ? 'default' : '' ) 
 			);
 		}
 
@@ -582,7 +592,7 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 		);
 
 		$html .= sprintf( 
-			'<div class="aiovg-player aiovg-player-videojs aiovg-player-standard vjs-waiting" style="padding-bottom: %s%%;" data-id="%s" data-params=\'%s\'>',
+			'<aiovg-video class="aiovg-player aiovg-player-videojs aiovg-player-standard vjs-waiting" style="padding-bottom: %s%%;" data-id="%s" data-params=\'%s\'>',
 			(float) $player_settings['ratio'],
 			esc_attr( $attributes['id'] ),
 			wp_json_encode( $settings )
@@ -590,7 +600,7 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 
 		$html .= $player_html;
 
-		$html .= '</div>';
+		$html .= '</aiovg-video>';
 		$html .= '</div>';
 
 		return $html;

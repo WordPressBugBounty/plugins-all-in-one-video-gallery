@@ -1,12 +1,7 @@
 /**
- * Import block dependencies
+ * WordPress dependencies
  */
 import ServerSideRender from '@wordpress/server-side-render';
-
-import { 	
-	InspectorControls,
-	useBlockProps
-} from '@wordpress/block-editor';
 
 import {
 	Disabled,
@@ -16,7 +11,15 @@ import {
 	ToggleControl
 } from '@wordpress/components';
 
-export default function Edit( { attributes, setAttributes } ) {
+import { InspectorControls,	useBlockProps } from '@wordpress/block-editor';
+
+/**
+ * Describes the structure of the block in the context of the editor.
+ * This represents what the editor will render when the block is used.
+ *
+ * @return {WPElement} Element to render.
+ */
+function Edit( { attributes, setAttributes } ) {
 	
 	const { 
 		template, 
@@ -31,7 +34,7 @@ export default function Edit( { attributes, setAttributes } ) {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ aiovg_blocks.i18n.general_settings }>
+				<PanelBody title={ aiovg_blocks.i18n.general_settings } className="aiovg-block-panel">
 					<PanelRow>
 						<SelectControl
 							label={ aiovg_blocks.i18n.select_template }
@@ -41,6 +44,8 @@ export default function Edit( { attributes, setAttributes } ) {
 								{ label: aiovg_blocks.i18n.horizontal, value: 'horizontal' }
 							] }
 							onChange={ ( value ) => setAttributes( { template: value } ) }
+							__nextHasNoMarginBottom
+            				__next40pxDefaultSize
 						/>
 					</PanelRow>
 
@@ -49,6 +54,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.search_by_keywords }
 							checked={ keyword }
 							onChange={ () => setAttributes( { keyword: ! keyword } ) }
+							__nextHasNoMarginBottom
 						/>
 					</PanelRow>
 
@@ -57,6 +63,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.search_by_categories }
 							checked={ category }
 							onChange={ () => setAttributes( { category: ! category } ) }
+							__nextHasNoMarginBottom
 						/>
 					</PanelRow>
 
@@ -65,6 +72,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.search_by_tags }
 							checked={ tag }
 							onChange={ () => setAttributes( { tag: ! tag } ) }
+							__nextHasNoMarginBottom
 						/>
 					</PanelRow>
 
@@ -73,6 +81,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.sort_by_dropdown }
 							checked={ sort }
 							onChange={ () => setAttributes( { sort: ! sort } ) }
+							__nextHasNoMarginBottom
 						/>
 					</PanelRow>
 
@@ -81,6 +90,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.search_button }
 							checked={ search_button }
 							onChange={ () => setAttributes( { search_button: ! search_button } ) }
+							__nextHasNoMarginBottom
 						/>
 					</PanelRow>
 
@@ -93,6 +103,8 @@ export default function Edit( { attributes, setAttributes } ) {
 								{ label: aiovg_blocks.i18n.current_page, value: 'current' }
 							] }
 							onChange={ ( value ) => setAttributes( { target: value } ) }
+							__nextHasNoMarginBottom
+            				__next40pxDefaultSize
 						/>
 					</PanelRow>
 				</PanelBody>
@@ -109,3 +121,6 @@ export default function Edit( { attributes, setAttributes } ) {
 		</>
 	);
 }
+
+
+export default Edit;

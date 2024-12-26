@@ -6,7 +6,7 @@ Tags: video player, video gallery, youtube gallery, vimeo gallery, live stream
 Requires at least: 6.3
 Tested up to: 6.7
 Requires PHP: 5.6.20
-Stable tag: 3.9.1
+Stable tag: 3.9.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -145,6 +145,18 @@ Also, the videos from third-party services like "YouTube", "Vimeo", "Dailymotion
 7. Plugin Settings.
 
 == Changelog ==
+
+= 3.9.4 =
+
+* Enhancement: Improved live user interface for the Video.js Player Library, offering a more intuitive and seamless user experience.
+* Enhancement: Added custom HTML elements in front-end layouts to improve performance and ensure future scalability.
+* Update: Upgraded the "Freemius SDK" to version 2.10.1 for enhanced functionality and stability.
+* Fix: Resolved compatibility issues with the Elementor page builder.
+* Fix: Addressed several minor bugs for a smoother user experience.
+
+= 3.9.2 =
+
+* Fix: Resolved an issue where the popup would close when clicking the Next/Previous buttons in the gallery.
 
 = 3.9.1 =
 
@@ -466,6 +478,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 3.9.1 =
+= 3.9.4 =
 
 Introduces several new features, bug fixes & enhancements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

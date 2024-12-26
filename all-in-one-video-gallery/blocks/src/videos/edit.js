@@ -1,13 +1,7 @@
 /**
- * Import block dependencies
+ * WordPress dependencies
  */
 import ServerSideRender from '@wordpress/server-side-render';
-
-import {	 
-	InspectorControls,
-	PanelColorSettings,
-	useBlockProps
-} from '@wordpress/block-editor';
 
 import {
 	Disabled,
@@ -20,19 +14,18 @@ import {
 	ToggleControl
 } from '@wordpress/components';
 
-import { 
-	useEffect,
-	useRef
-} from '@wordpress/element';
+import { InspectorControls,	PanelColorSettings,	useBlockProps } from '@wordpress/block-editor';
+
+import { useEffect,	useRef } from '@wordpress/element';
 
 import { applyFilters } from '@wordpress/hooks';
 
 import { useSelect } from '@wordpress/data';
 
-import { 
-	BuildTree,
-	GroupByParent
- } from '../helper.js';
+/**
+ * Internal dependencies
+ */
+import { BuildTree,	GroupByParent } from '../utils';
 
 /**
  * Describes the structure of the block in the context of the editor.
@@ -40,7 +33,7 @@ import {
  *
  * @return {WPElement} Element to render.
  */
-export default function Edit( { attributes, setAttributes } ) {	
+function Edit( { attributes, setAttributes } ) {	
 
 	const videos = aiovg_blocks.videos;	
 
@@ -69,7 +62,7 @@ export default function Edit( { attributes, setAttributes } ) {
 		let options = [];
 
 		if ( terms ) {
-			for ( var i = 0; i < terms.length; i += 1 ) {
+			for ( let i = 0; i < terms.length; i += 1 ) {
 				options.push({
 					label: terms[ i ].name,
 					value: terms[ i ].id,
@@ -102,6 +95,8 @@ export default function Edit( { attributes, setAttributes } ) {
 						options={ categoriesList }
 						value={ attributes[ field.name ] }
 						onChange={ onChange( field.name ) }
+						__nextHasNoMarginBottom
+            			__next40pxDefaultSize
 					/>
 				</PanelRow>
 			case 'tags':
@@ -113,6 +108,8 @@ export default function Edit( { attributes, setAttributes } ) {
 						options={ tagsList }
 						value={ attributes[ field.name ] }
 						onChange={ onChange( field.name ) }
+						__nextHasNoMarginBottom
+            			__next40pxDefaultSize
 					/>
 				</PanelRow>		
 			case 'number':
@@ -125,6 +122,8 @@ export default function Edit( { attributes, setAttributes } ) {
 						min={ field.min }
 						max={ field.max }
 						onChange={ onChange( field.name ) }
+						__nextHasNoMarginBottom
+            			__next40pxDefaultSize
 					/>
 				</PanelRow>
 			case 'textarea':
@@ -135,6 +134,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						placeholder={ placeholder }
 						value={ attributes[ field.name ] }
 						onChange={ onChange( field.name ) }
+						__nextHasNoMarginBottom
 					/>
 				</PanelRow>
 			case 'select':
@@ -155,6 +155,8 @@ export default function Edit( { attributes, setAttributes } ) {
 						options={ options }
 						value={ attributes[ field.name ] }
 						onChange={ onChange( field.name ) }
+						__nextHasNoMarginBottom
+            			__next40pxDefaultSize
 					/>
 				</PanelRow>
 			case 'checkbox':
@@ -164,6 +166,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						help={ description }
 						checked={ attributes[ field.name ] }
 						onChange={ toggleAttribute( field.name ) }
+						__nextHasNoMarginBottom
 					/>
 				</PanelRow>
 			case 'color':
@@ -188,6 +191,8 @@ export default function Edit( { attributes, setAttributes } ) {
 						placeholder={ placeholder }
 						value={ attributes[ field.name ] }
 						onChange={ onChange( field.name ) }
+						__nextHasNoMarginBottom
+            			__next40pxDefaultSize
 					/>
 				</PanelRow>
 		}		
@@ -198,7 +203,7 @@ export default function Edit( { attributes, setAttributes } ) {
 	}
 
 	const canShowControl = ( control ) => {
-		var value = true;
+		let value = true;
 		if ( 'show_more' == control || 'more_label' == control || 'more_link' == control ) {
 			value = false;
 		}
@@ -260,3 +265,5 @@ export default function Edit( { attributes, setAttributes } ) {
 		</>
 	);
 }
+
+export default Edit;

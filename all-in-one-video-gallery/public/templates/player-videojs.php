@@ -20,6 +20,7 @@ $settings = array(
 	),
 	'player' => array(
 		'controlBar'                => array(),
+		'liveui'                    => true,
 		'textTrackSettings'         => false,
 		'playbackRates'             => array( 0.5, 0.75, 1, 1.5, 2 ),
 		'techCanOverridePoster'     => true,
@@ -147,8 +148,13 @@ $sources = apply_filters( 'aiovg_video_sources', $sources ); // Backward compati
 $sources = apply_filters( 'aiovg_iframe_videojs_player_sources', $sources );
 
 // Video Tracks
+if ( 1 == $settings['cc_load_policy'] ) {
+	$has_tracks = 1;
+} else {
+	$has_tracks = isset( $_GET['tracks'] ) ? (int) $_GET['tracks'] : isset( $player_settings['controls']['tracks'] );
+}
+
 $tracks = array();
-$has_tracks = isset( $_GET['tracks'] ) ? (int) $_GET['tracks'] : isset( $player_settings['controls']['tracks'] );
 
 if ( $has_tracks && ! empty( $post_meta['track'] ) ) {
 	foreach ( $post_meta['track'] as $track ) {
@@ -274,6 +280,14 @@ foreach ( $controls as $index => $control ) {
 	if ( ! $enabled ) {	
 		unset( $controls[ $index ] );	
 	}	
+}
+
+if ( isset( $sources['hls'] ) || isset( $sources['dash'] ) ) {
+	if ( isset( $controls['progress'] ) ) {
+		$controls = aiovg_insert_array_after( 'progress', $controls, array( 
+			'liveui' => 'SeekToLive'
+		));
+	}
 }
 
 if ( isset( $controls['current'] ) && isset( $controls['duration'] ) ) {
@@ -1077,7 +1091,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		}
 
 		.aiovg-player .video-js.vjs-theme-custom.vjs-no-progress-control .vjs-text-track-display,
-		.aiovg-player .video-js.vjs-theme-custom.vjs-live .vjs-text-track-display {
+		.aiovg-player .video-js.vjs-theme-custom.vjs-live:not(.vjs-liveui) .vjs-text-track-display {
 			bottom: 3.6em;
 		}
 
@@ -1087,9 +1101,9 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		}
 
 		.aiovg-player .video-js.vjs-theme-custom.vjs-no-progress-control .vjs-overlay-bottom-right,
-		.aiovg-player .video-js.vjs-theme-custom.vjs-live .vjs-overlay-bottom-right,
+		.aiovg-player .video-js.vjs-theme-custom.vjs-live:not(.vjs-liveui) .vjs-overlay-bottom-right,
 		.aiovg-player .video-js.vjs-theme-custom.vjs-no-progress-control .vjs-overlay-bottom-left,
-		.aiovg-player .video-js.vjs-theme-custom.vjs-live .vjs-overlay-bottom-left {
+		.aiovg-player .video-js.vjs-theme-custom.vjs-live:not(.vjs-liveui) .vjs-overlay-bottom-left {
 			bottom: 3.6em;
 		}
 
@@ -1100,7 +1114,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		}
 
 		.aiovg-player .video-js.vjs-theme-custom.vjs-no-progress-control .vjs-control-bar,
-		.aiovg-player .video-js.vjs-theme-custom.vjs-live .vjs-control-bar {
+		.aiovg-player .video-js.vjs-theme-custom.vjs-live:not(.vjs-liveui) .vjs-control-bar {
 			background-color: rgba( 43, 51, 63, 0.7 );
 			background-image: none;
 		}
@@ -1115,7 +1129,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		}
 
 		.aiovg-player .video-js.vjs-theme-custom.vjs-no-progress-control .vjs-menu-button-popup .vjs-menu ul,
-		.aiovg-player .video-js.vjs-theme-custom.vjs-live .vjs-menu-button-popup .vjs-menu ul {
+		.aiovg-player .video-js.vjs-theme-custom.vjs-live:not(.vjs-liveui) .vjs-menu-button-popup .vjs-menu ul {
 			padding-bottom: 0;
 		}
 
@@ -1135,7 +1149,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		}
 
 		.aiovg-player .video-js.vjs-theme-custom.vjs-no-progress-control .vjs-volume-tooltip,
-		.aiovg-player .video-js.vjs-theme-custom.vjs-live .vjs-volume-tooltip {
+		.aiovg-player .video-js.vjs-theme-custom.vjs-live:not(.vjs-liveui) .vjs-volume-tooltip {
 			top: -3.4em;
 		}
 

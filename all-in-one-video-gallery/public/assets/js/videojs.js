@@ -1,375 +1,455 @@
-(function( $ ) {
-	'use strict';	
+'use strict';
+
+class AIOVGVideoElement extends HTMLElement {
 
 	/**
-	 * Init player.
-	 */
-	function initPlayer( $el ) {
-		// Vars		
-		var playerId = $el.data( 'id' );		
-		var settings = $el.data( 'params' );			
+     * Element created.
+     */
+    constructor() {
+        super();
 
-		// Player
-		var loadPlayer = function() {
-			settings.player.html5 = {
-				vhs: {
-					overrideNative: ! videojs.browser.IS_ANY_SAFARI,
-				}
-			};
+		// Set references to the DOM elements used by the component
+		this.player = null;
+		this.playButtonEl = null;		
 
-			var player = videojs( playerId, settings.player );				
+		// Set references to the public properties used by the component
+		this.settings = {};
 
-			var overlays = [];
-			var hasVideoStarted = false;
-			
-			// Trigger ready event.
-			var options = {					
-				id: playerId, // Backward compatibility to 3.3.0
-				player_id: playerId,
-				config: settings, // Backward compatibility to 3.3.0
-				settings: settings,
-				player: player					
-			};
+		// Set references to the private properties used by the component
+		this._playerId = '';		
+		this._hasVideoStarted = false;
+		this._ajaxUrl = aiovg_player.ajax_url;
+		this._ajaxNonce = aiovg_player.ajax_nonce;
+	}
 
-			$el.trigger( 'player.init', options );
+	/**
+     * Browser calls this method when the element is added to the document.
+     * (can be called many times if an element is repeatedly added/removed)
+     */
+    connectedCallback() {
+		this._playerId = this.dataset.id || '';	
 
-			// Fired when the player is ready.
-			player.ready(function() {
-				$el.removeClass( 'vjs-waiting' );
-				
-				$el.find( '.vjs-big-play-button' ).one( 'click', function() {
-					if ( ! hasVideoStarted ) {
-						$el.addClass( 'vjs-waiting' );
-					}
-				});				
-			});
+		this.settings = this.dataset.params ? JSON.parse( this.dataset.params ) : {};	
+		
+		if ( ! this.settings.hasOwnProperty( 'player' ) ) {
+			this.settings.player = {};
+		}
 
-			// On metadata loaded.
-			player.one( 'loadedmetadata', function() {
-				// Standard quality selector.
-				$el.find( '.vjs-quality-selector .vjs-menu-item' ).each(function() {
-					var $this = $( this );
-
-					var text = $this.find( '.vjs-menu-item-text' ).html();
-					var resolution = text.replace( /\D/g, '' );
-
-					if ( resolution >= 2160 ) {
-						$this.append( '<span class="vjs-quality-menu-item-sub-label">4K</span>' );
-					} else if ( resolution >= 720 ) {
-						$this.append( '<span class="vjs-quality-menu-item-sub-label">HD</span>' );
-					}
-				});
-
-				// Add support for SRT.
-				if ( settings.hasOwnProperty( 'tracks' ) ) {
-					for ( var i = 0, max = settings.tracks.length; i < max; i++ ) {
-						var track = settings.tracks[ i ];
-
-						var mode = '';
-						if ( i == 0 && settings.cc_load_policy == 1 ) {
-							mode = 'showing';
-						}
-
-						if ( /srt/.test( track.src.toLowerCase() ) ) {
-							addSrtTextTrack( player, track, mode );
-						} else {
-							var obj = {
-								kind: 'captions',
-								src: track.src,									
-								label: track.label,
-								srclang: track.srclang
-							};
-
-							if ( mode ) {
-								obj.mode = mode;
-							}
-
-							player.addRemoteTextTrack( obj, true ); 
-						}					               
-					}
-				}
-				
-				// Chapters
-				if ( settings.hasOwnProperty( 'chapters' ) ) {
-					addMarkers( player, settings.chapters );
-				}
-			});
-
-			// Chapters
-			if ( settings.hasOwnProperty( 'chapters' ) ) {
-				try {
-					player.getDescendant([
-						'ControlBar',
-						'ProgressControl',
-						'SeekBar',
-						'MouseTimeDisplay',
-						'TimeTooltip',
-					]).update = function( seekBarRect, seekBarPoint, time ) {
-						var markers = settings.chapters;
-						var markerIndex = markers.findIndex(({ time: markerTime }) => markerTime == formatedTimeToSeconds( time ));
-				
-						if ( markerIndex > -1 ) {
-							var label = markers[ markerIndex ].label;
-					
-							videojs.dom.emptyEl( this.el() );
-							videojs.dom.appendContent( this.el(), [labelEl( label ), timeEl( time )] );
-					
-							return false;
-						}
-				
-						this.write( time );
-					};
-				} catch ( error ) {
-					/** console.log( error ); */
-				}
+		this.settings.player.html5 = {
+			vhs: {
+				overrideNative: ! videojs.browser.IS_ANY_SAFARI,
 			}
+		};		
 
-			// Fired the first time a video is played.
-			player.one( 'play', function( e ) {
-				hasVideoStarted = true;
-				$el.removeClass( 'vjs-waiting' );
-
-				updateViewsCount( settings, player );
-
-				$( '.aiovg-player-standard' ).trigger( 'playRequested', { playerId: playerId } );
-			});
-
-			$el.on( 'playRequested', function( event, args ) {
-				if ( playerId != args.playerId ) {
-					player.pause();
-				}
-			});
-
-			player.on( 'playing', function() {
-				player.trigger( 'controlsshown' );
-			});
-
-			player.on( 'ended', function() {
-				player.trigger( 'controlshidden' );
-			});
-
-			// Standard quality selector.
-			player.on( 'qualitySelected', function( event, source ) {
-				var resolution = source.label.replace( /\D/g, '' );
-
-				player.removeClass( 'vjs-4k' );
-				player.removeClass( 'vjs-hd' );
-
-				if ( resolution >= 2160 ) {
-					player.addClass( 'vjs-4k' );
-				} else if ( resolution >= 720 ) {
-					player.addClass( 'vjs-hd' );
-				}
-			});
-
-			// HLS quality selector.
-			var src = player.src();
-
-			if ( /.m3u8/.test( src ) || /.mpd/.test( src ) ) {
-				if ( settings.player.controlBar.children.indexOf( 'qualitySelector' ) !== -1 ) {
-					player.qualityMenu();
-				}
+		if ( this.settings.cookie_consent ) {
+			const privacyConsentButtonEl = this.querySelector( '.aiovg-privacy-consent-button' );
+			if ( privacyConsentButtonEl !== null ) {
+				privacyConsentButtonEl.addEventListener( 'click', () => this._onCookieConsent() );
 			}
+		} else {
+			this._initPlayer();
+		}		
+	}
 
-			// Offset
-			var offset = {};
+	/**
+     * Browser calls this method when the element is removed from the document.
+     * (can be called many times if an element is repeatedly added/removed)
+     */
+	disconnectedCallback() {
+		// TODO
+	}
 
-			if ( settings.hasOwnProperty( 'start' ) ) {
-				offset.start = settings.start;
-			}
+	/**
+     * Define private methods.
+     */
 
-			if ( settings.hasOwnProperty( 'end' ) ) {
-				offset.end = settings.end;
-			}
-			
-			if ( Object.keys( offset ).length > 1 ) {
-				offset.restart_beginning = false;
-				player.offset( offset );
-			}				
+	_onCookieConsent() {
+		this.settings.player.autoplay = true;
 
-			// Share / Embed.
-			if ( settings.hasOwnProperty( 'share' ) || settings.hasOwnProperty( 'embed' ) ) {
-				overlays.push({
-					content: '<button type="button" class="vjs-share-embed-button" title="Share"><span class="vjs-icon-share" aria-hidden="true"></span><span class="vjs-control-text" aria-live="polite">Share</span></button>',
-					class: 'vjs-share',
-					align: 'top-right',
-					start: 'controlsshown',
-					end: 'controlshidden',
-					showBackground: false					
-				});					
-			}
+		const videos = document.querySelectorAll( 'aiovg-video' );
+        for ( let i = 0; i < videos.length; i++ ) {
+            videos[ i ].removeCookieConsent();
+        }
 
-			// Download
-			if ( settings.hasOwnProperty( 'download' ) ) {
-				var className = 'vjs-download';
+		const embeds = document.querySelectorAll( '.aiovg-player-element[cookieconsent]' );
+        for ( let i = 0; i < embeds.length; i++ ) {
+            embeds[ i ].removeAttribute( 'cookieconsent' );
+        }
 
-				if ( settings.hasOwnProperty( 'share' ) || settings.hasOwnProperty( 'embed' ) ) {
-					className += ' vjs-has-share';
-				}
+		this._setCookie();
+	}
 
-				overlays.push({
-					content: '<a href="' + settings.download.url + '" class="vjs-download-button" title="Download" target="_blank"><span class="vjs-icon-file-download" aria-hidden="true"></span><span class="vjs-control-text" aria-live="polite">Download</span></a>',
-					class: className,
-					align: 'top-right',
-					start: 'controlsshown',
-					end: 'controlshidden',
-					showBackground: false					
-				});
-			}
+	_initPlayer() {
+		this.player = videojs( this.querySelector( 'video-js' ), this.settings.player );				
 
-			// Logo
-			if ( settings.hasOwnProperty( 'logo' ) ) {
-				if ( settings.logo.margin ) {
-					settings.logo.margin = settings.logo.margin - 5;
-				}
-				
-				var style = 'margin: ' + settings.logo.margin + 'px;';
-				var align = 'bottom-left';
+		this.player.ready( () => this._onReady() );
+		this.player.one( 'loadedmetadata', () => this._onMetadataLoaded() );
+		this.player.on( 'play', () => this._onPlay() );
+		this.player.on( 'playing', () => this._onPlaying() );
+		this.player.on( 'ended', () => this._onEnded() );
 
-				switch ( settings.logo.position ) {
-					case 'topleft':						
-						align = 'top-left';
-						break;
+		this._initOffset();
+		this._initChapters();
+		this._initQualitySelector();			
+		this._initOverlays();	
+		this._initHotKeys();
+		this._initContextMenu();	
 
-					case 'topright':						
-						align = 'top-right';
-						break;
-
-					case 'bottomright':
-						align = 'bottom-right';
-						break;				
-				}
-
-				var logo = '<a href="' + settings.logo.link + '" style="' + style + '"><img src="' + settings.logo.image + '" alt="" /><span class="vjs-control-text" aria-live="polite">Logo</span></a>';
-
-				overlays.push({
-					content: logo,
-					class: 'vjs-logo',
-					align: align,
-					start: 'controlsshown',
-					end: 'controlshidden',
-					showBackground: false					
-				});
-			}
-
-			// Overlay
-			if ( overlays.length > 0 ) {
-				player.overlay({
-					content: '',
-					overlays: overlays
-				});
-
-				if ( settings.hasOwnProperty( 'share' ) || settings.hasOwnProperty( 'embed' ) ) {
-					var options = {};
-					options.content = $el.find( '.vjs-share-embed' ).get(0);
-					options.temporary = false;
-
-					var ModalDialog = videojs.getComponent( 'ModalDialog' );
-					var modal = new ModalDialog( player, options );
-					modal.addClass( 'vjs-modal-dialog-share-embed' );
-
-					player.addChild( modal );
-
-					var wasPlaying = true;
-					$el.find( '.vjs-share-embed-button' ).on( 'click', function() {
-						wasPlaying = ! player.paused;
-						modal.open();						
-					});
-
-					modal.on( 'modalclose', function() {
-						if ( wasPlaying ) {
-							player.play();
-						}						
-					});
-				}
-
-				if ( settings.hasOwnProperty( 'embed' ) ) {
-					$el.find( '.vjs-input-embed-code' ).on( 'focus', function() {
-						$( this ).select();	
-						document.execCommand( 'copy' );					
-					});
-				}
-			}
-
-			// Keyboard hotkeys.
-			if ( settings.hotkeys ) {
-				player.hotkeys();
-			}
-
-			// Custom contextmenu.
-			if ( settings.hasOwnProperty( 'contextmenu' ) ) {
-				if ( ! $( '#aiovg-contextmenu' ).length ) {
-					$( 'body' ).append( '<div id="aiovg-contextmenu" style="display: none;"><div class="aiovg-contextmenu-content">' + settings.contextmenu.content + '</div></div>' );
-				}
-	
-				var contextmenu = document.getElementById( 'aiovg-contextmenu' );
-				var timeoutHandler = '';
-				
-				$( '#' + playerId ).on( 'contextmenu', function( e ) {						
-					if ( e.keyCode == 3 || e.which == 3 ) {
-						e.preventDefault();
-						e.stopPropagation();
-						
-						var width = contextmenu.offsetWidth,
-							height = contextmenu.offsetHeight,
-							x = e.pageX,
-							y = e.pageY,
-							doc = document.documentElement,
-							scrollLeft = ( window.pageXOffset || doc.scrollLeft ) - ( doc.clientLeft || 0 ),
-							scrollTop = ( window.pageYOffset || doc.scrollTop ) - ( doc.clientTop || 0 ),
-							left = x + width > window.innerWidth + scrollLeft ? x - width : x,
-							top = y + height > window.innerHeight + scrollTop ? y - height : y;
-				
-						contextmenu.style.display = '';
-						contextmenu.style.left = left + 'px';
-						contextmenu.style.top = top + 'px';
-						
-						clearTimeout( timeoutHandler );
-	
-						timeoutHandler = setTimeout(function() {
-							contextmenu.style.display = 'none';
-						}, 1500);				
-					}														 
-				});
-				
-				document.addEventListener( 'click', function() {
-					contextmenu.style.display = 'none';								 
-				});
-			}
+		// Dispatch a player ready event
+		const options = {					
+			id: this._playerId, // Backward compatibility to 3.3.0
+			player_id: this._playerId,
+			config: this.settings, // Backward compatibility to 3.3.0
+			settings: this.settings,
+			player: this.player					
 		};
 
-		// ...
-		if ( settings.cookie_consent ) {
-			$el.find( '.aiovg-privacy-consent-button' ).on( 'click', function() {
-				$( this ).html( '...' );
+		this._dispatchEvent( 'player.init', options );
+	}
 
-				settings.player.autoplay = true;
+	_onReady() {
+		this.classList.remove( 'vjs-waiting' );
 
-				setCookie();
+		this.playButtonEl = this.querySelector( '.vjs-big-play-button' );	
+		if ( this.playButtonEl !== null ) {
+			this.playButtonEl.addEventListener( 'click', () => this._onPlayClicked() );
+		}
+	}
 
-				loadPlayer();
-				$el.find( '.aiovg-privacy-wrapper' ).remove();
+	_onMetadataLoaded() {
+		// Quality selector
+		const qualitySelectorEl = this.querySelector( '.vjs-quality-selector' );
 
-				$( '.aiovg-player-standard' ).trigger( 'cookieConsent' );
-				$( '.aiovg-player-element' ).removeAttr( 'cookieconsent' );
-			});
+		if ( qualitySelectorEl !== null ) {
+			const items = qualitySelectorEl.querySelectorAll( '.vjs-menu-item' );
 
-			$el.on( 'cookieConsent', function( event, args ) {
-				if ( $el.find( '.aiovg-privacy-wrapper' ).length > 0 ) {
-					loadPlayer();
-					$el.find( '.aiovg-privacy-wrapper' ).remove();
+			for ( let i = 0; i < items.length; i++ ) {
+				let item = items[ i ];
+
+				const textNode   = item.querySelector( '.vjs-menu-item-text' );
+				const resolution = textNode.innerHTML.replace( /\D/g, '' );
+
+				if ( resolution >= 2160 ) {
+					item.innerHTML += '<span class="vjs-quality-menu-item-sub-label">4K</span>';
+				} else if ( resolution >= 720 ) {
+					item.innerHTML += '<span class="vjs-quality-menu-item-sub-label">HD</span>';
 				}
-			});
-		} else {
-			loadPlayer();
-		}		
-	}	 	
+			}
+		}
 
-	/**
-	 * Add SRT Text Track.
-	 */
-	function addSrtTextTrack( player, track, mode ) {
-		var xmlhttp;
+		// Add support for SRT
+		if ( this.settings.hasOwnProperty( 'tracks' ) ) {
+			for ( let i = 0, max = this.settings.tracks.length; i < max; i++ ) {
+				const track = this.settings.tracks[ i ];
+
+				let mode = '';
+				if ( i == 0 && this.settings.cc_load_policy == 1 ) {
+					mode = 'showing';
+				}
+
+				if ( /srt/.test( track.src.toLowerCase() ) ) {
+					this._addSrtTextTrack( track, mode );
+				} else {
+					const obj = {
+						kind: 'captions',
+						src: track.src,									
+						label: track.label,
+						srclang: track.srclang
+					};
+
+					if ( mode ) {
+						obj.mode = mode;
+					}
+
+					this.player.addRemoteTextTrack( obj, true ); 
+				}					               
+			}
+		}
+		
+		// Chapters
+		if ( this.settings.hasOwnProperty( 'chapters' ) ) {
+			this._addMarkers();
+		}
+	}
+
+	_onPlayClicked() {
+		if ( ! this._hasVideoStarted ) {
+			this.classList.add( 'vjs-waiting' );
+		}
+
+		this.playButtonEl.removeEventListener( 'click', () => this._onPlayClicked() );
+	}
+
+	_onPlay() {
+		if ( ! this._hasVideoStarted ) {
+			this._hasVideoStarted = true;
+			this.classList.remove( 'vjs-waiting' );
+
+			this._updateViewsCount();
+		}	
+
+		// Pause other videos
+		const videos = document.querySelectorAll( 'aiovg-video' );
+        for ( let i = 0; i < videos.length; i++ ) {
+			if ( videos[ i ] != this ) {
+            	videos[ i ].pause();
+			}
+        }
+	}
+
+	_onPlaying() {
+		this.player.trigger( 'controlsshown' );
+	}
+
+	_onEnded() {
+		this.player.trigger( 'controlshidden' );
+	}
+
+	_initOffset() {
+		const offset = {};
+
+		if ( this.settings.hasOwnProperty( 'start' ) ) {
+			offset.start = this.settings.start;
+		}
+
+		if ( this.settings.hasOwnProperty( 'end' ) ) {
+			offset.end = this.settings.end;
+		}
+		
+		if ( Object.keys( offset ).length > 1 ) {
+			offset.restart_beginning = false;
+			this.player.offset( offset );
+		}
+	}
+
+	_initChapters() {
+		if ( ! this.settings.hasOwnProperty( 'chapters' ) ) {
+			return false;
+		}
+
+		const root = this;
+
+		try {
+			this.player.getDescendant([
+				'ControlBar',
+				'ProgressControl',
+				'SeekBar',
+				'MouseTimeDisplay',
+				'TimeTooltip',
+			]).update = function( seekBarRect, seekBarPoint, time ) {
+				const markers = root.settings.chapters;
+				const markerIndex = markers.findIndex( ( { time: markerTime } ) => markerTime == root._formatedTimeToSeconds( time ) );
+		
+				if ( markerIndex > -1 ) {
+					const label = markers[ markerIndex ].label;
+			
+					videojs.dom.emptyEl( this.el() );
+					videojs.dom.appendContent( this.el(), [ root._labelEl( label ), root._timeEl( time ) ] );
+			
+					return false;
+				}
+		
+				this.write( time );
+			};
+		} catch ( error ) {
+			// console.log( error );
+		}
+	}
+
+	_initQualitySelector() {
+		// Standard quality selector
+		this.player.on( 'qualitySelected', ( event, source ) => {
+			const resolution = source.label.replace( /\D/g, '' );
+
+			this.player.removeClass( 'vjs-4k' );
+			this.player.removeClass( 'vjs-hd' );
+
+			if ( resolution >= 2160 ) {
+				this.player.addClass( 'vjs-4k' );
+			} else if ( resolution >= 720 ) {
+				this.player.addClass( 'vjs-hd' );
+			}
+		});
+
+		// HLS quality selector
+		const src = this.player.src();
+
+		if ( /.m3u8/.test( src ) || /.mpd/.test( src ) ) {
+			if ( this.settings.player.controlBar.children.indexOf( 'qualitySelector' ) != -1 ) {
+				this.player.qualityMenu();
+			}
+		}
+	}
+
+	_initOverlays() {
+		const overlays = [];
+
+		// Share / Embed
+		if ( this.settings.hasOwnProperty( 'share' ) || this.settings.hasOwnProperty( 'embed' ) ) {
+			overlays.push({
+				content: '<button type="button" class="vjs-share-embed-button" title="Share"><span class="vjs-icon-share" aria-hidden="true"></span><span class="vjs-control-text" aria-live="polite">Share</span></button>',
+				class: 'vjs-share',
+				align: 'top-right',
+				start: 'controlsshown',
+				end: 'controlshidden',
+				showBackground: false					
+			});					
+		}
+
+		// Download
+		if ( this.settings.hasOwnProperty( 'download' ) ) {
+			let className = 'vjs-download';
+
+			if ( this.settings.hasOwnProperty( 'share' ) || this.settings.hasOwnProperty( 'embed' ) ) {
+				className += ' vjs-has-share';
+			}
+
+			overlays.push({
+				content: '<a href="' + this.settings.download.url + '" class="vjs-download-button" title="Download" target="_blank"><span class="vjs-icon-file-download" aria-hidden="true"></span><span class="vjs-control-text" aria-live="polite">Download</span></a>',
+				class: className,
+				align: 'top-right',
+				start: 'controlsshown',
+				end: 'controlshidden',
+				showBackground: false					
+			});
+		}
+
+		// Logo
+		if ( this.settings.hasOwnProperty( 'logo' ) ) {
+			if ( this.settings.logo.margin ) {
+				this.settings.logo.margin = this.settings.logo.margin - 5;
+			}
+			
+			let style = 'margin: ' + this.settings.logo.margin + 'px;';
+			let align = 'bottom-left';
+
+			switch ( this.settings.logo.position ) {
+				case 'topleft':						
+					align = 'top-left';
+					break;
+
+				case 'topright':						
+					align = 'top-right';
+					break;
+
+				case 'bottomright':
+					align = 'bottom-right';
+					break;				
+			}
+
+			const logo = '<a href="' + this.settings.logo.link + '" style="' + style + '">' + 
+				'<img src="' + this.settings.logo.image + '" alt="" />' + 
+				'<span class="vjs-control-text" aria-live="polite">Logo</span>' + 
+			'</a>';
+
+			overlays.push({
+				content: logo,
+				class: 'vjs-logo',
+				align: align,
+				start: 'controlsshown',
+				end: 'controlshidden',
+				showBackground: false					
+			});
+		}
+
+		// Overlay
+		if ( overlays.length > 0 ) {
+			this.player.overlay({
+				content: '',
+				overlays: overlays
+			});
+
+			if ( this.settings.hasOwnProperty( 'share' ) || this.settings.hasOwnProperty( 'embed' ) ) {
+				const options = {};
+				options.content = this.querySelector( '.vjs-share-embed' );
+				options.temporary = false;
+
+				const ModalDialog = videojs.getComponent( 'ModalDialog' );
+				const modal = new ModalDialog( this.player, options );
+				modal.addClass( 'vjs-modal-dialog-share-embed' );
+
+				this.player.addChild( modal );
+
+				let wasPlaying = true;
+
+				this.querySelector( '.vjs-share-embed-button' ).addEventListener( 'click', () => {
+					wasPlaying = ! this.player.paused;
+					modal.open();						
+				});
+
+				modal.on( 'modalclose', () => {
+					if ( wasPlaying ) {
+						this.player.play();
+					}						
+				});
+			}
+
+			if ( this.settings.hasOwnProperty( 'embed' ) ) {
+				this.querySelector( '.vjs-input-embed-code' ).addEventListener( 'focus', function() {
+					this.select();
+					document.execCommand( 'copy' );					
+				});
+			}
+		}
+	}
+
+	_initHotKeys() {
+		if ( this.settings.hotkeys ) {
+			this.player.hotkeys();
+		}
+	}
+
+	_initContextMenu() {
+		if ( ! this.settings.hasOwnProperty( 'contextmenu' ) ) {
+			return false;
+		}
+
+		let contextmenuEl = document.querySelector( '#aiovg-contextmenu' );
+		if ( contextmenuEl === null ) {
+			contextmenuEl = document.createElement( 'div' );
+			contextmenuEl.id = 'aiovg-contextmenu';
+			contextmenuEl.style.display = 'none';
+			contextmenuEl.innerHTML = '<div class="aiovg-contextmenu-content">' + this.settings.contextmenu.content + '</div>';
+			
+			document.body.appendChild( contextmenuEl );	
+
+			document.addEventListener( 'click', () => {
+				contextmenuEl.style.display = 'none';								 
+			});
+		}
+
+		let timeoutHandler = '';			
+		
+		this.addEventListener( 'contextmenu', function( event ) {						
+			if ( event.keyCode == 3 || event.which == 3 ) {
+				event.preventDefault();
+				event.stopPropagation();
+				
+				let width = contextmenuEl.offsetWidth,
+					height = contextmenuEl.offsetHeight,
+					x = event.pageX,
+					y = event.pageY,
+					documentElement = document.documentElement,
+					scrollLeft = ( window.pageXOffset || documentElement.scrollLeft ) - ( documentElement.clientLeft || 0 ),
+					scrollTop = ( window.pageYOffset || documentElement.scrollTop ) - ( documentElement.clientTop || 0 ),
+					left = x + width > window.innerWidth + scrollLeft ? x - width : x,
+					top = y + height > window.innerHeight + scrollTop ? y - height : y;
+		
+				contextmenuEl.style.display = '';
+				contextmenuEl.style.left = left + 'px';
+				contextmenuEl.style.top = top + 'px';
+				
+				clearTimeout( timeoutHandler );
+
+				timeoutHandler = setTimeout( () => {
+					contextmenuEl.style.display = 'none';
+				}, 1500 );				
+			}														 
+		});
+	}
+
+	_addSrtTextTrack( track, mode ) {
+		let xmlhttp;
 
 		if ( window.XMLHttpRequest ) {
 			xmlhttp = new XMLHttpRequest();
@@ -377,15 +457,15 @@
 			xmlhttp = new ActiveXObject( 'Microsoft.XMLHTTP' );
 		}
 		
-		xmlhttp.onreadystatechange = function() {				
+		xmlhttp.onreadystatechange = () => {				
 			if ( xmlhttp.readyState == 4 && xmlhttp.status == 200 && xmlhttp.responseText ) {					
-				var text = srtToWebVTT( xmlhttp.responseText );
+				const text = this._srtToWebVTT( xmlhttp.responseText );
 
 				if ( text ) {
-					var blob = new Blob([ text ], { type : 'text/vtt' });
-					var src = URL.createObjectURL( blob );
+					const blob = new Blob( [ text ], { type : 'text/vtt' } );
+					const src = URL.createObjectURL( blob );
 
-					var obj = {
+					const obj = {
 						kind: 'captions',
 						src: src,							
 						label: track.label,
@@ -396,161 +476,176 @@
 						obj.mode = mode;
 					}
 
-					player.addRemoteTextTrack( obj, true );
+					this.player.addRemoteTextTrack( obj, true );
 				}
 			}					
 		};
 
 		xmlhttp.open( 'GET', track.src, true );
 		xmlhttp.send();							
-	}	
-	
-	/**
-	 * Convert SRT to WebVTT.
-	 */
-	function srtToWebVTT( data ) {
-		// Remove dos newlines.
-		var srt = data.replace( /\r+/g, '' );
+	}
 
-		// Trim white space start and end.
+	_srtToWebVTT( data ) {
+		// Remove dos newlines
+		let srt = data.replace( /\r+/g, '' );
+
+		// Trim white space start and end
 		srt = srt.replace( /^\s+|\s+$/g, '' );
 
-		// Get cues.
-		var cuelist = srt.split( '\n\n' );
-		var result  = '';
+		// Get cues
+		let cuelist = srt.split( '\n\n' );
+		let result  = '';
 
 		if ( cuelist.length > 0 ) {
-		  	result += "WEBVTT\n\n";
+			result += "WEBVTT\n\n";
 
-			for ( var i = 0; i < cuelist.length; i++ ) {
-				result += convertSrtCue( cuelist[ i ] );
+			for ( let i = 0; i < cuelist.length; i++ ) {
+				result += this._convertSrtCue( cuelist[ i ] );
 			}
 		}
 
 		return result;
-  	}
+	}
 
-	function convertSrtCue( caption ) {
-		// Remove all html tags for security reasons.
+	_convertSrtCue( caption ) {
+		// Remove all html tags for security reasons
 		// srt = srt.replace( /<[a-zA-Z\/][^>]*>/g, '' );
 
-		var cue = '';
-		var s = caption.split( /\n/ );
+		let cue = '';
+		let s = caption.split( /\n/ );
 
-		// Concatenate muilt-line string separated in array into one.
+		// Concatenate muilt-line string separated in array into one
 		while ( s.length > 3 ) {
-			for ( var i = 3; i < s.length; i++ ) {
+			for ( let i = 3; i < s.length; i++ ) {
 				s[2] += "\n" + s[ i ];
 			}
 
 			s.splice( 3, s.length - 3 );
 		}
 
-		var line = 0;
+		let line = 0;
 
-		// Detect identifier.
+		// Detect identifier
 		if ( ! s[0].match( /\d+:\d+:\d+/ ) && s[1].match( /\d+:\d+:\d+/ ) ) {
-		  	cue  += s[0].match( /\w+/ ) + "\n";
-		  	line += 1;
+			cue  += s[0].match( /\w+/ ) + "\n";
+			line += 1;
 		}
 
-		// Get time strings.
+		// Get time strings
 		if ( s[ line ].match( /\d+:\d+:\d+/ ) ) {
-			// Convert time string.
-			var m = s[1].match( /(\d+):(\d+):(\d+)(?:,(\d+))?\s*--?>\s*(\d+):(\d+):(\d+)(?:,(\d+))?/ );
+			// Convert time string
+			let m = s[1].match( /(\d+):(\d+):(\d+)(?:,(\d+))?\s*--?>\s*(\d+):(\d+):(\d+)(?:,(\d+))?/ );
 
 			if ( m ) {
 				cue  += m[1] + ":" + m[2] + ":" + m[3] + "." + m[4] + " --> " + m[5] + ":" + m[6] + ":" + m[7] + "." + m[8] + "\n";
 				line += 1;
 			} else {
-				// Unrecognized timestring.
+				// Unrecognized timestring
 				return '';
 			}
 		} else {
-		  	// File format error or comment lines.
-		  	return '';
+			// File format error or comment lines
+			return '';
 		}
 
-		// Get cue text.
+		// Get cue text
 		if ( s[ line ] ) {
-		  	cue += s[ line ] + "\n\n";
+			cue += s[ line ] + "\n\n";
 		}
 
 		return cue;
-  	}
+	}
 
-	/**
-	 * Helper functions for chapters.
-	 */
-	function addMarkers( player, markers ) {
-		var total   = player.duration();
-		var seekBar = player.el_.querySelector( '.vjs-progress-control .vjs-progress-holder' );
+	_addMarkers() {
+		const total = this.player.duration();
+		const seekBarEl = this.player.el_.querySelector( '.vjs-progress-control .vjs-progress-holder' );
 
-		if ( seekBar !== null ) {
-			for ( var i = 0; i < markers.length; i++ ) {
-				var elem = document.createElement( 'div' );
+		if ( seekBarEl !== null ) {
+			for ( let i = 0; i < this.settings.chapters.length; i++ ) {
+				const elem = document.createElement( 'div' );
 				elem.className = 'vjs-marker';
-				elem.style.left = ( markers[ i ].time / total ) * 100 + '%';
+				elem.style.left = ( this.settings.chapters[ i ].time / total ) * 100 + '%';
 
-				seekBar.appendChild( elem );
+				seekBarEl.appendChild( elem );
 			}
 		}
 	}
 
-	function formatedTimeToSeconds( time ) {
-		var timeSplit = time.split( ':' );
-		var seconds   = +timeSplit.pop();
-  
-		return timeSplit.reduce(( acc, curr, i, arr ) => {
+	_formatedTimeToSeconds( time ) {
+		let timeSplit = time.split( ':' );
+		let seconds   = +timeSplit.pop();
+
+		return timeSplit.reduce( ( acc, curr, i, arr ) => {
 			if ( arr.length === 2 && i === 1 ) return acc + +curr * 60 ** 2;
-		  	else return acc + +curr * 60;
-		}, seconds);
+			else return acc + +curr * 60;
+		}, seconds );
 	}
 
-	function timeEl( time ) {
+	_timeEl( time ) {
 		return videojs.dom.createEl( 'span', undefined, undefined, '(' + time + ')' );
 	}
 
-	function labelEl( label ) {
+	_labelEl( label ) {
 		return videojs.dom.createEl( 'strong', undefined, undefined, label );
 	}
 
+	_dispatchEvent( event, data ) {
+        jQuery( this ).trigger( event, data ); 						
+    }
+
+	_fetch( data ) {
+        jQuery.post( this._ajaxUrl, data ); 						
+    }
+
 	/**
-	 * Set GDPR cookie.
-	 */
-	function setCookie() {		
-		var data = {
+     * Define private async methods.
+     */
+
+	async _setCookie() {		
+		const data = {
 			'action': 'aiovg_set_cookie',
-			'security': aiovg_player.ajax_nonce
+			'security': this._ajaxNonce
 		};
 
-		$.post( aiovg_player.ajax_url, data, function( response ) {
-			/** console.log( response ); */
-		});
-	}
+		this._fetch( data );
+	}	
 
-	/**
-	 * Update video views count.
-	 */
-	function updateViewsCount( settings, player ) {
-		if ( 'aiovg_videos' !== settings.post_type ) {
+	async _updateViewsCount() {
+		if ( this.settings.post_type != 'aiovg_videos' ) {
 			return false;
 		}
 
-		var data = {
+		const data = {
 			'action': 'aiovg_update_views_count',
-			'post_id': settings.post_id,
-			'security': aiovg_player.ajax_nonce
+			'post_id': this.settings.post_id,
+			'duration': this.player.duration() || 0,
+			'security': this._ajaxNonce
 		};
 
-		if ( typeof player !== 'undefined' ) {
-			data.duration = player.duration() || 0;
-		}
+		this._fetch( data );
+	}	
 
-		$.post( aiovg_player.ajax_url, data, function( response ) {
-			/** console.log( response ); */
-		});
+	/**
+     * Define API methods.
+     */
+
+	removeCookieConsent() {
+		const privacyWrapperEl = this.querySelector( '.aiovg-privacy-wrapper' );
+		if ( privacyWrapperEl != null ) {
+			privacyWrapperEl.remove();
+			this._initPlayer();		
+		}	
 	}
+
+	pause() {
+		if ( this.player ) {
+			this.player.pause();
+		}
+	}
+
+}
+
+(function( $ ) {	
 
 	/**
 	 * Refresh iframe player elements upon cookie confirmation.
@@ -558,10 +653,10 @@
 	window.onmessage = function( event ) {
 		if ( event.data == 'aiovg-cookie-consent' ) {
 			$( '.aiovg-player-iframe iframe' ).each(function() {
-				var src = $( this ).attr( 'src' );
+				const src = $( this ).attr( 'src' );
 
 				if ( src.indexOf( 'refresh=1' ) == -1 ) {
-                    var separator = src.indexOf( '?' ) > -1 ? '&' : '?';
+                    const separator = src.indexOf( '?' ) > -1 ? '&' : '?';
 					$( this ).attr( 'src', src + separator + 'refresh=1' );
 				}
 			});
@@ -573,28 +668,37 @@
 	 */
 	$(function() {
 		
+		// Register custom element
+		customElements.define( 'aiovg-video', AIOVGVideoElement );
+
 		// Update views count for the non-iframe embeds
 		$( '.aiovg-player-raw' ).each(function() {
-			var settings = $( this ).data( 'params' );
-			updateViewsCount( settings );
+			const settings = $( this ).data( 'params' );
+
+			if ( settings.post_type != 'aiovg_videos' ) {
+				return;
+			}
+
+			const data = {
+				'action': 'aiovg_update_views_count',
+				'post_id': settings.post_id,
+				'security': aiovg_player.ajax_nonce
+			};
+
+			$.post( aiovg_player.ajax_url, data );
 		});
 
-		// Init player.
-		$( '.aiovg-player-standard' ).each(function() {
-			initPlayer( $( this ) );
-		});		
-
-		// Custom error message.
-		if ( typeof videojs !== "undefined" ) {
+		// Custom error message
+		if ( typeof videojs !== 'undefined' ) {
 			videojs.hook( 'beforeerror', function( player, error ) {
-				// Prevent current error from being cleared out.
+				// Prevent current error from being cleared out
 				if ( error == null ) {
 					return player.error();
 				}
 
-				// But allow changing to a new error.
+				// But allow changing to a new error
 				if ( error.code == 2 || error.code == 4 ) {
-					var src = player.src();
+					const src = player.src();
 
 					if ( /.m3u8/.test( src ) || /.mpd/.test( src ) ) {
 						return {

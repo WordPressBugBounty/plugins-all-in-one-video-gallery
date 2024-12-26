@@ -691,7 +691,7 @@ class AIOVG_Public_Videos {
 				break;
 
 			case 'rand':
-				$seed = aiovg_get_orderby_rand_seed( (int) $attributes['paged'] );
+				$seed = aiovg_get_orderby_rand_seed();
 				$args['orderby']  = 'RAND(' . $seed . ')';
 				break;
 
@@ -747,6 +747,16 @@ class AIOVG_Public_Videos {
 					$this->defaults[ 'categories_' . $field['name'] ] = $field['value'];
 				}
 			}			
+			
+			foreach ( $fields['video']['sections']['general']['fields'] as $field ) {
+				if ( 'autoplay' == $field['name'] || 'loop' == $field['name'] || 'muted' == $field['name'] ) {
+					$this->defaults[ 'player_' . $field['name'] ] = $field['value'];
+				}
+			}
+
+			foreach ( $fields['video']['sections']['controls']['fields'] as $field ) {
+				$this->defaults[ 'player_' . $field['name'] ] = $field['value'];
+			}
 			
 			$this->defaults['source'] = 'videos';
 			$this->defaults['count'] = 0;

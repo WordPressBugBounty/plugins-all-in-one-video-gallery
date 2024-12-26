@@ -879,6 +879,10 @@ aiovg-like-button {
 	align-items: center;
 }
 
+aiovg-like-button:empty {
+	display: none;
+}
+
 aiovg-like-button button {
 	display: flex;
     gap: 0.35em;

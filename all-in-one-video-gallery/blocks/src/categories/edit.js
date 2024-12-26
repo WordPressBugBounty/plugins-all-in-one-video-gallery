@@ -1,12 +1,7 @@
 /**
- * Import block dependencies
+ * WordPress dependencies
  */
 import ServerSideRender from '@wordpress/server-side-render';
-
-import {	 
-	InspectorControls,
-	useBlockProps
-} from '@wordpress/block-editor';
 
 import {
 	Disabled,
@@ -17,12 +12,14 @@ import {
 	ToggleControl
 } from '@wordpress/components';
 
+import { InspectorControls,	useBlockProps } from '@wordpress/block-editor';
+
 import { useSelect } from '@wordpress/data';
 
-import { 
-	BuildTree,
-	GroupByParent
- } from '../helper.js';
+/**
+ * Internal dependencies
+ */
+import { BuildTree,	GroupByParent } from '../utils';
 
 /**
  * Describes the structure of the block in the context of the editor.
@@ -30,7 +27,7 @@ import {
  *
  * @return {WPElement} Element to render.
  */
-export default function Edit( { attributes, setAttributes } ) {
+function Edit( { attributes, setAttributes } ) {
 
 	const { 		
 		template, 
@@ -69,7 +66,7 @@ export default function Edit( { attributes, setAttributes } ) {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ aiovg_blocks.i18n.general_settings }>
+				<PanelBody title={ aiovg_blocks.i18n.general_settings } className="aiovg-block-panel">
 					<PanelRow>
 						<SelectControl
 							label={ aiovg_blocks.i18n.select_template }
@@ -80,6 +77,8 @@ export default function Edit( { attributes, setAttributes } ) {
 								{ label: aiovg_blocks.i18n.dropdown, value: 'dropdown' }
 							] }
 							onChange={ ( value ) => setAttributes( { template: value } ) }
+							__nextHasNoMarginBottom
+            				__next40pxDefaultSize
 						/>
 					</PanelRow>
 
@@ -89,6 +88,8 @@ export default function Edit( { attributes, setAttributes } ) {
 							value={ id }
 							options={ categories }
 							onChange={ ( value ) => setAttributes( { id: Number( value ) } ) }
+							__nextHasNoMarginBottom
+           		 			__next40pxDefaultSize
 						/>	
 					</PanelRow>
 
@@ -100,6 +101,8 @@ export default function Edit( { attributes, setAttributes } ) {
 								min={ 1 }
 								max={ 12 }
 								onChange={ ( value ) => setAttributes( { columns: value } ) }
+								__nextHasNoMarginBottom
+            					__next40pxDefaultSize
 							/>
 						</PanelRow>
 					) }
@@ -112,6 +115,8 @@ export default function Edit( { attributes, setAttributes } ) {
 								min={ 0 }
 								max={ 500 }
 								onChange={ ( value ) => setAttributes( { limit: value } ) }
+								__nextHasNoMarginBottom
+            					__next40pxDefaultSize
 							/>
 						</PanelRow>
 					) }
@@ -128,6 +133,8 @@ export default function Edit( { attributes, setAttributes } ) {
 								{ label: aiovg_blocks.i18n.menu_order, value: 'menu_order' }
 							] }
 							onChange={ ( value ) => setAttributes( { orderby: value } ) }
+							__nextHasNoMarginBottom
+            				__next40pxDefaultSize
 						/>
 					</PanelRow>
 
@@ -140,6 +147,8 @@ export default function Edit( { attributes, setAttributes } ) {
 								{ label: aiovg_blocks.i18n.desc, value: 'desc' }
 							] }
 							onChange={ ( value ) => setAttributes( { order: value } ) }
+							__nextHasNoMarginBottom
+            				__next40pxDefaultSize
 						/>
 					</PanelRow>
 
@@ -149,6 +158,7 @@ export default function Edit( { attributes, setAttributes } ) {
 								label={ aiovg_blocks.i18n.show_hierarchy }
 								checked={ hierarchical }
 								onChange={ () => setAttributes( { hierarchical: ! hierarchical } ) }
+								__nextHasNoMarginBottom
 							/>
 						</PanelRow>
 					) }
@@ -159,6 +169,7 @@ export default function Edit( { attributes, setAttributes } ) {
 								label={ aiovg_blocks.i18n.show_description }
 								checked={ show_description }
 								onChange={ () => setAttributes( { show_description: ! show_description } ) }
+								__nextHasNoMarginBottom
 							/>
 						</PanelRow>
 					) }
@@ -168,6 +179,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.show_videos_count }
 							checked={ show_count }
 							onChange={ () => setAttributes( { show_count: ! show_count } ) }
+							__nextHasNoMarginBottom
 						/>
 					</PanelRow>
 
@@ -176,6 +188,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.hide_empty_categories }
 							checked={ hide_empty }
 							onChange={ () => setAttributes( { hide_empty: ! hide_empty } ) }
+							__nextHasNoMarginBottom
 						/>
 					</PanelRow>
 
@@ -185,6 +198,7 @@ export default function Edit( { attributes, setAttributes } ) {
 								label={ aiovg_blocks.i18n.show_pagination }
 								checked={ show_pagination }
 								onChange={ () => setAttributes( { show_pagination: ! show_pagination } )  }
+								__nextHasNoMarginBottom
 							/>
 						</PanelRow>
 					) }
@@ -202,3 +216,5 @@ export default function Edit( { attributes, setAttributes } ) {
 		</>
 	);
 }
+
+export default Edit;

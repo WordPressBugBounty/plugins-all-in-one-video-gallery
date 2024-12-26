@@ -8,12 +8,15 @@
  *
  * @package All_In_One_Video_Gallery
  */
+
+$search_page_id  = (int) $attributes['search_page_id'];
+$search_page_url = aiovg_get_search_page_url( $search_page_id );
 ?>
 
 <div class="aiovg aiovg-search-form aiovg-search-form-template-compact">
-	<form method="get" action="<?php echo esc_url( aiovg_get_search_page_url() ); ?>">
+	<form method="get" action="<?php echo esc_url( $search_page_url ); ?>">
     	<?php if ( ! get_option('permalink_structure') ) : ?>
-       		<input type="hidden" name="page_id" value="<?php echo esc_attr( $attributes['search_page_id'] ); ?>" />
+       		<input type="hidden" name="page_id" value="<?php echo $search_page_id; ?>" />
     	<?php endif; ?>
 
 		<div class="aiovg-form-group aiovg-field-keyword">

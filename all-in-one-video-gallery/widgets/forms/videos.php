@@ -14,7 +14,7 @@
 	<?php foreach ( $this->fields['videos']['sections'] as $key => $section ) :	?>
 		<div class="aiovg-widget-section aiovg-widget-section-<?php echo esc_attr( $key ); ?>">
 			<?php if ( 'general' !== $key ) : ?>
-				<div class="aiovg-widget-section-header aiovg-margin-top aiovg-text-small">
+				<div class="aiovg-widget-section-header aiovg-text-small">
 					<?php echo wp_kses_post( $section['title'] ); ?>
 				</div>
 			<?php endif; ?>

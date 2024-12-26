@@ -159,7 +159,9 @@ class AIOVG_Init {
 		$this->loader->add_action( 'admin_init', $admin, 'handle_form_actions' );
 		$this->loader->add_action( 'admin_menu', $admin, 'admin_menu' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $admin, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $admin, 'enqueue_scripts' );		
+		$this->loader->add_action( 'admin_enqueue_scripts', $admin, 'enqueue_scripts' );
+		$this->loader->add_action( 'elementor/editor/after_enqueue_styles', $admin, 'enqueue_styles' );
+		$this->loader->add_action( 'elementor/editor/after_enqueue_scripts', $admin, 'enqueue_scripts' );		
 		
 		$this->loader->add_filter( 'display_post_states', $admin, 'add_display_post_states', 10, 2 );
 		$this->loader->add_filter( 'plugin_action_links_' . AIOVG_PLUGIN_FILE_NAME, $admin, 'plugin_action_links' );
@@ -238,6 +240,9 @@ class AIOVG_Init {
 		$this->loader->add_action( 'init', $public, 'register_styles' );
 		$this->loader->add_action( 'init', $public, 'register_scripts' );
 		$this->loader->add_action( 'aiovg_enqueue_block_editor_assets', $public, 'enqueue_block_editor_assets' );	
+		$this->loader->add_action( 'elementor/editor/after_enqueue_scripts', $public, 'enqueue_block_editor_assets' );
+		$this->loader->add_action( 'elementor/preview/enqueue_scripts', $public, 'enqueue_block_editor_assets' );	
+		$this->loader->add_action( 'wp', $public, 'set_mysql_rand_seed_value' );	
 		$this->loader->add_action( 'wp_loaded', $public, 'maybe_flush_rules', 11 );				
 		$this->loader->add_action( 'wp_head', $public, 'wp_head' );
 		$this->loader->add_action( 'wp_ajax_aiovg_set_cookie', $public, 'set_gdpr_cookie' );

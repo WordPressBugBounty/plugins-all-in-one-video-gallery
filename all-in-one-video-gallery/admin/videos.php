@@ -68,7 +68,6 @@ class AIOVG_Admin_Videos {
 	 * @since 1.0.0
 	 */
 	public function register_post_type() {			
-		$video_settings = get_option( 'aiovg_video_settings' );
 		$featured_images_settings = get_option( 'aiovg_featured_images_settings', array() );
 		$permalink_settings = get_option( 'aiovg_permalink_settings' );
 		
@@ -102,16 +101,11 @@ class AIOVG_Admin_Videos {
 			'filter_items_list'     => __( 'Filter videos list', 'all-in-one-video-gallery' ),
 		);
 		
-		$supports = array( 'title', 'editor', 'author', 'excerpt' );			
+		$supports = array( 'title', 'editor', 'author', 'excerpt', 'comments' );			
 
 		$has_thumbnail = isset( $featured_images_settings['enabled'] ) ? (int) $featured_images_settings['enabled'] : 0;
 		if ( $has_thumbnail == 1 ) {
 			$supports[] = 'thumbnail';
-		}
-
-		$has_comments = (int) $video_settings['has_comments'];
-		if ( $has_comments == 1 || $has_comments == -1 ) {
-			$supports[] = 'comments';
 		}
 		
 		$args = array(

@@ -404,6 +404,59 @@ function aiovg_dropdown_terms( $args ) {
 }
 
 /**
+ * Extract player attributes.
+ * 
+ * @since  3.9.3
+ * @param  array $attributes Array of attributes.
+ * @return array             Filtered array of attributes.
+ */
+function aiovg_extract_player_attributes( $attributes = array() ) {
+	$player_settings = get_option( 'aiovg_player_settings' );
+
+	$player_attributes = array( 
+		'autoplay', 
+		'loop', 
+		'muted', 
+		'playpause', 
+		'current', 
+		'progress', 
+		'duration',
+		'tracks',
+		'chapters', 
+		'speed', 
+		'quality', 
+		'volume',
+		'pip',
+		'fullscreen',
+		'share',
+		'embed',
+		'download'
+	);
+	
+	$player_args = array();
+
+	foreach ( $player_attributes as $key ) {  
+		if ( ! isset( $attributes[ 'player_' . $key ] ) ) {
+			continue;
+		}
+
+		$value = (int) $attributes[ 'player_' . $key ];
+	
+		if ( 'autoplay' == $key || 'loop' == $key || 'muted' == $key ) {
+			$default = ! empty( $player_settings[ $key ] ) ? 1 : 0;
+		} else {
+			$default = isset( $player_settings['controls'][ $key ] ) ? 1 : 0;
+		}
+	
+		if ( $value != $default ) {
+			$player_args[ $key ] = $value;
+		}
+	}
+
+	return $player_args;
+}
+
+/**
  * Get attachment ID of the given URL.
  * 
  * @since      1.0.0
@@ -815,10 +868,6 @@ function aiovg_get_excerpt( $post_id = 0 , $char_length = 55, $append = '...', $
 	}
 
 	$content = trim( $content );
-	if ( ! empty( $content ) && $allow_html ) {
-		$content = do_shortcode( $content );
-	}
-	
 	return apply_filters( 'aiovg_excerpt', $content, $post_id, $char_length, $append, $allow_html );	
 }
 
@@ -1096,30 +1145,15 @@ function aiovg_get_message( $msg_id ) {
  * Get MySQL's RAND function seed value.
  * 
  * @since  1.6.5
- * @param  int    $paged Current Page Number.
  * @return string $seed Seed value.
  */
-function aiovg_get_orderby_rand_seed( $paged = 1 ) {
-	global $aiovg;
-
+function aiovg_get_orderby_rand_seed( $paged = 'no_longer_required' ) {
 	$seed = '';
 	
-	if ( isset( $aiovg['rand_seed'] ) ) {
-		$aiovg['rand_seed'] = sanitize_text_field( $aiovg['rand_seed'] );
-		$seed = $aiovg['rand_seed'];
-
-		if ( 1 == $paged ) {
-			$transient_seed = get_transient( 'aiovg_rand_seed_' . $aiovg['rand_seed'] );
-
-			if ( empty( $transient_seed ) ) {
-				$seed = wp_rand();
-				set_transient( 'aiovg_rand_seed_' . $aiovg['rand_seed'], $seed, 12 * 60 * 60 );				
-			} else {
-				$seed = sanitize_text_field( $transient_seed );
-			}
-		}		
+	if ( isset( $_COOKIE['aiovg_rand_seed'] ) ) {
+		$seed = (int) $_COOKIE['aiovg_rand_seed'];	
 	}
-	  
+
 	return $seed;
 }
 
@@ -2489,7 +2523,13 @@ function the_aiovg_content_after_thumbnail( $attributes ) {
  * @param int   $char_length Excerpt length.
  */
 function the_aiovg_excerpt( $char_length ) {
-	echo wp_kses_post( aiovg_get_excerpt( 0, $char_length ) );
+	$excerpt = aiovg_get_excerpt( 0, $char_length );
+	if ( ! empty( $excerpt ) ) {
+		$excerpt = wp_kses_post( $excerpt );
+		$excerpt = do_shortcode( $excerpt );
+	}
+
+	echo $excerpt;
 }
 
 /**
@@ -2513,23 +2553,23 @@ function the_aiovg_more_button( $numpages = '', $atts = array() ) {
 		if ( $paged < $numpages ) {			
 			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-pagination' );
 
-			echo sprintf( '<div class="aiovg-more aiovg-more-ajax aiovg-text-center" data-params=\'%s\'>', wp_json_encode( $atts ) );
+			echo sprintf( '<aiovg-pagination class="aiovg-more aiovg-more-ajax aiovg-text-center" data-params=\'%s\'>', wp_json_encode( $atts ) );
 			echo sprintf( 
 				'<button type="button" class="aiovg-link-more" data-numpages="%d" data-paged="%d">%s</button>', 
 				$numpages,
 				$paged,
 				esc_html( $atts['more_label'] ) 
 			);
-			echo '</div>';
+			echo '</aiovg-pagination>';
 		}
 	} else {
-		echo '<div class="aiovg-more aiovg-text-center">';
+		echo '<aiovg-pagination class="aiovg-more aiovg-text-center">';
 		echo sprintf( 
 			'<button type="button" onclick="location.href=\'%s\'" class="aiovg-link-more">%s</button>', 
 			esc_url( $atts['more_link'] ), 
 			esc_html( $atts['more_label'] ) 
 		);
-		echo '</div>';
+		echo '</aiovg-pagination>';
 	}
 }
 
@@ -2606,12 +2646,12 @@ function the_aiovg_pagination( $numpages = '', $pagerange = '', $paged = '', $at
   	if ( is_array( $paginate_links ) ) {
 		if ( $is_ajax ) {
 			printf(
-				'<div class="aiovg-pagination aiovg-text-center aiovg-pagination-ajax" data-params=\'%s\' data-current="%d">',			
+				'<aiovg-pagination class="aiovg-pagination aiovg-pagination-ajax aiovg-text-center" data-params=\'%s\' data-current="%d">',			
 				wp_json_encode( $atts ),
 				$paged
 			);
 		} else {
-			echo '<div class="aiovg-pagination aiovg-text-center">';			
+			echo '<aiovg-pagination class="aiovg-pagination aiovg-text-center">';			
 		}
 
 		echo '<div class="aiovg-pagination-links">'; 		   	
@@ -2624,7 +2664,7 @@ function the_aiovg_pagination( $numpages = '', $pagerange = '', $paged = '', $at
 		echo sprintf( __( 'Page %d of %d', 'all-in-one-video-gallery' ), $paged, $numpages );
 		echo '</div>';		
 		
-		echo '</div>';
+		echo '</aiovg-pagination>';
   	}
 }
 

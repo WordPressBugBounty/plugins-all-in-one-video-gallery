@@ -17,6 +17,10 @@ class AIOVGLikeButtonElement extends HTMLElement {
         this._isLoading  = false; 
         this._options    = {};    
         this._params     = {};
+
+        // Bind the event handlers to ensure the reference remains stable
+		this._toggleLikes = this._toggleLikes.bind( this );
+        this._toggleDislikes = this._toggleDislikes.bind( this );
     }
 
     /**
@@ -57,7 +61,7 @@ class AIOVGLikeButtonElement extends HTMLElement {
 
             this.appendChild( this._likeButtonEl );                
 
-            this._likeButtonEl.addEventListener( 'click', ( event ) => this._toggleLikes( event ) ); 
+            this._likeButtonEl.addEventListener( 'click', this._toggleLikes ); 
         }
 
         // Dislikes Button
@@ -70,7 +74,7 @@ class AIOVGLikeButtonElement extends HTMLElement {
 
             this.appendChild( this._dislikeButtonEl );
 
-            this._dislikeButtonEl.addEventListener( 'click', ( event ) => this._toggleDislikes( event ) ); 
+            this._dislikeButtonEl.addEventListener( 'click', this._toggleDislikes ); 
         }
 
         this._load();
@@ -81,13 +85,7 @@ class AIOVGLikeButtonElement extends HTMLElement {
      * (can be called many times if an element is repeatedly added/removed)
      */
     disconnectedCallback() {
-        if ( this._likeButtonEl ) {
-            this._likeButtonEl.removeEventListener( 'click', ( event ) => this._toggleLikes( event ) ); 
-        }
-
-        if ( this._dislikeButtonEl ) {
-            this._dislikeButtonEl.removeEventListener( 'click', ( event ) => this._toggleDislikes( event ) ); 
-        }
+        // TODO
     }
 
     /**

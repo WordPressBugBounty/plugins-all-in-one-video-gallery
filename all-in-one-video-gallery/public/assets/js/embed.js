@@ -266,8 +266,7 @@ class AIOVGBaseElement extends HTMLElement {
      * (can be called many times if an element is repeatedly added/removed)
      */
     disconnectedCallback() {
-        this.removeEventListener( 'pointerover', () => this._warmConnections(), { once: true, } );
-        this.removeEventListener( 'click', () => this._addIframe( true ) );
+        // TODO
     }
 
     /**

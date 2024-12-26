@@ -41,15 +41,19 @@
 }
 
 /* Block Editor */
-.components-panel__row .components-base-control {
+.aiovg-block-panel .components-panel__row .aiovg-no-margin {
+	margin: 0;
+}
+
+.aiovg-block-panel .components-panel__row .components-base-control {
 	width: 100%;
 }
 
-.components-panel__row .components-range-control__wrapper {
+.aiovg-block-panel .components-panel__row .components-range-control__wrapper {
     flex: 1 1 100%;
 }
 
-.components-panel__row .block-editor-panel-color-gradient-settings {	
+.aiovg-block-panel .components-panel__row .block-editor-panel-color-gradient-settings {	
 	padding-left: 0;
 	padding-right: 0;
 	width: 100%;
@@ -66,6 +70,21 @@
 }
 
 .aiovg-block-panel .aiovg-block-multiselect .components-input-control__suffix {
+	display: none;
+}
+
+.wp-block-aiovg-categories .components-spinner,
+.wp-block-aiovg-search .components-spinner,
+.wp-block-aiovg-videos .components-spinner,
+.wp-block-aiovg-video .components-spinner {
+	display: flex;
+	align-items: center;
+	width: 100%;
+}
+
+.wp-block-aiovg-categories .components-placeholder,
+.wp-block-aiovg-search .components-placeholder,
+.wp-block-aiovg-videos .components-placeholder {
 	display: none;
 }
 
@@ -686,9 +705,10 @@
  *
  *--------------------------------------------------------------------------------------------*/
 .aiovg-widget-section-header {
+	margin-top: 2em;
 	border-radius: 2px; 
 	background-color: #0073aa;
-	padding: 0.5em; 
+	padding: 0.75em; 
 	color: #fff; 	
 }
 
@@ -706,6 +726,10 @@
 
 .aiovg-widget-form label {
 	line-height: normal !important;
+}
+
+.aiovg-widget-form .aiovg-widget-label {
+	font-weight: 500 !important;
 }
 
 .aiovg-widget-form p {
@@ -746,4 +770,8 @@
 
 .aiovg-widget-form-video input[type="text"].ui-autocomplete-loading {
 	background-position: 99% center;
+}
+
+.aiovg-widget-form-video .aiovg-autocomplete-result .dashicons-yes-alt {
+	color: green;
 }
