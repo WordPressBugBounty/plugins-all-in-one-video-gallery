@@ -96,6 +96,7 @@ class AIOVG_Admin_Settings {
     public function get_tabs() {	
 		$tabs = array(
 			'general'  => __( 'General', 'all-in-one-video-gallery' ),
+            'player'   => __( 'Player', 'all-in-one-video-gallery' ),
             'seo'      => __( 'SEO', 'all-in-one-video-gallery' ),
             'privacy'  => __( 'GDPR Compliance', 'all-in-one-video-gallery' ),
 			'advanced' => __( 'Advanced', 'all-in-one-video-gallery' )
@@ -116,7 +117,7 @@ class AIOVG_Admin_Settings {
                 'id'          => 'aiovg_player_settings',
                 'title'       => __( 'Player Settings', 'all-in-one-video-gallery' ),
                 'description' => '',
-                'tab'         => 'general',
+                'tab'         => 'player',
                 'page'        => 'aiovg_player_settings'
             ),             		
             array(
@@ -126,13 +127,6 @@ class AIOVG_Admin_Settings {
                 'tab'         => 'general',
                 'page'        => 'aiovg_videos_settings'
             ),
-			array(
-                'id'          => 'aiovg_categories_settings',
-                'title'       => __( 'Categories Layout', 'all-in-one-video-gallery' ),
-                'description' => '',
-                'tab'         => 'general',
-                'page'        => 'aiovg_categories_settings'
-            ),            			
 			array(
                 'id'          => 'aiovg_video_settings',
                 'title'       => __( 'Single Video Page', 'all-in-one-video-gallery' ),
@@ -146,6 +140,13 @@ class AIOVG_Admin_Settings {
                 'description' => '',
                 'tab'         => 'general',
                 'page'        => 'aiovg_video_settings'
+            ),
+            array(
+                'id'          => 'aiovg_categories_settings',
+                'title'       => __( 'Categories Layout', 'all-in-one-video-gallery' ),
+                'description' => '',
+                'tab'         => 'general',
+                'page'        => 'aiovg_categories_settings'
             ),
             array(
                 'id'          => 'aiovg_images_settings',
@@ -162,13 +163,6 @@ class AIOVG_Admin_Settings {
                 'page'        => 'aiovg_images_settings'
             ),
             array(
-                'id'          => 'aiovg_likes_settings',
-                'title'       => __( 'Likes / Dislikes', 'all-in-one-video-gallery' ),
-                'description' => '',
-                'tab'         => 'general',
-                'page'        => 'aiovg_likes_settings'
-            ),
-            array(
                 'id'          => 'aiovg_pagination_settings',
                 'title'       => __( 'Pagination Settings', 'all-in-one-video-gallery' ),
                 'description' => '',
@@ -181,6 +175,13 @@ class AIOVG_Admin_Settings {
 				'description' => '',
                 'tab'         => 'general',
                 'page'        => 'aiovg_socialshare_settings'
+            ),
+            array(
+                'id'          => 'aiovg_likes_settings',
+                'title'       => __( 'Likes / Dislikes', 'all-in-one-video-gallery' ),
+                'description' => '',
+                'tab'         => 'general',
+                'page'        => 'aiovg_likes_settings'
             ),                       
 			array(
                 'id'          => 'aiovg_permalink_settings',
@@ -204,18 +205,18 @@ class AIOVG_Admin_Settings {
                 'page'        => 'aiovg_general_settings'
             ),
             array(
-                'id'          => 'aiovg_api_settings',
-                'title'       => __( 'API Keys', 'all-in-one-video-gallery' ),
-                'description' => '',
-                'tab'         => 'advanced',
-                'page'        => 'aiovg_api_settings'
-            ),
-            array(
                 'id'          => 'aiovg_page_settings',
                 'title'       => __( 'Page Settings', 'all-in-one-video-gallery' ),
                 'description' => '',
                 'tab'         => 'advanced',
                 'page'        => 'aiovg_page_settings'
+            ),
+            array(
+                'id'          => 'aiovg_api_settings',
+                'title'       => __( 'API Keys', 'all-in-one-video-gallery' ),
+                'description' => '',
+                'tab'         => 'advanced',
+                'page'        => 'aiovg_api_settings'
             )           			
         );
 
@@ -224,7 +225,7 @@ class AIOVG_Admin_Settings {
                 'id'          => 'aiovg_brand_settings',
                 'title'       => __( 'Logo & Branding', 'all-in-one-video-gallery' ),
                 'description' => '',
-                'tab'         => 'general',
+                'tab'         => 'player',
                 'page'        => 'aiovg_brand_settings'
             );
         }
@@ -246,11 +247,7 @@ class AIOVG_Admin_Settings {
                 array(
                     'name'              => 'player',
                     'label'             => __( 'Player Library', 'all-in-one-video-gallery' ),
-                    'description'       => sprintf(
-                        '<a href="https://www.vidstack.io/" target="_blank">%s</a>: %s',
-                        __( 'Vidstack Player', 'all-in-one-video-gallery' ),
-                        __( 'We are very much impressed by this player library which will be used as a default player when their stable release comes out. We confirm that you are safe to use this player in a production environment at the moment but <strong>the current player skin is subject to change</strong>.', 'all-in-one-video-gallery' )
-                    ),
+                    'description'       => '',
                     'type'              => 'radio',
                     'options'           => array(
                         'videojs'  => __( 'Video.js', 'all-in-one-video-gallery' ),
@@ -503,7 +500,8 @@ class AIOVG_Admin_Settings {
 						'linkedin'  => __( 'Linkedin', 'all-in-one-video-gallery' ),
                         'pinterest' => __( 'Pinterest', 'all-in-one-video-gallery' ),
                         'tumblr'    => __( 'Tumblr', 'all-in-one-video-gallery' ),
-                        'whatsapp'  => __( 'WhatsApp', 'all-in-one-video-gallery' )
+                        'whatsapp'  => __( 'WhatsApp', 'all-in-one-video-gallery' ),
+                        'email'     => __( 'Email', 'all-in-one-video-gallery' )
 					),
 					'sanitize_callback' => 'aiovg_sanitize_array'
                 ),
@@ -863,6 +861,13 @@ class AIOVG_Admin_Settings {
                 ),
 			),			
             'aiovg_general_settings' => array(
+                array(
+                    'name'              => 'custom_css',
+                    'label'             => __( 'Custom CSS', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Add your own CSS code to customize the appearance and style of the plugin elements. This allows you to tailor the design to match your site\'s theme seamlessly.', 'all-in-one-video-gallery' ),
+					'type'              => 'textarea',
+					'sanitize_callback' => 'sanitize_textarea_field'
+				),
                 array(
                     'name'              => 'lazyloading',
                     'label'             => __( 'Lazyload Images / Videos', 'all-in-one-video-gallery' ),

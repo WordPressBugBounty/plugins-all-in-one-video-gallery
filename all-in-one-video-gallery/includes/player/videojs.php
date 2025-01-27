@@ -592,7 +592,7 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 		);
 
 		$html .= sprintf( 
-			'<aiovg-video class="aiovg-player aiovg-player-videojs aiovg-player-standard vjs-waiting" style="padding-bottom: %s%%;" data-id="%s" data-params=\'%s\'>',
+			'<aiovg-video class="aiovg-player aiovg-player-element aiovg-player-standard vjs-waiting" style="padding-bottom: %s%%;" data-id="%s" data-params=\'%s\'>',
 			(float) $player_settings['ratio'],
 			esc_attr( $attributes['id'] ),
 			wp_json_encode( $settings )

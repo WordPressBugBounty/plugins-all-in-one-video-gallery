@@ -651,16 +651,11 @@ class AIOVG_Player_Base {
 	public function get_player_raw_embed() {
 		$videos = $this->get_videos();
 
-		wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-player' );
-
-		$settings = array(
-			'post_id'   => $this->post_id,
-			'post_type' => 'aiovg_videos'
-		);
+		wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-embed' );
 
 		$html = sprintf(
-			'<div class="aiovg-player-raw" data-params=\'%s\'>%s</div>',
-			wp_json_encode( $settings ),
+			'<div class="aiovg-player-raw" data-post_id="%d">%s</div>',
+			(int) $this->post_id,
 			do_shortcode( $videos['embedcode'] )		
 		);
 
@@ -681,13 +676,7 @@ class AIOVG_Player_Base {
 		$poster = $this->get_poster();				
 
 		// Enqueue dependencies
-		wp_enqueue_script( 
-			AIOVG_PLUGIN_SLUG . '-embed', 
-			AIOVG_PLUGIN_URL . 'public/assets/js/embed.min.js', 
-			array(), 
-			AIOVG_PLUGIN_VERSION,
-			array( 'strategy' => 'defer' )
-		);
+		wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-embed' );
 		
 		// Vars
 		$provider = 'embed';
@@ -715,11 +704,6 @@ class AIOVG_Player_Base {
 
 		if ( ! empty( $privacy_settings['show_consent'] ) ) {
 			$attributes['cookieconsent'] = '';
-		}
-
-		if ( ( $this->post_id > 0 && 'aiovg_videos' == $this->post_type ) || isset( $attributes['cookieconsent'] ) ) {
-			$attributes['ajax_url'] = esc_url( admin_url( 'admin-ajax.php' ) );
-			$attributes['ajax_nonce'] = esc_attr( wp_create_nonce( 'aiovg_ajax_nonce' ) );
 		}
 
 		// Player

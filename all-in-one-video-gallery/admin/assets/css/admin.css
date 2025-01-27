@@ -330,7 +330,8 @@
 
 @media screen and (min-width: 783px) {
 	.aiovg .aiovg-table th[scope="row"] {
-		max-width: 160px;
+		max-width: 150px;
+		font-size: 13px;
 		font-weight: normal;
 	}
 
@@ -697,6 +698,14 @@
 #aiovg-categories-settings.aiovg-template-dropdown tr.limit,
 #aiovg-categories-settings.aiovg-template-dropdown tr.show_description {
 	display: none;
+}
+
+@media screen and ( min-width: 783px ) {
+	#aiovg-settings input[type="text"],
+	#aiovg-settings input[type="number"],
+	#aiovg-settings select {
+		width: 25em;
+	}
 }
 
 /*----------------------------------------------------------------------------------------------

@@ -12,6 +12,7 @@
 $player_settings  = get_option( 'aiovg_player_settings' );
 $privacy_settings = get_option( 'aiovg_privacy_settings' );
 $brand_settings   = get_option( 'aiovg_brand_settings', array() );
+$general_settings = get_option( 'aiovg_general_settings' );
 
 $post_id    = (int) get_query_var( 'aiovg_video', 0 );
 $post_type  = 'page';
@@ -60,9 +61,9 @@ if ( ! empty( $post_meta ) ) {
 		$use_native_controls = isset( $player_settings['use_native_controls'][ $provider ] );
 		$use_native_controls = apply_filters( 'aiovg_use_native_controls', $use_native_controls, $provider );
 	
-		if ( $use_native_controls ) {
-			if ( isset( $_GET[ $provider ] ) ) {
-				$current_video_provider = $provider;
+		if ( isset( $_GET[ $provider ] ) ) {
+			$current_video_provider = $provider;
+			if ( $use_native_controls ) {
 				$player_template = 'iframe';
 			}		
 		}
@@ -76,9 +77,11 @@ if ( ! empty( $post_meta ) ) {
 	}
 }
 
-if ( ! isset( $_COOKIE['aiovg_gdpr_consent'] ) && ! empty( $privacy_settings['show_consent'] ) && ! empty( $privacy_settings['consent_message'] ) && ! empty( $privacy_settings['consent_button_label'] ) ) {		
-	if ( in_array( $current_video_provider, $thirdparty_providers_all ) || 'iframe' == $player_template ) {
-		$player_template = 'gdpr';
+if ( ! isset( $_GET['nocookie'] ) ) {
+	if ( ! isset( $_COOKIE['aiovg_gdpr_consent'] ) && ! empty( $privacy_settings['show_consent'] ) && ! empty( $privacy_settings['consent_message'] ) && ! empty( $privacy_settings['consent_button_label'] ) ) {		
+		if ( in_array( $current_video_provider, $thirdparty_providers_all ) || 'iframe' == $player_template ) {
+			$player_template = 'gdpr';
+		}
 	}
 }
 

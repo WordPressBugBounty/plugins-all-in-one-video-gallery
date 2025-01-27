@@ -224,6 +224,8 @@ class AIOVGBaseElement extends HTMLElement {
         
         // Set references to the private properties used by the component
         this._isRendered = false;
+        this._ajaxUrl = aiovg_embed.ajax_url;
+        this._ajaxNonce = aiovg_embed.ajax_nonce;
         this._isCookieConsentLoaded = false;
         this._isPosterImageLoaded = false;
         this._isIframeLoaded = false;             
@@ -273,7 +275,7 @@ class AIOVGBaseElement extends HTMLElement {
      * Array of attribute names to monitor for changes.
      */
     static get observedAttributes() {
-        return [ 'title', 'ratio', 'cookieconsent' ];
+        return [ 'title', 'ratio' ];
     }   
     
     /**
@@ -295,13 +297,6 @@ class AIOVGBaseElement extends HTMLElement {
             case 'ratio':      
                 if ( newValue ) {               
                     this.$root.style.paddingBottom = `${parseFloat(newValue)}%`; 
-                }
-                break;
-
-            case 'cookieconsent':                     
-                if ( ! this._isRendered ) {
-                    this._removeClass( 'cookieconsent' );                    
-                    this._render();
                 }
                 break;
         }
@@ -331,15 +326,6 @@ class AIOVGBaseElement extends HTMLElement {
     
     get postType() {
         return this.getAttribute( 'post_type' ) || '';
-    } 
-
-    get ajaxUrl() {
-        const value = this.getAttribute( 'ajax_url' ) || '';
-        return AIOVGBaseElement.isValidUrl( value ) ? value : '';
-    }
-
-    get ajaxNonce() {
-        return this.getAttribute( 'ajax_nonce' ) || '';
     }
 
     get lazyLoading() {
@@ -365,7 +351,7 @@ class AIOVGBaseElement extends HTMLElement {
      */
 
     _render() {    
-        if ( this._isRendered ) true;          
+        if ( this._isRendered ) return false;          
         
         if ( this.lazyLoading && ! this._isInViewport ) {
             this._initIntersectionObserver();
@@ -407,6 +393,16 @@ class AIOVGBaseElement extends HTMLElement {
         this._addIframe( true );
 
         this._setCookie();
+
+        // Remove cookieconsent from other players
+        const videos = document.querySelectorAll( '.aiovg-player-element' );
+        for ( let i = 0; i < videos.length; i++ ) {
+            videos[ i ].removeCookieConsent();
+        }
+        
+        window.postMessage({                       
+            message: 'aiovg-cookie-consent'
+        }, window.location.origin );
     }
 
     _addPosterImage() {
@@ -449,12 +445,6 @@ class AIOVGBaseElement extends HTMLElement {
 
         this._addClass( 'initialized' );
         this._updateViewsCount();        
-
-        this.dispatchEvent(new CustomEvent('AIOVGIframeLoaded', {
-            detail: 'iframe.loaded',
-            bubbles: true,
-            cancelable: true,
-        }));
     }
 
     _initIntersectionObserver() {
@@ -499,40 +489,22 @@ class AIOVGBaseElement extends HTMLElement {
      */
 
     async _updateViewsCount() {
-        if ( this.postType == 'aiovg_videos' && this.ajaxUrl ) {
+        if ( this.postType == 'aiovg_videos' ) {
             let formData = new FormData();
             formData.append( 'action', 'aiovg_update_views_count' );
             formData.append( 'post_id', this.postId );
-            formData.append( 'security', this.ajaxNonce );
+            formData.append( 'security', this._ajaxNonce );
 
-            fetch( this.ajaxUrl, { method: 'POST', body: formData } );
+            fetch( this._ajaxUrl, { method: 'POST', body: formData } );
         }
     }
     
     async _setCookie() {
-        try {
-            if ( this.ajaxUrl ) {
-                let formData = new FormData();
-                formData.append( 'action', 'aiovg_set_cookie' );
-                formData.append( 'security', this.ajaxNonce );
+        let formData = new FormData();
+        formData.append( 'action', 'aiovg_set_cookie' );
+        formData.append( 'security', this._ajaxNonce );
 
-                fetch( this.ajaxUrl, { method: 'POST', body: formData } );
-            }
-           
-            // Announce to our friends  
-            const vidstack = document.querySelectorAll( '.aiovg-player-element[cookieconsent]' );
-            for ( let i = 0; i < vidstack.length; i++ ) {
-                vidstack[ i ].removeAttribute( 'cookieconsent' );
-            }
-
-            const videojs = document.querySelectorAll( '.aiovg-player-standard' );
-            const event = new CustomEvent( 'cookieConsent' );
-            for ( let i = 0; i < videojs.length; i++ ) {
-                videojs[ i ].dispatchEvent( event );
-            }     
-        } catch ( error ) {
-            /** console.log( error ); */
-        }
+        fetch( this._ajaxUrl, { method: 'POST', body: formData } );
     }
 
     /**
@@ -565,7 +537,24 @@ class AIOVGBaseElement extends HTMLElement {
         linkElem.crossOrigin = 'true';
 
         document.head.append( linkElem );
-    }    
+    }
+    
+    /**
+     * Define API methods.
+     */
+
+	removeCookieConsent() {
+		if ( this._isRendered ) return false;
+
+        this._removeClass( 'cookieconsent' );
+        this.cookieConsent = false; 
+                            
+        this._render();
+	}
+
+	pause() {
+		// TODO
+	}
 
 }
 
@@ -648,10 +637,49 @@ window.AIOVGYouTubeIsPreconnected = false;
 window.AIOVGVimeoIsPreconnected = false;
 window.AIOVGDailymotionIsPreconnected = false;
 
-// Register custom element
+/**
+ * Called when the page has loaded.
+ */
 document.addEventListener( 'DOMContentLoaded', function() {
+    // Register custom elements
     customElements.define( 'aiovg-youtube', AIOVGYouTubeElement );
     customElements.define( 'aiovg-vimeo', AIOVGVimeoElement );
     customElements.define( 'aiovg-dailymotion', AIOVGDailymotionElement );
     customElements.define( 'aiovg-embed', AIOVGIframeElement );
+
+    // Update views count for the non-iframe embeds
+    const videos = document.querySelectorAll( '.aiovg-player-raw' );
+    for ( let i = 0; i < videos.length; i++ ) {
+        const elem    = videos[ i ];
+        const post_id = parseInt( elem.dataset.postId );
+
+        let formData = new FormData();
+        formData.append( 'action', 'aiovg_update_views_count' );
+        formData.append( 'post_id', post_id );
+        formData.append( 'security', aiovg_embed.ajax_nonce );
+
+        fetch( aiovg_embed.ajax_url, { method: 'POST', body: formData } );
+    }
+
+    // Listen to the iframe player events
+    window.addEventListener( 'message', function( event ) {
+        if ( event.origin != window.location.origin ) {
+            return false;
+        }        
+
+        if ( ! event.data.hasOwnProperty( 'context' ) || event.data.context != 'iframe' ) {
+            return false;
+        }
+
+        if ( ! event.data.hasOwnProperty( 'message' ) ) {
+            return false;
+        }
+
+        if ( event.data.message == 'aiovg-cookie-consent' ) {
+            const videos = document.querySelectorAll( '.aiovg-player-element' );
+            for ( let i = 0; i < videos.length; i++ ) {
+                videos[ i ].removeCookieConsent();
+            }
+        }
+    });
 });

@@ -446,6 +446,19 @@ if ( $has_share ) {
 		);
 	}
 
+	if ( isset( $socialshare_settings['services']['email'] ) ) {
+		$email_subject = sprintf( __( 'Check out the "%s"', 'all-in-one-video-gallery' ), $share_title );
+		$email_body    = sprintf( __( 'Check out the "%s" at %s', 'all-in-one-video-gallery' ), $share_title, $share_url );
+		$email_url     = "mailto:?subject={$email_subject}&amp;body={$email_body}";
+
+		$share_buttons[] = array(
+			'service' => 'email',			
+			'url'     => $email_url,
+			'icon'    => 'aiovg-icon-email',
+			'text'    => __( 'Email', 'all-in-one-video-gallery' )
+		);
+	}
+
 	$share_buttons = apply_filters( 'aiovg_player_socialshare_buttons', $share_buttons );
 	if ( ! empty( $share_buttons ) ) {
 		$settings['share'] = 1;
@@ -561,11 +574,11 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		/* Icons */
 		@font-face {
 			font-family: 'aiovg-icons';
-			src: url( '<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.eot?2afx3z' );
-			src: url( '<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.eot?2afx3z#iefix' ) format( 'embedded-opentype' ),
-				url( '<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.ttf?2afx3z' ) format( 'truetype' ),
-				url( '<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.woff?2afx3z' ) format( 'woff' ),
-				url( '<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.svg?2afx3z#aiovg-icons' ) format( 'svg' );
+			src: url( '<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.eot?tx9c7f' );
+			src: url( '<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.eot?tx9c7f#iefix' ) format( 'embedded-opentype' ),
+				url( '<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.ttf?tx9c7f' ) format( 'truetype' ),
+				url( '<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.woff?tx9c7f' ) format( 'woff' ),
+				url( '<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.svg?tx9c7f#aiovg-icons' ) format( 'svg' );
 			font-weight: normal;
 			font-style: normal;
 			font-display: swap;
@@ -607,6 +620,10 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 
 		.aiovg-icon-whatsapp:before {
 			content: "\ea93";
+		}
+
+		.aiovg-icon-email:before {
+			content: "\e901";
 		}
 
 		/* Common */
@@ -966,7 +983,11 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		
 		.aiovg-player .video-js .vjs-share-button-whatsapp {
             background-color: #25d366;
-        }  
+        }
+		
+		.aiovg-player .video-js .vjs-share-button-email {
+            background-color: #6E6E6E;
+        }
 
         .aiovg-player .video-js .vjs-share-button span {            
 			line-height: 1;
@@ -1175,7 +1196,13 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
             font-size: 11px;
         }
     </style>
-
+	
+	<?php if ( isset( $general_settings['custom_css'] ) && ! empty( $general_settings['custom_css'] ) ) : ?>
+        <style type="text/css">
+		    <?php echo esc_html( $general_settings['custom_css'] ); ?>
+        </style>
+	<?php endif; ?>
+	
 	<?php do_action( 'aiovg_player_head', $settings, $attributes, $sources, $tracks ); // Backward compatibility to 3.3.0 ?>
 	<?php do_action( 'aiovg_iframe_videojs_player_head', $settings, $attributes, $sources, $tracks ); ?>
 </head>
@@ -1214,7 +1241,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 					foreach ( $share_buttons as $button ) {
 						printf( 
 							'<a href="%1$s" class="vjs-share-button vjs-share-button-%2$s" title="%3$s" target="_blank"><span class="%4$s" aria-hidden="true"></span><span class="vjs-control-text" aria-live="polite">%3$s</span></a>',							
-							esc_url( $button['url'] ), 
+							esc_attr( $button['url'] ), 
 							esc_attr( $button['service'] ),
 							esc_attr( $button['text'] ),
 							esc_attr( $button['icon'] )
@@ -1284,7 +1311,8 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		var body = document.getElementById( 'body' );
 		var playButton = null;
 		var overlays = [];
-		var hasVideoStarted = false;				
+		var hasVideoStarted = false;
+		var lastEvent = null;				
 
 		/**
 		 * Called when the big play button in the player is clicked.
@@ -1508,6 +1536,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 
 			// On player ready.
 			player.ready(function() {
+				lastEvent = 'ready';
 				body.classList.remove( 'vjs-waiting' );
 				
 				playButton = document.querySelector( '.vjs-big-play-button' );
@@ -1518,6 +1547,8 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 
 			// On metadata loaded.
 			player.one( 'loadedmetadata', function() {
+				lastEvent = 'loadedmetadata';
+
 				// Standard quality selector.
 				var qualitySelector = document.querySelector( '.vjs-quality-selector' );
 
@@ -1603,6 +1634,8 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 			}
 
 			player.on( 'play', function() {
+				lastEvent = 'play';
+
 				if ( ! hasVideoStarted ) {
 					hasVideoStarted = true;
 					body.classList.remove( 'vjs-waiting' );
@@ -1612,28 +1645,32 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 					}
 				}
 
-				if ( settings.post_type == 'aiovg_videos' ) {
-					window.parent.postMessage({ 				
-						message: 'aiovg-video-playing',			
-						id: settings.uid,
-						post_id: settings.post_id
-					}, '*');
-				}
+				// Pause other players.
+				window.parent.postMessage({ 				
+					message: 'aiovg-video-playing',
+					context: 'iframe'
+				}, window.location.origin );
 			});
 
 			player.on( 'playing', function() {
+				lastEvent = 'playing';
 				player.trigger( 'controlsshown' );
 			});
 
 			player.on( 'ended', function() {
+				if ( lastEvent == 'ended' ) {
+					return false;
+				}
+
+				lastEvent = 'ended';
 				player.trigger( 'controlshidden' );
 
 				// Autoplay next video.
 				if ( settings.hasOwnProperty( 'autoadvance' ) ) {
-					window.parent.postMessage({ 				
-						message: 'aiovg-video-ended',			
-						id: settings.uid
-					}, '*'); 
+					window.parent.postMessage({ 
+						message: 'aiovg-video-ended',
+						context: 'iframe'						
+					}, window.location.origin ); 
 				}
 			});
 
@@ -1846,15 +1883,11 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 
 			// Api methods
 			window.addEventListener( 'message', function( event ) {
+				if ( event.origin !== window.location.origin ) {
+					return false;
+				}
+
 				if ( ! event.data.hasOwnProperty( 'message' ) ) {
-					return false;
-				}
-
-				if ( event.data.id != settings.uid ) {
-					return false;
-				}
-
-				if ( event.data.post_id != settings.post_id ) {
 					return false;
 				}
 

@@ -31,30 +31,7 @@ class AIOVGVideoElement extends HTMLElement {
      
 		this._render();  
     }
-
-    /**
-     * Array of attribute names to monitor for changes.
-     */
-    static get observedAttributes() {
-        return [ 'cookieconsent' ];
-    }   
-    
-    /**
-     * Called when one of the observed attributes listed above is modified.
-     */
-    attributeChangedCallback( name, oldValue, newValue ) {
-        if ( oldValue == newValue ) return false;
-
-        switch ( name ) {
-            case 'cookieconsent':                     
-                if ( ! this.cookieConsent && ! this._isRendered ) {
-					this._cookieConsentEl.remove();
-                	this._render();
-                }
-                break;
-        }
-    }
-
+ 
     /**
      * Define getters and setters for attributes.
      */
@@ -115,6 +92,16 @@ class AIOVGVideoElement extends HTMLElement {
 		this._addPlayer();  
 
         this._setCookie();
+
+		// Remove cookieconsent from other players
+		const videos = document.querySelectorAll( '.aiovg-player-element' );
+        for ( let i = 0; i < videos.length; i++ ) {
+            videos[ i ].removeCookieConsent();
+        }
+
+		window.postMessage({                       
+			message: 'aiovg-cookie-consent'
+		}, window.location.origin );
     }
 
 	_addPosterImage() {
@@ -162,13 +149,25 @@ class AIOVGVideoElement extends HTMLElement {
 		});
 
 		// Update views count
-		let viewed = false;
+		let _hasVideoStarted = false;
 
 		this._player.on( 'playing', () => {
-			if ( viewed ) return false;
-			viewed = true;
+			if ( ! _hasVideoStarted ) {
+				_hasVideoStarted = true;
+				this._updateViewsCount();
+			}			
 
-			this._updateViewsCount();
+			// Pause other players
+			const videos = document.querySelectorAll( '.aiovg-player-element' );
+			for ( let i = 0; i < videos.length; i++ ) {
+				if ( videos[ i ] != this ) {
+					videos[ i ].pause();
+				}
+			}
+
+			window.postMessage({					 				
+				message: 'aiovg-video-playing'
+			}, window.location.origin );
 		});
 
 		// On ended
@@ -455,7 +454,7 @@ class AIOVGVideoElement extends HTMLElement {
      */
 
     async _updateViewsCount() {
-        if ( this._params.post_type == 'aiovg_videos' && AIOVGVideoElement.isValidUrl( this._params.ajax_url ) ) {
+        if ( this._params.post_type == 'aiovg_videos' ) {
             let formData = new FormData();
             formData.append( 'action', 'aiovg_update_views_count' );
             formData.append( 'post_id', parseInt( this._params.post_id ) );
@@ -467,22 +466,11 @@ class AIOVGVideoElement extends HTMLElement {
     }
     
     async _setCookie() {
-        try {
-            if ( AIOVGVideoElement.isValidUrl( this._params.ajax_url ) ) {
-                let formData = new FormData();
-                formData.append( 'action', 'aiovg_set_cookie' );
-                formData.append( 'security', this._params.ajax_nonce );
+		let formData = new FormData();
+		formData.append( 'action', 'aiovg_set_cookie' );
+		formData.append( 'security', this._params.ajax_nonce );
 
-                fetch( this._params.ajax_url, { method: 'POST', body: formData } );
-            }
-
-            const nodeList = document.querySelectorAll( '.aiovg-player-element[cookieconsent]' );
-            for ( let i = 0; i < nodeList.length; i++ ) {
-                nodeList[ i ].removeAttribute( 'cookieconsent' );
-            }
-        } catch ( error ) {
-			/** console.log( error ); */
-        }
+		fetch( this._params.ajax_url, { method: 'POST', body: formData } );
     }
 
     /**
@@ -500,11 +488,62 @@ class AIOVGVideoElement extends HTMLElement {
         }
     }
 
+	/**
+     * Define API methods.
+     */
+
+	removeCookieConsent() {
+		if ( this._isRendered ) return false;
+
+		this._cookieConsentEl.remove();
+		this.cookieConsent = false; 
+		
+		this._render();
+	}
+
+	pause() {
+		if ( this._player ) {
+			this._player.pause();
+		}
+	}
+
 }
 
 window.AIOVGIsContextMenuAdded = false;
 
-// Register custom element.
+/**
+ * Called when the page has loaded.
+ */
 document.addEventListener( 'DOMContentLoaded', function() {
+	// Register custom element
 	customElements.define( 'aiovg-video', AIOVGVideoElement );
+
+	// Listen to the iframe player events
+    window.addEventListener( 'message', function( event ) {
+        if ( event.origin != window.location.origin ) {
+            return false;
+        }
+
+		if ( ! event.data.hasOwnProperty( 'context' ) || event.data.context != 'iframe' ) {
+            return false;
+        }
+
+        if ( ! event.data.hasOwnProperty( 'message' ) ) {
+            return false;
+        }        
+
+		if ( event.data.message == 'aiovg-cookie-consent' ) {
+			const videos = document.querySelectorAll( '.aiovg-player-element' );
+			for ( let i = 0; i < videos.length; i++ ) {
+				videos[ i ].removeCookieConsent();
+			}
+		}
+
+		if ( event.data.message == 'aiovg-video-playing' ) {
+			const videos = document.querySelectorAll( 'aiovg-video' );
+			for ( let i = 0; i < videos.length; i++ ) {
+				videos[ i ].pause();
+			}
+		}
+    });
 });

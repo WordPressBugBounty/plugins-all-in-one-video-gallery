@@ -109,6 +109,8 @@ class AIOVG_Init {
 		 * side of the site.
 		 */
 		require_once AIOVG_PLUGIN_DIR . 'public/public.php';		
+		require_once AIOVG_PLUGIN_DIR . 'public/yoast.php';
+		require_once AIOVG_PLUGIN_DIR . 'public/rank-math.php';			
 		require_once AIOVG_PLUGIN_DIR . 'public/categories.php';
 		require_once AIOVG_PLUGIN_DIR . 'public/videos.php';		
 		require_once AIOVG_PLUGIN_DIR . 'public/video.php';
@@ -245,26 +247,14 @@ class AIOVG_Init {
 		$this->loader->add_action( 'wp', $public, 'set_mysql_rand_seed_value' );	
 		$this->loader->add_action( 'wp_loaded', $public, 'maybe_flush_rules', 11 );				
 		$this->loader->add_action( 'wp_head', $public, 'wp_head' );
+		$this->loader->add_action( 'wp_print_footer_scripts', $public, 'wp_print_footer_scripts', 99 );
 		$this->loader->add_action( 'wp_ajax_aiovg_set_cookie', $public, 'set_gdpr_cookie' );
 		$this->loader->add_action( 'wp_ajax_nopriv_aiovg_set_cookie', $public, 'set_gdpr_cookie' );
 		
-		if ( aiovg_can_use_yoast() ) {
-			$this->loader->add_filter( 'wpseo_title', $public, 'wpseo_title' );
-			$this->loader->add_filter( 'wpseo_opengraph_title', $public, 'wpseo_title' );
-			$this->loader->add_filter( 'wpseo_metadesc', $public, 'wpseo_metadesc' );
-			$this->loader->add_filter( 'wpseo_opengraph_desc', $public, 'wpseo_metadesc' );
-			$this->loader->add_filter( 'wpseo_canonical', $public, 'wpseo_canonical' );
-			$this->loader->add_filter( 'wpseo_opengraph_url', $public, 'wpseo_canonical' );
-			$this->loader->add_filter( 'wpseo_opengraph_image', $public, 'wpseo_opengraph_image' );
-			$this->loader->add_filter( 'wpseo_twitter_image', $public, 'wpseo_twitter_image' );
-			$this->loader->add_filter( 'wpseo_breadcrumb_links', $public, 'wpseo_breadcrumb_links' );
-			$this->loader->add_filter( 'wpseo_video_custom_field_details', $public, 'wpseo_video_sitemap_entry' );
-			$this->loader->add_filter( 'wpseo_video_youtube_details', $public, 'wpseo_video_sitemap_entry' );
-			$this->loader->add_filter( 'wpseo_video_vimeo_details', $public, 'wpseo_video_sitemap_entry' );
-		} else {
+		if ( ! aiovg_is_yoast_or_rank_math_active() ) {
 			$this->loader->add_filter( 'wp_title', $public, 'wp_title', 99, 3 );
 			$this->loader->add_filter( 'document_title_parts', $public, 'document_title_parts' );
-		}				
+		}
 
 		$this->loader->add_filter( 'the_title', $public, 'the_title', 99, 2 );
 		$this->loader->add_filter( 'single_post_title', $public, 'the_title', 99 );
@@ -272,6 +262,32 @@ class AIOVG_Init {
 		$this->loader->add_filter( 'post_thumbnail_html', $public, 'post_thumbnail_html', 10, 5 );
 		$this->loader->add_filter( 'term_link', $public, 'term_link', 10, 3 );
 		
+		// Hooks specific to the Yoast SEO plugin
+		$yoast = new AIOVG_Public_Yoast();
+
+		$this->loader->add_filter( 'wpseo_title', $yoast, 'wpseo_title' );
+		$this->loader->add_filter( 'wpseo_opengraph_title', $yoast, 'wpseo_title' );
+		$this->loader->add_filter( 'wpseo_metadesc', $yoast, 'wpseo_metadesc' );
+		$this->loader->add_filter( 'wpseo_opengraph_desc', $yoast, 'wpseo_metadesc' );
+		$this->loader->add_filter( 'wpseo_canonical', $yoast, 'wpseo_canonical' );
+		$this->loader->add_filter( 'wpseo_opengraph_url', $yoast, 'wpseo_canonical' );
+		$this->loader->add_filter( 'wpseo_opengraph_image', $yoast, 'wpseo_opengraph_image' );
+		$this->loader->add_filter( 'wpseo_twitter_image', $yoast, 'wpseo_twitter_image' );
+		$this->loader->add_filter( 'wpseo_breadcrumb_links', $yoast, 'wpseo_breadcrumb_links' );
+		$this->loader->add_filter( 'wpseo_video_custom_field_details', $yoast, 'wpseo_video_sitemap_entry' );
+		$this->loader->add_filter( 'wpseo_video_youtube_details', $yoast, 'wpseo_video_sitemap_entry' );
+		$this->loader->add_filter( 'wpseo_video_vimeo_details', $yoast, 'wpseo_video_sitemap_entry' );
+
+		// Hooks specific to the Rank Math SEO plugin
+		$rank_math = new AIOVG_Public_Rank_Math();
+
+		$this->loader->add_filter( 'rank_math/frontend/title', $rank_math, 'meta_title' );
+		$this->loader->add_filter( 'rank_math/frontend/description', $rank_math, 'meta_description' );
+		$this->loader->add_filter( 'rank_math/frontend/canonical', $rank_math, 'canonical_url' );
+		$this->loader->add_filter( 'rank_math/opengraph/facebook/image', $rank_math, 'opengraph_image_url' );
+		$this->loader->add_filter( 'rank_math/opengraph/twitter/image', $rank_math, 'opengraph_image_url' );
+		$this->loader->add_filter( 'rank_math/frontend/breadcrumb/items', $rank_math, 'breadcrumb_items' );
+
 		// Hooks specific to the categories page
 		$categories = new AIOVG_Public_Categories();
 		

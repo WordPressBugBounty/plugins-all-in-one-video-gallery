@@ -40,15 +40,9 @@ class AIOVG_Player_Iframe extends AIOVG_Player_Base {
  	 * @return string $html Player HTML.
 	 */
 	public function get_player() {
-		$player_settings  = $this->get_player_settings();
-		$privacy_settings = $this->get_privacy_settings();
+		$player_settings = $this->get_player_settings();
 
 		$this->embed_url = aiovg_get_player_page_url( $this->post_id, $this->args );
-
-		// Enqueue dependencies
-		if ( ! empty( $privacy_settings['show_consent'] ) ) {
-			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-player' );
-		}
 
 		// Output
 		$html = sprintf( 

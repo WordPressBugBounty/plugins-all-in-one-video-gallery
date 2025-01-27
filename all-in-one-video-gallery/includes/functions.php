@@ -114,23 +114,6 @@ function aiovg_base64_encode( $string ) {
 }
 
 /**
- * Check if Yoast SEO plugin is active and AIOVG can use that.
- *
- * @since  1.5.6
- * @return bool  $can_use_yoast True if can use Yoast, false if not.
- */
-function aiovg_can_use_yoast() {
-	$can_use_yoast = false;
-
-	$active_plugins = apply_filters( 'active_plugins', get_option( 'active_plugins' ) );
-	if ( in_array( 'wordpress-seo/wp-seo.php', $active_plugins ) || in_array( 'wordpress-seo-premium/wp-seo-premium.php', $active_plugins ) ) {
-		$can_use_yoast = true;
-	}
-
-	return $can_use_yoast;
-}
-
-/**
  * Combine video attributes as a string.
  * 
  * @since 2.0.0
@@ -724,7 +707,8 @@ function aiovg_get_default_settings() {
 				'linkedin'  => 'linkedin',
 				'pinterest' => 'pinterest',
 				'tumblr'    => 'tumblr',
-				'whatsapp'  => 'whatsapp'
+				'whatsapp'  => 'whatsapp',
+				'email'     => 'email'
 			),
 			'open_graph_tags'  => 1,
 			'twitter_username' => ''
@@ -807,6 +791,7 @@ function aiovg_get_default_settings() {
 			'disable_cookies'      => array()
 		),
 		'aiovg_general_settings' => array(
+			'custom_css'                => '',
 			'lazyloading'               => 0,
 			'datetime_format'           => '',
 			'maybe_flush_rewrite_rules' => 1,
@@ -2306,6 +2291,28 @@ function aiovg_is_gutenberg_page() {
 }
 
 /**
+ * Check if Yoast or the Rank Math SEO plugin is active.
+ *
+ * @since  3.9.5
+ * @return bool  True if active, false if not.
+ */
+function aiovg_is_yoast_or_rank_math_active() {	
+	$active_plugins = apply_filters( 'active_plugins', get_option( 'active_plugins' ) );
+
+	// Check if Yoast SEO plugin is active
+	if ( in_array( 'wordpress-seo/wp-seo.php', $active_plugins ) || in_array( 'wordpress-seo-premium/wp-seo-premium.php', $active_plugins ) ) {
+		return true;
+	}
+
+	// Check if Rank Math SEO plugin is active
+	if ( in_array( 'seo-by-rank-math/rank-math.php', $active_plugins ) ) {
+		return true;
+	}
+
+	return false;
+}
+
+/**
  * Convert relative file paths into absolute URLs.
  * 
  * @since  3.8.4
@@ -2771,6 +2778,18 @@ function the_aiovg_socialshare_buttons() {
 			'icon' => 'aiovg-icon-whatsapp',				
 			'text' => __( 'WhatsApp', 'all-in-one-video-gallery' ),
 			'url'  => $whatsapp_url
+		);
+	}
+
+	if ( isset( $socialshare_settings['services']['email'] ) ) {
+		$email_subject = sprintf( __( 'Check out the "%s"', 'all-in-one-video-gallery' ), $title );
+		$email_body    = sprintf( __( 'Check out the "%s" at %s', 'all-in-one-video-gallery' ), $title, $url );
+		$email_url     = "mailto:?subject={$email_subject}&amp;body={$email_body}";
+
+		$buttons['email'] = array(		
+			'icon' => 'aiovg-icon-email',
+			'text' => __( 'Email', 'all-in-one-video-gallery' ),
+			'url'  => $email_url
 		);
 	}
 

@@ -203,6 +203,12 @@ if ( ! empty( $embed_url ) ) {
         }
     </style>
 
+    <?php if ( isset( $general_settings['custom_css'] ) && ! empty( $general_settings['custom_css'] ) ) : ?>
+        <style type="text/css">
+		    <?php echo esc_html( $general_settings['custom_css'] ); ?>
+        </style>
+	<?php endif; ?>
+    
     <?php if ( $maybe_shortcode ) wp_head(); ?>
     <?php do_action( 'aiovg_player_iframe_head' ); ?>
 </head>

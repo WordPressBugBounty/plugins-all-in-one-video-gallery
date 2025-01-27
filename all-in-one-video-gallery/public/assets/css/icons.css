@@ -1,10 +1,10 @@
 @font-face {
 	font-family: 'aiovg-icons';
-	src: url('../fonts/aiovg-icons.eot?2afx3z');
-	src: url('../fonts/aiovg-icons.eot?2afx3z#iefix') format('embedded-opentype'),
-		url('../fonts/aiovg-icons.ttf?2afx3z') format('truetype'),
-		url('../fonts/aiovg-icons.woff?2afx3z') format('woff'),
-	  	url('../fonts/aiovg-icons.svg?2afx3z#aiovg-icons') format('svg');
+	src: url('../fonts/aiovg-icons.eot?tx9c7f');
+	src: url('../fonts/aiovg-icons.eot?tx9c7f#iefix') format('embedded-opentype'),
+		url('../fonts/aiovg-icons.ttf?tx9c7f') format('truetype'),
+		url('../fonts/aiovg-icons.woff?tx9c7f') format('woff'),
+	  	url('../fonts/aiovg-icons.svg?tx9c7f#aiovg-icons') format('svg');
 	font-weight: normal;
 	font-style: normal;
 	font-display: swap;
@@ -54,6 +54,10 @@
 
 .aiovg-icon-whatsapp:before {
 	content: "\ea93";
+}
+
+.aiovg-icon-email:before {
+	content: "\e901";
 }
 
 .aiovg-icon-close:before {

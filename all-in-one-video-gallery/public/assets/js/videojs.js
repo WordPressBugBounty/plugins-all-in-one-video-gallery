@@ -65,18 +65,17 @@ class AIOVGVideoElement extends HTMLElement {
 
 	_onCookieConsent() {
 		this.settings.player.autoplay = true;
+		this._setCookie();
 
-		const videos = document.querySelectorAll( 'aiovg-video' );
+		// Remove cookieconsent from other players
+		const videos = document.querySelectorAll( '.aiovg-player-element' );
         for ( let i = 0; i < videos.length; i++ ) {
             videos[ i ].removeCookieConsent();
         }
 
-		const embeds = document.querySelectorAll( '.aiovg-player-element[cookieconsent]' );
-        for ( let i = 0; i < embeds.length; i++ ) {
-            embeds[ i ].removeAttribute( 'cookieconsent' );
-        }
-
-		this._setCookie();
+		window.postMessage({
+            message: 'aiovg-cookie-consent'
+        }, window.location.origin );
 	}
 
 	_initPlayer() {
@@ -188,13 +187,17 @@ class AIOVGVideoElement extends HTMLElement {
 			this._updateViewsCount();
 		}	
 
-		// Pause other videos
-		const videos = document.querySelectorAll( 'aiovg-video' );
+		// Pause other players
+		const videos = document.querySelectorAll( '.aiovg-player-element' );
         for ( let i = 0; i < videos.length; i++ ) {
-			if ( videos[ i ] != this ) {
+            if ( videos[ i ] != this ) {
             	videos[ i ].pause();
 			}
         }
+
+		window.postMessage({					 				
+			message: 'aiovg-video-playing'
+		}, window.location.origin );
 	}
 
 	_onPlaying() {
@@ -648,45 +651,12 @@ class AIOVGVideoElement extends HTMLElement {
 (function( $ ) {	
 
 	/**
-	 * Refresh iframe player elements upon cookie confirmation.
-	 */
-	window.onmessage = function( event ) {
-		if ( event.data == 'aiovg-cookie-consent' ) {
-			$( '.aiovg-player-iframe iframe' ).each(function() {
-				const src = $( this ).attr( 'src' );
-
-				if ( src.indexOf( 'refresh=1' ) == -1 ) {
-                    const separator = src.indexOf( '?' ) > -1 ? '&' : '?';
-					$( this ).attr( 'src', src + separator + 'refresh=1' );
-				}
-			});
-		}
-	};
-
-	/**
 	 * Called when the page has loaded.
 	 */
 	$(function() {
 		
 		// Register custom element
 		customElements.define( 'aiovg-video', AIOVGVideoElement );
-
-		// Update views count for the non-iframe embeds
-		$( '.aiovg-player-raw' ).each(function() {
-			const settings = $( this ).data( 'params' );
-
-			if ( settings.post_type != 'aiovg_videos' ) {
-				return;
-			}
-
-			const data = {
-				'action': 'aiovg_update_views_count',
-				'post_id': settings.post_id,
-				'security': aiovg_player.ajax_nonce
-			};
-
-			$.post( aiovg_player.ajax_url, data );
-		});
 
 		// Custom error message
 		if ( typeof videojs !== 'undefined' ) {
@@ -711,6 +681,35 @@ class AIOVGVideoElement extends HTMLElement {
 				return error;
 			});
 		}
+
+		// Listen to the iframe player events
+		window.addEventListener( 'message', function( event ) {
+			if ( event.origin != window.location.origin ) {
+				return false;
+			}
+	
+			if ( ! event.data.hasOwnProperty( 'context' ) || event.data.context != 'iframe' ) {
+				return false;
+			}
+
+			if ( ! event.data.hasOwnProperty( 'message' ) ) {
+				return false;
+			}			
+
+			if ( event.data.message == 'aiovg-cookie-consent' ) {
+				const videos = document.querySelectorAll( '.aiovg-player-element' );
+				for ( let i = 0; i < videos.length; i++ ) {
+					videos[ i ].removeCookieConsent();
+				}
+			}
+
+			if ( event.data.message == 'aiovg-video-playing' ) {
+				const videos = document.querySelectorAll( '.aiovg-player-element' );
+				for ( let i = 0; i < videos.length; i++ ) {
+					videos[ i ].pause();
+				}
+			}
+		});
 
 	});
 

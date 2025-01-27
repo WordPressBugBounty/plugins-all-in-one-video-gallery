@@ -126,6 +126,12 @@ $consent_button_label = apply_filters( 'aiovg_translate_strings', $privacy_setti
             opacity: 0.8;
         }
     </style>
+
+    <?php if ( isset( $general_settings['custom_css'] ) && ! empty( $general_settings['custom_css'] ) ) : ?>
+        <style type="text/css">
+		    <?php echo esc_html( $general_settings['custom_css'] ); ?>
+        </style>
+	<?php endif; ?>
 </head>
 <body>    
 	<div id="privacy-wrapper" style="background-image: url(<?php echo esc_url( $image ); ?>);">
@@ -152,11 +158,22 @@ $consent_button_label = apply_filters( 'aiovg_translate_strings', $privacy_setti
 			
 			xmlhttp.onreadystatechange = function() {				
 				if ( xmlhttp.readyState == 4 && xmlhttp.status == 200 && xmlhttp.responseText ) {					
-                    var url = window.location.href;
-                    var separator = url.indexOf( '?' ) > -1 ? '&' : '?';
+                    // Remove cookieconsent from other players 
+                    window.parent.postMessage({                       
+                        message: 'aiovg-cookie-consent',
+                        context: 'iframe'
+                    }, window.location.origin );
 
-                    window.parent.postMessage( 'aiovg-cookie-consent', '*' );
-                    window.location.href = url + separator + 'refresh=1'; // Reload document
+                    // Reload document
+                    var url = new URL( window.location.href );
+
+                    var searchParams = url.searchParams;
+                    searchParams.set( 'autoplay', 1 );
+                    searchParams.set( 'nocookie', 1 );
+
+                    url.search = searchParams.toString();
+
+                    window.location.href = url.toString();
 				}					
 			}
 
