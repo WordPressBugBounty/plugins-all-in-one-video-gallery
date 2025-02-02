@@ -49,6 +49,13 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
  	 * @return string Player HTML.
 	 */
 	public function get_player() {
+		// Check if the current user has access to this video
+		if ( $this->post_id > 0 && 'aiovg_videos' == $this->post_type ) {
+			if ( ! aiovg_current_user_has_video_access( $this->post_id ) ) {
+				return $this->get_player_restricted_message();
+			}
+		}
+
 		$videos = $this->get_videos();
 
 		// Raw embedcode that contains script tags

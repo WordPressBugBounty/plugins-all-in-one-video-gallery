@@ -248,6 +248,11 @@ class AIOVG_Admin {
 				aiovg_insert_missing_pages();			
 			}
 
+			// Insert the restrictions settings
+			if ( false == get_option( 'aiovg_restrictions_settings' ) ) {
+				add_option( 'aiovg_restrictions_settings', $defaults['aiovg_restrictions_settings'] );
+			}
+
 			// Insert the privacy settings			
 			if ( false == get_option( 'aiovg_privacy_settings' ) ) {
 				add_option( 'aiovg_privacy_settings', $defaults['aiovg_privacy_settings'] );

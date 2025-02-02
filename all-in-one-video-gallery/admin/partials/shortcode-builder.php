@@ -183,9 +183,9 @@ if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
                                             <ul name="<?php echo esc_attr( $field['name'] ); ?>" class="aiovg-shortcode-field aiovg-checklist widefat" data-default="">
                                                 <?php
                                                 $args = array(
-                                                'taxonomy'      => 'aiovg_categories',
-                                                'walker'        => null,
-                                                'checked_ontop' => false
+                                                    'taxonomy'      => 'aiovg_categories',
+                                                    'walker'        => null,
+                                                    'checked_ontop' => false
                                                 ); 
                                             
                                                 wp_terms_checklist( 0, $args );
@@ -196,9 +196,9 @@ if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
                                             <ul name="<?php echo esc_attr( $field['name'] ); ?>" class="aiovg-shortcode-field aiovg-checklist widefat" data-default="">
                                                 <?php
                                                 $args = array(
-                                                'taxonomy'      => 'aiovg_tags',
-                                                'walker'        => null,
-                                                'checked_ontop' => false
+                                                    'taxonomy'      => 'aiovg_tags',
+                                                    'walker'        => null,
+                                                    'checked_ontop' => false
                                                 ); 
                                             
                                                 wp_terms_checklist( 0, $args );

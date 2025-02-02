@@ -62,7 +62,7 @@ if ( ! empty( $post_meta ) ) {
 			}
 
 			if ( ! empty( $post_meta['sources'][0] ) ) {
-				$_sources = unserialize( $post_meta['sources'][0] );
+				$_sources = maybe_unserialize( $post_meta['sources'][0] );
 
 				foreach ( $_sources as $source ) {
 					if ( ! empty( $source['quality'] ) && ! empty( $source['src'] ) ) {	
@@ -142,7 +142,7 @@ $cc_load_policy = isset( $_GET['cc_load_policy'] ) ? (int) $_GET['cc_load_policy
 
 if ( ! empty( $post_meta['track'] ) ) {
 	foreach ( $post_meta['track'] as $track ) {
-		$tracks[] = unserialize( $track );
+		$tracks[] = maybe_unserialize( $track );
 	}	
 
 	if ( ! empty( $cc_load_policy ) ) {
@@ -163,7 +163,7 @@ if ( $has_chapters && ! empty( $post_meta['chapter'] ) ) {
 	$chapters = array();
 
 	foreach ( $post_meta['chapter'] as $chapter ) {
-		$chapter = unserialize( $chapter );
+		$chapter = maybe_unserialize( $chapter );
 
 		$chapters[] = array(
 			'label' => sanitize_text_field( $chapter['label'] ),

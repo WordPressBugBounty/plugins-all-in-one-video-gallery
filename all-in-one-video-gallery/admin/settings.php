@@ -95,11 +95,12 @@ class AIOVG_Admin_Settings {
      */
     public function get_tabs() {	
 		$tabs = array(
-			'general'  => __( 'General', 'all-in-one-video-gallery' ),
-            'player'   => __( 'Player', 'all-in-one-video-gallery' ),
-            'seo'      => __( 'SEO', 'all-in-one-video-gallery' ),
-            'privacy'  => __( 'GDPR Compliance', 'all-in-one-video-gallery' ),
-			'advanced' => __( 'Advanced', 'all-in-one-video-gallery' )
+			'general'      => __( 'General', 'all-in-one-video-gallery' ),
+            'player'       => __( 'Player', 'all-in-one-video-gallery' ),
+            'seo'          => __( 'SEO', 'all-in-one-video-gallery' ),
+            'restrictions' => __( 'Restrictions', 'all-in-one-video-gallery' ),
+            'privacy'      => __( 'GDPR - Privacy', 'all-in-one-video-gallery' ),
+			'advanced'     => __( 'Advanced', 'all-in-one-video-gallery' )
 		);
 		
 		return apply_filters( 'aiovg_settings_tabs', $tabs );	
@@ -191,8 +192,15 @@ class AIOVG_Admin_Settings {
                 'page'        => 'aiovg_permalink_settings'
             ),
             array(
+                'id'          => 'aiovg_restrictions_settings',
+                'title'       => __( 'Video Restrictions Settings', 'all-in-one-video-gallery' ),
+                'description' => '',
+                'tab'         => 'restrictions',
+                'page'        => 'aiovg_restrictions_settings'
+            ),
+            array(
                 'id'          => 'aiovg_privacy_settings',
-                'title'       => __( 'GDPR Compliance', 'all-in-one-video-gallery' ),
+                'title'       => __( 'GDPR - Privacy', 'all-in-one-video-gallery' ),
 				'description' => __( 'These options will help with privacy restrictions such as GDPR and the EU Cookie Law.', 'all-in-one-video-gallery' ),
                 'tab'         => 'privacy',
                 'page'        => 'aiovg_privacy_settings'
@@ -240,8 +248,6 @@ class AIOVG_Admin_Settings {
      * @return array $fields Setting fields array.
      */
     public function get_fields() {
-        $video_templates = aiovg_get_video_templates();
-
 		$fields = array(			
 			'aiovg_player_settings' => array(
                 array(
@@ -527,7 +533,7 @@ class AIOVG_Admin_Settings {
                     'label'             => __( 'Select Template', 'all-in-one-video-gallery' ),
                     'description'       => ( aiovg_fs()->is_not_paying() ? sprintf( __( '<a href="%s" target="_blank">Upgrade Pro</a> for more templates (Popup, Inline, Slider, Playlist, Compact, etc.)', 'all-in-one-video-gallery' ), esc_url( aiovg_fs()->get_upgrade_url() ) ) : '' ),
                     'type'              => 'select',
-					'options'           => $video_templates,
+					'options'           => aiovg_get_video_templates(),
 					'sanitize_callback' => 'sanitize_key'
                 ),                                
 				array(
@@ -826,6 +832,42 @@ class AIOVG_Admin_Settings {
                     'sanitize_callback' => 'sanitize_text_field'
                 )
 			),
+            'aiovg_restrictions_settings' => array(
+                array(
+                    'name'              => 'enable_restrictions',
+                    'label'             => __( 'Enable Video Access Restrictions', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Check this option to restrict access to videos listed under the plugin\'s "All Videos" menu.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+					'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'access_control',
+                    'label'             => __( 'Who Can Access the Videos?', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Users with editing permissions (e.g., administrators, editors) will always have access. This is a global setting but can be overridden for individual videos.', 'all-in-one-video-gallery' ),
+                    'type'              => 'select',
+					'options'           => array(
+						0 => __( 'Everyone', 'all-in-one-video-gallery' ),
+						1 => __( 'Logged out users', 'all-in-one-video-gallery' ),
+                        2 => __( 'Logged in users', 'all-in-one-video-gallery' )
+					),
+					'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'restricted_roles',
+                    'label'             => __( 'Select User Roles Allowed to Access Videos', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'If no roles are selected, all users will have access. Users with editing permissions will always have access. This is a global setting but can be overridden for individual videos.', 'all-in-one-video-gallery' ),
+                    'type'              => 'multicheck',
+					'options'           => aiovg_get_user_roles(),
+					'sanitize_callback' => 'aiovg_sanitize_array'
+                ),
+                array(
+                    'name'              => 'restricted_message',
+                    'label'             => __( 'Restricted Access Message', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Customize the message displayed to users who do not have permission to view restricted videos.', 'all-in-one-video-gallery' ),
+                    'type'              => 'wysiwyg',
+                    'sanitize_callback' => 'wp_kses_post'
+               	)
+            ),
             'aiovg_privacy_settings' => array(
 				array(
                     'name'              => 'show_consent',
@@ -1179,8 +1221,8 @@ class AIOVG_Admin_Settings {
             $html    .= sprintf( '<input type="checkbox" class="checkbox" id="%1$s[%2$s][%3$s]" name="%1$s[%2$s][%3$s]" value="%3$s" %4$s />', $args['section'], $args['id'], $key, $checked );
             $html    .= sprintf( '%1$s</label><br>',  $label );
         }
-        $html .= $this->get_field_description( $args );
         $html .= '</fieldset>';
+        $html .= $this->get_field_description( $args );
 		
         echo $html;		
     }

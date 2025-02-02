@@ -643,6 +643,46 @@ class AIOVG_Player_Base {
 	}			
 
 	/**
+	 * Get the HTML output for the restricted access message.
+	 *
+	 * @since  3.9.6
+ 	 * @return string $html The HTML message for restricted access.
+	 */
+	public function get_player_restricted_message() {
+		$restrictions_settings = get_option( 'aiovg_restrictions_settings' );
+		$player_settings = $this->get_player_settings();
+
+		$restricted_message = $restrictions_settings['restricted_message'];
+		if ( empty( $restricted_message ) ) {
+			$restricted_message = __( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' );
+		}
+
+		// Enqueue dependencies
+		wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-player' );		
+
+		// HTML output
+		$html = sprintf( 
+			'<div class="aiovg-player-container" style="max-width: %s;">', 
+			( ! empty( $player_settings['width'] ) ? (int) $player_settings['width'] . 'px' : '100%' )
+		);
+
+		$html .= sprintf( 
+			'<div class="aiovg-player" style="padding-bottom: %s%%;">',
+			(float) $player_settings['ratio']
+		);
+
+		$html .= sprintf(
+			'<div class="aiovg-restrictions-wrapper"><div class="aiovg-restrictions-message">%s</div></div>',
+			wp_kses_post( trim( $restricted_message ) )
+		);
+
+		$html .= '</div>';
+		$html .= '</div>';
+
+		return $html;
+	}
+	
+	/**
 	 * Get the raw player embedcode.
 	 *
 	 * @since  3.5.0

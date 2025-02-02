@@ -6,7 +6,7 @@ Tags: video player, video gallery, youtube gallery, vimeo gallery, live stream
 Requires at least: 6.3
 Tested up to: 6.7
 Requires PHP: 5.6.20
-Stable tag: 3.9.5
+Stable tag: 3.9.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,6 +21,10 @@ The ultimate video player & video gallery plugin for YouTubers, Video Bloggers, 
 **All-in-One Video Gallery** is a VIDEO POSTS plugin that helps you add videos as posts and build scalable, searchable, SEO-optimized video galleries in minutes. 
 
 No coding is required. Suitable for all kinds of websites that require a single video player to a large video-sharing website like YouTube/Vimeo. 
+
+### LATEST ADDITION
+
+* **New Video Restriction Options!** Now, you can **restrict videos for logged-in users, logged-out users, or specific user roles—globally or per video!**
 
 ### PLAYER FEATURES
 
@@ -145,6 +149,11 @@ Also, the videos from third-party services like "YouTube", "Vimeo", "Dailymotion
 7. Plugin Settings.
 
 == Changelog ==
+
+= 3.9.6 =
+
+* New: Introduced video access restrictions based on user roles, allowing global and per-video control.
+* Fix: [+] a few minor bug fixes.
 
 = 3.9.5 =
 
@@ -489,6 +498,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 3.9.5 =
+= 3.9.6 =
 
 Introduces several new features, bug fixes & enhancements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

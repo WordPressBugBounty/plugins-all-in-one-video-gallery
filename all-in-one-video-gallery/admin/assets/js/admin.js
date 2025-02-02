@@ -447,6 +447,16 @@
 			sortChapters();
 		}
 
+		// Videos: Toggle fields based on the selected access control.
+		$( '#aiovg-field-access_control select' ).on( 'change', function() {	
+			var value = parseInt( $( this ).val() );
+			if ( value == 2 ) {
+				$( '#aiovg-field-restricted_roles' ).show();
+			} else {
+				$( '#aiovg-field-restricted_roles' ).hide();
+			}
+		});
+
 		// Categories: Upload Image.
 		$( '#aiovg-categories-upload-image' ).on( 'click', function( event ) { 
             event.preventDefault();
@@ -524,7 +534,17 @@
 		$( '#aiovg-videos-settings tr.template select' ).on( 'change', function() {			
 			var value = $( this ).val();			
 			$( '#aiovg-videos-settings' ).aiovgReplaceClass( /\aiovg-template-\S+/ig, 'aiovg-template-' + value );
-		}).trigger( 'change' );	
+		}).trigger( 'change' );
+
+		// Settings: Toggle fields based on the selected access control for the videos.
+		$( '#aiovg-restrictions-settings tr.access_control select' ).on( 'change', function() {	
+			var value = parseInt( $( this ).val() );
+			if ( value == 2 ) {
+				$( '#aiovg-restrictions-settings tr.restricted_roles' ).show();
+			} else {
+				$( '#aiovg-restrictions-settings tr.restricted_roles' ).hide();
+			}
+		}).trigger( 'change' );
 
 		// Categories Widget: Toggle fields based on the selected categories template.
 		$( document ).on( 'change', '.aiovg-widget-form-categories .aiovg-widget-input-template', function() {			

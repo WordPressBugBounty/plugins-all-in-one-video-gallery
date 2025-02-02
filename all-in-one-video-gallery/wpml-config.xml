@@ -40,6 +40,9 @@
             <key name="logo_link"/>
             <key name="copyright_text"/>
         </key>
+        <key name="aiovg_restrictions_settings">
+            <key name="restricted_message"/>
+        </key>
         <key name="aiovg_privacy_settings">
             <key name="consent_message"/>
             <key name="consent_button_label"/>

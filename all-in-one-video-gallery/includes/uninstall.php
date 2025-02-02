@@ -89,6 +89,7 @@ class AIOVG_Uninstall {
             'aiovg_related_videos_settings',
             'aiovg_brand_settings',
             'aiovg_permalink_settings',
+            'aiovg_restrictions_settings',
             'aiovg_privacy_settings',
             'aiovg_general_settings',
             'aiovg_api_settings',

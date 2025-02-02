@@ -438,6 +438,18 @@ class AIOVG_Public_Video {
 			if ( post_password_required( $post->ID ) ) {
 				return $content;
 			}
+
+			if ( ! aiovg_current_user_has_video_access( $post->ID ) ) {
+				$restrictions_settings = get_option( 'aiovg_restrictions_settings' );
+
+				$restricted_message = $restrictions_settings['restricted_message'];
+				if ( empty( $restricted_message ) ) {
+					$restricted_message = __( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' );
+				}
+
+				$content = '<p>' . wp_kses_post( $restricted_message ) . '</p>';
+				return $content;
+			}
 			
 			// Vars
 			$video_settings = get_option( 'aiovg_video_settings' );					

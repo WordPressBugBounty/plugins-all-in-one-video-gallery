@@ -170,7 +170,7 @@ class AIOVG_Admin_Videos {
 	public function add_meta_boxes() {
 		add_meta_box( 
 			'aiovg-video-sources', 
-			__( 'Video Info', 'all-in-one-video-gallery' ), 
+			__( 'Video', 'all-in-one-video-gallery' ), 
 			array( $this, 'display_meta_box_video_sources' ), 
 			'aiovg_videos', 
 			'normal', 
@@ -179,7 +179,7 @@ class AIOVG_Admin_Videos {
 
 		add_meta_box( 
 			'aiovg-video-image', 
-			__( 'Thumbnail Image', 'all-in-one-video-gallery' ), 
+			__( 'Image', 'all-in-one-video-gallery' ), 
 			array( $this, 'display_meta_box_video_image' ), 
 			'aiovg_videos', 
 			'normal', 
@@ -202,6 +202,15 @@ class AIOVG_Admin_Videos {
 			'aiovg_videos', 
 			'normal', 
 			'high' 
+		);
+
+		add_meta_box( 
+			'aiovg-video-restrictions', 
+			__( 'Restrictions', 'all-in-one-video-gallery' ), 
+			array( $this, 'display_meta_box_video_restrictions' ), 
+			'aiovg_videos', 
+			'side', 
+			'default' 
 		);
 	}
 
@@ -228,7 +237,7 @@ class AIOVG_Admin_Videos {
 		$has_ogv       = isset( $post_meta['has_ogv'] ) ? $post_meta['has_ogv'][0] : 0;
 		$ogv           = isset( $post_meta['ogv'] ) ? $post_meta['ogv'][0] : '';
 		$quality_level = isset( $post_meta['quality_level'] ) ? $post_meta['quality_level'][0] : '';
-		$sources       = isset( $post_meta['sources'] ) ? unserialize( $post_meta['sources'][0] ) : array();
+		$sources       = isset( $post_meta['sources'] ) ? maybe_unserialize( $post_meta['sources'][0] ) : array();
 		$hls           = isset( $post_meta['hls'] ) ? $post_meta['hls'][0] : '';
 		$dash          = isset( $post_meta['dash'] ) ? $post_meta['dash'][0] : '';
 		$youtube       = isset( $post_meta['youtube'] ) ? $post_meta['youtube'][0] : '';
@@ -284,6 +293,19 @@ class AIOVG_Admin_Videos {
 	public function display_meta_box_video_chapters( $post ) {		
 		$chapters = get_post_meta( $post->ID, 'chapter' );
 		require_once AIOVG_PLUGIN_DIR . 'admin/partials/video-chapters.php';
+	}
+
+	/**
+	 * Display "Restrictions" meta box.
+	 *
+	 * @since 3.9.6
+	 * @param WP_Post $post WordPress Post object.
+	 */
+	public function display_meta_box_video_restrictions( $post ) {
+		$access_control   = get_post_meta( $post->ID, 'access_control', true );
+		$restricted_roles = get_post_meta( $post->ID, 'restricted_roles', true );
+
+		require_once AIOVG_PLUGIN_DIR . 'admin/partials/video-restrictions.php';
 	}
 	
 	/**
@@ -548,6 +570,19 @@ class AIOVG_Admin_Videos {
 					}					
 				}				
 			}			
+		}
+
+		// Check if "aiovg_video_restrictions_nonce" nonce is set
+    	if ( isset( $_POST['aiovg_video_restrictions_nonce'] ) ) {
+			// Verify that the nonce is valid
+    		if ( wp_verify_nonce( $_POST['aiovg_video_restrictions_nonce'], 'aiovg_save_video_restrictions' ) ) {			
+				// OK to save meta data
+				$access_control = isset( $_POST['access_control'] ) ? (int) $_POST['access_control'] : -1;
+    			update_post_meta( $post_id, 'access_control', $access_control );
+
+				$restricted_roles = isset( $_POST['restricted_roles'] ) ? array_map( 'sanitize_text_field', $_POST['restricted_roles'] ) : array();
+				update_post_meta( $post_id, 'restricted_roles', $restricted_roles );
+			}
 		}
 		
 		return $post_id;	

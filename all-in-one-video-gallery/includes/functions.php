@@ -298,6 +298,83 @@ function aiovg_current_user_can( $capability, $post_id = 0 ) {
 }
 
 /**
+ * Checks if the current user has access to watch a specific video.
+ *
+ * This function verifies whether the current user has permission to view the 
+ * given video based on role-based restrictions.
+ * 
+ * @since  3.9.6
+ * @param  int   $post_id The ID of the video post.
+ * @return bool           True if the current user has access, false otherwise.
+ */
+function aiovg_current_user_has_video_access( $post_id = 0 ) {
+	if ( 0 == $post_id ) {
+		return true;
+	}
+
+	if ( current_user_can( 'manage_aiovg_options' ) ) {
+		return true;
+	}
+
+	if ( aiovg_current_user_can( 'edit_aiovg_video', $post_id ) ) {
+		return true;
+	}
+
+	$restrictions_settings = get_option( 'aiovg_restrictions_settings' );
+	if ( empty( $restrictions_settings['enable_restrictions'] ) ) {
+		return true;
+	}
+	
+	$access_control   = $restrictions_settings['access_control'];
+	$restricted_roles = $restrictions_settings['restricted_roles'];
+
+	if ( metadata_exists( 'post', $post_id, 'access_control' ) ) {
+		$__access_control = (int) get_post_meta( $post_id, 'access_control', true );
+		if ( $__access_control != -1 ) {
+			$access_control = $__access_control;
+
+			if ( $access_control == 2 ) {
+				$__restricted_roles = get_post_meta( $post_id, 'restricted_roles', true );
+				if ( ! empty( $__restricted_roles ) ) {		
+					$restricted_roles = $__restricted_roles;
+				}		
+			}
+		}		
+	}
+
+	// Everyone
+	if ( $access_control == 0 ) {
+		return true;
+	}
+
+	// Logged out users only
+	if ( $access_control == 1 ) {
+		if ( ! is_user_logged_in() ) {
+			return true;
+		}
+	}
+
+	// Logged in users only
+	if ( $access_control == 2 ) {
+		if ( is_user_logged_in() ) {
+			$restricted_roles = (array) $restricted_roles;
+			$restricted_roles = array_filter( $restricted_roles );
+			if ( empty( $restricted_roles ) ) {
+				return true;
+			}
+
+			$current_user  = wp_get_current_user();
+			$roles_matched = array_intersect( $current_user->roles, $restricted_roles );
+			if ( count( $roles_matched ) > 0 ) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+/**
  * Delete category attachments.
  *
  * @since 1.0.0
@@ -783,6 +860,12 @@ function aiovg_get_default_settings() {
 		),					
 		'aiovg_permalink_settings' => array(
 			'video' => $video_page_slug
+		),
+		'aiovg_restrictions_settings' => array(
+			'enable_restrictions' => 0,
+			'access_control'      => 2,
+			'restricted_roles'    => array(),
+			'restricted_message'  => __( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' )
 		),
 		'aiovg_privacy_settings' => array(
 			'show_consent'         => 0,
@@ -1323,7 +1406,6 @@ function aiovg_get_shortcode_fields() {
 	$videos_settings     = array_merge( $defaults['aiovg_videos_settings'], get_option( 'aiovg_videos_settings', array() ) );
 	$player_settings     = array_merge( $defaults['aiovg_player_settings'], get_option( 'aiovg_player_settings', array() ) );
 	$images_settings     = array_merge( $defaults['aiovg_images_settings'], (array) get_option( 'aiovg_images_settings', array() ) );
-	$video_templates     = aiovg_get_video_templates();
 	
 	// Fields	
 	$fields = array(
@@ -1571,7 +1653,7 @@ function aiovg_get_shortcode_fields() {
 							'label'       => __( 'Select Template', 'all-in-one-video-gallery' ),
 							'description' => ( aiovg_fs()->is_not_paying() ? sprintf( __( '<a href="%s" target="_blank">Upgrade Pro</a> for more templates (Popup, Inline, Slider, Playlist, Compact, etc.)', 'all-in-one-video-gallery' ), esc_url( aiovg_fs()->get_upgrade_url() ) ) : '' ),
 							'type'        => 'select',
-							'options'     => $video_templates,
+							'options'     => aiovg_get_video_templates(),
 							'value'       => $videos_settings['template']
 						),
 						array(
@@ -2167,6 +2249,19 @@ function aiovg_get_video_templates() {
 	);
 	
 	return apply_filters( 'aiovg_video_templates', $templates );
+}
+
+/**
+ * Get a list of user roles.
+ *
+ * @since  3.9.6
+ * @return array Array of user roles.
+ */
+function aiovg_get_user_roles() {
+	$roles = wp_roles()->get_names();
+	asort( $roles );
+	
+	return $roles;
 }
 
 /**

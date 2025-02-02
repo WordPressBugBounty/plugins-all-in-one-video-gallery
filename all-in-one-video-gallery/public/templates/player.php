@@ -34,6 +34,12 @@ if ( $post_id > 0 ) {
 		
 	if ( 'aiovg_videos' == $post_type ) {
 		$post_meta = get_post_meta( $post_id );		
+		
+		// Check if the current user has access to this video
+		if ( ! aiovg_current_user_has_video_access( $post_id ) ) {
+			include apply_filters( 'aiovg_load_template', AIOVG_PLUGIN_DIR . 'public/templates/player-restricted.php' );
+			return false;
+		}
 	}
 }
 
