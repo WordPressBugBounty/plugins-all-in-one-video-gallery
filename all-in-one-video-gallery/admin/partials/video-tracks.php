@@ -55,7 +55,7 @@
 		<?php esc_html_e( '[+] Add New File', 'all-in-one-video-gallery' ); ?>
 	</a>
 
-	<table id="aiovg-tracks-clone" hidden>
+	<template id="aiovg-template-track">
 		<tr class="aiovg-tracks-row">
 			<td class="aiovg-handle">
 				<span class="aiovg-text-muted dashicons dashicons-sort"></span>
@@ -89,7 +89,7 @@
 				</div>
 			</td>
 		</tr>		
-	</table>
+	</template>
 
 	<?php wp_nonce_field( 'aiovg_save_video_tracks', 'aiovg_video_tracks_nonce' ); // Nonce ?>
 </div>

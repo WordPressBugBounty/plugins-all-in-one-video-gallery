@@ -183,20 +183,24 @@ $tracks = apply_filters( 'aiovg_iframe_videojs_player_tracks', $tracks );
 // Video Chapters
 $has_chapters = isset( $_GET['chapters'] ) ? (int) $_GET['chapters'] : isset( $player_settings['controls']['chapters'] );
 
-if ( $has_chapters && ! empty( $post_meta['chapter'] ) ) {	
-	$chapters = array();
+if ( $has_chapters && 'aiovg_videos' == $post_type ) {	
+	$post     = get_post( $post_id );
+	$chapters = aiovg_extract_chapters_from_string( $post->post_content );
 
-	foreach ( $post_meta['chapter'] as $chapter ) {
-		$chapter = maybe_unserialize( $chapter );
+	if ( ! empty( $post_meta['chapter'] ) ) {	
+		foreach ( $post_meta['chapter'] as $chapter ) {
+			$chapter = maybe_unserialize( $chapter );
+			$seconds = aiovg_convert_time_to_seconds( $chapter['time'] );
 
-		$chapters[] = array(
-			'label' => sanitize_text_field( $chapter['label'] ),
-			'time'  => (float) $chapter['time']
-		);
+			$chapters[ $seconds ] = array(
+				'time'  => $seconds,
+				'label' => sanitize_text_field( $chapter['label'] )				
+			);
+		}
 	}
 
 	if ( ! empty( $chapters ) ) {
-		$settings['chapters'] = $chapters;
+		$settings['chapters'] = array_values( $chapters );
 	}
 }
 
@@ -645,6 +649,10 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		/* Poster */
 		.aiovg-player .video-js .vjs-poster {
 			background-color: #000;
+		}
+
+		.aiovg-player .video-js .vjs-poster img {
+			object-fit: cover;
 		}
 
 		.aiovg-player .video-js.vjs-ended .vjs-poster {
@@ -1898,6 +1906,15 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 
 					case 'aiovg-video-pause':
 						player.pause();
+						break;
+
+					case 'aiovg-video-seek':
+						if ( event.data.hasOwnProperty( 'seconds' ) ) {
+							player.currentTime( event.data.seconds );
+							if ( ! hasVideoStarted ) {
+								player.play();
+							}
+						}
 						break;
 				}
 			});

@@ -12,7 +12,8 @@ class AIOVGVideoElement extends HTMLElement {
         this._isRendered = false;
 		this._isCookieConsentLoaded = false;
 		this._isPosterImageLoaded = false;
-        this._isPlayerLoaded = false; 
+        this._isPlayerLoaded = false;
+		this._hasVideoStarted = false; 
 		this._player = null;
 		this._playerEl = null;
 		this._cookieConsentEl = null;
@@ -149,11 +150,9 @@ class AIOVGVideoElement extends HTMLElement {
 		});
 
 		// Update views count
-		let _hasVideoStarted = false;
-
 		this._player.on( 'playing', () => {
-			if ( ! _hasVideoStarted ) {
-				_hasVideoStarted = true;
+			if ( ! this._hasVideoStarted ) {
+				this._hasVideoStarted = true;
 				this._updateViewsCount();
 			}			
 
@@ -504,6 +503,15 @@ class AIOVGVideoElement extends HTMLElement {
 	pause() {
 		if ( this._player ) {
 			this._player.pause();
+		}
+	}
+
+	seekTo( seconds ) {
+		if ( this._player ) {
+			this._player.currentTime = seconds;
+			if ( ! this._hasVideoStarted ) {
+				this._player.play();
+			}
 		}
 	}
 

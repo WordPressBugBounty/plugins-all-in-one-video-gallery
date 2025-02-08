@@ -418,6 +418,74 @@ class AIOVG_Public_Video {
 	}	
 	
 	/**
+	 * Filters the video title and adds a restrictions label if applicable.
+	 *
+	 * @since  3.9.7
+	 * @param  string $title   The original video title.
+	 * @param  int    $post_id The video post ID.
+	 * @return string          The modified title with the restrictions label if applicable.
+	 */
+	public function filter_the_title_with_restrictions_label( $title, $post_id ) {
+		if ( ! aiovg_current_user_has_video_access( $post_id ) ) {
+			$restrictions_settings = get_option( 'aiovg_restrictions_settings' );
+
+			if ( ! empty( $restrictions_settings['show_restricted_label'] ) ) {
+				$restricted_label_text = $restrictions_settings['restricted_label_text'];				
+				if ( empty( $restricted_label_text ) ) {
+					$restricted_label_text = __( 'restricted', 'all-in-one-video-gallery' );
+				}
+
+				$restricted_label_bg_color = $restrictions_settings['restricted_label_bg_color'];				
+				if ( empty( $restricted_label_bg_color ) ) {
+					$restricted_label_bg_color = '#aaa';
+				}
+
+				$restricted_label_text_color = $restrictions_settings['restricted_label_text_color'];				
+				if ( empty( $restricted_label_text_color ) ) {
+					$restricted_label_text_color = '#fff';
+				}
+
+				$title = sprintf( 
+					'<span class="aiovg-restricted-label" style="background-color: %s; color: %s;">%s</span> %s',
+					esc_attr( $restricted_label_bg_color ),
+					esc_attr( $restricted_label_text_color ),
+					esc_html( $restricted_label_text ),
+					$title
+				);
+			}
+		}
+		
+		return $title;
+	}
+
+	/**
+	 * Filters timestamps in the video description and wraps them with links.
+	 *
+	 * @since  3.9.7
+	 * @param  string $content The original video description.
+	 * @return string          The modified description with timestamps wrapped in links.
+	 */
+	public function wrap_timestamps_with_links( $content ) {
+		$player_settings = get_option( 'aiovg_player_settings' );
+
+		if ( isset( $player_settings['controls']['chapters'] ) ) {
+			$pattern = '/(\d{1,2}:)?\d{1,2}:\d{2}/';
+
+			// Replace timestamps with anchor tags
+			$content = preg_replace_callback( $pattern, function( $matches ) {
+				$timestamp = $matches[0];
+				return sprintf(
+					'<a href="javascript:void(0);" class="aiovg-chapter-timestamp" data-time="%s">%s</a>',
+					aiovg_convert_time_to_seconds( $timestamp ),
+					$timestamp
+				);
+			}, $content );
+		}
+
+		return $content;
+	}
+
+	/**
 	 * Filter the post content.
 	 *
 	 * @since  1.0.0
@@ -452,6 +520,7 @@ class AIOVG_Public_Video {
 			}
 			
 			// Vars
+			$player_settings = get_option( 'aiovg_player_settings' );	
 			$video_settings = get_option( 'aiovg_video_settings' );					
 			$related_videos_settings = get_option( 'aiovg_related_videos_settings' );
 			$categories_settings = get_option( 'aiovg_categories_settings' );
@@ -499,6 +568,10 @@ class AIOVG_Public_Video {
 			
 			// Enqueue dependencies
 			wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-public' );
+
+			if ( isset( $player_settings['controls']['chapters'] ) ) {
+				wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-public' );
+			}
 			
 			// Process output
 			ob_start();

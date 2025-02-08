@@ -168,6 +168,8 @@ class AIOVG_Admin_Videos {
 	 * @since 1.0.0
 	 */
 	public function add_meta_boxes() {
+		$restrictions_settings = get_option( 'aiovg_restrictions_settings' );
+
 		add_meta_box( 
 			'aiovg-video-sources', 
 			__( 'Video', 'all-in-one-video-gallery' ), 
@@ -204,14 +206,16 @@ class AIOVG_Admin_Videos {
 			'high' 
 		);
 
-		add_meta_box( 
-			'aiovg-video-restrictions', 
-			__( 'Restrictions', 'all-in-one-video-gallery' ), 
-			array( $this, 'display_meta_box_video_restrictions' ), 
-			'aiovg_videos', 
-			'side', 
-			'default' 
-		);
+		if ( ! empty( $restrictions_settings['enable_restrictions'] ) ) {
+			add_meta_box( 
+				'aiovg-video-restrictions', 
+				__( 'Restrictions', 'all-in-one-video-gallery' ), 
+				array( $this, 'display_meta_box_video_restrictions' ), 
+				'aiovg_videos', 
+				'side', 
+				'default' 
+			);
+		}
 	}
 
 	/**
@@ -554,16 +558,16 @@ class AIOVG_Admin_Videos {
 				// OK to save meta data
 				delete_post_meta( $post_id, 'chapter' );
 				
-				if ( ! empty( $_POST['chapter_label'] ) ) {				
-					foreach ( $_POST['chapter_label'] as $key => $value ) {
-						$label = sanitize_text_field( $_POST['chapter_label'][ $key ] );
+				if ( ! empty( $_POST['chapter_time'] ) ) {				
+					foreach ( $_POST['chapter_time'] as $key => $value ) {						
 						$time  = sanitize_text_field( $_POST['chapter_time'][ $key ] );
+						$label = sanitize_text_field( $_POST['chapter_label'][ $key ] );
 
-						if ( empty( $label ) || empty( $time ) ) continue;
+						if ( empty( $time ) || empty( $label ) ) continue;
 
-						$chapter = array(							
-							'label' => $label,
-							'time'  => $time
+						$chapter = array(
+							'time'  => $time,
+							'label' => $label
 						);
 						
 						add_post_meta( $post_id, 'chapter', $chapter );

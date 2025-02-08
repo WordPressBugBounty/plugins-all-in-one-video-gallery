@@ -507,6 +507,13 @@ img.aiovg-responsive-element {
 	margin: 0;
 	font-size: 1.125em;
 }
+.aiovg-caption .aiovg-title .aiovg-restricted-label {
+	display: inline-flex;
+	padding: 3px 5px;
+	border-radius: 2px;
+	font-size: 90%;
+	line-height: 1;
+}
 
 .aiovg-caption .aiovg-excerpt,
 .aiovg-caption .aiovg-description,

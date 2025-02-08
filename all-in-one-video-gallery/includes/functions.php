@@ -135,6 +135,29 @@ function aiovg_combine_video_attributes( $atts ) {
 }
 
 /**
+ * Converts a timestamp string into seconds.
+ *
+ * This function takes a time string formatted as HH:MM:SS or MM:SS
+ * and converts it into the total number of seconds.
+ *
+ * @since  3.9.7
+ * @param  string $time The timestamp string (HH:MM:SS or MM:SS).
+ * @return int          The total time in seconds.
+ */
+function aiovg_convert_time_to_seconds( $time ) {
+    $parts = explode( ':', $time );
+    $parts = array_map( 'intval', $parts ); // Convert to integers
+
+    if ( count( $parts ) === 3 ) {
+        return $parts[0] * 3600 + $parts[1] * 60 + $parts[2]; // HH:MM:SS
+    } elseif ( count( $parts ) === 2 ) {
+        return $parts[0] * 60 + $parts[1]; // MM:SS
+    }
+
+    return (int) $time;
+}
+
+/**
  * Create an attachment from the external image URL and return the attachment ID.
  * 
  * @since  2.6.3
@@ -464,6 +487,37 @@ function aiovg_dropdown_terms( $args ) {
 }
 
 /**
+ * Extracts chapters from a given string containing timestamps and titles.
+ * 
+ * This function parses a structured string input, identifying timestamps and 
+ * their corresponding chapter titles, then returns them as an array.
+ * 
+ * @since  3.9.7
+ * @param  string $string The input string containing timestamps and chapter titles.
+ * @return array          An array of chapters, each containing 'title', and 'seconds'.
+ */
+function aiovg_extract_chapters_from_string( $string ) {
+	// Regex to match timestamps and titles
+	$pattern = '/((\d{1,2}:)?\d{1,2}:\d{2})\s+(.+)/';
+
+	$chapters = array();
+
+	if ( preg_match_all( $pattern, $string, $matches, PREG_SET_ORDER ) ) {
+		foreach ( $matches as $match ) {
+			$seconds = aiovg_convert_time_to_seconds( trim( $match[1] ) );
+			$label   = isset( $match[3] ) ? ltrim( $match[3], '-' ) : '';
+
+			$chapters[ $seconds ] = array(				
+				'time'  => $seconds,
+				'label' => sanitize_text_field( trim( $label ) )
+			);
+		}
+	}
+
+	return $chapters;
+}
+
+/**
  * Extract player attributes.
  * 
  * @since  3.9.3
@@ -752,6 +806,7 @@ function aiovg_get_default_settings() {
 		'aiovg_player_settings' => array(
 			'player'      => 'videojs',
 			'theme'       => 'default',
+			'theme_color' => '#00b2ff',
 			'width'       => '',
 			'ratio'       => 56.25,
 			'autoplay'    => 0,
@@ -862,10 +917,14 @@ function aiovg_get_default_settings() {
 			'video' => $video_page_slug
 		),
 		'aiovg_restrictions_settings' => array(
-			'enable_restrictions' => 0,
-			'access_control'      => 2,
-			'restricted_roles'    => array(),
-			'restricted_message'  => __( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' )
+			'enable_restrictions'         => 0,
+			'access_control'              => 2,
+			'restricted_roles'            => array(),
+			'restricted_message'          => __( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' ),
+			'show_restricted_label'       => 1,
+			'restricted_label_text'       => __( 'restricted', 'all-in-one-video-gallery' ),
+			'restricted_label_bg_color'   => '#aaa',
+			'restricted_label_text_color' => '#fff'
 		),
 		'aiovg_privacy_settings' => array(
 			'show_consent'         => 0,

@@ -283,12 +283,23 @@ class AIOVG_Player_Base {
 		$chapters = array();
 
 		if ( $this->post_id > 0 && 'aiovg_videos' == $this->post_type ) {
-			$chapters = get_post_meta( $this->post_id, 'chapter' );
-			
-			foreach ( $chapters as $index => $chapter ) {
-				$chapters[ $index ]['label'] = sanitize_text_field( $chapter['label'] );
-				$chapters[ $index ]['time']  = (float) $chapter['time'];
+			$post     = get_post( $this->post_id );
+			$chapters = aiovg_extract_chapters_from_string( $post->post_content );
+
+			if ( $__chapters = get_post_meta( $this->post_id, 'chapter' ) ) {			
+				foreach ( $__chapters as $chapter ) {
+					$seconds = aiovg_convert_time_to_seconds( $chapter['time'] );
+
+					$chapters[ $seconds ] = array(
+						'time'  => $seconds,
+						'label' => sanitize_text_field( $chapter['label'] )				
+					);
+				}
 			}
+		}
+
+		if ( ! empty( $chapters ) ) {
+			$chapters = array_values( $chapters );
 		}
 
 		// Output

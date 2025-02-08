@@ -296,44 +296,42 @@
 		</tbody>
 	</table>
 
-	<?php if ( ! empty( $quality_levels ) ) : ?>
-		<div id="aiovg-source-clone" hidden>
-			<div class="aiovg-source aiovg-flex aiovg-flex-col aiovg-gap-2">
-				<?php
-				echo '<div class="aiovg-quality-selector aiovg-flex aiovg-flex-col aiovg-gap-2">';
+	<template id="aiovg-template-source">
+		<div class="aiovg-source aiovg-flex aiovg-flex-col aiovg-gap-2">
+			<?php
+			echo '<div class="aiovg-quality-selector aiovg-flex aiovg-flex-col aiovg-gap-2">';
 
-				echo '<p class="aiovg-no-margin">';
-				echo '<span class="aiovg-text-muted dashicons dashicons-video-alt3"></span> ';
-				echo esc_html__( 'Select a Quality Level', 'all-in-one-video-gallery' );
-				echo '</p>';
+			echo '<p class="aiovg-no-margin">';
+			echo '<span class="aiovg-text-muted dashicons dashicons-video-alt3"></span> ';
+			echo esc_html__( 'Select a Quality Level', 'all-in-one-video-gallery' );
+			echo '</p>';
 
-				echo '<div class="aiovg-flex aiovg-flex-wrap aiovg-gap-3">';
+			echo '<div class="aiovg-flex aiovg-flex-wrap aiovg-gap-3">';
 
+			echo sprintf( 
+				'<label><input type="radio" value=""/>%s</label>',
+				esc_html__( 'None', 'all-in-one-video-gallery' )
+			);
+
+			foreach ( $quality_levels as $quality ) {
 				echo sprintf( 
-					'<label><input type="radio" value=""/>%s</label>',
-					esc_html__( 'None', 'all-in-one-video-gallery' )
+					'<label><input type="radio" value="%s"/>%s</label>',
+					esc_attr( $quality ),
+					esc_html( $quality )
 				);
+			}
 
-				foreach ( $quality_levels as $quality ) {
-					echo sprintf( 
-						'<label><input type="radio" value="%s"/>%s</label>',
-						esc_attr( $quality ),
-						esc_html( $quality )
-					);
-				}
-
-				echo '</div>';
-				echo '</div>';
-				?>
-				<div class="aiovg-media-uploader">
-					<input type="text" class="widefat" placeholder="<?php esc_attr_e( 'Enter your direct file URL (OR) upload your file using the button here', 'all-in-one-video-gallery' ); ?> &rarr;" value="" />
-					<button type="button" class="aiovg-upload-media button" data-format="mp4">
-						<?php esc_html_e( 'Upload File', 'all-in-one-video-gallery' ); ?>
-					</button>
-				</div>
+			echo '</div>';
+			echo '</div>';
+			?>
+			<div class="aiovg-media-uploader">
+				<input type="text" class="widefat" placeholder="<?php esc_attr_e( 'Enter your direct file URL (OR) upload your file using the button here', 'all-in-one-video-gallery' ); ?> &rarr;" value="" />
+				<button type="button" class="aiovg-upload-media button" data-format="mp4">
+					<?php esc_html_e( 'Upload File', 'all-in-one-video-gallery' ); ?>
+				</button>
 			</div>
 		</div>
-	<?php endif; ?>
+	</template>
 
 	<?php wp_nonce_field( 'aiovg_save_video_sources', 'aiovg_video_sources_nonce' ); // Nonce ?>
 </div>

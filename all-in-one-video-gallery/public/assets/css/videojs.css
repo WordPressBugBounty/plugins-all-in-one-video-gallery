@@ -19,6 +19,10 @@
 	background-color: #000;
 }
 
+.aiovg-player .video-js .vjs-poster img {
+	object-fit: cover;
+}
+
 .aiovg-player .video-js.vjs-ended .vjs-poster {
 	display: inline-block;
 }

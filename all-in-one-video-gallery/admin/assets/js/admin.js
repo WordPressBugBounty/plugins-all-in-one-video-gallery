@@ -358,11 +358,14 @@
 				$( '#aiovg-field-mp4 .aiovg-quality-selector' ).show();
 			}
 
-			var $field = $( '#aiovg-source-clone .aiovg-source' ).clone();	
-			$field.find( 'input[type=radio]' ).attr( 'name', 'quality_levels[' + index + ']' );
-			$field.find( 'input[type=text]' ).attr( 'name', 'sources[' + index + ']' );
+			var template = document.querySelector( '#aiovg-template-source' );
+			if ( template !== null ) {
+				var el = template.content.cloneNode( true );
+				el.querySelector( 'input[type=radio]' ).setAttribute( 'name', 'quality_levels[' + index + ']' );
+				el.querySelector( 'input[type=text]' ).setAttribute( 'name', 'sources[' + index + ']' );
 
-			$this.before( $field ); 		
+				$this.before( el );
+			} 		
 			
 			if ( ( length + 1 ) >= limit ) {
 				$this.hide();
@@ -392,8 +395,11 @@
 		$( '#aiovg-add-new-track' ).on( 'click', function( event ) { 
             event.preventDefault();
 			
-			var $field = $( '#aiovg-tracks-clone tr' ).clone();			
-            $( '#aiovg-tracks' ).append( $field ); 
+			var template = document.querySelector( '#aiovg-template-track' );
+			if ( template !== null ) {
+				var el = template.content.cloneNode( true );		
+				$( '#aiovg-tracks' ).append( el );
+			} 
         });
 		
 		if ( $( '#aiovg-tracks .aiovg-tracks-row' ).length == 0 ) {
@@ -428,8 +434,11 @@
 		$( '#aiovg-add-new-chapter' ).on( 'click', function( event ) { 
             event.preventDefault();
 			
-			var $field = $( '#aiovg-chapters-clone tr' ).clone();			
-            $( '#aiovg-chapters' ).append( $field ); 
+			var template = document.querySelector( '#aiovg-template-chapter' );
+			if ( template !== null ) {
+				var el = template.content.cloneNode( true );			
+				$( '#aiovg-chapters' ).append( el ); 
+			}
         });
 		
 		if ( $( '#aiovg-chapters .aiovg-chapters-row' ).length == 0 ) {

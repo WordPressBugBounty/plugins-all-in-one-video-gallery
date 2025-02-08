@@ -6,7 +6,7 @@ Tags: video player, video gallery, youtube gallery, vimeo gallery, live stream
 Requires at least: 6.3
 Tested up to: 6.7
 Requires PHP: 5.6.20
-Stable tag: 3.9.6
+Stable tag: 4.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,6 +149,13 @@ Also, the videos from third-party services like "YouTube", "Vimeo", "Dailymotion
 7. Plugin Settings.
 
 == Changelog ==
+
+= 4.0.0 =
+
+* New: Added an option to configure the player theme color when using the Vidstack player library.
+* Tweak: Enhanced video restrictions by adding an option to display a restricted access label on gallery thumbnails.
+* Tweak: Extended the chapters feature to allow chapter configuration directly within the video description field.
+* Fix: Various minor bug fixes and improvements.
 
 = 3.9.6 =
 
@@ -498,6 +505,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 3.9.6 =
+= 4.0.0 =
 
 Introduces several new features, bug fixes & enhancements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

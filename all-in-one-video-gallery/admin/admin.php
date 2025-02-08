@@ -42,6 +42,10 @@ class AIOVG_Admin {
 				$new_player_settings['theme'] = $defaults['aiovg_player_settings']['theme'];				
 			}
 
+			if ( ! array_key_exists( 'theme_color', $player_settings ) ) {
+				$new_player_settings['theme_color'] = $defaults['aiovg_player_settings']['theme_color'];				
+			}
+
 			if ( ! array_key_exists( 'muted', $player_settings ) ) {
 				$new_player_settings['muted'] = $defaults['aiovg_player_settings']['muted'];				
 			}
@@ -248,9 +252,15 @@ class AIOVG_Admin {
 				aiovg_insert_missing_pages();			
 			}
 
-			// Insert the restrictions settings
-			if ( false == get_option( 'aiovg_restrictions_settings' ) ) {
+			// Insert / Update the restrictions settings
+			$restrictions_settings = get_option( 'aiovg_restrictions_settings' );
+
+			if ( false == $restrictions_settings ) {
 				add_option( 'aiovg_restrictions_settings', $defaults['aiovg_restrictions_settings'] );
+			} else {
+				if ( ! array_key_exists( 'show_restricted_label', $restrictions_settings ) ) {
+					update_option( 'aiovg_restrictions_settings', array_merge( $defaults['aiovg_restrictions_settings'], $restrictions_settings ) );
+				}
 			}
 
 			// Insert the privacy settings			

@@ -55,6 +55,34 @@
 			}
 		}
 		
+		// Chapters
+		$( '.aiovg-single-video .aiovg-chapter-timestamp' ).on( 'click', function( event ) {
+			event.preventDefault();
+
+			var seconds  = parseInt( event.currentTarget.dataset.time );
+			var playerEl = document.querySelector( '.aiovg-single-video .aiovg-player-element' );
+					
+			if ( playerEl !== null ) {
+				playerEl.seekTo( seconds );
+			} else {
+				playerEl = document.querySelector( '.aiovg-single-video iframe' );
+
+				if ( playerEl !== null ) {
+					playerEl.contentWindow.postMessage({ 				
+						message: 'aiovg-video-seek',
+						seconds: seconds
+					}, window.location.origin );
+				} else {
+					return false;
+				}
+			}
+
+			// Scroll to Top
+			$( 'html, body' ).animate({
+				scrollTop: $( '.aiovg-single-video' ).offset().top - parseInt( aiovg_public.scroll_to_top_offset )
+			}, 500 );
+		});
+
 		// Search Form
 		$( '.aiovg-search-form-type-filter' ).each(function() {
 			var $this = $( this );
@@ -73,7 +101,7 @@
 			});
 		});
 		
-		// Categories Dropdown.
+		// Categories Dropdown
 		$( '.aiovg-categories-template-dropdown select' ).on( 'change', function() {
 			var selectedEl = this.options[ this.selectedIndex ];
 

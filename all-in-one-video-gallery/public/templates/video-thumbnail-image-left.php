@@ -44,9 +44,14 @@ $lazyloading = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' :
             <div class="aiovg-caption">
                 <?php if ( $attributes['show_title'] ) : ?>
                     <div class="aiovg-title">
-                        <a href="<?php the_permalink(); ?>" class="aiovg-link-title">
-                            <?php echo wp_kses_post( aiovg_truncate( get_the_title(), $attributes['title_length'] ) ); ?>
-                        </a>
+                        <?php
+                        $filtered_title  = '<a href="' . esc_url( get_permalink() ) . '" class="aiovg-link-title">';
+                        $filtered_title .= wp_kses_post( aiovg_truncate( get_the_title(), $attributes['title_length'] ) );
+                        $filtered_title .= '</a>';
+                        $filtered_title = apply_filters( 'aiovg_the_title', $filtered_title, $post->ID );
+
+                        echo $filtered_title;
+                        ?>
                     </div>
                 <?php endif; ?>
 

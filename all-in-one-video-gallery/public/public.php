@@ -562,7 +562,10 @@ class AIOVG_Public {
 		}
 		
 		// Custom common CSS code
+		$player_settings  = get_option( 'aiovg_player_settings' );
 		$general_settings = get_option( 'aiovg_general_settings' );
+
+		$player_theme_color = ! empty( $player_settings['theme_color'] ) ? $player_settings['theme_color'] : '#00b2ff';
 
 		echo '<style type="text/css">
 			.aiovg-player {
@@ -577,6 +580,7 @@ class AIOVG_Public {
 			.aiovg-player iframe,
 			.aiovg-player .video-js,
 			.aiovg-player .plyr {
+				--plyr-color-main: ' . esc_attr( $player_theme_color ) . ';
 				position: absolute;
 				inset: 0;	
 				margin: 0;

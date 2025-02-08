@@ -556,6 +556,10 @@ class AIOVGBaseElement extends HTMLElement {
 		// TODO
 	}
 
+    seekTo( seconds ) {
+		// TODO
+	}
+
 }
 
 class AIOVGYouTubeElement extends AIOVGBaseElement {

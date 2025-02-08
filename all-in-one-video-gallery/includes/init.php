@@ -314,6 +314,8 @@ class AIOVG_Init {
 		$this->loader->add_filter( 'aiovg_vidstack_player_sources', $video, 'player_sources', 10, 2 );
 		$this->loader->add_filter( 'aiovg_iframe_vidstack_player_sources', $video, 'player_sources' );
 		$this->loader->add_filter( 'aiovg_iframe_videojs_player_sources', $video, 'player_sources' );
+		$this->loader->add_filter( 'aiovg_the_title', $video, 'filter_the_title_with_restrictions_label', 10, 2 );
+		$this->loader->add_filter( 'aiovg_the_content', $video, 'wrap_timestamps_with_links' );
 		$this->loader->add_filter( 'the_content', $video, 'the_content', 20 );
 		$this->loader->add_filter( 'comments_open', $video, 'comments_open', 10, 2 );		
 		

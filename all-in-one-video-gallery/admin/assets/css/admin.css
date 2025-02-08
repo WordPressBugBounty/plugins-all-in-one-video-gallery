@@ -681,6 +681,10 @@
  *	Page: Settings
  *
  *--------------------------------------------------------------------------------------------*/
+#aiovg-player-settings.aiovg-player-videojs tr.theme_color {
+	display: none;
+}
+
 #aiovg-player-settings.aiovg-player-vidstack tr.theme {
 	display: none;
 }

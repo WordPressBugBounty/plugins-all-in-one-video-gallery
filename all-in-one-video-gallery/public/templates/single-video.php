@@ -18,7 +18,7 @@
     <?php the_aiovg_content_after_player( $post->ID, $attributes ); ?>
 
     <!-- Description -->
-    <div class="aiovg-description aiovg-margin-top aiovg-hide-if-empty"><?php echo $content; ?></div>
+    <div class="aiovg-description aiovg-margin-top aiovg-hide-if-empty"><?php echo apply_filters( 'aiovg_the_content', $content, $post->ID ); ?></div>
 
     <!-- Meta informations -->
     <div class="aiovg-meta aiovg-flex aiovg-flex-col aiovg-gap-1 aiovg-margin-top">

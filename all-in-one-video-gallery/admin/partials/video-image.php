@@ -26,7 +26,7 @@
 				<label for="aiovg-image_alt"><?php esc_html_e( 'Image Alt Text', 'all-in-one-video-gallery' ); ?></label>
 				<input type="text" name="image_alt" id="aiovg-image_alt" class="widefat" placeholder="<?php esc_attr_e( 'Optional', 'all-in-one-video-gallery' ); ?>" value="<?php echo esc_attr( $image_alt ); ?>" />
 				<p class="description">
-					<a href="https://www.w3.org/WAI/tutorials/images/decision-tree" target="_blank" rel="noopener">
+					<a href="https://www.w3.org/WAI/tutorials/images/decision-tree" target="_blank" rel="noopener noreferrer">
 						<?php esc_html_e( 'Learn how to describe the purpose of the image.', 'all-in-one-video-gallery' ); ?>
 					</a>
 				</p>

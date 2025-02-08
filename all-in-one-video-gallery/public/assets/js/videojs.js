@@ -646,6 +646,15 @@ class AIOVGVideoElement extends HTMLElement {
 		}
 	}
 
+	seekTo( seconds ) {
+		if ( this.player ) {
+			this.player.currentTime( seconds );
+			if ( ! this._hasVideoStarted ) {
+				this.player.play();
+			}
+		}
+	}
+
 }
 
 (function( $ ) {	

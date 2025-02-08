@@ -272,6 +272,13 @@ class AIOVG_Admin_Settings {
                     ),
                     'sanitize_callback' => 'sanitize_key'
                 ),
+                array(
+					'name'              => 'theme_color',
+					'label'             => __( 'Player Theme Color', 'all-in-one-video-gallery' ),
+					'description'       => __( 'Select a primary color that will be used to style various elements of the player, such as buttons, controls, and highlights. This color will help define the overall appearance of the player.', 'all-in-one-video-gallery' ),
+					'type'              => 'color',
+					'sanitize_callback' => 'sanitize_text_field'
+				),
 				array(
                     'name'              => 'width',
                     'label'             => __( 'Width', 'all-in-one-video-gallery' ),
@@ -866,7 +873,35 @@ class AIOVG_Admin_Settings {
                     'description'       => __( 'Customize the message displayed to users who do not have permission to view restricted videos.', 'all-in-one-video-gallery' ),
                     'type'              => 'wysiwyg',
                     'sanitize_callback' => 'wp_kses_post'
-               	)
+               	),
+                array(
+                    'name'              => 'show_restricted_label',
+                    'label'             => __( 'Show Restricted Access Label', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enable this option to display a "Restricted Access" label next to the video title on the gallery thumbnails for restricted content.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
+               	),
+                array(
+                    'name'              => 'restricted_label_text',
+                    'label'             => __( 'Restricted Access Label Text', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enter custom text for the restricted access label. Default: "restricted".', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                array(
+					'name'              => 'restricted_label_bg_color',
+					'label'             => __( 'Restricted Access Label Background Color', 'all-in-one-video-gallery' ),
+					'description'       => __( 'Choose a background color for the restricted access label.', 'all-in-one-video-gallery' ),
+					'type'              => 'color',
+					'sanitize_callback' => 'sanitize_text_field'
+				),
+                array(
+					'name'              => 'restricted_label_text_color',
+					'label'             => __( 'Restricted Access Label Text Color', 'all-in-one-video-gallery' ),
+					'description'       => __( 'Choose a text color for the restricted access label.', 'all-in-one-video-gallery' ),
+					'type'              => 'color',
+					'sanitize_callback' => 'sanitize_text_field'
+				)
             ),
             'aiovg_privacy_settings' => array(
 				array(
@@ -921,7 +956,7 @@ class AIOVG_Admin_Settings {
                     'name'              => 'datetime_format',
                     'label'             => __( 'DateTime Format', 'all-in-one-video-gallery' ),
                     'description'       => sprintf(
-						'%s <a href="https://wordpress.org/documentation/article/customize-date-and-time-format/" target="_blank">%s</a><br />%s', 
+						'%s <a href="https://wordpress.org/documentation/article/customize-date-and-time-format/" target="_blank" rel="noopener noreferrer">%s</a><br />%s', 
 						__( "Enter the PHP DateTime format that the plugin should use when displaying the dates on the site's front end.", 'all-in-one-video-gallery' ),
 						__( 'Documentation on date and time formatting.', 'all-in-one-video-gallery' ),
 						__( 'When left empty, the plugin will display a human-readable format such as "1 hour ago", "5 mins ago", and "2 days ago".', 'all-in-one-video-gallery' )
@@ -956,14 +991,14 @@ class AIOVG_Admin_Settings {
                 array(
                     'name'              => 'youtube_api_key',
                     'label'             => __( 'YouTube API Key', 'all-in-one-video-gallery' ),
-                    'description'       => sprintf( __( 'Follow <a href="%s" target="_blank">this guide</a> to get your own API key.', 'all-in-one-video-gallery' ), 'https://plugins360.com/all-in-one-video-gallery/how-to-get-youtube-api-key/' ),
+                    'description'       => sprintf( __( 'Follow <a href="%s" target="_blank" rel="noopener noreferrer">this guide</a> to get your own API key.', 'all-in-one-video-gallery' ), 'https://plugins360.com/all-in-one-video-gallery/how-to-get-youtube-api-key/' ),
                     'type'              => 'text',
                     'sanitize_callback' => 'sanitize_text_field'
                 ),
                 array(
                     'name'              => 'vimeo_access_token',
                     'label'             => __( 'Vimeo Access Token', 'all-in-one-video-gallery' ),
-                    'description'       => sprintf( __( 'Follow <a href="%s" target="_blank">this guide</a> to get your own access token.', 'all-in-one-video-gallery' ), 'https://plugins360.com/all-in-one-video-gallery/how-to-get-vimeo-access-token/' ),
+                    'description'       => sprintf( __( 'Follow <a href="%s" target="_blank" rel="noopener noreferrer">this guide</a> to get your own access token.', 'all-in-one-video-gallery' ), 'https://plugins360.com/all-in-one-video-gallery/how-to-get-vimeo-access-token/' ),
                     'type'              => 'text',
                     'sanitize_callback' => 'sanitize_text_field'
                 )

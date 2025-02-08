@@ -10,6 +10,10 @@
 }
 
 /* Ads */
+.aiovg-player .plyr--playing .plyr__ads {
+	display: none;
+}
+
 .aiovg-player .plyr__ads .plyr__control--overlaid {
 	z-index: 999;
 }
