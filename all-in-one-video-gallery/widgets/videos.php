@@ -98,22 +98,17 @@ class AIOVG_Widget_Videos extends WP_Widget {
 		} else {
 			$attributes = $this->defaults;
 		}
-		
-		if ( empty( $attributes['more_label'] ) ) {
-			$attributes['more_label'] = __( 'Show More', 'all-in-one-video-gallery' );
-		}
 
+		$attributes = $this->prepare_attributes( $attributes );		
+
+		$orderby = sanitize_text_field( $attributes['orderby'] );
+		$order   = sanitize_text_field( $attributes['order'] );
+		
 		// Added for backward compatibility (version < 1.5.7)
 		if ( isset( $instance['image_position'] ) && 'left' == $instance['image_position'] ) {
 			$attributes['thumbnail_style'] = 'image-left';
 		}
 
-		$attributes['uid'] = aiovg_get_uniqid();
-		$attributes['show_count'] = 0;
-
-		$orderby = sanitize_text_field( $attributes['orderby'] );
-		$order   = sanitize_text_field( $attributes['order'] );
-		
 		// Define the query
 		global $post;	
 
@@ -123,62 +118,48 @@ class AIOVG_Widget_Videos extends WP_Widget {
 			'post_status'    => array( 'publish' )
 		);
 		
-		// Taxonomy Parameters
-		$tax_queries = array();					
+		if ( isset( $attributes['search_query'] ) && ! empty( $attributes['search_query'] ) ) { // Search
+			$query['s'] = sanitize_text_field( $attributes['search_query'] );
+		}
 
-		$category = array_map( 'intval', $attributes['category'] );
-		$tag = array_map( 'intval', $attributes['tag'] );		
-
-		$tax_relation = 'AND';		
-	
-		if ( $attributes['related'] ) {	
-			$tax_relation = 'OR';
-
-			if ( is_singular( 'aiovg_videos' ) ) {
-				$categories = wp_get_object_terms( $post->ID, 'aiovg_categories', array( 'fields' => 'ids' ) );
-				$category = ! empty( $categories ) ? $categories : '';
-
-				$tags = wp_get_object_terms( $post->ID, 'aiovg_tags', array( 'fields' => 'ids' ) );
-				$tag = ! empty( $tags ) ? $tags : '';
-				
-				$query['post__not_in'] = array( $post->ID );
-			} else {			
-				// Category page
-				$term_slug = get_query_var( 'aiovg_category' );				
-				if ( ! empty( $term_slug ) ) {		
-					$term = get_term_by( 'slug', sanitize_text_field( $term_slug ), 'aiovg_categories' );
-					$category = $term->term_id;
-				}
-				
-				// Tag page
-				$term_slug = get_query_var( 'aiovg_tag' );				
-				if ( ! empty( $term_slug ) ) {		
-					$term = get_term_by( 'slug', sanitize_text_field( $term_slug ), 'aiovg_tags' );
-					$tag = $term->term_id;
-				}
-			}			
+		if ( isset( $attributes['exclude'] ) && ! empty( $attributes['exclude'] ) ) { // Exclude video IDs
+			$query['post__not_in'] = is_array( $attributes['exclude'] ) ? array_map( 'intval', $attributes['exclude'] ) : array_map( 'intval', explode( ',', $attributes['exclude'] ) );
 		}
 		
-		if ( ! empty( $category ) ) {		
+		// Taxonomy Parameters
+		$tax_queries = array();
+
+		if ( ! empty( $attributes['category'] ) ) { // Category
 			$tax_queries[] = array(
 				'taxonomy'         => 'aiovg_categories',
 				'field'            => 'term_id',
-				'terms'            => $category,
+				'terms'            => is_array( $attributes['category'] ) ? array_map( 'intval', $attributes['category'] ) : array_map( 'intval', explode( ',', $attributes['category'] ) ),
+				'include_children' => false
+			);
+		}
+
+		if ( isset( $attributes['category_exclude'] ) && ! empty( $attributes['category_exclude'] ) ) { // Exclude categories
+			$tax_queries[] = array(
+				'taxonomy'         => 'aiovg_categories',
+				'field'            => 'term_id',
+				'terms'            => is_array( $attributes['category_exclude'] ) ? array_map( 'intval', $attributes['category_exclude'] ) : array_map( 'intval', explode( ',', $attributes['category_exclude'] ) ),
 				'include_children' => false,
-			);					
+				'operator'         => 'NOT IN'
+			);
 		}
 		
-		if ( ! empty( $tag ) ) {		
+		if ( ! empty( $attributes['tag'] ) ) { // Tag
 			$tax_queries[] = array(
 				'taxonomy'         => 'aiovg_tags',
 				'field'            => 'term_id',
-				'terms'            => $tag,
-				'include_children' => false,
-			);					
-		}		
-		
+				'terms'            => is_array( $attributes['tag'] ) ? array_map( 'intval', $attributes['tag'] ) : array_map( 'intval', explode( ',', $attributes['tag'] ) ),
+				'include_children' => false
+			);
+		}
+
 		$count_tax_queries = count( $tax_queries );
 		if ( $count_tax_queries ) {
+			$tax_relation = ! empty( $attributes['related'] ) ? 'OR' : 'AND';
 			$query['tax_query'] = ( $count_tax_queries > 1 ) ? array_merge( array( 'relation' => $tax_relation ), $tax_queries ) : $tax_queries;
 		}
 	
@@ -265,13 +246,18 @@ class AIOVG_Widget_Videos extends WP_Widget {
 		if ( $aiovg_query->have_posts() ) {			
 			unset( $attributes['title'] );
 				
+			ob_start();
 			include apply_filters( 'aiovg_load_template', AIOVG_PLUGIN_DIR . 'public/templates/videos-template-classic.php', $attributes );		
+			$content = ob_get_clean();			
 		} else {		
-			printf(
-				'<div class="aiovg-widget-videos aiovg-no-items-found">%s</div>',
+			$content = sprintf(
+				'<div class="aiovg-videos aiovg-widget-videos aiovg-no-items-found">%s</div>',
 				esc_html( aiovg_get_message( 'videos_empty' ) )
 			);
 		}
+
+		$content = aiovg_wrap_with_filters( $content, $attributes );
+		echo $content;
 		
 		echo $args['after_widget'];
 	}
@@ -340,10 +326,107 @@ class AIOVG_Widget_Videos extends WP_Widget {
 	}
 
 	/**
-	 * Get the default shortcode attribute values.
+	 * Prepares and processes the complete attributes array for the widget.
+	 *
+	 * @since  4.0.1
+	 * @param  array $attributes Raw widget attributes.
+	 * @return array        	 Fully prepared attributes array, ready for use.
+	 */
+	public function prepare_attributes( $attributes ) {
+		$attributes['uid'] = aiovg_get_uniqid();
+		$attributes['show_count'] = 0;
+
+		// Related
+		if ( ! empty( $attributes['related'] ) ) {
+			if ( is_singular( 'aiovg_videos' ) ) {
+				global $wp_the_query;				
+				$post_id = $wp_the_query->get_queried_object_id();
+
+				$categories = wp_get_object_terms( $post_id, 'aiovg_categories', array( 'fields' => 'ids' ) );
+				$attributes['category'] = ! empty( $categories ) ? $categories : '';
+
+				$tags = wp_get_object_terms( $post_id, 'aiovg_tags', array( 'fields' => 'ids' ) );
+				$attributes['tag'] = ! empty( $tags ) ? $tags : '';
+				
+				$attributes['exclude'] = array( $post_id );
+			} else {
+				// Category page
+				if ( $term_slug = get_query_var( 'aiovg_category' ) ) {         
+					$term = get_term_by( 'slug', sanitize_text_field( $term_slug ), 'aiovg_categories' );
+					$attributes['category'] = $term->term_id;
+				}
+
+				// Tag page
+				if ( $term_slug = get_query_var( 'aiovg_tag' ) ) {         
+					$term = get_term_by( 'slug', sanitize_text_field( $term_slug ), 'aiovg_tags' );
+					$attributes['tag'] = $term->term_id;
+				}
+			}			
+		}
+
+		// Search
+		if ( 
+			! empty( $attributes['filters_keyword'] ) ||
+			! empty( $attributes['filters_category'] ) ||
+			! empty( $attributes['filters_tag'] ) ||
+			! empty( $attributes['filters_sort'] )
+		) {
+			if ( isset( $_GET['vi'] ) ) {
+				$attributes['search_query'] = $_GET['vi'];
+			}
+			
+			if ( isset( $_GET['ca'] ) ) {
+				$attributes['category'] = $_GET['ca'];
+			}
+	
+			if ( ! isset( $_GET['ca'] ) || ( isset( $_GET['ca'] ) && empty( $_GET['ca'] ) ) ) {
+				$categories_excluded = get_terms( array(
+					'taxonomy'   => 'aiovg_categories',
+					'hide_empty' => false,
+					'fields'     => 'ids',
+					'meta_key'   => 'exclude_search_form',
+					'meta_value' => 1
+				) );
+	
+				if ( ! empty( $categories_excluded ) && ! is_wp_error( $categories_excluded ) ) {
+					$attributes['category_exclude'] = $categories_excluded;
+				}
+			}
+	
+			if ( isset( $_GET['ta'] ) ) {
+				$attributes['tag'] = $_GET['ta'];
+			}
+			
+			if ( isset( $_GET['sort'] ) ) {
+				$sort = array_filter( array_map( 'trim', explode( '-', $_GET['sort'] ) ) );
+	
+				if ( ! empty( $sort ) ) {
+					$attributes['orderby'] = $sort[0];
+					
+					if ( count( $sort ) > 1 ) {
+						$attributes['order'] = $sort[1];
+					}
+				}
+			}
+		}
+
+		// Pagination
+		if ( empty( $attributes['more_label'] ) ) {
+			$attributes['more_label'] = __( 'Show More', 'all-in-one-video-gallery' );
+		}
+
+		if ( 'ajax' == $attributes['filters_mode'] ) {
+			$attributes['pagination_ajax'] = 1;
+		}
+
+		return $attributes;
+	}
+
+	/**
+	 * Get the default attribute values.
 	 *
 	 * @since  1.0.0
-	 * @return array $atts An associative array of attributes.
+	 * @return array An associative array of attributes.
 	 */
 	public function get_defaults() {
 		$pagination_settings = get_option( 'aiovg_pagination_settings', array() ); 
@@ -362,6 +445,24 @@ class AIOVG_Widget_Videos extends WP_Widget {
 			}
 		}
 
+		foreach ( $this->fields['video']['sections']['general']['fields'] as $field ) {
+			if ( 'autoplay' == $field['name'] || 'loop' == $field['name'] || 'muted' == $field['name'] ) {
+				$defaults[ 'player_' . $field['name'] ] = $field['value'];
+			}
+		}
+
+		foreach ( $this->fields['video']['sections']['controls']['fields'] as $field ) {
+			$defaults[ 'player_' . $field['name'] ] = $field['value'];
+		}
+
+		$defaults['filters_keyword'] = 0;
+		$defaults['filters_category'] = 0;
+		$defaults['filters_tag'] = 0;
+		$defaults['filters_sort'] = 0;
+		$defaults['filters_template'] = 'horizontal';
+		$defaults['filters_mode'] = 'live';
+		$defaults['filters_position'] = 'top';
+		
 		$defaults['source'] = 'videos';
 		$defaults['count'] = 0;
 		$defaults['paged'] = 1;

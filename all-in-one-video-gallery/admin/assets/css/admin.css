@@ -3,6 +3,10 @@
  *	Base
  *
  *--------------------------------------------------------------------------------------------*/
+.aiovg [hidden] {
+	display: none !important;
+}
+
 .aiovg .widefat {
 	max-width: 100%;
 }
@@ -15,10 +19,6 @@
 
 .aiovg .aiovg-toggle-fields {
 	display: none;
-}
-
-.aiovg [hidden] {
-	display: none !important;
 }
 
 /* Player */
@@ -248,6 +248,46 @@
  *	Components
  *
  *--------------------------------------------------------------------------------------------*/
+/* Accordion */
+.aiovg details.aiovg-accordion {
+	transition: background-color 0.3s ease;
+	margin-bottom: 8px;
+    border: 1px solid #ddd;
+	border-radius: 4px;
+    background-color: #f9f9f9;
+    cursor: pointer;	    
+}
+
+.aiovg details.aiovg-accordion:hover {
+    background-color: #f1f1f1;
+}
+
+.aiovg details.aiovg-accordion[open] {
+	border-color: #bbb;
+    background-color: #fff;    
+}
+
+.aiovg details.aiovg-accordion > summary {
+	outline: none;
+	cursor: pointer;
+	padding: 12px 15px;
+	color: #333;
+    font-weight: 600;    
+}
+
+.aiovg details.aiovg-accordion > div,
+.aiovg details.aiovg-accordion > ol {
+	margin: 0;
+	padding: 12px 15px;
+	line-height: 1.6;
+    font-size: 14px;
+    color: #555;    
+}
+
+.aiovg details.aiovg-accordion > ol {
+	list-style-position: inside;
+}
+
 /* Alert */
 .aiovg .aiovg-notice {
 	border-radius: 2px;
@@ -388,6 +428,35 @@
 	opacity: 0;
 }
 
+/* Driver.js */
+#aiovg-button-tour .dashicons {
+	width: 20px;
+	height: 24px;
+	vertical-align: middle;
+}
+
+.driver-popover.driverjs-theme * {
+	font-family: inherit;
+}
+
+.driver-popover.driverjs-theme .driver-popover-title {
+	color: #135e96;
+}
+
+.driver-popover.driverjs-theme .driver-popover-navigation-btns button {	
+	border: 1px solid #2271b1;
+	background-color: #f6f7f7;
+	color: #2271b1;	
+	text-shadow: none;
+}
+
+.driver-popover.driverjs-theme .driver-popover-navigation-btns button:hover,
+.driver-popover.driverjs-theme .driver-popover-navigation-btns button:focus {	
+	border: 1px solid #135e96;
+	background-color: #135e96;
+	color: #fff;	
+}
+
 /*----------------------------------------------------------------------------------------------
  *
  *	Page: Dashboard
@@ -395,6 +464,23 @@
  *--------------------------------------------------------------------------------------------*/
 #aiovg-dashboard .wp-badge {	
 	background: #0073aa url( '../images/logo.png' ) no-repeat top;
+}
+
+#aiovg-dashboard .button-hero {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+
+#aiovg-dashboard .aiovg-right-col .about-description {
+	font-weight: 500;
+}
+
+@media screen and (max-width: 500px) {
+	#aiovg-dashboard .button-hero {
+		width: 100%;
+	}
 }
 
 /* Tab: Shortcode Builder */

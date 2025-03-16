@@ -351,7 +351,7 @@ class AIOVG_Admin {
 	public function display_dashboard_content() {
 		$tabs = array(			
 			'shortcode-builder' => __( 'Shortcode Builder', 'all-in-one-video-gallery' ),
-			'faq'               => __( 'FAQ', 'all-in-one-video-gallery' )
+			'help'              => __( 'Help & Tutorials', 'all-in-one-video-gallery' )
 		);
 		
 		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'shortcode-builder';
@@ -392,14 +392,19 @@ class AIOVG_Admin {
 
 		foreach ( $pages as $key => $page ) {
 			$issue_found = 0;
-			$post_id = $page_settings[ $key ];			
+			$post_id = $page_settings[ $key ];
+			
+			$pattern = '';
+			if ( ! empty( $pages[ $key ]['content'] ) ) {
+				$pattern = rtrim( $pages[ $key ]['content'], ']' );
+			}
 
 			if ( $post_id > 0 ) {
 				$post = get_post( $post_id );
 
 				if ( empty( $post ) || 'publish' != $post->post_status ) {
 					$issue_found = 1;
-				} elseif ( ! empty( $pages[ $key ]['content'] ) && false === strpos( $post->post_content, $pages[ $key ]['content'] ) ) {
+				} elseif ( ! empty( $pattern ) && false === strpos( $post->post_content, $pattern ) ) {
 					$issue_found = 1;				
 				}
 			} else {
@@ -450,12 +455,17 @@ class AIOVG_Admin {
 						$issue_found = 0;
 						$post_id = $page_settings[ $key ];			
 			
+						$pattern = '';
+						if ( ! empty( $pages[ $key ]['content'] ) ) {
+							$pattern = rtrim( $pages[ $key ]['content'], ']' );
+						}
+
 						if ( $post_id > 0 ) {
 							$post = get_post( $post_id );
 			
 							if ( empty( $post ) || 'publish' != $post->post_status ) {
 								$issue_found = 1;
-							} elseif ( ! empty( $pages[ $key ]['content'] ) && false === strpos( $post->post_content, $pages[ $key ]['content'] ) ) {
+							} elseif ( ! empty( $pattern ) && false === strpos( $post->post_content, $pattern ) ) {
 								$issue_found = 1;		
 							}
 						} else {
@@ -465,10 +475,10 @@ class AIOVG_Admin {
 						if ( $issue_found ) {
 							$insert_id = 0;
 
-							if ( ! empty( $pages[ $key ]['content'] ) ) {
+							if ( ! empty( $pattern ) ) {
 								$query = $wpdb->prepare(
 									"SELECT ID FROM {$wpdb->posts} WHERE `post_content` LIKE %s",
-									sanitize_text_field( $pages[ $key ]['content'] )
+									'%' . $wpdb->esc_like( sanitize_text_field( $pattern ) ) . '%'
 								);
 
 								$ids = $wpdb->get_col( $query );
@@ -600,8 +610,11 @@ class AIOVG_Admin {
 	 * Register the stylesheets for the admin area.
 	 *
 	 * @since 1.0.0
+	 * @param string $hook The current admin page.
 	 */
-	public function enqueue_styles() {
+	public function enqueue_styles( $hook ) {
+		global $post_type;		
+
 		wp_enqueue_style( 'wp-color-picker' );
 
 		wp_enqueue_style( 
@@ -611,6 +624,27 @@ class AIOVG_Admin {
 			'1.2.0', 
 			'all' 
 		);
+
+		wp_register_style( 
+			AIOVG_PLUGIN_SLUG . '-driverjs', 
+			AIOVG_PLUGIN_URL . 'vendor/driverjs/driver.css', 
+			array(), 
+			'1.3.4', 
+			'all' 
+		);
+
+		if ( ! defined( 'AIOVG_DISABLE_TOUR' ) || ! AIOVG_DISABLE_TOUR ) {
+			if ( current_user_can( 'manage_aiovg_options' ) ) {
+				if ( in_array( $hook, array( 'post-new.php', 'post.php' ) ) && 'aiovg_videos' === $post_type ) {
+					$current_user_id = get_current_user_id();
+					$video_form_tour = get_user_meta( $current_user_id, 'aiovg_video_form_tour', true );
+					
+					if ( 'completed' != $video_form_tour ) {
+						wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-driverjs' );
+					}			
+				}
+			}
+		}
 		
 		wp_enqueue_style( 
 			AIOVG_PLUGIN_SLUG . '-admin', 
@@ -625,8 +659,11 @@ class AIOVG_Admin {
 	 * Register the JavaScript for the admin area.
 	 *
 	 * @since 1.0.0
+	 * @param string $hook The current admin page.
 	 */
-	public function enqueue_scripts() {
+	public function enqueue_scripts( $hook ) {
+		global $post_type;
+
 		wp_enqueue_media();
 		
         wp_enqueue_script( 'wp-color-picker' );
@@ -638,6 +675,27 @@ class AIOVG_Admin {
 			'1.2.0', 
 			array( 'strategy' => 'defer' ) 
 		);
+
+		wp_register_script( 
+			AIOVG_PLUGIN_SLUG . '-driverjs', 
+			AIOVG_PLUGIN_URL . 'vendor/driverjs/driver.js.iife.js',
+			array( 'jquery' ), 
+			'1.3.4', 
+			array( 'strategy' => 'defer' ) 
+		);
+
+		if ( ! defined( 'AIOVG_DISABLE_TOUR' ) || ! AIOVG_DISABLE_TOUR ) {
+			if ( current_user_can( 'manage_aiovg_options' ) ) {
+				if ( in_array( $hook, array( 'post-new.php', 'post.php' ) ) && 'aiovg_videos' === $post_type ) {
+					$current_user_id = get_current_user_id();
+					$video_form_tour = get_user_meta( $current_user_id, 'aiovg_video_form_tour', true );
+					
+					if ( 'completed' != $video_form_tour ) {
+						wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-driverjs' );
+					}
+				}
+			}
+		}
 		
 		wp_enqueue_script( 
 			AIOVG_PLUGIN_SLUG . '-admin', 
@@ -745,6 +803,25 @@ class AIOVG_Admin {
 		}
 	
 		return $types;
+	}
+
+	/**
+	 * Store user meta.
+	 *
+	 * @since 4.0.1
+	 */
+	public function ajax_callback_store_user_meta() {	
+		check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
+
+		$user_id = get_current_user_id();
+		$key     = isset( $_POST['key'] ) ? sanitize_text_field( $_POST['key'] ) : '';
+		$value   = isset( $_POST['value'] ) ? sanitize_text_field( $_POST['value'] ) : '';
+
+		if ( ! empty( $user_id ) && ! empty( $key ) ) {
+			update_user_meta( $user_id, $key, $value );
+		}
+
+		wp_die();	
 	}
 
 }

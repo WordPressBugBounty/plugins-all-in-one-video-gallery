@@ -180,7 +180,9 @@ class AIOVG_Public_Video {
 				}
 
 				if ( $is_singular && $in_the_loop && $is_main_query ) {
-					$post_id = get_the_ID();
+					global $wp_the_query;
+					$post_id = $wp_the_query->get_queried_object_id();
+
 					$attributes['id'] = $post_id;
 				} else {
 					$args = array(				
@@ -416,47 +418,6 @@ class AIOVG_Public_Video {
 		
 		return $sources;	
 	}	
-	
-	/**
-	 * Filters the video title and adds a restrictions label if applicable.
-	 *
-	 * @since  3.9.7
-	 * @param  string $title   The original video title.
-	 * @param  int    $post_id The video post ID.
-	 * @return string          The modified title with the restrictions label if applicable.
-	 */
-	public function filter_the_title_with_restrictions_label( $title, $post_id ) {
-		if ( ! aiovg_current_user_has_video_access( $post_id ) ) {
-			$restrictions_settings = get_option( 'aiovg_restrictions_settings' );
-
-			if ( ! empty( $restrictions_settings['show_restricted_label'] ) ) {
-				$restricted_label_text = $restrictions_settings['restricted_label_text'];				
-				if ( empty( $restricted_label_text ) ) {
-					$restricted_label_text = __( 'restricted', 'all-in-one-video-gallery' );
-				}
-
-				$restricted_label_bg_color = $restrictions_settings['restricted_label_bg_color'];				
-				if ( empty( $restricted_label_bg_color ) ) {
-					$restricted_label_bg_color = '#aaa';
-				}
-
-				$restricted_label_text_color = $restrictions_settings['restricted_label_text_color'];				
-				if ( empty( $restricted_label_text_color ) ) {
-					$restricted_label_text_color = '#fff';
-				}
-
-				$title = sprintf( 
-					'<span class="aiovg-restricted-label" style="background-color: %s; color: %s;">%s</span> %s',
-					esc_attr( $restricted_label_bg_color ),
-					esc_attr( $restricted_label_text_color ),
-					esc_html( $restricted_label_text ),
-					$title
-				);
-			}
-		}
-		
-		return $title;
-	}
 
 	/**
 	 * Filters timestamps in the video description and wraps them with links.
@@ -497,9 +458,9 @@ class AIOVG_Public_Video {
 		$is_main_query = apply_filters( 'aiovg_the_content_is_main_query', is_main_query() );
 
 		if ( is_singular( 'aiovg_videos' ) && $in_the_loop && $is_main_query ) {		
-			global $post, $wp_query;
-			
-			if ( $post->ID != $wp_query->get_queried_object_id() ) {
+			global $wp_the_query, $post;
+
+			if ( $post->ID != $wp_the_query->get_queried_object_id() ) {
 				return $content;
 			}
 			

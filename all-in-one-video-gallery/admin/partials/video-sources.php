@@ -13,7 +13,7 @@
 <div class="aiovg">
 	<table class="aiovg-table form-table">
 		<tbody>
-			<tr>
+			<tr id="aiovg-field-type">
 				<th scope="row">
 					<label for="aiovg-video-type"><?php esc_html_e( 'Source Type', 'all-in-one-video-gallery' ); ?></label>
 				</th>
@@ -189,7 +189,7 @@
 					<input type="text" name="dash" id="aiovg-dash" class="widefat" placeholder="<?php printf( '%s: https://www.mysite.com/stream.mpd', esc_attr__( 'Example', 'all-in-one-video-gallery' ) ); ?>" value="<?php echo esc_url( $dash ); ?>" />
 				</td>
 			</tr>
-			<tr class="aiovg-toggle-fields aiovg-type-youtube">
+			<tr id="aiovg-field-youtube" class="aiovg-toggle-fields aiovg-type-youtube">
 				<th scope="row">
 					<label for="aiovg-youtube"><?php esc_html_e( 'YouTube URL', 'all-in-one-video-gallery' ); ?></label>
 				</th>
@@ -197,7 +197,7 @@
 					<input type="text" name="youtube" id="aiovg-youtube" class="widefat" placeholder="<?php printf( '%s: https://www.youtube.com/watch?v=twYp6W6vt2U', esc_attr__( 'Example', 'all-in-one-video-gallery' ) ); ?>" value="<?php echo esc_url( $youtube ); ?>" />
 				</td>
 			</tr>
-			<tr class="aiovg-toggle-fields aiovg-type-vimeo">
+			<tr id="aiovg-field-vimeo" class="aiovg-toggle-fields aiovg-type-vimeo">
 				<th scope="row">
 					<label for="aiovg-vimeo"><?php esc_html_e( 'Vimeo URL', 'all-in-one-video-gallery' ); ?></label>
 				</th>
@@ -205,7 +205,7 @@
 					<input type="text" name="vimeo" id="aiovg-vimeo" class="widefat" placeholder="<?php printf( '%s: https://vimeo.com/108018156', esc_attr__( 'Example', 'all-in-one-video-gallery' ) ); ?>" value="<?php echo esc_url( $vimeo ); ?>" />
 				</td>
 			</tr>
-			<tr class="aiovg-toggle-fields aiovg-type-dailymotion">
+			<tr id="aiovg-field-dailymotion" class="aiovg-toggle-fields aiovg-type-dailymotion">
 				<th scope="row">
 					<label for="aiovg-dailymotion"><?php esc_html_e( 'Dailymotion URL', 'all-in-one-video-gallery' ); ?></label>
 				</th>
@@ -213,7 +213,7 @@
 					<input type="text" name="dailymotion" id="aiovg-dailymotion" class="widefat" placeholder="<?php printf( '%s: https://www.dailymotion.com/video/x11prnt', esc_attr__( 'Example', 'all-in-one-video-gallery' ) ); ?>" value="<?php echo esc_url( $dailymotion ); ?>" />
 				</td>
 			</tr>
-			<tr class="aiovg-toggle-fields aiovg-type-rumble">
+			<tr id="aiovg-field-rumble" class="aiovg-toggle-fields aiovg-type-rumble">
 				<th scope="row">
 					<label for="aiovg-rumble"><?php esc_html_e( 'Rumble URL', 'all-in-one-video-gallery' ); ?></label>
 				</th>
@@ -221,7 +221,7 @@
 					<input type="text" name="rumble" id="aiovg-rumble" class="widefat" placeholder="<?php printf( '%s: https://rumble.com/val8vm-how-to-use-rumble.html', esc_attr__( 'Example', 'all-in-one-video-gallery' ) ); ?>" value="<?php echo esc_url( $rumble ); ?>" />
 				</td>
 			</tr>
-			<tr class="aiovg-toggle-fields aiovg-type-facebook">
+			<tr id="aiovg-field-facebook" class="aiovg-toggle-fields aiovg-type-facebook">
 				<th scope="row">
 					<label for="aiovg-facebook"><?php esc_html_e( 'Facebook URL', 'all-in-one-video-gallery' ); ?></label>
 				</th>
@@ -229,7 +229,7 @@
 					<input type="text" name="facebook" id="aiovg-facebook" class="widefat" placeholder="<?php printf( '%s: https://www.facebook.com/facebook/videos/10155278547321729', esc_attr__( 'Example', 'all-in-one-video-gallery' ) ); ?>" value="<?php echo esc_url( $facebook ); ?>" />
 				</td>
 			</tr>
-			<tr class="aiovg-toggle-fields aiovg-type-embedcode">
+			<tr id="aiovg-field-embedcode" class="aiovg-toggle-fields aiovg-type-embedcode">
 				<th scope="row">
 					<label for="aiovg-embedcode"><?php esc_html_e( 'Player Code', 'all-in-one-video-gallery' ); ?></label>
 				</th>

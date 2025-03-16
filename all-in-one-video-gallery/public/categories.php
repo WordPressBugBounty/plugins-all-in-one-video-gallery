@@ -41,11 +41,11 @@ class AIOVG_Public_Categories {
 	}
 
 	/**
-	 * Load more categories.
+	 * Load categories.
 	 *
 	 * @since 2.5.1
 	 */
-	public function ajax_callback_load_more_categories() {
+	public function ajax_callback_load_categories() {
 		// Security check
 		check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
 

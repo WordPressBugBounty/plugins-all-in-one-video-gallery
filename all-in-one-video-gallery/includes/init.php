@@ -91,9 +91,11 @@ class AIOVG_Init {
 		
 		/**
 		 * The files with the helper functions.
-		 */
-		require_once AIOVG_PLUGIN_DIR . 'includes/functions.php';
-		require_once AIOVG_PLUGIN_DIR . 'includes/providers.php';
+		 */		
+		require_once AIOVG_PLUGIN_DIR . 'includes/helpers/functions.php';
+		require_once AIOVG_PLUGIN_DIR . 'includes/helpers/providers.php';
+		require_once AIOVG_PLUGIN_DIR . 'includes/helpers/render.php';
+		require_once AIOVG_PLUGIN_DIR . 'includes/helpers/urls.php';
 
 		/**
 		 * The classes responsible for defining all actions that occur in the admin area.
@@ -164,7 +166,8 @@ class AIOVG_Init {
 		$this->loader->add_action( 'admin_enqueue_scripts', $admin, 'enqueue_scripts' );
 		$this->loader->add_action( 'elementor/editor/after_enqueue_styles', $admin, 'enqueue_styles' );
 		$this->loader->add_action( 'elementor/editor/after_enqueue_scripts', $admin, 'enqueue_scripts' );		
-		
+		$this->loader->add_action( 'wp_ajax_aiovg_store_user_meta', $admin, 'ajax_callback_store_user_meta' );
+
 		$this->loader->add_filter( 'display_post_states', $admin, 'add_display_post_states', 10, 2 );
 		$this->loader->add_filter( 'plugin_action_links_' . AIOVG_PLUGIN_FILE_NAME, $admin, 'plugin_action_links' );
 		$this->loader->add_filter( 'wp_check_filetype_and_ext', $admin, 'add_filetype_and_ext', 10, 4 );	
@@ -182,7 +185,8 @@ class AIOVG_Init {
 			$this->loader->add_action( 'save_post', $videos, 'save_meta_data', 10, 2 );
 			$this->loader->add_action( 'restrict_manage_posts', $videos, 'restrict_manage_posts' );
 			$this->loader->add_action( 'manage_aiovg_videos_posts_custom_column', $videos, 'custom_column_content', 10, 2 );
-			
+			$this->loader->add_action( 'admin_print_footer_scripts', $videos, 'print_footer_scripts', 99 );
+
 			$this->loader->add_filter( 'parent_file', $videos, 'parent_file' );
 			$this->loader->add_filter( 'parse_query', $videos, 'parse_query' );
 			$this->loader->add_filter( 'post_row_actions', $videos, 'row_actions', 10, 2 );
@@ -291,14 +295,14 @@ class AIOVG_Init {
 		// Hooks specific to the categories page
 		$categories = new AIOVG_Public_Categories();
 		
-		$this->loader->add_action( 'wp_ajax_aiovg_load_more_categories', $categories, 'ajax_callback_load_more_categories' );
-		$this->loader->add_action( 'wp_ajax_nopriv_aiovg_load_more_categories', $categories, 'ajax_callback_load_more_categories' );
+		$this->loader->add_action( 'wp_ajax_aiovg_load_categories', $categories, 'ajax_callback_load_categories' );
+		$this->loader->add_action( 'wp_ajax_nopriv_aiovg_load_categories', $categories, 'ajax_callback_load_categories' );
 		
 		// Hooks specific to the videos page
 		$videos = new AIOVG_Public_Videos();
 
-		$this->loader->add_action( 'wp_ajax_aiovg_load_more_videos', $videos, 'ajax_callback_load_more_videos' );
-		$this->loader->add_action( 'wp_ajax_nopriv_aiovg_load_more_videos', $videos, 'ajax_callback_load_more_videos' );
+		$this->loader->add_action( 'wp_ajax_aiovg_load_videos', $videos, 'ajax_callback_load_videos' );
+		$this->loader->add_action( 'wp_ajax_nopriv_aiovg_load_videos', $videos, 'ajax_callback_load_videos' );
 		
 		// Hooks specific to the single video page
 		$video = new AIOVG_Public_Video();
@@ -314,7 +318,6 @@ class AIOVG_Init {
 		$this->loader->add_filter( 'aiovg_vidstack_player_sources', $video, 'player_sources', 10, 2 );
 		$this->loader->add_filter( 'aiovg_iframe_vidstack_player_sources', $video, 'player_sources' );
 		$this->loader->add_filter( 'aiovg_iframe_videojs_player_sources', $video, 'player_sources' );
-		$this->loader->add_filter( 'aiovg_the_title', $video, 'filter_the_title_with_restrictions_label', 10, 2 );
 		$this->loader->add_filter( 'aiovg_the_content', $video, 'wrap_timestamps_with_links' );
 		$this->loader->add_filter( 'the_content', $video, 'the_content', 20 );
 		$this->loader->add_filter( 'comments_open', $video, 'comments_open', 10, 2 );		

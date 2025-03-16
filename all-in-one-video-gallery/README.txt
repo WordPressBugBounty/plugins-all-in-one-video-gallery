@@ -6,7 +6,7 @@ Tags: video player, video gallery, youtube gallery, vimeo gallery, live stream
 Requires at least: 6.3
 Tested up to: 6.7
 Requires PHP: 5.6.20
-Stable tag: 4.0.0
+Stable tag: 4.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,7 @@ No coding is required. Suitable for all kinds of websites that require a single 
 ### LATEST ADDITION
 
 * **New Video Restriction Options!** Now, you can **restrict videos for logged-in users, logged-out users, or specific user roles—globally or per video!**
+* **New Gallery Filtering Options!** Now, you can **filter videos on the same page using AJAX** with keywords, categories, tags, and sort them by title, date, popularity, and more!
 
 ### PLAYER FEATURES
 
@@ -149,6 +150,14 @@ Also, the videos from third-party services like "YouTube", "Vimeo", "Dailymotion
 7. Plugin Settings.
 
 == Changelog ==
+
+= 4.1.0 =
+
+* New: Added filtering options to the gallery, allowing users to filter videos on the same page using keywords, categories, tags, and sort by title, date, popularity, etc.
+* New: Introduced a guided user tour for first-time users to enhance onboarding.
+* Tweak: Improved the plugin dashboard with a new "Help & Tutorials" section for better accessibility.
+* Tweak: Optimized the plugin's JavaScript files for improved performance.
+* Fix: Various minor bug fixes and improvements.
 
 = 4.0.0 =
 
@@ -505,6 +514,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 4.0.0 =
+= 4.1.0 =
 
 Introduces several new features, bug fixes & enhancements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

@@ -593,6 +593,208 @@ class AIOVG_Admin_Videos {
 	}
 	
 	/**
+	 * Print footer scripts.
+	 *
+	 * @since 4.0.1
+	 */
+	public function print_footer_scripts() {
+		if ( defined( 'AIOVG_DISABLE_TOUR' ) && AIOVG_DISABLE_TOUR ) {
+			return false;
+		}
+
+		if ( ! current_user_can( 'manage_aiovg_options' ) ) {
+			return false;
+		}
+
+		global $pagenow, $typenow;		
+		if ( ! in_array( $pagenow, array( 'post-new.php', 'post.php' ) ) || 'aiovg_videos' != $typenow ) {
+			return false;
+		}
+
+		$current_user_id = get_current_user_id();
+		$video_form_tour = get_user_meta( $current_user_id, 'aiovg_video_form_tour', true );
+		$automatic_tour_enabled = 0;
+
+		if ( 'completed' == $video_form_tour ) {
+			return false;
+		}		
+
+		if ( '' == $video_form_tour ) {
+			$automatic_tour_enabled = 1;
+
+			$args = array(				
+				'post_type' => 'aiovg_videos',			
+				'posts_per_page' => 1,
+				'fields' => 'ids',
+				'no_found_rows' => true,
+				'update_post_term_cache' => false,
+				'update_post_meta_cache' => false
+			);
+			
+			$aiovg_query = new WP_Query( $args );
+			
+			if ( $aiovg_query->have_posts() ) {
+				$automatic_tour_enabled = 0;
+			}
+		}
+
+		$l10n = array(
+			'take_a_guided_tour' => __( 'Take a Guided Tour', 'all-in-one-video-gallery' ),
+			'progress_text'      => sprintf( __( '%s of %s', 'all-in-one-video-gallery' ), '{{current}}', '{{total}}' ),
+			'next_btn_text'      => __( 'Next →', 'all-in-one-video-gallery' ),
+			'prev_btn_text'      => __( '← Previous', 'all-in-one-video-gallery' ),
+			'done_btn_text'      => __( 'Done', 'all-in-one-video-gallery' ),
+		);
+
+		$steps = array(
+			array(
+				'popover' => array(
+					'title'       => __( 'Welcome to the Quick Tour', 'all-in-one-video-gallery' ),
+					'description' => __( 'This form lets you add or edit videos for your gallery.<br><br>Let\'s walk through the key steps to get your first video published.', 'all-in-one-video-gallery' )
+				)
+			),
+			array(
+				'element' => '#title',
+				'popover' => array(
+					'title'       => __( 'Video Title', 'all-in-one-video-gallery' ),
+					'description' => __( 'Start by entering a <strong>clear, descriptive title</strong> for your video.<br><br>This helps visitors (and search engines) understand what your video is about.', 'all-in-one-video-gallery' )
+				)
+			),
+			array(
+				'element' => '#postdivrich',
+				'popover' => array(
+					'title'       => __( 'Video Description', 'all-in-one-video-gallery' ),
+					'description' => __( 'Next, add a <strong>description</strong> for your video.<br><br>This is optional, but highly recommended, as it helps with <strong>SEO</strong>, provides context to your audience, and even shows up when sharing videos on social media.', 'all-in-one-video-gallery' )
+				)
+			),
+			array(
+				'element' => '#aiovg-field-type',
+				'popover' => array(
+					'title'       => __( 'Source Type', 'all-in-one-video-gallery' ),
+					'description' => __( 'Choose where your video is hosted — <strong>YouTube</strong>, <strong>Vimeo</strong>, <strong>Self-Hosted</strong>, or another source.<br><br>This helps the plugin know how to handle your video.', 'all-in-one-video-gallery' )
+				)
+			),
+			array(
+				'element' => '%%video-field%%',
+				'popover' => array(
+					'title'       => __( 'Video File Input', 'all-in-one-video-gallery' ),
+					'description' => __( 'Depending on the source you selected, either <strong>upload a video file</strong> or <strong>paste the video URL</strong>.', 'all-in-one-video-gallery' )
+				)
+			),
+			array(
+				'element' => '#aiovg-video-image',
+				'popover' => array(
+					'title'       => __( 'Poster Image', 'all-in-one-video-gallery' ),
+					'description' => sprintf(
+						__( 'Upload a <strong>poster image</strong> for your video.<br><br>This image appears in the gallery and before the video plays.<br><br>Leave this field empty for <strong>YouTube, Vimeo, Dailymotion, and Rumble</strong> to automatically fetch thumbnails.<br><br>Want automatic thumbnails for <strong>self-hosted videos</strong>? Check out our <a href="%s" target="_blank" rel="noopener noreferrer">Premium Add-on</a>.', 'all-in-one-video-gallery' ),
+						'https://plugins360.com/all-in-one-video-gallery/auto-thumbnail-generator/'
+					)
+				)
+			),
+			array(
+				'element' => '#aiovg_categoriesdiv',
+				'popover' => array(
+					'title'       => __( 'Video Categories', 'all-in-one-video-gallery' ),
+					'description' => __( 'Assign your video to <strong>categories</strong> to help visitors find related content.<br><br><strong>Need a new category?</strong> Just click "+ Add New Category" to create one.', 'all-in-one-video-gallery' )
+				)
+			),
+			array(
+				'element' => '#tagsdiv-aiovg_tags',
+				'popover' => array(
+					'title'       => __( 'Video Tags', 'all-in-one-video-gallery' ),
+					'description' => __( 'Add <strong>tags</strong> to describe your video in more detail.<br><br>Tags work like keywords and help visitors find similar videos.', 'all-in-one-video-gallery' )
+				)
+			),
+			array(
+				'element' => '#publish',
+				'popover' => array(
+					'title'       => __( 'Save Your Video', 'all-in-one-video-gallery' ),
+					'description' => __( 'All set? Great!<br><br>Click <strong>"Publish"</strong> to save your video.<br><br>Repeat these steps to add as many videos as you want.', 'all-in-one-video-gallery' )
+				)
+			),
+			array(
+				'element' => '#toplevel_page_all-in-one-video-gallery',
+				'popover' => array(
+					'title'       => __( 'Next Steps', 'all-in-one-video-gallery' ),
+					'description' => sprintf(
+						__( 'That\'s it — you\'re all set!<br><br>Use the menu on the left to manage your <strong>Videos</strong>, <strong>Categories</strong>, and <strong>Tags</strong>. You can also customize the plugin in <strong>Settings</strong>.<br><br><strong>To display your videos on a page:</strong><br>Simply add this shortcode to any page or post: <code>[aiovg_videos filters="all"]</code><br><br>Want to customize how your gallery looks? <a href="%s" target="_blank" rel="noopener noreferrer">Check out this guide</a> to explore all the display options.', 'all-in-one-video-gallery' ),
+						'https://plugins360.com/all-in-one-video-gallery/displaying-video-gallery/'
+					),
+					'align'       => 'center'
+				)
+			)
+		);						
+		?>
+		<script type="text/javascript">
+			(function( $ ) {
+				'use strict';
+
+				function initTour() {
+					const type = $( '#aiovg-video-type' ).val();
+
+					const driver = window.driver.js.driver;
+
+					let steps = <?php echo json_encode( $steps ); ?>;
+					steps.forEach(step => {
+						if ( step.element == '%%video-field%%' ) {							
+							step.element = '.aiovg-type-' + type;
+						}
+					});
+
+					const driverObj = driver({
+						steps: steps,
+						disableActiveInteraction: true,
+						popoverClass: 'driverjs-theme',
+						showProgress: true,
+						progressText: "<?php echo esc_html( $l10n['progress_text'] ); ?>",
+						nextBtnText: "<?php echo esc_html( $l10n['next_btn_text'] ); ?>",
+						prevBtnText: "<?php echo esc_html( $l10n['prev_btn_text'] ); ?>",
+						doneBtnText: "<?php echo esc_html( $l10n['done_btn_text'] ); ?>",												
+						onDestroyStarted: () => {
+							const data = {
+								'action': 'aiovg_store_user_meta',
+								'key': 'aiovg_video_form_tour',				
+								'value': ( driverObj.isLastStep() ? 'completed' : driverObj.getActiveIndex() ),
+								'security': aiovg_admin.ajax_nonce
+							};
+
+							$.post( ajaxurl, data, function( response ) {
+								// Do Nothing
+							});
+
+							driverObj.destroy();
+						}
+					});
+
+					driverObj.drive();
+				}
+				
+				$(function() {
+					// Insert the "Take a Guided Tour" button
+					const button = '<button type="button" id="aiovg-button-tour" class="page-title-action">' + 
+						'<span class="dashicons dashicons-controls-repeat"></span> ' +
+						'<?php echo esc_html( $l10n['take_a_guided_tour'] ); ?>' + 
+						'</button>';
+
+					$( button ).insertBefore( '.wp-header-end' );
+
+					// Init Driver
+					$( '#aiovg-button-tour' ).on( 'click', function( event ) {
+						event.preventDefault();
+						initTour();
+					});	
+					
+					const automaticTourEnabled = <?php echo (int) $automatic_tour_enabled; ?>;
+					if ( automaticTourEnabled == 1 ) {
+						initTour();
+					}
+				});
+			})( jQuery );
+		</script>
+		<?php
+	}
+
+	/**
 	 * Add custom filter options.
 	 *
 	 * @since 1.0.0
@@ -726,7 +928,7 @@ class AIOVG_Admin_Videos {
 		));
 
 		$columns = aiovg_insert_array_after( 'taxonomy-aiovg_tags', $columns, array(
-			'post_meta' => __( 'Custom Fields', 'all-in-one-video-gallery' ),
+			'post_meta' => __( 'Additional Info', 'all-in-one-video-gallery' ),
 			'post_id'   => __( 'ID', 'all-in-one-video-gallery' )
 		));
 

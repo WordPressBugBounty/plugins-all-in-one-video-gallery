@@ -11,7 +11,7 @@
  * Plugin Name:     All-in-One Video Gallery
  * Plugin URI:      https://plugins360.com/all-in-one-video-gallery/
  * Description:     An ultimate video player and video gallery plugin – no coding required. Suitable for YouTubers, Video Bloggers, Course Creators, Podcasters, Sales & Marketing Professionals, and anyone using video on a website.
- * Version:         4.0.0
+ * Version:         4.1.0
  * Author:          Team Plugins360
  * Author URI:      https://plugins360.com
  * License:         GPL-2.0+
@@ -68,7 +68,7 @@ if ( !function_exists( 'aiovg_fs' ) ) {
 }
 // The current version of the plugin
 if ( !defined( 'AIOVG_PLUGIN_VERSION' ) ) {
-    define( 'AIOVG_PLUGIN_VERSION', '4.0.0' );
+    define( 'AIOVG_PLUGIN_VERSION', '4.1.0' );
 }
 // The unique identifier of the plugin
 if ( !defined( 'AIOVG_PLUGIN_SLUG' ) ) {
@@ -93,7 +93,13 @@ if ( !function_exists( 'aiovg_activate' ) ) {
      * The code that runs during plugin activation.
      * This action is documented in includes/activator.php
      */
-    function aiovg_activate() {
+    function aiovg_activate(  $network_wide  ) {
+        if ( is_multisite() && $network_wide ) {
+            deactivate_plugins( AIOVG_PLUGIN_FILE_NAME );
+            wp_die( __( 'Sorry, this plugin cannot be activated network-wide. Please activate it individually on each site where it is needed.', 'all-in-one-video-gallery' ), __( 'Network Activation Not Allowed', 'all-in-one-video-gallery' ), array(
+                'back_link' => true,
+            ) );
+        }
         require_once AIOVG_PLUGIN_DIR . 'includes/activator.php';
         AIOVG_Activator::activate();
     }

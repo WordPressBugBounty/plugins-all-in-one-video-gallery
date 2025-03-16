@@ -19,6 +19,8 @@ $image_data = aiovg_get_image( $post->ID, $image_size, 'post', true );
 $image = $image_data['src'];
 $image_alt = ! empty( $image_data['alt'] ) ? $image_data['alt'] : $post->post_title;
 
+$has_access = aiovg_current_user_has_video_access( $post->ID ) ? true : false;
+
 $lazyloading = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' : '';
 ?>
 
@@ -34,9 +36,15 @@ $lazyloading = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' :
                     </div>
                 <?php endif; ?>
 
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="32" height="32" viewBox="0 0 32 32" class="aiovg-svg-icon-play aiovg-flex-shrink-0">
-                    <path d="M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM12 9l12 7-12 7z"></path>
-                </svg>
+                <?php if ( $has_access ) : ?>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="white" width="40" height="40" viewBox="0 0 24 24" class="aiovg-svg-icon-play aiovg-flex-shrink-0">
+                        <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+                    </svg>
+                <?php else : ?>
+                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="32" height="32" viewBox="0 0 50 50" class="aiovg-svg-icon-locked aiovg-flex-shrink-0">
+                        <path d="M 25 3 C 18.363281 3 13 8.363281 13 15 L 13 20 L 9 20 C 7.300781 20 6 21.300781 6 23 L 6 47 C 6 48.699219 7.300781 50 9 50 L 41 50 C 42.699219 50 44 48.699219 44 47 L 44 23 C 44 21.300781 42.699219 20 41 20 L 37 20 L 37 15 C 37 8.363281 31.636719 3 25 3 Z M 25 5 C 30.566406 5 35 9.433594 35 15 L 35 20 L 15 20 L 15 15 C 15 9.433594 19.433594 5 25 5 Z M 25 30 C 26.699219 30 28 31.300781 28 33 C 28 33.898438 27.601563 34.6875 27 35.1875 L 27 38 C 27 39.101563 26.101563 40 25 40 C 23.898438 40 23 39.101563 23 38 L 23 35.1875 C 22.398438 34.6875 22 33.898438 22 33 C 22 31.300781 23.300781 30 25 30 Z"></path>
+                    </svg>
+                <?php endif; ?>
             </a> 
         </div>   	
         
@@ -54,6 +62,31 @@ $lazyloading = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' :
                         ?>
                     </div>
                 <?php endif; ?>
+
+                <?php
+                // Labels
+                if ( ! $has_access ) {
+                    $restrictions_settings = get_option( 'aiovg_restrictions_settings' );
+
+                    if ( ! empty( $restrictions_settings['show_restricted_label'] ) && ! empty( $restrictions_settings['restricted_label_text'] ) ) {
+                        $styles = array();				
+
+                        if ( $restricted_label_bg_color = $restrictions_settings['restricted_label_bg_color'] ) {
+                            $styles[] = sprintf( 'background-color: %s', $restricted_label_bg_color );
+                        }
+
+                        if ( $restricted_label_text_color = $restrictions_settings['restricted_label_text_color'] ) {
+                            $styles[] = sprintf( 'color: %s', $restricted_label_text_color );
+                        }
+
+                        printf( 
+                            '<div class="aiovg-labels"><span class="aiovg-restricted-label" style="%s">%s</span></div>',
+                            esc_attr( implode( '; ', $styles ) ),
+                            esc_html( $restrictions_settings['restricted_label_text'] )
+                        );
+                    }
+                }
+                ?>
 
                 <?php
                 $meta = array();					

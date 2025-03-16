@@ -54,31 +54,18 @@ class AIOVG_Public_Videos {
 	 * @param array $atts An associative array of attributes.
 	 */
 	public function run_shortcode_videos( $atts ) {		
-		$attributes = shortcode_atts( $this->get_defaults(), $atts, 'aiovg_videos' );
-		$attributes['shortcode'] = 'aiovg_videos';
-				
-		if ( ! empty( $attributes['related'] ) ) {
-			// Category page
-			if ( $term_slug = get_query_var( 'aiovg_category' ) ) {         
-				$term = get_term_by( 'slug', sanitize_text_field( $term_slug ), 'aiovg_categories' );
-				$attributes['category'] = $term->term_id;
-			}
-
-			// Tag page
-			if ( $term_slug = get_query_var( 'aiovg_tag' ) ) {         
-				$term = get_term_by( 'slug', sanitize_text_field( $term_slug ), 'aiovg_tags' );
-				$attributes['tag'] = $term->term_id;
-			}
-		}
+		$attributes = $this->prepare_attributes( $atts, 'aiovg_videos' );		
 		
 		$content = $this->get_content( $attributes );
 		
 		if ( empty( $content ) ) {
 			$content = sprintf(
-				'<div class="aiovg-shortcode-videos aiovg-no-items-found">%s</div>',
+				'<div class="aiovg-videos aiovg-shortcode-videos aiovg-no-items-found">%s</div>',
 				esc_html( aiovg_get_message( 'videos_empty' ) )
 			);
 		}
+
+		$content = aiovg_wrap_with_filters( $content, $attributes );
 		
 		return $content;		
 	}
@@ -161,7 +148,7 @@ class AIOVG_Public_Videos {
 			// ...
 			if ( empty( $videos ) && empty( $sub_categories ) ) {
 				$content .= sprintf(
-					'<div class="aiovg-shortcode-category aiovg-no-items-found">%s</div>',
+					'<div class="aiovg-videos aiovg-shortcode-category aiovg-no-items-found">%s</div>',
 					esc_html( aiovg_get_message( 'videos_empty' ) )
 				);
 			} else {
@@ -223,7 +210,7 @@ class AIOVG_Public_Videos {
 
 			if ( empty( $content ) ) {
 				$content = sprintf(
-					'<div class="aiovg-shortcode-tag aiovg-no-items-found">%s</div>',
+					'<div class="aiovg-videos aiovg-shortcode-tag aiovg-no-items-found">%s</div>',
 					esc_html( aiovg_get_message( 'videos_empty' ) )
 				);
 			}
@@ -261,57 +248,18 @@ class AIOVG_Public_Videos {
 	 * @param array $atts An associative array of attributes.
 	 */
 	public function run_shortcode_search( $atts ) {	
-		$attributes = shortcode_atts( $this->get_defaults(), $atts, 'aiovg_search' );
-		$attributes['shortcode'] = 'aiovg_search';
-		
-		if ( isset( $_GET['vi'] ) ) {
-			$attributes['search_query'] = $_GET['vi'];
-		}
-		
-		if ( isset( $_GET['ca'] ) ) {
-			$attributes['category'] = $_GET['ca'];
-		}
+		$attributes = $this->prepare_attributes( $atts, 'aiovg_search' );
 
-		if ( ! isset( $_GET['ca'] ) || ( isset( $_GET['ca'] ) && empty( $_GET['ca'] ) ) ) {
-			$categories_excluded = get_terms( array(
-				'taxonomy'   => 'aiovg_categories',
-				'hide_empty' => false,
-				'fields'     => 'ids',
-				'meta_key'   => 'exclude_search_form',
-				'meta_value' => 1
-			) );
-
-			if ( ! empty( $categories_excluded ) && ! is_wp_error( $categories_excluded ) ) {
-				$attributes['category_exclude'] = $categories_excluded;
-			}
-		}
-
-		if ( isset( $_GET['ta'] ) ) {
-			$attributes['tag'] = $_GET['ta'];
-		}
-		
-		if ( isset( $_GET['sort'] ) ) {
-			$sort = explode( '-', $_GET['sort'] );
-			$sort = array_map( 'trim', $sort );
-			$sort = array_filter( $sort );
-
-			if ( ! empty( $sort ) ) {
-				$attributes['orderby'] = $sort[0];
-				
-				if ( count( $sort ) > 1 ) {
-					$attributes['order'] = $sort[1];
-				}
-			}
-		}
-		
 		$content = $this->get_content( $attributes );
 		
 		if ( empty( $content ) ) {
 			$content = sprintf(
-				'<div class="aiovg-shortcode-search aiovg-no-items-found">%s</div>',
+				'<div class="aiovg-videos aiovg-shortcode-search aiovg-no-items-found">%s</div>',
 				esc_html( aiovg_get_message( 'videos_empty' ) )
 			);
 		}
+
+		$content = aiovg_wrap_with_filters( $content, $attributes );
 		
 		return $content;		
 	}
@@ -323,15 +271,14 @@ class AIOVG_Public_Videos {
 	 * @param array $atts An associative array of attributes.
 	 */
 	public function run_shortcode_related_videos( $atts ) {
-		global $post;
-
-		if ( ! isset( $post ) || ! is_singular( 'aiovg_videos' ) ) {
+		if ( ! is_singular( 'aiovg_videos' ) ) {
 			return '';
 		}
 
 		$related_videos_settings = get_option( 'aiovg_related_videos_settings' );
 
-		$post_id = (int) $post->ID;
+		global $wp_the_query;
+		$post_id = $wp_the_query->get_queried_object_id();
 
 		$attributes = array(
 			'related'         => 1,
@@ -365,7 +312,7 @@ class AIOVG_Public_Videos {
 
 		if ( empty( $content ) ) {
 			$content = sprintf(
-				'<div class="aiovg-shortcode-related-videos aiovg-no-items-found">%s</div>',
+				'<div class="aiovg-videos aiovg-shortcode-related-videos aiovg-no-items-found">%s</div>',
 				esc_html( aiovg_get_message( 'videos_empty' ) )
 			);
 		}
@@ -403,7 +350,7 @@ class AIOVG_Public_Videos {
 		
 		if ( empty( $content ) ) {
 			$content = sprintf(
-				'<div class="aiovg-shortcode-user-videos aiovg-no-items-found">%s</div>',
+				'<div class="aiovg-videos aiovg-shortcode-user-videos aiovg-no-items-found">%s</div>',
 				esc_html( aiovg_get_message( 'videos_empty' ) )
 			);
 		}
@@ -458,7 +405,7 @@ class AIOVG_Public_Videos {
 		
 		if ( empty( $content ) ) {
 			$content = sprintf(
-				'<div class="aiovg-shortcode-liked-videos aiovg-no-items-found">%s</div>',
+				'<div class="aiovg-videos aiovg-shortcode-liked-videos aiovg-no-items-found">%s</div>',
 				esc_html( aiovg_get_message( 'videos_empty' ) )
 			);
 		}
@@ -513,7 +460,7 @@ class AIOVG_Public_Videos {
 		
 		if ( empty( $content ) ) {
 			$content = sprintf(
-				'<div class="aiovg-shortcode-disliked-videos aiovg-no-items-found">%s</div>',
+				'<div class="aiovg-videos aiovg-shortcode-disliked-videos aiovg-no-items-found">%s</div>',
 				esc_html( aiovg_get_message( 'videos_empty' ) )
 			);
 		}
@@ -522,11 +469,11 @@ class AIOVG_Public_Videos {
 	}
 
 	/**
-	 * Load more videos.
+	 * Load videos using Ajax.
 	 *
 	 * @since 2.5.1
 	 */
-	public function ajax_callback_load_more_videos() {
+	public function ajax_callback_load_videos() {
 		// Security check
 		check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
 
@@ -543,9 +490,16 @@ class AIOVG_Public_Videos {
 			}
 		}
 
-		$json = array();
-		$json['html'] = $this->get_content( $attributes );
+		$content = $this->get_content( $attributes );
 
+		if ( empty( $content ) ) {
+			$content = sprintf(
+				'<div class="aiovg-videos aiovg-no-items-found">%s</div>',
+				esc_html( aiovg_get_message( 'videos_empty' ) )
+			);
+		}
+
+		$json = array( 'html' => $content );
 		wp_send_json_success( $json );
 	}
 	
@@ -553,8 +507,8 @@ class AIOVG_Public_Videos {
 	 * Get the html output.
 	 *
 	 * @since  1.0.0
-	 * @param  array  $atts    An associative array of attributes.
-	 * @return string $content HTML output.
+	 * @param  array  $attributes An associative array of attributes.
+	 * @return string $content    HTML output.
 	 */
 	public function get_content( $attributes ) {		
 		$attributes['ratio'] = ! empty( $attributes['ratio'] ) ? (float) $attributes['ratio'] . '%' : '56.25%';
@@ -625,11 +579,7 @@ class AIOVG_Public_Videos {
 		
 		$count_tax_queries = count( $tax_queries );
 		if ( $count_tax_queries ) {
-			$tax_relation = 'AND';
-			if ( ! empty( $attributes['related'] ) ) {		
-				$tax_relation = 'OR';
-			}
-
+			$tax_relation = ! empty( $attributes['related'] ) ? 'OR' : 'AND';
 			$args['tax_query'] = ( $count_tax_queries > 1 ) ? array_merge( array( 'relation' => $tax_relation ), $tax_queries ) : $tax_queries;
 		}
 
@@ -725,10 +675,100 @@ class AIOVG_Public_Videos {
 	}
 	
 	/**
+	 * Prepares and processes the complete attributes array for the shortcode.
+	 *
+	 * @since  4.0.1
+	 * @param  array  $atts      Raw shortcode attributes passed to the shortcode.
+	 * @param  string $shortcode The name of the shortcode (e.g., 'aiovg_videos' or 'aiovg_search').
+	 * @return array             Fully prepared attributes array, ready for use.
+	 */
+	public function prepare_attributes( $atts, $shortcode ) {
+		$attributes = shortcode_atts( $this->get_defaults(), $atts, $shortcode );
+		$attributes['shortcode'] = $shortcode;
+
+		// Related
+		if ( ! empty( $attributes['related'] ) ) {
+			// Category page
+			if ( $term_slug = get_query_var( 'aiovg_category' ) ) {         
+				$term = get_term_by( 'slug', sanitize_text_field( $term_slug ), 'aiovg_categories' );
+				$attributes['category'] = $term->term_id;
+			}
+
+			// Tag page
+			if ( $term_slug = get_query_var( 'aiovg_tag' ) ) {         
+				$term = get_term_by( 'slug', sanitize_text_field( $term_slug ), 'aiovg_tags' );
+				$attributes['tag'] = $term->term_id;
+			}
+		}
+
+		// Filters
+		if ( 'all' === $attributes['filters'] ) {
+			$attributes['filters_keyword'] = 1;
+			$attributes['filters_category'] = 1;
+			$attributes['filters_tag'] = 1;
+			$attributes['filters_sort'] = 1;
+		}
+
+		// Search
+		if ( 
+			'aiovg_search' == $shortcode ||
+			! empty( $attributes['filters_keyword'] ) ||
+			! empty( $attributes['filters_category'] ) ||
+			! empty( $attributes['filters_tag'] ) ||
+			! empty( $attributes['filters_sort'] )
+		) {
+			if ( isset( $_GET['vi'] ) ) {
+				$attributes['search_query'] = $_GET['vi'];
+			}
+			
+			if ( isset( $_GET['ca'] ) ) {
+				$attributes['category'] = $_GET['ca'];
+			}
+	
+			if ( ! isset( $_GET['ca'] ) || ( isset( $_GET['ca'] ) && empty( $_GET['ca'] ) ) ) {
+				$categories_excluded = get_terms( array(
+					'taxonomy'   => 'aiovg_categories',
+					'hide_empty' => false,
+					'fields'     => 'ids',
+					'meta_key'   => 'exclude_search_form',
+					'meta_value' => 1
+				) );
+	
+				if ( ! empty( $categories_excluded ) && ! is_wp_error( $categories_excluded ) ) {
+					$attributes['category_exclude'] = $categories_excluded;
+				}
+			}
+	
+			if ( isset( $_GET['ta'] ) ) {
+				$attributes['tag'] = $_GET['ta'];
+			}
+			
+			if ( isset( $_GET['sort'] ) ) {
+				$sort = array_filter( array_map( 'trim', explode( '-', $_GET['sort'] ) ) );
+	
+				if ( ! empty( $sort ) ) {
+					$attributes['orderby'] = $sort[0];
+					
+					if ( count( $sort ) > 1 ) {
+						$attributes['order'] = $sort[1];
+					}
+				}
+			}
+		}
+
+		// Pagination
+		if ( 'ajax' == $attributes['filters_mode'] ) {
+			$attributes['pagination_ajax'] = 1;
+		}
+
+		return $attributes;
+	}
+
+	/**
 	 * Get the default shortcode attribute values.
 	 *
 	 * @since  1.0.0
-	 * @return array $atts An associative array of attributes.
+	 * @return array An associative array of attributes.
 	 */
 	public function get_defaults() {	
 		if ( empty( $this->defaults ) ) {	
@@ -757,6 +797,15 @@ class AIOVG_Public_Videos {
 			foreach ( $fields['video']['sections']['controls']['fields'] as $field ) {
 				$this->defaults[ 'player_' . $field['name'] ] = $field['value'];
 			}
+
+			$this->defaults['filters'] = '';
+			$this->defaults['filters_keyword'] = 0;
+			$this->defaults['filters_category'] = 0;
+			$this->defaults['filters_tag'] = 0;
+			$this->defaults['filters_sort'] = 0;
+			$this->defaults['filters_template'] = 'horizontal';
+			$this->defaults['filters_mode'] = 'live';
+			$this->defaults['filters_position'] = 'top';
 			
 			$this->defaults['source'] = 'videos';
 			$this->defaults['count'] = 0;

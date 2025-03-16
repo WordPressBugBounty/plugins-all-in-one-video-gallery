@@ -19,6 +19,8 @@ $image_data = aiovg_get_image( $post->ID, $image_size, 'post', true );
 $image = $image_data['src'];
 $image_alt = ! empty( $image_data['alt'] ) ? $image_data['alt'] : $post->post_title;
 
+$has_access = aiovg_current_user_has_video_access( $post->ID ) ? true : false;
+
 $lazyloading = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' : '';
 ?>
 
@@ -32,9 +34,15 @@ $lazyloading = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' :
             </div>
         <?php endif; ?>
 
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="32" height="32" viewBox="0 0 32 32" class="aiovg-svg-icon-play aiovg-flex-shrink-0">
-            <path d="M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM12 9l12 7-12 7z"></path>
-        </svg>
+        <?php if ( $has_access ) : ?>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="white" width="40" height="40" viewBox="0 0 24 24" class="aiovg-svg-icon-play aiovg-flex-shrink-0">
+                <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+            </svg>
+        <?php else : ?>
+            <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="32" height="32" viewBox="0 0 50 50" class="aiovg-svg-icon-locked aiovg-flex-shrink-0">
+                <path d="M 25 3 C 18.363281 3 13 8.363281 13 15 L 13 20 L 9 20 C 7.300781 20 6 21.300781 6 23 L 6 47 C 6 48.699219 7.300781 50 9 50 L 41 50 C 42.699219 50 44 48.699219 44 47 L 44 23 C 44 21.300781 42.699219 20 41 20 L 37 20 L 37 15 C 37 8.363281 31.636719 3 25 3 Z M 25 5 C 30.566406 5 35 9.433594 35 15 L 35 20 L 15 20 L 15 15 C 15 9.433594 19.433594 5 25 5 Z M 25 30 C 26.699219 30 28 31.300781 28 33 C 28 33.898438 27.601563 34.6875 27 35.1875 L 27 38 C 27 39.101563 26.101563 40 25 40 C 23.898438 40 23 39.101563 23 38 L 23 35.1875 C 22.398438 34.6875 22 33.898438 22 33 C 22 31.300781 23.300781 30 25 30 Z"></path>
+            </svg>
+        <?php endif; ?>
     </a>    	
     
     <div class="aiovg-caption">
@@ -50,6 +58,31 @@ $lazyloading = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' :
                 ?>
             </div>
         <?php endif; ?>
+
+        <?php
+        // Labels
+        if ( ! $has_access ) {
+            $restrictions_settings = get_option( 'aiovg_restrictions_settings' );
+
+			if ( ! empty( $restrictions_settings['show_restricted_label'] ) && ! empty( $restrictions_settings['restricted_label_text'] ) ) {
+				$styles = array();				
+
+				if ( $restricted_label_bg_color = $restrictions_settings['restricted_label_bg_color'] ) {
+					$styles[] = sprintf( 'background-color: %s', $restricted_label_bg_color );
+				}
+
+				if ( $restricted_label_text_color = $restrictions_settings['restricted_label_text_color'] ) {
+                    $styles[] = sprintf( 'color: %s', $restricted_label_text_color );
+				}
+
+				printf( 
+					'<div class="aiovg-labels"><span class="aiovg-restricted-label" style="%s">%s</span></div>',
+					esc_attr( implode( '; ', $styles ) ),
+					esc_html( $restrictions_settings['restricted_label_text'] )
+				);
+			}
+		}
+        ?>
 
         <?php
         $meta = array();					
@@ -100,8 +133,8 @@ $lazyloading = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' :
             );
         }
 
-         // Likes
-         if ( $attributes['show_likes'] ) {           
+        // Likes
+        if ( $attributes['show_likes'] ) {           
             $icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor" class="aiovg-flex-shrink-0">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282m0 0h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H5.904m10.598-9.75H14.25M5.904 18.5c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 0 1-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 9.953 4.167 9.5 5 9.5h1.053c.472 0 .745.556.5.96a8.958 8.958 0 0 0-1.302 4.665c0 1.194.232 2.333.654 3.375Z" />
             </svg>';

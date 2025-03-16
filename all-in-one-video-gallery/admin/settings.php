@@ -884,7 +884,7 @@ class AIOVG_Admin_Settings {
                 array(
                     'name'              => 'restricted_label_text',
                     'label'             => __( 'Restricted Access Label Text', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Enter custom text for the restricted access label. Default: "restricted".', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enter custom text for the restricted access label. Example: "members only".', 'all-in-one-video-gallery' ),
                     'type'              => 'text',
                     'sanitize_callback' => 'sanitize_text_field'
                 ),

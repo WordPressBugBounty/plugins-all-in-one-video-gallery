@@ -83,7 +83,7 @@ if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
                     
                     if ( ! $is_video_found ) {
                         $error = sprintf( 
-                            __( 'No videos found. <a href="%s">Add</a> your first video.', 'all-in-one-video-gallery' ),
+                            __( 'No videos found. <a href="%s">Add your first video</a>', 'all-in-one-video-gallery' ),
                             esc_url( admin_url( 'post-new.php?post_type=aiovg_videos' ) )
                         );
                     }  
@@ -92,7 +92,7 @@ if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
 
                     if ( ! $is_category_found ) {
                         $error = sprintf( 
-                            __( 'No categories found. <a href="%s">Add</a> your first category.', 'all-in-one-video-gallery' ),
+                            __( 'No categories found. <a href="%s">Add your first category</a>', 'all-in-one-video-gallery' ),
                             esc_url( admin_url( 'edit-tags.php?taxonomy=aiovg_categories&post_type=aiovg_videos' ) )
                         );
                     }
@@ -219,6 +219,7 @@ if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
             <?php endforeach; ?>
 
             <a href="#aiovg-shortcode-modal" id="aiovg-generate-shortcode" class="aiovg-modal-button aiovg-margin-top button button-primary button-hero">
+                <span class="dashicons dashicons-shortcode"></span>
                 <?php esc_attr_e( 'Generate Shortcode', 'all-in-one-video-gallery' ); ?>
             </a>
         </div>
@@ -227,22 +228,22 @@ if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
         <div class="aiovg-right-col">
             <div id="aiovg-shortcode-instructions-video" class="aiovg-shortcode-instructions" style="display: none;">
                 <p class="about-description aiovg-no-margin">
-                    <?php esc_html_e( 'How to add a single video in my POST/PAGE?', 'all-in-one-video-gallery' ); ?>
+                    <?php esc_html_e( 'How to add a single video to your POST or PAGE?', 'all-in-one-video-gallery' ); ?>
                 </p>
 
                 <p>
-                    <?php esc_html_e( 'You can use one of the following methods,', 'all-in-one-video-gallery' ); ?>
+                    <?php esc_html_e( 'You can use one of the following methods:', 'all-in-one-video-gallery' ); ?>
                 </p>
 
                 <p>
                     <span class="dashicons dashicons-arrow-left-alt"></span>  
-                    <?php esc_html_e( 'Use the shortcode builder in this page to build your shortcode, then add it in your POST/PAGE.', 'all-in-one-video-gallery' ); ?>
+                    <?php esc_html_e( 'Use the shortcode builder in this page to build your shortcode, copy the shortcode, and insert it into your POST or PAGE.', 'all-in-one-video-gallery' ); ?>
                 </p>
 
                 <p>
                     2. <?php 
                     printf( 
-                        __( '<a href="%s">Add</a> your video using our "Custom Post Type" form, copy the shortcode, then add it in your POST/PAGE.', 'all-in-one-video-gallery' ),
+                        __( '<a href="%s">Add your Video</a> under the "All Videos" menu, copy the shortcode, and insert it into your POST or PAGE.', 'all-in-one-video-gallery' ),
                         esc_url( admin_url( 'post-new.php?post_type=aiovg_videos' ) )
                     ); 
                     ?>
@@ -251,7 +252,7 @@ if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
                 <p>
                     3. <?php 
                     printf( 
-                        __( 'Use the <a href="%s">AIOVG - Video Player</a> Gutenberg block and add the video directly in your POST/PAGE.', 'all-in-one-video-gallery' ), 
+                        __( 'Use the <a href="%s">AIOVG - Video Player</a> Gutenberg block to add the video directly in your POST or PAGE.', 'all-in-one-video-gallery' ), 
                         esc_url( admin_url( 'post-new.php?post_type=page' ) ) 
                     ); 
                     ?>
@@ -265,6 +266,33 @@ if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
                     ); 
                     ?>
                 </p>
+
+                <hr class="aiovg-no-margin" />
+                <br />
+
+                <p class="about-description aiovg-no-margin">
+                    <?php esc_html_e( 'Related Tutorials', 'all-in-one-video-gallery' ); ?>
+                </p>
+
+                <p>
+                    1. <?php
+                    printf( 
+                        '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+                        'https://plugins360.com/all-in-one-video-gallery/add-your-first-video/',
+                        esc_html__( 'Add Your First Video', 'all-in-one-video-gallery' )
+                    );
+                    ?>
+                </p>
+
+                <p>
+                    2. <?php
+                    printf( 
+                        '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+                        'https://plugins360.com/all-in-one-video-gallery/widgets-sidebar-content/',
+                        esc_html__( 'Using the Shortcode Builder, Gutenberg Blocks & Widgets', 'all-in-one-video-gallery' )
+                    );
+                    ?>
+                </p>
             </div>
 
             <div id="aiovg-shortcode-instructions-videos" class="aiovg-shortcode-instructions">
@@ -275,35 +303,26 @@ if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
                 <p>
                     1. <?php
                     printf(
-                        __( 'Optional. <a href="%s">Add Categories</a>', 'all-in-one-video-gallery' ),
-                        esc_url( admin_url( 'edit-tags.php?taxonomy=aiovg_categories&post_type=aiovg_videos' ) )
-                    );
-                    ?>
-                </p>
-
-                <p>
-                    2. <?php
-                    printf(
-                        __( '<a href="%s">Add Videos</a>', 'all-in-one-video-gallery' ),
+                        __( '<a href="%s">Add Videos</a> under the "All Videos" menu.', 'all-in-one-video-gallery' ),
                         esc_url( admin_url( 'edit.php?post_type=aiovg_videos' ) )
                     );
                     ?>
                 </p>
 
                 <p>
-                    3. <?php esc_html_e( 'Then, use one of the following methods to build and show the gallery in your site front-end,', 'all-in-one-video-gallery' ); ?>
+                    2. <?php esc_html_e( 'Use one of the following methods to show the videos on your site:', 'all-in-one-video-gallery' ); ?>
                 </p>
 
                 <p class="aiovg-margin-left">
                     <span class="dashicons dashicons-arrow-left-alt"></span>  
-                    <?php esc_html_e( 'Use the shortcode builder in this page to build your shortcode, then add it in your POST/PAGE.', 'all-in-one-video-gallery' ); ?>
+                    <?php esc_html_e( 'Use the shortcode builder in this page to build your shortcode, copy the shortcode, and insert it into your POST or PAGE.', 'all-in-one-video-gallery' ); ?>
                 </p>
 
                 <p class="aiovg-margin-left">
                     <span class="dashicons dashicons-arrow-right"></span>   
                     <?php 
                     printf( 
-                        __( 'Use the <a href="%s">AIOVG - Video Gallery</a> Gutenberg block in your POST/PAGE.', 'all-in-one-video-gallery' ), 
+                        __( 'Use the <a href="%s">AIOVG - Video Gallery</a> Gutenberg block in your POST or PAGE.', 'all-in-one-video-gallery' ), 
                         esc_url( admin_url( 'post-new.php?post_type=page' ) ) 
                     ); 
                     ?>
@@ -318,6 +337,33 @@ if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
                     ); 
                     ?>
                 </p>
+
+                <hr class="aiovg-no-margin" />
+                <br />
+
+                <p class="about-description aiovg-no-margin">
+                    <?php esc_html_e( 'Related Tutorials', 'all-in-one-video-gallery' ); ?>
+                </p>
+
+                <p>
+                    1. <?php
+                    printf( 
+                        '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+                        'https://plugins360.com/all-in-one-video-gallery/displaying-video-gallery/',
+                        esc_html__( 'Create and Show Video Galleries', 'all-in-one-video-gallery' )
+                    );
+                    ?>
+                </p>
+
+                <p>
+                    2. <?php
+                    printf( 
+                        '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+                        'https://plugins360.com/all-in-one-video-gallery/widgets-sidebar-content/',
+                        esc_html__( 'Using the Shortcode Builder, Gutenberg Blocks & Widgets', 'all-in-one-video-gallery' )
+                    );
+                    ?>
+                </p>
             </div>
 
             <div id="aiovg-shortcode-instructions-categories" class="aiovg-shortcode-instructions" style="display: none;">
@@ -328,26 +374,26 @@ if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
                 <p>
                     1. <?php
                     printf(
-                        __( '<a href="%s">Add Categories</a>', 'all-in-one-video-gallery' ),
+                        __( '<a href="%s">Add Categories</a> under the "Video Categories" menu.', 'all-in-one-video-gallery' ),
                         esc_url( admin_url( 'edit-tags.php?taxonomy=aiovg_categories&post_type=aiovg_videos' ) )
                     );
                     ?>
                 </p>
 
                 <p>
-                    2. <?php esc_html_e( 'Then, use one of the following methods to show the video categories in your site front-end,', 'all-in-one-video-gallery' ); ?>
+                    2. <?php esc_html_e( 'Use one of the following methods to show the video categories on your site:', 'all-in-one-video-gallery' ); ?>
                 </p>
 
                 <p class="aiovg-margin-left">
                     <span class="dashicons dashicons-arrow-left-alt"></span>  
-                    <?php esc_html_e( 'Use the shortcode builder in this page to build your shortcode, then add it in your POST/PAGE.', 'all-in-one-video-gallery' ); ?>
+                    <?php esc_html_e( 'Use the shortcode builder in this page to build your shortcode, copy the shortcode, and insert it into your POST or PAGE.', 'all-in-one-video-gallery' ); ?>
                 </p>
 
                 <p class="aiovg-margin-left">
                     <span class="dashicons dashicons-arrow-right"></span>   
                     <?php 
                     printf( 
-                        __( 'Use the <a href="%s">AIOVG - Video Categories</a> Gutenberg block in your POST/PAGE.', 'all-in-one-video-gallery' ), 
+                        __( 'Use the <a href="%s">AIOVG - Video Categories</a> Gutenberg block in your POST or PAGE.', 'all-in-one-video-gallery' ), 
                         esc_url( admin_url( 'post-new.php?post_type=page' ) ) 
                     ); 
                     ?>
@@ -362,6 +408,43 @@ if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
                     ); 
                     ?>
                 </p>
+
+                <hr class="aiovg-no-margin" />
+                <br />
+
+                <p class="about-description aiovg-no-margin">
+                    <?php esc_html_e( 'Related Tutorials', 'all-in-one-video-gallery' ); ?>
+                </p>
+
+                <p>
+                    1. <?php
+                    printf( 
+                        '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+                        'https://plugins360.com/all-in-one-video-gallery/displaying-categories/',
+                        esc_html__( 'Create and Show Video Categories', 'all-in-one-video-gallery' )
+                    );
+                    ?>
+                </p>
+
+                <p>
+                    2. <?php
+                    printf( 
+                        '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+                        'https://plugins360.com/all-in-one-video-gallery/displaying-tags/',
+                        esc_html__( 'Create and Show Video Tags', 'all-in-one-video-gallery' )
+                    );
+                    ?>
+                </p>
+
+                <p>
+                    3. <?php
+                    printf( 
+                        '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+                        'https://plugins360.com/all-in-one-video-gallery/widgets-sidebar-content/',
+                        esc_html__( 'Using the Shortcode Builder, Gutenberg Blocks & Widgets', 'all-in-one-video-gallery' )
+                    );
+                    ?>
+                </p>
             </div>
 
             <div id="aiovg-shortcode-instructions-search_form" class="aiovg-shortcode-instructions" style="display: none;">
@@ -370,18 +453,18 @@ if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
                 </p>
 
                 <p>
-                    <?php esc_html_e( 'You can use one of the following methods to add the videos search form in your website,', 'all-in-one-video-gallery' ); ?>
+                    <?php esc_html_e( 'Use one of the following methods to add the video search form on your site:', 'all-in-one-video-gallery' ); ?>
                 </p>
 
                 <p>
                     <span class="dashicons dashicons-arrow-left-alt"></span>  
-                    <?php esc_html_e( 'Use the shortcode builder in this page to build your shortcode, then add it in your POST/PAGE.', 'all-in-one-video-gallery' ); ?>
+                    <?php esc_html_e( 'Use the shortcode builder in this page to build your shortcode, copy the shortcode, and insert it into your POST or PAGE.', 'all-in-one-video-gallery' ); ?>
                 </p>
 
                 <p>
                     2. <?php 
                     printf( 
-                        __( 'Use the <a href="%s">AIOVG - Search Form</a> Gutenberg block in your POST/PAGE.', 'all-in-one-video-gallery' ), 
+                        __( 'Use the <a href="%s">AIOVG - Search Form</a> Gutenberg block in your POST or PAGE.', 'all-in-one-video-gallery' ), 
                         esc_url( admin_url( 'post-new.php?post_type=page' ) ) 
                     ); 
                     ?>
@@ -396,13 +479,20 @@ if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
                     ?>
                 </p>
 
+                <hr class="aiovg-no-margin" />
+                <br />
+
+                <p class="about-description aiovg-no-margin">
+                    <?php esc_html_e( 'Related Tutorials', 'all-in-one-video-gallery' ); ?>
+                </p>
+
                 <p>
-                    <span class="dashicons dashicons-info"></span> 
-                    <?php 
+                    1. <?php
                     printf( 
-                        __( 'No matter where you add the search form, but the search results will always be displayed in the <a href="%s">Search Videos</a> page that is added by our plugin dynamically during the activation.', 'all-in-one-video-gallery' ), 
-                        esc_url( admin_url( 'admin.php?page=aiovg_settings&tab=advanced&section=aiovg_page_settings' ) ) 
-                    ); 
+                        '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+                        'https://plugins360.com/all-in-one-video-gallery/widgets-sidebar-content/',
+                        esc_html__( 'Using the Shortcode Builder, Gutenberg Blocks & Widgets', 'all-in-one-video-gallery' )
+                    );
                     ?>
                 </p>
             </div>
@@ -412,8 +502,8 @@ if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
     <!-- Shortcode Modal -->
     <div id="aiovg-shortcode-modal" class="aiovg aiovg-modal mfp-hide">
         <div class="aiovg-modal-body">
-            <p><?php esc_html_e( 'Congrats! copy the shortcode below and paste it in your POST/PAGE where you need the gallery,', 'all-in-one-video-gallery' ); ?></p>
-            <textarea id="aiovg-shortcode" class="widefat code" autofocus="autofocus" onfocus="this.select()"></textarea>
+            <p><?php esc_html_e( 'Congrats! copy the shortcode below and paste it in your POST or PAGE where you need the gallery,', 'all-in-one-video-gallery' ); ?></p>
+            <textarea id="aiovg-shortcode" class="widefat code" rows="3" autofocus="autofocus" onfocus="this.select()"></textarea>
         </div>
     </div>
 </div>

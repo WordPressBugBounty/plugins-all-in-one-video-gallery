@@ -68,23 +68,28 @@ class AIOVG_Widget_Search extends WP_Widget {
 			'target'            => isset( $instance['target'] ) ? sanitize_text_field( $instance['target'] ) : 'default'
 		);
 
-		if ( ! $attributes['has_category'] && ! $attributes['has_tag'] && ! $attributes['has_sort'] ) {
+		if ( 
+			empty( $attributes['has_category'] ) && 
+			empty( $attributes['has_tag'] ) && 
+			empty( $attributes['has_sort'] ) 
+		) {
 			$attributes['template'] = 'compact';
 		}
 
 		if ( 'current' == $attributes['target'] ) {
-			global $wp_query;
-			$attributes['search_page_id'] = $wp_query->get_queried_object_id();
+			if ( $current_page_id = aiovg_get_current_page_id() ) {
+				$attributes['search_page_id'] = $current_page_id;
+			}
 		}
 		
 		// Enqueue dependencies
 		wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-public' );
 
-		if ( ! $attributes['has_search_button'] ) {
+		if ( empty( $attributes['has_search_button'] ) ) {
 			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-public' );
 		}
 
-		if ( $attributes['has_category'] || $attributes['has_tag'] ) {
+		if ( ! empty( $attributes['has_category'] ) || ! empty( $attributes['has_tag'] ) ) {
 			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-select' );
 		}
 

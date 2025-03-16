@@ -227,13 +227,19 @@
 	margin-top: -2px;
 }
 
-.aiovg-svg-icon-play {
+.aiovg-svg-icon-play,
+.aiovg-svg-icon-locked {
 	pointer-events: none;
 	position: absolute;
 	inset: 0;
 	z-index: 3;	
 	margin: auto;
+	max-width: 40px;
 	fill: #fff;
+	filter: drop-shadow( 1px 2px 4px rgba( 0, 0, 0, 0.2 ) );
+}
+
+.aiovg-svg-icon-locked {
 	width: 32px;
 }
 
@@ -243,7 +249,7 @@
  *
  *--------------------------------------------------------------------------------------------*/
 /** Pulse */
-@keyframes aiovgPulse {
+@keyframes aiovg-pulse {
 	0%, 100% {
 	  	opacity: 1;
 	}
@@ -253,11 +259,18 @@
 }
 
 .aiovg .aiovg-animate-pulse {
-	animation: aiovgPulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	animation: aiovg-pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/** Pulse bar */
+@keyframes aiovg-pulse-bar {
+    0% { opacity: 1; }
+    50% { opacity: 0.8; }
+    100% { opacity: 1; }
 }
 
 /** Rotate */
-@keyframes aiovgRotate {
+@keyframes aiovg-rotate {
 	from {
 	  	transform: rotate(0deg);
 	}
@@ -267,11 +280,11 @@
 }
 
 .aiovg .aiovg-animate-rotate {
-	animation: aiovgRotate 1s linear infinite;
+	animation: aiovg-rotate 1s linear infinite;
 }
 
 /** Spinner */
-@keyframes aiovgWait {
+@keyframes aiovg-wait {
 	12.5% {
 		background-position-x: -4px, -4px, -4px, -4px, -4px, -4px, -4px, -4px, -4px, -4px, 0, 0;
 	}
@@ -355,7 +368,7 @@
 	height: 16px;
     min-height: 16px;
 
-    animation: aiovgWait .80s steps(1, start) infinite;
+    animation: aiovg-wait .80s steps(1, start) infinite;
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -507,10 +520,13 @@ img.aiovg-responsive-element {
 	margin: 0;
 	font-size: 1.125em;
 }
-.aiovg-caption .aiovg-title .aiovg-restricted-label {
+
+.aiovg-caption .aiovg-restricted-label {
 	display: inline-flex;
-	padding: 3px 5px;
 	border-radius: 2px;
+	background-color: #999;
+	padding: .25em .5em;
+	color: #fff;
 	font-size: 90%;
 	line-height: 1;
 }
@@ -710,12 +726,12 @@ img.aiovg-responsive-element {
 }
 
 .aiovg-dropdown-list .aiovg-dropdown-item.aiovg-item-selected {
-	background-color: #0073e6;
+	background-color: #1e90ff;
 	color: #fff;
 }
 
 .aiovg-dropdown-list .aiovg-dropdown-item:hover {
-	background-color: #0461cf;
+	background-color: #1c86ee;
 	color: #fff;
 }
 
@@ -900,7 +916,7 @@ aiovg-like-button button {
 
 aiovg-like-button:not([loaded]) {
 	pointer-events: none;
-	animation: aiovgPulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	animation: aiovg-pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -931,6 +947,32 @@ aiovg-like-button:not([loaded]) {
 
 .aiovg-search-form .aiovg-form-control {	
 	width: 100%;
+}
+
+.aiovg-search-form .aiovg-field-keyword {
+	position: relative;
+}
+
+.aiovg-search-form .aiovg-field-keyword button {
+	position: absolute;	
+	top: 0;
+	right: 0;
+	bottom: 0;	
+}
+
+.aiovg-search-form .aiovg-field-keyword button,
+.aiovg-search-form .aiovg-field-keyword button:hover,
+.aiovg-search-form .aiovg-field-keyword button:focus {	
+	margin: 0;
+	border: 0;
+	box-shadow: none;
+	background: transparent;
+	background-color: transparent;
+	background-image: none;
+	padding: 0;
+	width: 2em;
+	height: 100%;
+	line-height: 1;
 }
 
 /* Template: Compact */
@@ -983,6 +1025,69 @@ aiovg-like-button:not([loaded]) {
 .aiovg-search-form-template-horizontal .aiovg-autocomplete-tags {
 	margin-top: 0;
 	width: 100%;
+}
+
+/*----------------------------------------------------------------------------------------------
+ *
+ *	Videos + Filters
+ *
+ *--------------------------------------------------------------------------------------------*/
+.aiovg-videos-filters-wrapper {
+	display: grid;
+	gap: 1.5em;
+	grid-template-columns: 1fr;
+}
+
+.aiovg-videos-filters-wrapper .aiovg-videos-template-slider {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+}
+
+@media only screen and ( min-width: 768px ) {
+	.aiovg-filters-position-left {
+		grid-template-columns: minmax( 180px, 30% ) 1fr;
+	}
+
+	.aiovg-filters-position-right {
+		grid-template-columns: 1fr minmax( 180px, 30% );
+	}
+
+	.aiovg-filters-position-right .aiovg-search-form {
+		order: 2;
+	}
+}
+
+@media ( min-width: 1600px ) {
+	.aiovg-filters-position-left {
+		grid-template-columns: minmax( 180px, 400px ) 1fr;
+	}
+
+	.aiovg-filters-position-right {
+		grid-template-columns: 1fr minmax( 180px, 400px );
+	}
+}
+
+/* Progress bar container */
+.aiovg-filters-progress-bar {
+	display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+	z-index: 99999;
+    height: 4px;
+    width: 100%;    
+    overflow: hidden;    
+}
+
+/* Inner bar (actual progress) */
+.aiovg-filters-progress-bar-inner {
+	background-color: #1e90ff;    
+    width: 0;
+    height: 100%;
+    transition: width 0.2s ease, background-color 0.2s ease;
+    animation: aiovg-pulse-bar 1.5s infinite;
+    will-change: width, background-color;
 }
 
 /*----------------------------------------------------------------------------------------------
