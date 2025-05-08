@@ -268,6 +268,11 @@ class AIOVG_Admin {
 				add_option( 'aiovg_privacy_settings', $defaults['aiovg_privacy_settings'] );
 			}	
 			
+			// Insert the bunny stream settings			
+			if ( false == get_option( 'aiovg_bunny_stream_settings' ) ) {
+				add_option( 'aiovg_bunny_stream_settings', $defaults['aiovg_bunny_stream_settings'] );
+			}
+
 			// Delete the unwanted plugin options
 			delete_option( 'aiovg_image_settings' );
 		}
@@ -697,6 +702,18 @@ class AIOVG_Admin {
 			}
 		}
 		
+		if ( in_array( $hook, array( 'post-new.php', 'post.php' ) ) && 'aiovg_videos' === $post_type ) {
+			if ( aiovg_has_bunny_stream_enabled() ) {
+				wp_enqueue_script( 
+					AIOVG_PLUGIN_SLUG . '-tus', 
+					AIOVG_PLUGIN_URL . 'vendor/tus/tus.min.js',
+					array( 'jquery' ), 
+					'4.3.1', 
+					array( 'strategy' => 'defer' ) 
+				);
+			}
+		}
+
 		wp_enqueue_script( 
 			AIOVG_PLUGIN_SLUG . '-admin', 
 			AIOVG_PLUGIN_URL . 'admin/assets/js/admin.min.js', 
@@ -717,6 +734,10 @@ class AIOVG_Admin {
 					'no_video_selected'  => __( 'No video selected. The last added video will be displayed.', 'all-in-one-video-gallery' ),
 					'quality_exists'     => __( 'Sorry, there is already a video with this quality level.', 'all-in-one-video-gallery' ),
 					'remove'             => __( 'Remove', 'all-in-one-video-gallery' ),
+					'preparing_upload'   => __( 'Preparing upload', 'all-in-one-video-gallery' ),
+					'cancel_upload'      => __( 'Cancel', 'all-in-one-video-gallery' ),
+					'upload_status'      => __( 'Uploaded %d%', 'all-in-one-video-gallery' ),
+					'upload_processing'  => __( '<strong>Processing:</strong> Your video is being processed. This usually happens quickly, but during busy times, it may take a little longer. You can safely continue and save the form — no need to wait. The video will automatically become playable once processing is complete.', 'all-in-one-video-gallery' )
 				)				
 			)
 		);

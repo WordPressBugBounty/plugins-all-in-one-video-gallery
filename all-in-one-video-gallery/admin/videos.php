@@ -168,148 +168,27 @@ class AIOVG_Admin_Videos {
 	 * @since 1.0.0
 	 */
 	public function add_meta_boxes() {
-		$restrictions_settings = get_option( 'aiovg_restrictions_settings' );
-
 		add_meta_box( 
-			'aiovg-video-sources', 
+			'aiovg-video-metabox', 
 			__( 'Video', 'all-in-one-video-gallery' ), 
-			array( $this, 'display_meta_box_video_sources' ), 
+			array( $this, 'display_meta_box_video' ), 
 			'aiovg_videos', 
 			'normal', 
 			'high' 
 		);
-
-		add_meta_box( 
-			'aiovg-video-image', 
-			__( 'Image', 'all-in-one-video-gallery' ), 
-			array( $this, 'display_meta_box_video_image' ), 
-			'aiovg_videos', 
-			'normal', 
-			'high' 
-		);
-		
-		add_meta_box( 
-			'aiovg-video-tracks', 
-			__( 'Subtitles', 'all-in-one-video-gallery' ), 
-			array( $this, 'display_meta_box_video_tracks' ), 
-			'aiovg_videos', 
-			'normal', 
-			'high' 
-		);	
-		
-		add_meta_box( 
-			'aiovg-video-chapters', 
-			__( 'Chapters', 'all-in-one-video-gallery' ), 
-			array( $this, 'display_meta_box_video_chapters' ), 
-			'aiovg_videos', 
-			'normal', 
-			'high' 
-		);
-
-		if ( ! empty( $restrictions_settings['enable_restrictions'] ) ) {
-			add_meta_box( 
-				'aiovg-video-restrictions', 
-				__( 'Restrictions', 'all-in-one-video-gallery' ), 
-				array( $this, 'display_meta_box_video_restrictions' ), 
-				'aiovg_videos', 
-				'side', 
-				'default' 
-			);
-		}
 	}
 
 	/**
-	 * Display "Video Sources" meta box.
+	 * Display "Video" meta box.
 	 *
 	 * @since 1.0.0
 	 * @param WP_Post $post WordPress Post object.
 	 */
-	public function display_meta_box_video_sources( $post ) {			
-		$player_settings = get_option( 'aiovg_player_settings' );
-
+	public function display_meta_box_video( $post ) {
 		$post_meta = get_post_meta( $post->ID );
 		$post_meta = apply_filters( 'aiovg_get_post_meta', $post_meta, $post->ID, '', false, 'aiovg_videos' );
 
-		$quality_levels = explode( "\n", $player_settings['quality_levels'] );
-		$quality_levels = array_filter( $quality_levels );
-		$quality_levels = array_map( 'sanitize_text_field', $quality_levels );
-		
-		$type          = isset( $post_meta['type'] ) ? $post_meta['type'][0] : 'default';
-		$mp4           = isset( $post_meta['mp4'] ) ? $post_meta['mp4'][0] : '';
-		$has_webm      = isset( $post_meta['has_webm'] ) ? $post_meta['has_webm'][0] : 0;
-		$webm          = isset( $post_meta['webm'] ) ? $post_meta['webm'][0] : '';
-		$has_ogv       = isset( $post_meta['has_ogv'] ) ? $post_meta['has_ogv'][0] : 0;
-		$ogv           = isset( $post_meta['ogv'] ) ? $post_meta['ogv'][0] : '';
-		$quality_level = isset( $post_meta['quality_level'] ) ? $post_meta['quality_level'][0] : '';
-		$sources       = isset( $post_meta['sources'] ) ? maybe_unserialize( $post_meta['sources'][0] ) : array();
-		$hls           = isset( $post_meta['hls'] ) ? $post_meta['hls'][0] : '';
-		$dash          = isset( $post_meta['dash'] ) ? $post_meta['dash'][0] : '';
-		$youtube       = isset( $post_meta['youtube'] ) ? $post_meta['youtube'][0] : '';
-		$vimeo         = isset( $post_meta['vimeo'] ) ? $post_meta['vimeo'][0] : '';
-		$dailymotion   = isset( $post_meta['dailymotion'] ) ? $post_meta['dailymotion'][0] : '';
-		$rumble        = isset( $post_meta['rumble'] ) ? $post_meta['rumble'][0] : '';
-		$facebook      = isset( $post_meta['facebook'] ) ? $post_meta['facebook'][0] : '';
-		$embedcode     = isset( $post_meta['embedcode'] ) ? $post_meta['embedcode'][0] : '';
-		$duration      = isset( $post_meta['duration'] ) ? $post_meta['duration'][0] : '';
-		$views         = isset( $post_meta['views'] ) ? $post_meta['views'][0] : '';
-		$likes         = isset( $post_meta['likes'] ) ? $post_meta['likes'][0] : '';
-		$dislikes      = isset( $post_meta['dislikes'] ) ? $post_meta['dislikes'][0] : '';
-		$download      = isset( $post_meta['download'] ) ? $post_meta['download'][0] : 1;
-
-		require_once AIOVG_PLUGIN_DIR . 'admin/partials/video-sources.php';
-	}
-
-	/**
-	 * Display "Thumbnail Image" meta box.
-	 *
-	 * @since 3.5.0
-	 * @param WP_Post $post WordPress Post object.
-	 */
-	public function display_meta_box_video_image( $post ) {			
-		$featured_images_settings = get_option( 'aiovg_featured_images_settings' );
-
-		$post_meta = get_post_meta( $post->ID );
-
-		$image              = isset( $post_meta['image'] ) ? $post_meta['image'][0] : '';
-		$image_alt          = isset( $post_meta['image_alt'] ) ? $post_meta['image_alt'][0] : '';
-		$set_featured_image = isset( $post_meta['set_featured_image'] ) ? $post_meta['set_featured_image'][0] : 1;
-
-		require_once AIOVG_PLUGIN_DIR . 'admin/partials/video-image.php';
-	}
-	
-	/**
-	 * Display "Subtitles" meta box.
-	 *
-	 * @since 1.0.0
-	 * @param WP_Post $post WordPress Post object.
-	 */
-	public function display_meta_box_video_tracks( $post ) {		
-		$tracks = get_post_meta( $post->ID, 'track' );
-		require_once AIOVG_PLUGIN_DIR . 'admin/partials/video-tracks.php';
-	}
-
-	/**
-	 * Display "Chapters" meta box.
-	 *
-	 * @since 3.6.0
-	 * @param WP_Post $post WordPress Post object.
-	 */
-	public function display_meta_box_video_chapters( $post ) {		
-		$chapters = get_post_meta( $post->ID, 'chapter' );
-		require_once AIOVG_PLUGIN_DIR . 'admin/partials/video-chapters.php';
-	}
-
-	/**
-	 * Display "Restrictions" meta box.
-	 *
-	 * @since 3.9.6
-	 * @param WP_Post $post WordPress Post object.
-	 */
-	public function display_meta_box_video_restrictions( $post ) {
-		$access_control   = get_post_meta( $post->ID, 'access_control', true );
-		$restricted_roles = get_post_meta( $post->ID, 'restricted_roles', true );
-
-		require_once AIOVG_PLUGIN_DIR . 'admin/partials/video-restrictions.php';
+		require_once AIOVG_PLUGIN_DIR . 'admin/partials/video-metabox.php';
 	}
 	
 	/**
@@ -353,10 +232,10 @@ class AIOVG_Admin_Videos {
 			update_post_meta( $post_id, 'featured', $featured );
 		}
 		
-		// Check if "aiovg_video_sources_nonce" nonce is set
-    	if ( isset( $_POST['aiovg_video_sources_nonce'] ) ) {		
+		// Check if "aiovg_video_metabox_nonce" nonce is set
+    	if ( isset( $_POST['aiovg_video_metabox_nonce'] ) ) {		
 			// Verify that the nonce is valid
-    		if ( wp_verify_nonce( $_POST['aiovg_video_sources_nonce'], 'aiovg_save_video_sources' ) ) {			
+    		if ( wp_verify_nonce( $_POST['aiovg_video_metabox_nonce'], 'aiovg_save_video_metabox' ) ) {			
 				// OK to save meta data		
 				$featured_images_settings = get_option( 'aiovg_featured_images_settings' );
 
@@ -459,77 +338,65 @@ class AIOVG_Admin_Videos {
 				
 				$download = isset( $_POST['download'] ) ? (int) $_POST['download'] : 0;
 				update_post_meta( $post_id, 'download', $download );
+	
+				// Poster Image	
+				$image    = '';
+				$image_id = 0;
 
-				// Check if "aiovg_video_image_nonce" nonce is set
-				if ( isset( $_POST['aiovg_video_image_nonce'] ) ) {		
-					// Verify that the nonce is valid
-					if ( wp_verify_nonce( $_POST['aiovg_video_image_nonce'], 'aiovg_save_video_image' ) ) {			
-						// OK to save meta data	
-						$image    = '';
-						$image_id = 0;
-		
-						if ( ! empty( $_POST['image'] ) ) {
-							$image    = aiovg_sanitize_url( $_POST['image'] );
-							$image_id = attachment_url_to_postid( $image, 'image' );
-						} else {
-							if ( 'youtube' == $type && ! empty( $youtube ) ) {
-								$image = aiovg_get_youtube_image_url( $youtube );
-							} elseif ( 'vimeo' == $type && ! empty( $vimeo ) ) {
-								$image = aiovg_get_vimeo_image_url( $vimeo );
-							} elseif ( 'dailymotion' == $type && ! empty( $dailymotion ) ) {
-								$image = aiovg_get_dailymotion_image_url( $dailymotion );
-							} elseif ( 'rumble' == $type && ! empty( $rumble ) ) {
-								$image = aiovg_get_rumble_image_url( $rumble );
-							} elseif ( 'embedcode' == $type && ! empty( $embedcode ) ) {
-								$image = aiovg_get_embedcode_image_url( $embedcode );
-							}
-						}
-		
-						if ( ! empty( $featured_images_settings['enabled'] ) ) { // Set featured image
-							$set_featured_image = isset( $_POST['set_featured_image'] ) ? (int) $_POST['set_featured_image'] : 0;
-							update_post_meta( $post_id, 'set_featured_image', $set_featured_image );
-							
-							if ( empty( $image ) ) {
-								$set_featured_image = 0;
-							} else {
-								if ( isset( $_POST['images'] ) ) { // Has images from thumbnail generator?
-									$images = array_map( 'aiovg_sanitize_url', $_POST['images'] );
-			
-									foreach ( $images as $__image ) {		
-										if ( $__image == $image ) {
-											$set_featured_image = 0;
-											break;
-										}
-									}
-								}
-							}					
-		
-							if ( ! empty( $set_featured_image ) ) {
-								if ( empty( $image_id ) && ! empty( $featured_images_settings['download_external_images'] ) ) {
-									$image_id = aiovg_create_attachment_from_external_image_url( $image, $post_id );
-								}
-		
-								if ( ! empty( $image_id ) ) {
-									set_post_thumbnail( $post_id, $image_id ); 
-								}
-							}
-						}
-						
-						update_post_meta( $post_id, 'image', $image );
-						update_post_meta( $post_id, 'image_id', $image_id );
-		
-						$image_alt = isset( $_POST['image_alt'] ) ? sanitize_text_field( $_POST['image_alt'] ) : '';
-						update_post_meta( $post_id, 'image_alt', $image_alt );
+				if ( ! empty( $_POST['image'] ) ) {
+					$image    = aiovg_sanitize_url( $_POST['image'] );
+					$image_id = attachment_url_to_postid( $image, 'image' );
+				} else {
+					if ( 'youtube' == $type && ! empty( $youtube ) ) {
+						$image = aiovg_get_youtube_image_url( $youtube );
+					} elseif ( 'vimeo' == $type && ! empty( $vimeo ) ) {
+						$image = aiovg_get_vimeo_image_url( $vimeo );
+					} elseif ( 'dailymotion' == $type && ! empty( $dailymotion ) ) {
+						$image = aiovg_get_dailymotion_image_url( $dailymotion );
+					} elseif ( 'rumble' == $type && ! empty( $rumble ) ) {
+						$image = aiovg_get_rumble_image_url( $rumble );
+					} elseif ( 'embedcode' == $type && ! empty( $embedcode ) ) {
+						$image = aiovg_get_embedcode_image_url( $embedcode );
 					}
 				}
-			}			
-		}
-		
-		// Check if "aiovg_video_tracks_nonce" nonce is set
-    	if ( isset( $_POST['aiovg_video_tracks_nonce'] ) ) {		
-			// Verify that the nonce is valid
-    		if ( wp_verify_nonce( $_POST['aiovg_video_tracks_nonce'], 'aiovg_save_video_tracks' ) ) {			
-				// OK to save meta data
+
+				if ( ! empty( $featured_images_settings['enabled'] ) ) { // Set featured image
+					$set_featured_image = isset( $_POST['set_featured_image'] ) ? (int) $_POST['set_featured_image'] : 0;
+					update_post_meta( $post_id, 'set_featured_image', $set_featured_image );
+					
+					if ( empty( $image ) ) {
+						$set_featured_image = 0;
+					} else {
+						if ( isset( $_POST['images'] ) ) { // Has images from thumbnail generator?
+							$images = array_map( 'aiovg_sanitize_url', $_POST['images'] );
+	
+							foreach ( $images as $__image ) {		
+								if ( $__image == $image ) {
+									$set_featured_image = 0;
+									break;
+								}
+							}
+						}
+					}					
+
+					if ( ! empty( $set_featured_image ) ) {
+						if ( empty( $image_id ) && ! empty( $featured_images_settings['download_external_images'] ) ) {
+							$image_id = aiovg_create_attachment_from_external_image_url( $image, $post_id );
+						}
+
+						if ( ! empty( $image_id ) ) {
+							set_post_thumbnail( $post_id, $image_id ); 
+						}
+					}
+				}
+				
+				update_post_meta( $post_id, 'image', $image );
+				update_post_meta( $post_id, 'image_id', $image_id );
+
+				$image_alt = isset( $_POST['image_alt'] ) ? sanitize_text_field( $_POST['image_alt'] ) : '';
+				update_post_meta( $post_id, 'image_alt', $image_alt );
+
+				// Subtitles
 				delete_post_meta( $post_id, 'track' );
 				
 				if ( ! empty( $_POST['track_src'] ) ) {				
@@ -547,15 +414,9 @@ class AIOVG_Admin_Videos {
 						
 						add_post_meta( $post_id, 'track', $track );
 					}					
-				}				
-			}			
-		}
+				}
 
-		// Check if "aiovg_video_chapters_nonce" nonce is set
-    	if ( isset( $_POST['aiovg_video_chapters_nonce'] ) ) {		
-			// Verify that the nonce is valid
-    		if ( wp_verify_nonce( $_POST['aiovg_video_chapters_nonce'], 'aiovg_save_video_chapters' ) ) {			
-				// OK to save meta data
+				// Chapters
 				delete_post_meta( $post_id, 'chapter' );
 				
 				if ( ! empty( $_POST['chapter_time'] ) ) {				
@@ -571,21 +432,21 @@ class AIOVG_Admin_Videos {
 						);
 						
 						add_post_meta( $post_id, 'chapter', $chapter );
-					}					
-				}				
-			}			
-		}
+					}
+				}
 
-		// Check if "aiovg_video_restrictions_nonce" nonce is set
-    	if ( isset( $_POST['aiovg_video_restrictions_nonce'] ) ) {
-			// Verify that the nonce is valid
-    		if ( wp_verify_nonce( $_POST['aiovg_video_restrictions_nonce'], 'aiovg_save_video_restrictions' ) ) {			
-				// OK to save meta data
-				$access_control = isset( $_POST['access_control'] ) ? (int) $_POST['access_control'] : -1;
-    			update_post_meta( $post_id, 'access_control', $access_control );
-
-				$restricted_roles = isset( $_POST['restricted_roles'] ) ? array_map( 'sanitize_text_field', $_POST['restricted_roles'] ) : array();
-				update_post_meta( $post_id, 'restricted_roles', $restricted_roles );
+				// Restrictions: Check if "aiovg_video_restrictions_nonce" nonce is set
+				if ( isset( $_POST['aiovg_video_restrictions_nonce'] ) ) {
+					// Verify that the nonce is valid
+					if ( wp_verify_nonce( $_POST['aiovg_video_restrictions_nonce'], 'aiovg_save_video_restrictions' ) ) {			
+						// OK to save meta data
+						$access_control = isset( $_POST['access_control'] ) ? (int) $_POST['access_control'] : -1;
+						update_post_meta( $post_id, 'access_control', $access_control );
+		
+						$restricted_roles = isset( $_POST['restricted_roles'] ) ? array_map( 'sanitize_text_field', $_POST['restricted_roles'] ) : array();
+						update_post_meta( $post_id, 'restricted_roles', $restricted_roles );
+					}
+				}
 			}
 		}
 		
@@ -682,7 +543,7 @@ class AIOVG_Admin_Videos {
 				)
 			),
 			array(
-				'element' => '#aiovg-video-image',
+				'element' => '#aiovg-field-image',
 				'popover' => array(
 					'title'       => __( 'Poster Image', 'all-in-one-video-gallery' ),
 					'description' => sprintf(

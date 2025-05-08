@@ -243,12 +243,137 @@
 	font-weight: 500 !important;
 }
 
+/** Animations: Dots */
+@keyframes aiovg-dots {
+	0%, 20% {
+	  content: ".";
+	}
+	40% {
+	  content: "..";
+	}
+	60% {
+	  content: "...";
+	}
+	90%, 100% {
+	  content: "";
+	}
+}
+
+.aiovg .aiovg-animate-dots:before {
+	display: inline-block;
+	animation: aiovg-dots 2s linear infinite;
+	width: 1.2em;
+	content: "";
+}
+
+/** Animations: Rotate */
+@keyframes aiovg-rotate {
+	from {
+	  	transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.aiovg .aiovg-animate-rotate {
+	animation: aiovg-rotate 1s linear infinite;
+}
+
 /*----------------------------------------------------------------------------------------------
  *
  *	Components
  *
  *--------------------------------------------------------------------------------------------*/
-/* Accordion */
+/* Metabox UI (Tabs + Accordion) */
+.aiovg-metabox-ui .aiovg-tabs {
+	display: flex;
+	flex-wrap: wrap;	
+	background: #f6f7f7;
+	padding: 0 1em;
+}
+
+.aiovg-metabox-ui .aiovg-tab {
+	display: flex;	
+	align-items: center;
+	gap: 0.25em;
+	transition: all 0.2s ease;
+	border: none;
+	border-bottom: 3px solid transparent;
+	background: none;
+	cursor: pointer;
+	padding: 1em 1.5em;	
+	color: #5a6065;
+}
+
+.aiovg-metabox-ui .aiovg-tab.aiovg-active {	
+	border-color: #2271b1;
+	color: #2271b1;
+}
+
+.aiovg-metabox-ui .aiovg-accordion {
+	border-top: 1px solid #dcdcde;
+	overflow: hidden;
+}
+
+.aiovg-metabox-ui .aiovg-accordion .aiovg-accordion-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	outline: none;	
+	border: none;
+	background: none;
+	cursor: pointer;
+	padding: 1em;
+	width: 100%;
+	color: #3c434a;
+	font-size: 1.1em;
+	font-weight: 500;	
+}
+
+.aiovg-metabox-ui .aiovg-accordion .aiovg-accordion-header:hover {
+	background: #f6f7f7;
+}
+
+.aiovg-metabox-ui .aiovg-accordion .aiovg-accordion-header.aiovg-open {
+	border-bottom: 1px solid #dcdcde;
+	background: #f6f7f7;
+}
+
+.aiovg-metabox-ui .aiovg-accordion .aiovg-accordion-header .dashicons {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: transform 0.2s ease;
+	font-size: 1.2em;
+}
+
+.aiovg-metabox-ui .aiovg-accordion .aiovg-accordion-header.aiovg-open .dashicons {
+	transform: rotate(360deg);
+}
+
+.aiovg-metabox-ui .aiovg-accordion .aiovg-accordion-body {
+	display: none;	
+	background: #fff;
+	padding: 1.5em 1em;
+}
+
+.aiovg-metabox-ui .aiovg-accordion[data-collapsible="false"] .aiovg-accordion-body {
+	display: block;
+}
+
+.aiovg-metabox-ui .aiovg-grid {
+	display: grid;
+	gap: 1.5em;
+}
+
+@media (min-width: 783px) {
+	.aiovg-metabox-ui .aiovg-col-2 {
+		grid-template-columns: repeat( 2, 1fr );
+	}
+}
+
+/* Accordion (HTML <details> Tag) */
 .aiovg details.aiovg-accordion {
 	transition: background-color 0.3s ease;
 	margin-bottom: 8px;
@@ -291,7 +416,7 @@
 /* Alert */
 .aiovg .aiovg-notice {
 	border-radius: 2px;
-	padding: 0.75em; 
+	padding: 1em; 
 }
 
 .aiovg .aiovg-notice-info {	
@@ -310,6 +435,17 @@
 	border: 1px solid #f1aeb5; 
 	background-color: #f8d7da; 	
 	color: #58151c;
+}
+
+/* Form */
+.aiovg .aiovg-form-control {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+}
+
+.aiovg .aiovg-form-label {
+	font-weight: 500;
 }
 
 /* Checklist */
@@ -377,8 +513,8 @@
 	}
 
 	.aiovg .aiovg-table th {
-		border: 1px solid #e5e7eb;
-		background-color: #f9fafb;
+		border: 1px solid #dcdcde;
+		background-color: #f6f7f7;
 		padding: 1em;
 	}
 }
@@ -395,7 +531,8 @@
 }
 
 .aiovg-modal .aiovg-notice {
-	margin-top: 1.25em;
+	margin-top: 1.75em;
+	padding: 0.75em;
 }
 
 .mfp-fade.mfp-bg {
@@ -652,105 +789,165 @@
 	}
 }
 
-/* Categories */
-#aiovg_categoriesdiv .categorydiv div.tabs-panel {
-    max-height: 240px;
+/* Video Metabox */
+#aiovg-video-metabox .inside {
+    margin: 0;
+    padding: 0;
 }
 
-/* Image */
+#aiovg-tab-content-general .aiovg-accordion:first-child .aiovg-accordion-body {
+	background-color: #fdfdfd;
+}
+
+#aiovg-tab-content-general .aiovg-accordion[data-collapsible="false"] .aiovg-form-label {
+	font-size: 1.1em;
+}
+
+/* Bunny Stream */
+.aiovg-is-bunny-stream .aiovg-sources .aiovg-source:not(:first-child),
+.aiovg-is-bunny-stream .aiovg-sources .aiovg-quality-selector,
+.aiovg-is-bunny-stream #aiovg-add-new-source {
+	display: none !important;
+}
+
+.aiovg-is-bunny-stream .aiovg-uploading {
+	cursor: wait;
+}
+
+.aiovg-is-bunny-stream .aiovg-uploading input[type="text"],
+.aiovg-is-bunny-stream .aiovg-uploading button {
+	pointer-events: none;
+}
+
+#aiovg-bunny-stream-upload-button {
+	display: flex;
+	align-items: center;
+	gap: 0.25em;
+	border: none;
+	background: linear-gradient( 171.02deg,#ffaf48 4.38%,#ff7854 111.49% );
+	line-height: 1;
+	color: #fff;
+}
+
+#aiovg-bunny-stream-upload-button:hover {
+	background: linear-gradient( 53.28deg,#ffaf48 35.53%,#ff7854 79.13% );
+}
+
+#aiovg-bunny-stream-upload-button:focus {
+	box-shadow: none;
+}
+
+.aiovg-uploading #aiovg-bunny-stream-upload-button .dashicons,
+.aiovg-uploading #aiovg-bunny-stream-upload-button .dashicons:before {
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+}
+
+.aiovg-uploading #aiovg-bunny-stream-upload-button .dashicons {
+	animation: aiovg-rotate 1s linear infinite;	
+}
+
+.aiovg-uploading #aiovg-bunny-stream-upload-button .dashicons:before {
+	content: "\f531";
+}
+
+#aiovg-field-mp4:not(.aiovg-is-bunny-stream) .aiovg-upload-status,
+.aiovg-is-bunny-stream .aiovg-upload-status:empty {
+	display: none;
+}
+
+/* Poster Image */
 #aiovg-video-image-footer {
-	border: 1px solid #e5e7eb;
-	background-color: #f9fafb;
+	border: 1px solid #dcdcde;
+	background-color: rgb( 253, 253, 253 );
 	padding: 1em;
 }
 
+/* Tables */
+#aiovg-video-metabox .aiovg-table {
+	margin-top: 0;
+}
+
+#aiovg-video-metabox .aiovg-table > tbody > :nth-child(even) {
+	background: #fff;
+}
+
+#aiovg-video-metabox .aiovg-table tr {
+	border-bottom: 1px solid #dcdcde;
+}
+
+#aiovg-video-metabox .aiovg-table .aiovg-handle {
+	cursor: move;
+	text-align: center;
+}
+
+@media screen and (max-width: 782px) {
+	#aiovg-video-metabox .aiovg-table td {
+		padding: 1em;
+	}
+
+	#aiovg-video-metabox .aiovg-table .aiovg-handle .dashicons::before {
+		content: "\f11c";
+	}
+}
+
 /* Tracks */
-#aiovg-video-tracks .striped > tbody > :nth-child(odd) {
-	background-color: #f9fafb;
-}
-
-#aiovg-video-tracks .aiovg-handle {  	
-  	cursor: move;
-}
-
-#aiovg-video-tracks .aiovg-track {
+#aiovg-tracks .aiovg-track {
 	display: flex;
     align-items: flex-end;
     flex-wrap: wrap;
     gap: 0.5em;
 }
 
-#aiovg-video-tracks .aiovg-track > div:not(.aiovg-track-buttons) {
+#aiovg-tracks .aiovg-track > div:not(.aiovg-track-buttons) {
 	display: flex;
 	flex-direction: column;
 	gap: 0.25em;
 }
 
-#aiovg-video-tracks .aiovg-track .aiovg-track-src {
+#aiovg-tracks .aiovg-track .aiovg-track-src {
 	flex-basis: 240px;
 	flex-grow: 3;
 }
 
-#aiovg-video-tracks .aiovg-track .aiovg-track-label {
+#aiovg-tracks .aiovg-track .aiovg-track-label {
 	flex-basis: 80px;
 	flex-grow: 1;
 }
 
-#aiovg-video-tracks .aiovg-track .aiovg-track-srclang {
+#aiovg-tracks .aiovg-track .aiovg-track-srclang {
 	flex-basis: 80px;
 	flex-grow: 1;
 }
 
-#aiovg-video-tracks .aiovg-track button {
+#aiovg-tracks .aiovg-track button {
 	margin: 0;
 }
 
-@media screen and (max-width: 782px) {
-	#aiovg-video-tracks .striped > tbody > :nth-child(odd) {
-		background-color: transparent;
-	}
-
-	#aiovg-video-tracks .aiovg-handle {  	
-		padding: 0.5em 0;
-  	}
-}
-
 /* Chapters */
-#aiovg-video-chapters .striped > tbody > :nth-child(odd) {
-	background-color: #f9fafb;
-}
-
-#aiovg-video-chapters .aiovg-handle {  	
-  	cursor: move;
-}
-
-#aiovg-video-chapters .aiovg-chapter {
+#aiovg-chapters .aiovg-chapter {
 	display: flex;
     align-items: flex-end;
     flex-wrap: wrap;
     gap: 0.5em;
 }
 
-#aiovg-video-chapters .aiovg-chapter .aiovg-chapter-label,
-#aiovg-video-chapters .aiovg-chapter .aiovg-chapter-time {
+#aiovg-chapters .aiovg-chapter .aiovg-chapter-label,
+#aiovg-chapters .aiovg-chapter .aiovg-chapter-time {
 	display: flex;
 	flex-direction: column;
 	flex-grow: 1;
 	gap: 0.25em;	
 }
 
-#aiovg-video-chapters .aiovg-chapter button {
+#aiovg-chapters .aiovg-chapter button {
 	margin: 0;
 }
 
-@media screen and (max-width: 782px) {
-	#aiovg-video-chapters .striped > tbody > :nth-child(odd) {
-		background-color: transparent;
-	}
-
-	#aiovg-video-chapters .aiovg-handle {  	
-		padding: 0.5em 0;
-  	}
+/* Categories Metabox */
+#aiovg_categoriesdiv .categorydiv div.tabs-panel {
+    max-height: 240px;
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -788,6 +985,11 @@
 #aiovg-categories-settings.aiovg-template-dropdown tr.columns,
 #aiovg-categories-settings.aiovg-template-dropdown tr.limit,
 #aiovg-categories-settings.aiovg-template-dropdown tr.show_description {
+	display: none;
+}
+
+#aiovg-bunny-stream-settings.aiovg-token-authentication-disabled tr.token_authentication_key,
+#aiovg-bunny-stream-settings.aiovg-token-authentication-disabled tr.token_expiry {
 	display: none;
 }
 

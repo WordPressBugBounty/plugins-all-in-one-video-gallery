@@ -44,13 +44,20 @@ class AIOVG_Public {
 	}
 	
 	/**
-	 * Add rewrite rules, set necessary plugin cookies.
+	 * Add rewrite rules.
 	 *
 	 * @since 1.0.0
 	 */
 	public function init() {
 		$page_settings = get_option( 'aiovg_page_settings' );
 		$site_url = home_url();
+		
+		// Rewrite tags
+		add_rewrite_tag( '%aiovg_category%', '([^/]+)' );
+		add_rewrite_tag( '%aiovg_tag%', '([^/]+)' );
+		add_rewrite_tag( '%aiovg_user%', '([^/]+)' );
+		add_rewrite_tag( '%aiovg_type%', '([^/]+)' );
+		add_rewrite_tag( '%aiovg_video%', '([^/]+)' );
 		
 		// Single category page		
 		if ( ! empty( $page_settings['category'] ) ) {
@@ -126,13 +133,6 @@ class AIOVG_Public {
 				}
 			}
 		}
-		
-		// Rewrite tags
-		add_rewrite_tag( '%aiovg_category%', '([^/]+)' );
-		add_rewrite_tag( '%aiovg_tag%', '([^/]+)' );
-		add_rewrite_tag( '%aiovg_user%', '([^/]+)' );
-		add_rewrite_tag( '%aiovg_type%', '([^/]+)' );
-		add_rewrite_tag( '%aiovg_video%', '([^/]+)' );
 	}
 	
 	/**

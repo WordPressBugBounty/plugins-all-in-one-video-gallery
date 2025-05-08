@@ -7,18 +7,30 @@
 	 * Init Dropdown.
 	 */
 	function initDropdown( el ) {
-		var $this         = $( el );
-		var $inputEl      = $this.find( '.aiovg-dropdown-input' );
-		var $dropdownList = $this.find( '.aiovg-dropdown-list' );
+		var $this             = $( el );
+		var $inputEl          = $this.find( '.aiovg-dropdown-input' );
+		var $dropdownEl       = $this.find( '.aiovg-dropdown' );		
+		var $dropdownListEl   = $this.find( '.aiovg-dropdown-list' );
+		var $dropdownSearchEl = $this.find( '.aiovg-dropdown-search' );		
+		var $searchEmptyEl    = $this.find( '.aiovg-dropdown-no-items' ); 
+		var $searchInputEl    = $dropdownSearchEl.find( 'input[type="text"]' );     
+        var $searchResetBtn   = $dropdownSearchEl.find( 'button' ); 
 
-		if ( $dropdownList.find( '.aiovg-dropdown-item' ).length == 0 ) {
+		var totalItems = $dropdownListEl.find( '.aiovg-dropdown-item' ).length;
+		var showSearchThreshold = parseInt( $dropdownSearchEl.data( 'show_search_threshold' ) );
+
+		if ( totalItems == 0 ) {
 			return false;
+		}
+
+		if ( totalItems >= showSearchThreshold ) {
+			$dropdownSearchEl.prop( 'hidden', false );
 		}
 
 		var setCategoryNames = function() {
 			var terms = [];
 
-			$this.find( '.aiovg-item-selected' ).each(function() {
+			$dropdownListEl.find( '.aiovg-item-selected' ).each(function() {
 				var termName = $( this ).find( '.aiovg-item-name' ).html().trim();
 				terms.push( termName );
 			});
@@ -28,11 +40,54 @@
 
 		// Toggle Dropdown
 		$inputEl.on( 'click', function() {
-			$dropdownList.toggle();				
+			$dropdownEl.toggle();				
 		});	
 
+		// Filter Items
+		$searchInputEl.on( 'input', function( event ) {
+			$this.addClass( 'aiovg-is-searching' );	
+
+			$searchResetBtn.prop( 'hidden', false );
+			$searchEmptyEl.prop( 'hidden', true );			
+
+			var value = this.value.trim().toLowerCase();
+			var matchesFound = false;
+
+			if ( value ) {
+				$dropdownListEl.find( '.aiovg-dropdown-item' ).each(function() {
+					var itemName = $( this ).find( '.aiovg-item-name' ).html();
+
+					if ( itemName.toLowerCase().indexOf( value.toString() ) === -1 ) {
+						this.hidden = true;
+					} else {
+						this.hidden = false;
+						matchesFound = true;
+					}   
+				});
+			} else {
+				$dropdownListEl.find( '.aiovg-dropdown-item' ).prop( 'hidden', true );
+			}
+
+			if ( ! matchesFound ) {
+				$searchEmptyEl.prop( 'hidden', false );
+			}
+		});
+
+		// Clear Search
+		$searchResetBtn.on( 'click', function( event ) {
+			event.preventDefault();
+
+			$this.removeClass( 'aiovg-is-searching' );
+
+			$searchInputEl.val( '' );
+			$searchResetBtn.prop( 'hidden', true );
+
+			$searchEmptyEl.prop( 'hidden', true );
+			$dropdownListEl.find( '.aiovg-dropdown-item' ).prop( 'hidden', false );									
+		});
+
 		// Toggle Checkbox
-		$this.find( '.aiovg-dropdown-item' ).on( 'click', function( event ) {
+		$dropdownListEl.find( '.aiovg-dropdown-item' ).on( 'click', function( event ) {
 			var tagName = event.target.tagName.toLowerCase();
 
 			if ( tagName !== 'input' ) {
@@ -41,7 +96,7 @@
 		});
 
 		// Set Category Names in the input field
-		$this.find( 'input[type="checkbox"]' ).on( 'change', function() {
+		$dropdownListEl.find( 'input[type="checkbox"]' ).on( 'change', function() {
 			var isChecked = $( this ).is( ':checked' );
 			
 			if ( isChecked ) {
@@ -52,7 +107,7 @@
 
 			setCategoryNames();
 
-			$dropdownList.hide();
+			$dropdownEl.hide();
 		});	
 		
 		setCategoryNames();
@@ -64,7 +119,7 @@
 	function hideOtherDropdowns( self = null ) {
 		document.querySelectorAll( '.aiovg-dropdown-terms' ).forEach(( el ) => {
 			if ( el !== self ) { 
-				el.querySelector( '.aiovg-dropdown-list' ).style.display = 'none';
+				el.querySelector( '.aiovg-dropdown' ).style.display = 'none';
 			}	
 		});	
 	}

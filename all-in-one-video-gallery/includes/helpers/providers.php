@@ -57,6 +57,157 @@ function aiovg_extract_iframe_src( $html ) {
 }
 
 /**
+ * Get the embed URL for a Bunny Stream video.
+ *
+ * @since  4.2.0 
+ * @param  string       $url      The original Bunny Stream HLS video URL.
+ * @param  int          $video_id Bunny Stream Video ID.
+ * @return string|false           The signed Bunny Stream embed URL or false if not applicable.
+ */
+function aiovg_get_bunny_stream_embed_url( $url, $video_id ) {
+	$settings = (array) get_option( 'aiovg_bunny_stream_settings' );
+
+	if ( empty( $settings['library_id'] ) ) {
+		return false;
+	}
+
+	// Sanitize video ID and retrieve library ID from settings
+	$video_id   = sanitize_text_field( $video_id );
+	$library_id = intval( $settings['library_id'] );
+
+	// Construct the base embed URL
+	$embed_url = sprintf(
+		'https://iframe.mediadelivery.net/embed/%d/%s',
+		$library_id,
+		$video_id
+	);
+
+	// If token authentication is enabled, generate a signed token
+	if ( ! empty( $settings['enable_token_authentication'] ) &&	! empty( $settings['token_authentication_key'] ) ) {
+		// Generate the token using SHA256 hash of key + video_id + expiry
+		$security_key    = sanitize_text_field( $settings['token_authentication_key'] );
+		$expiration_time = ! empty( $settings['token_expiry'] ) ? absint( $settings['token_expiry'] ) : 3600;
+		$expires         = time() + $expiration_time;
+		$token           = hash( 'sha256', $security_key . $video_id . $expires );
+
+		// Append token and expiry to the embed URL
+		$embed_url = add_query_arg( 'token', $token, $embed_url );
+		$embed_url = add_query_arg( 'expires', $expires, $embed_url );
+	}
+
+	// Allow developers to modify the embed URL via filter
+	return apply_filters( 'aiovg_bunny_stream_embed_url', $embed_url, $url, $video_id );
+}
+
+/**
+ * Get the signed file URL for a Bunny Stream video.
+ *
+ * @since  4.2.0
+ * @param  string $url      The original Bunny Stream video / image URL.
+ * @param  int    $video_id Bunny Stream video ID.
+ * @return string           Signed Bunny Stream URL with token and restrictions appended.
+ */
+function aiovg_get_bunny_stream_signed_url( $url, $video_id ) {
+	$settings = (array) get_option( 'aiovg_bunny_stream_settings' );
+
+	if ( empty( $settings['enable_token_authentication'] ) || empty( $settings['token_authentication_key'] ) ) {
+		return $url;
+	}
+
+	// Get the security key and expiry settings
+	$security_key       = sanitize_text_field( $settings['token_authentication_key'] );
+	$expiration_time    = ! empty( $settings['token_expiry'] ) ? absint( $settings['token_expiry'] ) : 3600;
+	$expires            = time() + $expiration_time;
+	$is_directory_token = true; // Indicates we're signing by directory path, not full file path
+	$path_allowed       = '/' . sanitize_text_field( $video_id ) . '/';
+
+	// Optional restrictions (not used currently, but placeholder for future config)
+	$user_ip            = '';
+	$countries_allowed  = '';
+	$countries_blocked  = '';
+	$referers_allowed   = '';
+
+	// Append optional query parameters for geo and referrer restrictions
+	if ( ! empty( $countries_allowed ) ) {
+		$url = add_query_arg( 'token_countries', $countries_allowed, $url );
+	}
+
+	if ( ! empty( $countries_blocked ) ) {
+		$url = add_query_arg( 'token_countries_blocked', $countries_blocked, $url );
+	}
+
+	if ( ! empty( $referers_allowed ) ) {
+		$url = add_query_arg( 'token_referer', $referers_allowed, $url );		
+	}
+
+	// Parse the URL components
+	$parsed = parse_url( $url );
+	if ( ! is_array( $parsed ) ) {
+		return $url;
+	}
+
+	$url_scheme = isset( $parsed['scheme'] ) ? $parsed['scheme'] : 'https';
+	$url_host   = isset( $parsed['host'] ) ? $parsed['host'] : '';
+	$url_path   = isset( $parsed['path'] ) ? $parsed['path'] : '';
+	$url_query  = isset( $parsed['query'] ) ? $parsed['query'] : '';
+
+	// Collect all query parameters for the signature
+	$parameters = array();
+	if ( ! empty( $url_query ) ) {
+		parse_str( $url_query, $parameters );
+	}
+
+	// Adjust the token path if directory-based tokenization is used
+	$signature_path = $url_path;
+	if ( ! empty( $path_allowed ) ) {
+		$signature_path = $path_allowed;
+		$parameters['token_path'] = $signature_path;
+	}
+
+	// Sort parameters alphabetically for consistent hashing
+	ksort( $parameters );
+
+	// Build parameter strings for hashing and for final URL
+	$parameter_data     = '';
+	$parameter_data_url = '';
+
+	foreach ( $parameters as $key => $value ) {
+		if ( $parameter_data !== '' ) {
+			$parameter_data .= '&';
+		}
+		$parameter_data_url .= '&';
+
+		$parameter_data     .= $key . '=' . $value;
+		$parameter_data_url .= $key . '=' . urlencode( $value );
+	}
+
+	// Create the base string for token generation
+	$hashable_base = $security_key . $signature_path . $expires;
+	
+	if ( ! empty( $user_ip ) ) {
+		$hashable_base .= $user_ip;
+	}
+	
+	$hashable_base .= $parameter_data;
+
+	// Generate the token using SHA-256 and encode it
+	$token = hash( 'sha256', $hashable_base, true );
+	$token = base64_encode( $token );
+	$token = strtr( $token, '+/', '-_' );
+	$token = str_replace( '=', '', $token );
+
+	// Build the final signed URL based on token type
+	if ( $is_directory_token ) {
+		$signed_url = "{$url_scheme}://{$url_host}/bcdn_token={$token}&expires={$expires}{$parameter_data_url}{$url_path}";
+	} else {
+		$signed_url = "{$url_scheme}://{$url_host}{$url_path}?token={$token}{$parameter_data_url}&expires={$expires}";
+	}
+
+	// Allow customization via filter and return final signed URL
+	return apply_filters( 'aiovg_bunny_stream_signed_url', $signed_url, $url, $video_id );
+}
+
+/**
  * Get Dailymotion ID from URL.
  *
  * @since  1.5.0
@@ -512,6 +663,28 @@ function aiovg_get_youtube_image_url( $url ) {
 	}
 	   	
 	return $url;	
+}
+
+/**
+ * Check if Bunny Stream hosting is enabled and return settings.
+ *
+ * @since  4.2.0
+ * @return array|false Returns the Bunny Stream settings array if all conditions are met; otherwise, false.
+ */
+function aiovg_has_bunny_stream_enabled() {
+	$settings = (array) get_option( 'aiovg_bunny_stream_settings' );
+
+	// Basic Bunny Stream setup check
+	if (
+		empty( $settings['enable_bunny_stream'] ) ||
+		empty( $settings['api_key'] ) ||
+		empty( $settings['library_id'] ) ||
+		empty( $settings['cdn_hostname'] )
+	) {
+		return false;
+	}
+
+	return $settings;
 }
 
 /**

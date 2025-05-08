@@ -119,6 +119,7 @@ class AIOVG_Init {
 		require_once AIOVG_PLUGIN_DIR . 'public/search.php';
 		require_once AIOVG_PLUGIN_DIR . 'public/likes.php';
 		require_once AIOVG_PLUGIN_DIR . 'public/multilingual.php';
+		require_once AIOVG_PLUGIN_DIR . 'public/bunny-stream.php';
 		require_once AIOVG_PLUGIN_DIR . 'public/conflict.php';		
 		
 		/**
@@ -314,10 +315,10 @@ class AIOVG_Init {
 
 		$this->loader->add_filter( 'show_admin_bar', $video, 'remove_admin_bar' );
 		$this->loader->add_filter( 'upload_mimes', $video, 'add_mime_types' );
-		$this->loader->add_filter( 'aiovg_videojs_player_sources', $video, 'player_sources', 10, 2 );
-		$this->loader->add_filter( 'aiovg_vidstack_player_sources', $video, 'player_sources', 10, 2 );
-		$this->loader->add_filter( 'aiovg_iframe_vidstack_player_sources', $video, 'player_sources' );
-		$this->loader->add_filter( 'aiovg_iframe_videojs_player_sources', $video, 'player_sources' );
+		$this->loader->add_filter( 'aiovg_iframe_videojs_player_sources', $video, 'filter_player_sources', 10, 2 );
+		$this->loader->add_filter( 'aiovg_iframe_vidstack_player_sources', $video, 'filter_player_sources', 10, 2 );
+		$this->loader->add_filter( 'aiovg_videojs_player_sources', $video, 'filter_player_sources', 10, 2 );
+		$this->loader->add_filter( 'aiovg_vidstack_player_sources', $video, 'filter_player_sources', 10, 2 );
 		$this->loader->add_filter( 'aiovg_the_content', $video, 'wrap_timestamps_with_links' );
 		$this->loader->add_filter( 'the_content', $video, 'the_content', 20 );
 		$this->loader->add_filter( 'comments_open', $video, 'comments_open', 10, 2 );		
@@ -343,8 +344,31 @@ class AIOVG_Init {
 		if ( ! is_admin() ) {
 			$public_multilingual = new AIOVG_Public_Multilingual();
 
+			$this->loader->add_action( 'init', $public, 'init', 11 );
 			$this->loader->add_filter( 'option_aiovg_page_settings', $public_multilingual, 'filter_page_settings_for_polylang' );
 		}
+
+		// Hooks specific to the Bunny Stream integration
+		$bunny_stream = new AIOVG_Public_Bunny_Stream();
+
+		if ( is_admin() ) {
+			$this->loader->add_action( 'save_post', $bunny_stream, 'save_post', 10, 2 );
+		}
+
+		$this->loader->add_action( 'aiovg_save_video', $bunny_stream, 'save_bunny_stream_data' );
+		$this->loader->add_action( 'wp_ajax_aiovg_create_bunny_stream_video', $bunny_stream, 'ajax_callback_create_bunny_stream_video' );
+		$this->loader->add_action( 'wp_ajax_nopriv_aiovg_create_bunny_stream_video', $bunny_stream, 'ajax_callback_create_bunny_stream_video' );
+		$this->loader->add_action( 'wp_ajax_aiovg_get_bunny_stream_video', $bunny_stream, 'ajax_callback_get_bunny_stream_video' );
+		$this->loader->add_action( 'wp_ajax_nopriv_aiovg_get_bunny_stream_video', $bunny_stream, 'ajax_callback_get_bunny_stream_video' );
+		$this->loader->add_action( 'wp_ajax_aiovg_delete_bunny_stream_video', $bunny_stream, 'ajax_callback_delete_bunny_stream_video' );
+		$this->loader->add_action( 'wp_ajax_nopriv_aiovg_delete_bunny_stream_video', $bunny_stream, 'ajax_callback_delete_bunny_stream_video' );
+		$this->loader->add_action( 'before_delete_post', $bunny_stream, 'before_delete_post', 1 );
+
+		$this->loader->add_filter( 'aiovg_get_image', $bunny_stream, 'filter_image_url', 10, 4 );
+		$this->loader->add_filter( 'aiovg_iframe_videojs_player_sources', $bunny_stream, 'filter_player_sources', 10, 2 );
+		$this->loader->add_filter( 'aiovg_iframe_vidstack_player_sources', $bunny_stream, 'filter_player_sources', 10, 2 );
+		$this->loader->add_filter( 'aiovg_videojs_player_sources', $bunny_stream, 'filter_player_sources', 10, 2 );
+		$this->loader->add_filter( 'aiovg_vidstack_player_sources', $bunny_stream, 'filter_player_sources', 10, 2 );
 
 		// Fixes for third-party plugin/theme conflict
 		$conflict = new AIOVG_Public_Conflict();

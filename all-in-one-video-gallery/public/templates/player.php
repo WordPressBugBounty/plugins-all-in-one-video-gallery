@@ -19,6 +19,7 @@ $post_type  = 'page';
 $post_title = '';
 $post_url   = '';
 $post_meta  = array();
+$embed_url  = '';
 
 $player_template = ( 'vidstack' == $player_settings['player'] ) ? 'vidstack' : 'videojs';
 
@@ -36,7 +37,7 @@ if ( $post_id > 0 ) {
 		$post_meta = get_post_meta( $post_id );		
 		
 		// Check if the current user has access to this video
-		if ( ! aiovg_current_user_has_video_access( $post_id ) ) {
+		if ( ! aiovg_current_user_can( 'play_aiovg_video', $post_id ) ) {
 			include apply_filters( 'aiovg_load_template', AIOVG_PLUGIN_DIR . 'public/templates/player-restricted.php' );
 			return false;
 		}
@@ -61,6 +62,23 @@ if ( ! empty( $post_meta ) ) {
 
 	if ( 'embedcode' == $current_video_provider ) {
 		$player_template = 'iframe';			
+	}
+
+	if ( 'default' == $current_video_provider ) {
+		$mp4 = isset( $post_meta['mp4'] ) ? $post_meta['mp4'][0] : '';
+		if ( ! empty( $mp4 ) ) {
+			$use_native_controls = apply_filters( 'aiovg_use_native_controls', isset( $player_settings['use_native_controls']['bunny_stream'] ), 'bunny_stream' );
+			if ( $use_native_controls ) {
+				$video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_meta['bunny_stream_video_id'][0] : '';
+				if ( ! empty( $video_id ) && strpos( $mp4, '/' . $video_id . '/' ) !== false ) {
+					$embed_url = aiovg_get_bunny_stream_embed_url( $mp4, $video_id );
+					if ( ! empty( $embed_url ) ) {
+						$current_video_provider = 'bunny_stream';
+						$player_template = 'iframe';
+					}
+				}
+			}
+		}
 	}
 } else {
 	foreach ( $thirdparty_providers_with_api as $provider ) {

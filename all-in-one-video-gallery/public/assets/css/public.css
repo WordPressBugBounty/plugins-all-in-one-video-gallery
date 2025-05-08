@@ -248,6 +248,29 @@
  *	Animations
  *
  *--------------------------------------------------------------------------------------------*/
+/** Dots */
+@keyframes aiovg-dots {
+	0%, 20% {
+	  content: ".";
+	}
+	40% {
+	  content: "..";
+	}
+	60% {
+	  content: "...";
+	}
+	90%, 100% {
+	  content: "";
+	}
+}
+
+.aiovg .aiovg-animate-dots:before {
+	display: inline-block;
+	animation: aiovg-dots 2s linear infinite;
+	width: 1.2em;
+	content: "";
+}
+
 /** Pulse */
 @keyframes aiovg-pulse {
 	0%, 100% {
@@ -692,7 +715,7 @@ img.aiovg-responsive-element {
 	text-overflow: ellipsis;
 }
 
-.aiovg-dropdown-terms .aiovg-dropdown-list {
+.aiovg-dropdown-terms .aiovg-dropdown {
 	position: absolute;
 	top: 100%;
 	left: 0;
@@ -706,6 +729,41 @@ img.aiovg-responsive-element {
 	max-height: 200px;
 	overflow-x: hidden;
 	overflow-y: auto;	
+}
+
+.aiovg-dropdown-terms .aiovg-dropdown-search {
+	position: relative;
+	border-bottom: 1px solid #eee;
+	padding: 0.75em 1em;
+}
+
+.aiovg-dropdown-terms .aiovg-dropdown-search input[type="text"] {
+	all: unset;	
+	box-sizing: border-box;
+	width: 100%;
+	font-size: 0.95em;	
+}
+
+.aiovg-dropdown-terms .aiovg-dropdown-search button {
+	position: absolute;	
+	top: 0;
+	right: 1em;
+	bottom: 0;	
+}
+
+.aiovg-dropdown-terms .aiovg-dropdown-search button,
+.aiovg-dropdown-terms .aiovg-dropdown-search button:hover,
+.aiovg-dropdown-terms .aiovg-dropdown-search button:focus {	
+	margin: 0;
+	border: 0;
+	box-shadow: none;
+	background: transparent;
+	background-color: transparent;
+	background-image: none;
+	padding: 0;
+	width: 16px;
+	height: 100%;
+	line-height: 1;
 }
 
 .aiovg-dropdown-list .aiovg-dropdown-item {
@@ -786,6 +844,14 @@ img.aiovg-responsive-element {
 	outline: 2px solid transparent;
 	border-color: #50575e;
 	box-shadow: 0 0 0 1px #50575e;	
+}
+
+.aiovg-dropdown-terms.aiovg-is-searching .aiovg-dropdown-list .aiovg-dropdown-item {
+	padding-left: 1em !important;
+}
+
+.aiovg-dropdown-terms .aiovg-dropdown .aiovg-dropdown-no-items {
+	padding: 0.65em 1em;
 }
 
 /*----------------------------------------------------------------------------------------------

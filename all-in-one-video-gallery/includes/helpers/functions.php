@@ -166,108 +166,129 @@ function aiovg_convert_time_to_seconds( $time ) {
  * @return int               WordPress attachment ID.
  */
 function aiovg_create_attachment_from_external_image_url( $image_url, $post_id ) {
-	if ( empty( $image_url ) ) {
-		return 0;
-	}
+    if ( empty( $image_url ) ) {
+        return 0;
+    }
 
-	$image_url_hash = md5( $image_url );
-	$attachment_id  = get_post_meta( $post_id, $image_url_hash, true );
+    $image_url_hash = md5( $image_url );
+    $attachment_id  = get_post_meta( $post_id, $image_url_hash, true );
 
-	if ( ! empty( $attachment_id ) ) {
-		if ( wp_attachment_is( 'image', $attachment_id ) ) {
-			return $attachment_id;
-		} else {
-			delete_post_meta( $post_id, $image_url_hash );
-		}
-	}
+    if ( ! empty( $attachment_id ) ) {
+        if ( wp_attachment_is( 'image', $attachment_id ) ) {
+            return $attachment_id;
+        } else {
+            delete_post_meta( $post_id, $image_url_hash );
+        }
+    }
 
-	// Validate file type
-	$allowed_mimes = array(
-		'jpg|jpeg|jpe' => 'image/jpeg',
-		'gif'          => 'image/gif',
-		'png'          => 'image/png'
-	);
+    // Validate file type
+    $allowed_mimes = array(
+        'jpg|jpeg|jpe' => 'image/jpeg',
+        'gif'          => 'image/gif',
+        'png'          => 'image/png'
+    );
 
-	$file_info = wp_check_filetype( basename( $image_url ), $allowed_mimes );
+    $file_info = wp_check_filetype( basename( $image_url ), $allowed_mimes );
 
-	if ( $file_info['type'] == false ) {
-		$parsed_url = parse_url( $image_url );
+    if ( $file_info['type'] == false ) {
+        $parsed_url = parse_url( $image_url );
 
-		// URLs from Vimeo/Dailymotion don't have a file extension. So, we manually set the file info.
-		if ( strpos( $parsed_url['host'], '.vimeocdn.com' ) !== false || strpos( $parsed_url['host'], '.dmcdn.net' ) !== false ) {
-			$file_info = array(				
-				'ext'  => 'jpg',
-				'type' => 'image/jpeg'
-			);
-		}
+        // URLs from Vimeo/Dailymotion don't have a file extension. So, manually set the file info.
+        if ( strpos( $parsed_url['host'], '.vimeocdn.com' ) !== false || strpos( $parsed_url['host'], '.dmcdn.net' ) !== false ) {
+            $file_info = array(
+                'ext'  => 'jpg',
+                'type' => 'image/jpeg'
+            );
+        }
 
-		// Hook for developers to set the file info for image URLs that don't have a file extension.
-		$file_info = apply_filters( 'aiovg_check_filetype', $file_info, $image_url, $post_id );
-	}
+        // Hook for developers to set the file info for image URLs that don't have a file extension.
+        $file_info = apply_filters( 'aiovg_check_filetype', $file_info, $image_url, $post_id );
+    }
 
-	if ( $file_info['ext'] == false ) {
-		return 0;
-	}
+    if ( $file_info['ext'] == false ) {
+        return 0;
+    }
 
-	$file_extension = strtolower( $file_info['ext'] );
-	if ( ! in_array( $file_extension, array( 'jpg', 'jpeg', 'png', 'gif' ) ) ) {
-		return 0;
-	}
+    $file_extension = strtolower( $file_info['ext'] );
+    if ( ! in_array( $file_extension, array( 'jpg', 'jpeg', 'png', 'gif' ) ) ) {
+        return 0;
+    }
 
-	// Validate mime type
-	$mime_type = wp_get_image_mime( $image_url );
+    // Validate remote URL accessibility using wp_remote_head
+    $response = wp_remote_head( $image_url, array(
+        'timeout' => 5,
+        'headers' => array(
+            'User-Agent' => 'Mozilla/5.0 (compatible; WordPress/' . get_bloginfo( 'version' ) . '; ' . get_bloginfo( 'url' ) . ')'
+        )
+    ) );
 
-	if ( $mime_type == false ) {
-		return 0;
-	}
-	
-	if ( ! in_array( $mime_type, array_values( $allowed_mimes ) ) ) {
-		return 0;
-	}
+    if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
+        return 0;
+    }
 
-	// Set upload folder
-	$wp_upload_dir = wp_upload_dir(); 
+    // Check MIME type from the header
+    $mime_type = wp_get_image_mime( $image_url );
 
-	$upload_dir = $wp_upload_dir['basedir'];
-	if ( wp_mkdir_p( $wp_upload_dir['path'] ) ) {
-		$upload_dir = $wp_upload_dir['path'];
-	}
-	
-	// Set file path & name
-	$unique_id = str_replace( '.', '-', uniqid() );
-	$unique_file_name = wp_unique_filename( $upload_dir, $unique_id . '.' . $file_extension ); // Generate unique name
-	$file_name = sanitize_file_name( basename( $unique_file_name ) ); // Create image file name
+    if ( $mime_type == false ) {
+        $content_type = wp_remote_retrieve_header( $response, 'content-type' );
 
-	$file_path = $upload_dir . '/' . $file_name;
+        if ( empty( $content_type ) || ! in_array( $content_type, array_values( $allowed_mimes ) ) ) {
+            return 0;
+        }
 
-	// Get image data
-	$image_data = file_get_contents( $image_url );
+        $mime_type = $content_type; // Use MIME type from the header
+    }
 
-	// Create the image file on the server
-	file_put_contents( $file_path, $image_data );
+    if ( ! in_array( $mime_type, array_values( $allowed_mimes ) ) ) {
+        return 0;
+    }
 
-	// Create the attachment
-	require_once( ABSPATH . 'wp-admin/includes/image.php' );
+    // Set upload folder
+    $wp_upload_dir = wp_upload_dir(); 
+    $upload_dir = $wp_upload_dir['basedir'];
+    if ( wp_mkdir_p( $wp_upload_dir['path'] ) ) {
+        $upload_dir = $wp_upload_dir['path'];
+    }
 
-	$attachment = array(
-		'post_mime_type' => $mime_type,
-		'post_title'     => $file_name,
-		'post_content'   => '',
-		'post_status'    => 'inherit'
-	);
-	
-	$attachment_id = wp_insert_attachment( $attachment, $file_path, $post_id );
+    // Set file path & name
+    $unique_id = str_replace( '.', '-', uniqid() );
+    $unique_file_name = wp_unique_filename( $upload_dir, $unique_id . '.' . $file_extension ); // Generate unique name
+    $file_name = sanitize_file_name( basename( $unique_file_name ) ); // Create image file name
 
-	// Define attachment metadata
-	$attachment_data = wp_generate_attachment_metadata( $attachment_id, $file_path );
+    $file_path = $upload_dir . '/' . $file_name;
 
-	// Assign metadata to attachment
-	wp_update_attachment_metadata( $attachment_id, $attachment_data );
+    // Get image data using file_get_contents
+    $image_data = @file_get_contents( $image_url );
 
-	// And finally, store a reference to the attachment in the post
-	update_post_meta( $post_id, $image_url_hash, $attachment_id );
+    if ( $image_data === false ) {
+        return 0;
+    }
 
-	return $attachment_id;
+    // Create the image file on the server
+    file_put_contents( $file_path, $image_data );
+
+    // Create the attachment
+    require_once( ABSPATH . 'wp-admin/includes/image.php' );
+
+    $attachment = array(
+        'post_mime_type' => $mime_type,
+        'post_title'     => $file_name,
+        'post_content'   => '',
+        'post_status'    => 'inherit'
+    );
+    
+    $attachment_id = wp_insert_attachment( $attachment, $file_path, $post_id );
+
+    // Define attachment metadata
+    $attachment_data = wp_generate_attachment_metadata( $attachment_id, $file_path );
+
+    // Assign metadata to attachment
+    wp_update_attachment_metadata( $attachment_id, $attachment_data );
+
+    // And finally, store a reference to the attachment in the post
+    update_post_meta( $post_id, $image_url_hash, $attachment_id );
+
+    return $attachment_id;
 }
 
 /**
@@ -282,6 +303,12 @@ function aiovg_create_attachment_from_external_image_url( $image_url, $post_id )
 function aiovg_current_user_can( $capability, $post_id = 0 ) {
 	$user_id = get_current_user_id();
 	
+	// If playing a video
+	if ( 'play_aiovg_video' == $capability ) {
+		$has_access = aiovg_current_user_has_video_access( $post_id );
+		return apply_filters( 'aiovg_current_user_can', $has_access, $capability, $post_id );
+	}
+
 	// If editing, deleting, or reading a video, get the post and post type object
 	if ( 'edit_aiovg_video' == $capability || 'delete_aiovg_video' == $capability || 'read_aiovg_video' == $capability ) {
 		$post = get_post( $post_id );
@@ -802,16 +829,26 @@ function aiovg_get_default_settings() {
 			'disable_cookies'      => array()
 		),
 		'aiovg_general_settings' => array(
-			'custom_css'                => '',
 			'lazyloading'               => 0,
 			'datetime_format'           => '',
 			'maybe_flush_rewrite_rules' => 1,
 			'delete_plugin_data'        => 1,
-			'delete_media_files'        => 1
+			'delete_media_files'        => 1,
+			'custom_css'                => ''
 		),
 		'aiovg_api_settings' => array(
 			'youtube_api_key'    => '',
 			'vimeo_access_token' => '',
+		),
+		'aiovg_bunny_stream_settings' => array(
+			'enable_bunny_stream'         => 0,
+			'api_key'                     => '',
+			'library_id'                  => '',
+			'cdn_hostname'                => '',
+			'collection_id'               => '',
+			'enable_token_authentication' => 0,
+			'token_authentication_key'    => '',
+			'token_expiry'                => 3600
 		),
 		'aiovg_page_settings' => aiovg_insert_custom_pages()							
 	);
@@ -961,7 +998,7 @@ function aiovg_get_image( $object_id, $size = "large", $object_type = "post", $p
 	
 	// Set default image
 	if ( empty( $image_data['src'] ) && ! empty( $placeholder_image ) ) {
-		$image_data['src'] = AIOVG_PLUGIN_URL . 'public/assets/images/placeholder-image.png';
+		$image_data['src'] = AIOVG_PLUGIN_PLACEHOLDER_IMAGE_URL;
 	}
 	
 	// Return
@@ -994,7 +1031,7 @@ function aiovg_get_image_url( $id, $size = "large", $default = '', $type = 'gall
 		$default = aiovg_make_url_absolute( $default );
 	} else {
 		if ( 'gallery' == $type ) {
-			$default = AIOVG_PLUGIN_URL . 'public/assets/images/placeholder-image.png';
+			$default = AIOVG_PLUGIN_PLACEHOLDER_IMAGE_URL;
 		}
 	}	
 	

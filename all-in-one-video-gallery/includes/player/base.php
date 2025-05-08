@@ -831,6 +831,7 @@ class AIOVG_Player_Base {
 
 		$url = add_query_arg( 'playsinline', (int) $player_settings['playsinline'], $url );				
 
+		$url = apply_filters( 'aiovg_youtube_embed_url', $url, $this->post_id );
 		return $url;
 	}
 
@@ -877,6 +878,11 @@ class AIOVG_Player_Base {
 
 		$url = add_query_arg( 'playsinline', (int) $player_settings['playsinline'], $url );
 
+		if ( ! empty( $player_settings['tracks'] ) || ! empty( $player_settings['cc_load_policy'] ) ) {
+			$url = add_query_arg( 'texttrack', 'en-x-autogen', $url );
+		}
+
+		$url = apply_filters( 'aiovg_vimeo_embed_url', $url, $this->post_id );
 		return $url;
 	}
 
@@ -904,6 +910,7 @@ class AIOVG_Player_Base {
 			$url = add_query_arg( 'mute', 1, $url );
 		}
 
+		$url = apply_filters( 'aiovg_dailymotion_embed_url', $url, $this->post_id );
 		return $url;
 	}
 
@@ -929,6 +936,7 @@ class AIOVG_Player_Base {
 			}
 		}
 
+		$url = apply_filters( 'aiovg_rumble_embed_url', $url, $this->post_id );
 		return $url;
 	}
 
@@ -955,6 +963,38 @@ class AIOVG_Player_Base {
 		if ( ! empty( $player_settings['muted'] ) ) {
 			$url = add_query_arg( 'muted', 1, $url );
 		}
+
+		$url = apply_filters( 'aiovg_facebook_embed_url', $url, $this->post_id );
+		return $url;
+	}
+
+	/**
+	 * Filters the Bunny Stream embed URL with custom player parameters.
+	 *
+	 * @since  4.2.0
+	 * @param  string $url Bunny Stream video URL.
+ 	 * @return string $url Embed URL.
+	 */
+	public function filter_bunny_stream_embed_url( $url ) {
+		$player_settings = $this->get_player_settings();
+
+		$autoplay = ! empty( $player_settings['autoplay'] ) ? 'true' : 'false';
+        $url = add_query_arg( 'autoplay', $autoplay, $url );
+
+		$preload = ( 'none' == $player_settings['preload'] ) ? 'false' : 'true';
+		$url = add_query_arg( 'preload', $preload, $url );
+
+        $muted = ! empty( $player_settings['muted'] ) ? 'true' : 'false';
+        $url = add_query_arg( 'muted', $muted, $url );
+
+        $loop = ! empty( $player_settings['loop'] ) ? 'true' : 'false';
+        $url = add_query_arg( 'loop', $loop, $url );
+
+        $playsinline = ! empty( $player_settings['playsinline'] ) ? 'true' : 'false';
+        $url = add_query_arg( 'playsinline', $playsinline, $url );
+
+        $speed = ! empty( $player_settings['speed'] ) ? 'true' : 'false';
+        $url = add_query_arg( 'showSpeed', $speed, $url );
 
 		return $url;
 	}

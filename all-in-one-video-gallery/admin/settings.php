@@ -97,9 +97,10 @@ class AIOVG_Admin_Settings {
 		$tabs = array(
 			'general'      => __( 'General', 'all-in-one-video-gallery' ),
             'player'       => __( 'Player', 'all-in-one-video-gallery' ),
+            'hosting'      => __( 'Hosting', 'all-in-one-video-gallery' ),
             'seo'          => __( 'SEO', 'all-in-one-video-gallery' ),
             'restrictions' => __( 'Restrictions', 'all-in-one-video-gallery' ),
-            'privacy'      => __( 'GDPR - Privacy', 'all-in-one-video-gallery' ),
+            'privacy'      => __( 'Privacy', 'all-in-one-video-gallery' ),
 			'advanced'     => __( 'Advanced', 'all-in-one-video-gallery' )
 		);
 		
@@ -225,7 +226,25 @@ class AIOVG_Admin_Settings {
                 'description' => '',
                 'tab'         => 'advanced',
                 'page'        => 'aiovg_api_settings'
-            )           			
+            ),
+            array(
+                'id'          => 'aiovg_bunny_stream_settings',
+                'title'       => __( 'Bunny Stream (Optional)', 'all-in-one-video-gallery' ),
+                'menu_title'  => __( 'Bunny Stream', 'all-in-one-video-gallery' ),
+                'description' => sprintf(
+                    '<p>%s <a href="%s" class="button button-primary button-small" target="_blank" rel="noopener noreferrer">%s</a></p><div class="aiovg-notice aiovg-notice-success"><strong>%s:</strong> %s</div>',
+                    __( 'Set up Bunny Stream to easily upload, store, and securely deliver your video content with optimal performance. Simply configure the necessary settings below to get started.', 'all-in-one-video-gallery' ),
+                    'https://plugins360.com/all-in-one-video-gallery/configure-bunny-stream/',
+                    __( 'View Setup Guide', 'all-in-one-video-gallery' ),
+                    __( 'Important', 'all-in-one-video-gallery' ),
+                    sprintf(
+                        __( 'Modifying your Bunny Stream settings (API Key, Library ID, or CDN Hostname) after your site is live may cause videos to stop functioning or result in data loss. <a href="%s">Contact us</a> if you want to make any changes after your site is live.', 'all-in-one-video-gallery' ),
+                        esc_url( admin_url( 'admin.php?page=all-in-one-video-gallery-contact' ) )
+                    )
+                ),
+                'tab'         => 'hosting',
+                'page'        => 'aiovg_bunny_stream_settings'
+            )
         );
 
         if ( false !== get_option( 'aiovg_brand_settings' ) ) {
@@ -409,13 +428,14 @@ class AIOVG_Admin_Settings {
                 array(
                     'name'              => 'use_native_controls',
                     'label'             => __( 'Use Native Controls', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Enables native player controls on the selected source types. For example, uses YouTube Player for playing YouTube videos & Vimeo Player for playing Vimeo videos. Note that none of our custom player features will work on the selected sources.', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enables native player controls on the selected source types. For example, uses YouTube Player for playing YouTube videos, Vimeo Player for playing Vimeo videos, and Bunny Stream\'s native player for videos uploaded to Bunny Stream. Note that none of our custom player features will work on the selected sources.', 'all-in-one-video-gallery' ),
                     'type'              => 'multicheck',
-					'options'           => array(
-						'youtube' => __( 'YouTube', 'all-in-one-video-gallery' ),
-						'vimeo'   => __( 'Vimeo', 'all-in-one-video-gallery' )
-					),
-					'sanitize_callback' => 'aiovg_sanitize_array'
+                    'options'           => array(
+                        'youtube'      => __( 'YouTube', 'all-in-one-video-gallery' ),
+                        'vimeo'        => __( 'Vimeo', 'all-in-one-video-gallery' ),
+                        'bunny_stream' => __( 'Bunny Stream', 'all-in-one-video-gallery' )
+                    ),
+                    'sanitize_callback' => 'aiovg_sanitize_array'
                 ),
                 array(
                     'name'              => 'force_js_initialization',
@@ -939,13 +959,6 @@ class AIOVG_Admin_Settings {
 			),			
             'aiovg_general_settings' => array(
                 array(
-                    'name'              => 'custom_css',
-                    'label'             => __( 'Custom CSS', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Add your own CSS code to customize the appearance and style of the plugin elements. This allows you to tailor the design to match your site\'s theme seamlessly.', 'all-in-one-video-gallery' ),
-					'type'              => 'textarea',
-					'sanitize_callback' => 'sanitize_textarea_field'
-				),
-                array(
                     'name'              => 'lazyloading',
                     'label'             => __( 'Lazyload Images / Videos', 'all-in-one-video-gallery' ),
                     'description'       => __( 'Enable this option to lazy load images and videos added by the plugin to enhance page load speed and performance. If you experience any issues with content display, try disabling this option.', 'all-in-one-video-gallery' ),
@@ -982,10 +995,17 @@ class AIOVG_Admin_Settings {
                 array(
                     'name'              => 'delete_media_files',
                     'label'             => __( 'Delete media files?', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Check this box to also delete the associated media files when a video post or a video category is deleted', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Check this box to delete the associated media files when a video post or video category is deleted, including any files stored on Bunny Stream (if enabled).', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
-                )
+                ),
+                array(
+                    'name'              => 'custom_css',
+                    'label'             => __( 'Custom CSS', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Add your own CSS code to customize the appearance and style of the plugin elements. This allows you to tailor the design to match your site\'s theme seamlessly.', 'all-in-one-video-gallery' ),
+					'type'              => 'textarea',
+					'sanitize_callback' => 'sanitize_textarea_field'
+				)
             ),
             'aiovg_api_settings' => array(
                 array(
@@ -1039,7 +1059,65 @@ class AIOVG_Admin_Settings {
                     'type'              => 'pages',
 					'sanitize_callback' => 'sanitize_key'
                 )
-            )            		
+            ),
+           'aiovg_bunny_stream_settings' => array(
+                array(
+                    'name'              => 'enable_bunny_stream',
+                    'label'             => __( 'Enable Bunny Stream Hosting', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enable this option to add a "Bunny Stream" upload button to the video forms under the "All Videos" menu. Videos uploaded through front-end forms will also be stored in Bunny Stream when this option is enabled.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'api_key',
+                    'label'             => __( 'API Key', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'You can find this in your Bunny.net Dashboard under: <strong>Stream → Your Library → API</strong>.', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                array(
+                    'name'              => 'library_id',
+                    'label'             => __( 'Video Library ID', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'You can find this in your Bunny.net Dashboard under: <strong>Stream → Your Library → API</strong>.', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'sanitize_callback' => 'aiovg_sanitize_int'
+                ),
+                array(
+                    'name'              => 'cdn_hostname',
+                    'label'             => __( 'CDN Hostname', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'You can find this in your Bunny.net Dashboard under: <strong>Stream → Your Library → API</strong>.', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                array(
+                    'name'              => 'collection_id',
+                    'label'             => __( 'Collection ID', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Optional. You can find this in your Bunny.net Dashboard under: <strong>Stream → Your Library → Collections</strong>. Click the three dots over the thumbnail of a collection to view the ID.', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                array(
+                    'name'              => 'enable_token_authentication',
+                    'label'             => __( 'Enable Token Authentication', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Check this option if token authentication is enabled in your Bunny.net account. The plugin will automatically generate signed URLs for secure video playback.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'token_authentication_key',
+                    'label'             => __( 'Token Authentication Key', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'You can find this in your Bunny.net Dashboard under: <strong>Stream → Your Library → Security</strong>.', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                array(
+                    'name'              => 'token_expiry',
+                    'label'             => __( 'Token Expiry (in seconds)', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Optional. Set how long signed URLs remain valid. Default is 3600 seconds (1 hour).', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'sanitize_callback' => 'aiovg_sanitize_int'
+                )
+            )   		
         );
         
         if ( false !== get_option( 'aiovg_brand_settings' ) ) {

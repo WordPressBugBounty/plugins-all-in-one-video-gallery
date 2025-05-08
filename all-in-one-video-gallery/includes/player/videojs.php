@@ -51,7 +51,7 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 	public function get_player() {
 		// Check if the current user has access to this video
 		if ( $this->post_id > 0 && 'aiovg_videos' == $this->post_type ) {
-			if ( ! aiovg_current_user_has_video_access( $this->post_id ) ) {
+			if ( ! aiovg_current_user_can( 'play_aiovg_video', $this->post_id ) ) {
 				return $this->get_player_restricted_message();
 			}
 		}
@@ -628,6 +628,19 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 		$videos = parent::get_videos();
 
 		// Force native embed when applicable
+		if ( ! empty( $videos['mp4'] ) ) {
+			$use_native_controls = apply_filters( 'aiovg_use_native_controls', isset( $player_settings['use_native_controls']['bunny_stream'] ), 'bunny_stream' );
+			if ( $use_native_controls ) {
+				$video_id = get_post_meta( $this->post_id, 'bunny_stream_video_id', true );
+				if ( ! empty( $video_id ) && strpos( $videos['mp4'], '/' . $video_id . '/' ) !== false ) {
+					$embed_url = aiovg_get_bunny_stream_embed_url( $videos['mp4'], $video_id );
+					if ( ! empty( $embed_url ) ) {
+						$videos['iframe'] = $this->filter_bunny_stream_embed_url( $embed_url );
+					}
+				}
+			}
+		}
+
 		if ( ! empty( $videos['youtube'] ) ) {
 			$use_native_controls = apply_filters( 'aiovg_use_native_controls', isset( $player_settings['use_native_controls']['youtube'] ), 'youtube' );
 			if ( $use_native_controls ) {

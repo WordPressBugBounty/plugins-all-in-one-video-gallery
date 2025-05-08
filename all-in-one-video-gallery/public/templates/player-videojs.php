@@ -144,8 +144,8 @@ if ( ! empty( $post_meta ) ) {
 	}
 }
 
-$sources = apply_filters( 'aiovg_video_sources', $sources ); // Backward compatibility to 3.3.0
-$sources = apply_filters( 'aiovg_iframe_videojs_player_sources', $sources );
+$sources = apply_filters( 'aiovg_video_sources', $sources, $settings ); // Backward compatibility to 3.3.0
+$sources = apply_filters( 'aiovg_iframe_videojs_player_sources', $sources, $settings );
 
 // Video Tracks
 if ( 1 == $settings['cc_load_policy'] ) {

@@ -51,7 +51,7 @@ class AIOVG_Player_AMP extends AIOVG_Player_Base {
 	public function get_player() {
 		// Check if the current user has access to this video
 		if ( $this->post_id > 0 && 'aiovg_videos' == $this->post_type ) {
-			if ( ! aiovg_current_user_has_video_access( $this->post_id ) ) {
+			if ( ! aiovg_current_user_can( 'play_aiovg_video', $this->post_id ) ) {
 				return $this->get_player_restricted_message();
 			}
 		}

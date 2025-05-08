@@ -19,7 +19,7 @@ $image_data = aiovg_get_image( $post->ID, $image_size, 'post', true );
 $image = $image_data['src'];
 $image_alt = ! empty( $image_data['alt'] ) ? $image_data['alt'] : $post->post_title;
 
-$has_access = aiovg_current_user_has_video_access( $post->ID ) ? true : false;
+$has_access = aiovg_current_user_can( 'play_aiovg_video', $post->ID );
 
 $lazyloading = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' : '';
 ?>
@@ -28,7 +28,7 @@ $lazyloading = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' :
     <div class="aiovg-row">
         <div class="aiovg-col aiovg-col-p-40">
             <a href="<?php the_permalink(); ?>" class="aiovg-responsive-container" style="padding-bottom: <?php echo esc_attr( $attributes['ratio'] ); ?>;">
-                <img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( $image_alt ); ?>" class="aiovg-responsive-element" <?php echo $lazyloading; ?>/>                        
+                <img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( $image_alt ); ?>" class="aiovg-responsive-element" onerror="this.onerror=null; this.src='<?php echo AIOVG_PLUGIN_PLACEHOLDER_IMAGE_URL; ?>';" <?php echo $lazyloading; ?>/>                        
                 
                 <?php if ( $attributes['show_duration'] && ! empty( $post_meta['duration'][0] ) ) : ?>
                     <div class="aiovg-duration">

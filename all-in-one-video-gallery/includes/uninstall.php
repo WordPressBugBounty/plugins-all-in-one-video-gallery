@@ -93,6 +93,7 @@ class AIOVG_Uninstall {
             'aiovg_privacy_settings',
             'aiovg_general_settings',
             'aiovg_api_settings',
+            'aiovg_bunny_stream_settings',
             'aiovg_page_settings',
             'aiovg_version'
         );

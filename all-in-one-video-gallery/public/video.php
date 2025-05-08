@@ -358,62 +358,57 @@ class AIOVG_Public_Video {
 	}
 
 	/**
-	 * Filter video sources.
+	 * Filters the video sources.
 	 *
 	 * @since  2.6.5
-	 * @param  array $sources Video sources.
-	 * @param  array $params  Player params.
-	 * @return array $sources Filtered video sources.
+	 * @param  array $sources  The original video sources.
+	 * @param  array $settings Player settings including post ID and post type.
+	 * @return array $sources  Filtered video sources.
 	 */
-	public function player_sources( $sources, $params = array() ) {	
-		$post_id = 0;
-		$type    = '';
-
-		if ( ! empty( $params ) ) {
-			$post_id = (int) $params['post_id'];
-		} else {
-			$post_id = (int) get_query_var( 'aiovg_video' );
-		}		
-
-		if ( $post_id > 0 ) {
-			$type = get_post_meta( $post_id, 'type', true );
+	public function filter_player_sources( $sources, $settings = array() ) {
+		if ( isset( $sources['hls'] ) ) {
+			return $sources;
 		}
 
-		if ( isset( $sources['mp4'] ) && ! isset( $sources['hls'] ) ) {
-			$mp4_src = $sources['mp4']['src'];
+		if ( ! isset( $sources['mp4'] ) || empty( $sources['mp4']['src'] ) ) {
+			return $sources;
+		}		
 
-			if ( strpos( $mp4_src, 'videos.files.wordpress.com' ) !== false && strpos( $mp4_src, '.mp4' ) !== false ) {
-				$hls_src = str_replace( '.mp4', '.master.m3u8', $mp4_src );
-				$has_hls = 0;
+		$mp4_src = $sources['mp4']['src'];
+		if ( strpos( $mp4_src, 'videos.files.wordpress.com' ) === false || strpos( $mp4_src, '.mp4' ) === false ) {
+			return $sources;
+		}
 
-				$query = parse_url( $mp4_src, PHP_URL_QUERY );
-				parse_str( $query, $parsed_url );
+		$post_id = isset( $settings['post_id'] ) ? (int) $settings['post_id'] : 0;
+		$hls_src = str_replace( '.mp4', '.master.m3u8', $mp4_src );
+		$has_hls = 0;		
 
-				if ( isset( $parsed_url['isnew'] ) ) {
-					$has_hls = (int) $parsed_url['isnew'];
-				} else {					
-					$hls_response = wp_remote_get( $hls_src );
+		$query = parse_url( $mp4_src, PHP_URL_QUERY );
+		parse_str( $query, $parsed_url );
 
-					if ( 200 == wp_remote_retrieve_response_code( $hls_response ) ) {
-						$has_hls = 1;
-					}
+		if ( isset( $parsed_url['isnew'] ) ) {
+			$has_hls = (int) $parsed_url['isnew'];
+		} else {					
+			$hls_response = wp_remote_get( $hls_src, array( 'timeout' => 5 ) );
 
-					if ( $post_id > 0 && 'default' == $type ) {
-						update_post_meta( $post_id, 'mp4', aiovg_sanitize_url( add_query_arg( 'isnew', $has_hls, $mp4_src ) ) );
-					}
-				}
-
-				if ( $has_hls ) {
-					$hls_source = array(
-						'hls' => array(
-							'type' => 'application/x-mpegurl',
-							'src'  => $hls_src
-						)
-					);
-
-					$sources = array_merge( $hls_source, $sources );
-				}
+			if ( ! is_wp_error( $hls_response ) && 200 === wp_remote_retrieve_response_code( $hls_response ) ) {
+				$has_hls = 1;
 			}
+
+			if ( $post_id > 0 && 'default' === get_post_meta( $post_id, 'type', true ) ) {
+				update_post_meta( $post_id, 'mp4', aiovg_sanitize_url( add_query_arg( 'isnew', $has_hls, $mp4_src ) ) );
+			}
+		}
+
+		if ( $has_hls ) {
+			$hls_source = array(
+				'hls' => array(
+					'type' => 'application/x-mpegurl',
+					'src'  => $hls_src
+				)
+			);
+
+			$sources = array_merge( $hls_source, $sources );
 		}
 		
 		return $sources;	
@@ -468,7 +463,7 @@ class AIOVG_Public_Video {
 				return $content;
 			}
 
-			if ( ! aiovg_current_user_has_video_access( $post->ID ) ) {
+			if ( ! aiovg_current_user_can( 'play_aiovg_video', $post->ID ) ) {
 				$restrictions_settings = get_option( 'aiovg_restrictions_settings' );
 
 				$restricted_message = $restrictions_settings['restricted_message'];

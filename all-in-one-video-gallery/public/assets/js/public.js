@@ -170,6 +170,7 @@
 				}
 
                 progressBar.init();
+				$this.trigger( 'aiovg-search-loading' );
 
                 // Clone params into requestData
                 var requestData = $.extend( {}, params );
@@ -222,8 +223,10 @@
                     }
 
                     progressBar.complete();
+					$this.trigger( 'aiovg-search-complete' );
                 }).fail(function() {
                     progressBar.complete();
+					$this.trigger( 'aiovg-search-failed' );
                 });
             };
 

@@ -4,9 +4,9 @@ Contributors: plugins360, wpvideogallery, freemius
 Donate link: https://plugins360.com
 Tags: video player, video gallery, youtube gallery, vimeo gallery, live stream
 Requires at least: 6.3
-Tested up to: 6.7
+Tested up to: 6.8
 Requires PHP: 5.6.20
-Stable tag: 4.1.0
+Stable tag: 4.3.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,6 +24,7 @@ No coding is required. Suitable for all kinds of websites that require a single 
 
 ### LATEST ADDITION
 
+* **Bunny Stream Integration!** Now, you can **host and deliver your videos securely through Bunny Stream**, with native player support and token authentication options!
 * **New Video Restriction Options!** Now, you can **restrict videos for logged-in users, logged-out users, or specific user roles—globally or per video!**
 * **New Gallery Filtering Options!** Now, you can **filter videos on the same page using AJAX** with keywords, categories, tags, and sort them by title, date, popularity, and more!
 
@@ -150,6 +151,14 @@ Also, the videos from third-party services like "YouTube", "Vimeo", "Dailymotion
 7. Plugin Settings.
 
 == Changelog ==
+
+= 4.3.2 =
+
+* New: Added Bunny Stream integration for seamless video hosting and playback.
+* Enhancement: Redesigned the admin UI with a modern, tabbed metabox for easier management of video details, captions, chapters, restrictions, and more.
+* Enhancement: Improved the custom multi-select dropdown by adding a search feature when the list contains more than 20 items.
+* Fix: Resolved compatibility issues with WordPress 6.8.
+* Fix: Various minor bug fixes and performance improvements.
 
 = 4.1.0 =
 
@@ -514,6 +523,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 4.1.0 =
+= 4.3.2 =
 
 Introduces several new features, bug fixes & enhancements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

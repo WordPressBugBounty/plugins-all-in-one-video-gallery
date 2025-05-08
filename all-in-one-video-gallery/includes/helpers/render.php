@@ -35,19 +35,37 @@ function aiovg_dropdown_terms( $args ) {
 	} 
 
 	$input_placeholder = isset( $args['show_option_none'] ) ? $args['show_option_none'] : '';
+	$show_search_threshold = isset( $args['show_search_threshold'] ) ? $args['show_search_threshold'] : 20;
 	
 	unset( $args['show_option_none'], $args['option_none_value'] );
 
 	$args['walker'] = new AIOVG_Walker_Terms_MultiSelect();
 	$args['echo']   = false;
 
-	$dropdown = wp_dropdown_categories( $args );
-	$dropdown = preg_replace( '/<select(.*?)>(.*?)<\/select>/s', '<div class="aiovg-dropdown-list" style="display:none;">$2</div>', $dropdown );
+	$dropdown_list = wp_dropdown_categories( $args );
+	$dropdown_list = preg_replace( '/<select(.*?)>(.*?)<\/select>/s', '<div class="aiovg-dropdown-list">$2</div>', $dropdown_list );
 
 	// Output
 	$html  = '<div class="aiovg-dropdown-terms">';
 	$html .= sprintf( '<input type="text" class="aiovg-dropdown-input aiovg-form-control" placeholder="%s" readonly />', esc_attr( $input_placeholder )	);	
-	$html .= $dropdown;
+	$html .= '<div class="aiovg-dropdown" style="display: none;">';
+
+	$html .= sprintf( '<div class="aiovg-dropdown-search" hidden data-show_search_threshold="%d">', $show_search_threshold );
+	$html .= sprintf( '<input type="text" placeholder="%s..." />', esc_html__( 'Search', 'all-in-one-video-gallery' ) );
+	$html .= '<button type="button" hidden>';
+	$html .= '<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="aiovg-flex-shrink-0">';
+	$html .= '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>';
+	$html .= '</svg>';
+	$html .= '</button>';
+	$html .= '</div>';
+
+	$html .= $dropdown_list;
+
+	$html .= '<div class="aiovg-dropdown-no-items" hidden>';
+	$html .= sprintf( '<label class="aiovg-text-muted aiovg-text-small">%s</label>', esc_html__( 'No items found', 'all-in-one-video-gallery' ) );
+	$html .= '</div>';
+
+	$html .= '</div>';
 	$html .= '</div>';
 
 	if ( $echo ) {

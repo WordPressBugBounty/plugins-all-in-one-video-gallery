@@ -1,22 +1,30 @@
 <?php
 
 /**
- * Videos: "Subtitles" meta box.
+ * Video Metabox: "Subtitles" tab.
  *
  * @link    https://plugins360.com
  * @since   1.0.0
  *
  * @package All_In_One_Video_Gallery
  */
+
+$tracks = array();
+
+if ( ! empty( $post_meta['track'] ) ) {
+	foreach ( $post_meta['track'] as $track ) {
+		$tracks[] = maybe_unserialize( $track );
+	}
+}
 ?>
 
-<div class="aiovg">
+<div class="aiovg-flex aiovg-flex-col aiovg-gap-4">
 	<table id="aiovg-tracks" class="aiovg-table form-table striped">
 		<tbody>
 			<?php foreach ( $tracks as $key => $track ) : ?>
 				<tr class="aiovg-tracks-row">
 					<td class="aiovg-handle">
-						<span class="aiovg-text-muted dashicons dashicons-sort"></span>
+						<span class="aiovg-text-muted dashicons dashicons-move"></span>
 					</td>
 					<td>
 						<div class="aiovg-track">
@@ -51,14 +59,14 @@
 		</tbody>
 	</table>
 
-	<a href="javascript:;" id="aiovg-add-new-track" class="aiovg-block aiovg-margin-top aiovg-text-small">
+	<a href="javascript:;" id="aiovg-add-new-track" class="aiovg-font-bold">
 		<?php esc_html_e( '[+] Add New File', 'all-in-one-video-gallery' ); ?>
 	</a>
 
 	<template id="aiovg-template-track">
 		<tr class="aiovg-tracks-row">
 			<td class="aiovg-handle">
-				<span class="aiovg-text-muted dashicons dashicons-sort"></span>
+				<span class="aiovg-text-muted dashicons dashicons-move"></span>
 			</td>
 			<td>
 				<div class="aiovg-track">
@@ -90,6 +98,4 @@
 			</td>
 		</tr>		
 	</template>
-
-	<?php wp_nonce_field( 'aiovg_save_video_tracks', 'aiovg_video_tracks_nonce' ); // Nonce ?>
 </div>

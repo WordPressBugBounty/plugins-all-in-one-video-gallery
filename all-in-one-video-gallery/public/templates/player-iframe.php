@@ -10,7 +10,6 @@
  */
  
 $player_html = '';
-$embed_url   = '';
 $maybe_shortcode = false;
 
 if ( ! empty( $post_meta ) ) {
@@ -70,7 +69,7 @@ if ( ! empty( $embed_url ) ) {
             $embed_url = add_query_arg( 'end', (int) $queries['end'], $embed_url );
         } 
 
-        $autoplay = isset( $_GET[ 'autoplay' ] ) ? $_GET['autoplay'] : $player_settings['autoplay'];
+        $autoplay = isset( $_GET['autoplay'] ) ? $_GET['autoplay'] : $player_settings['autoplay'];
         $embed_url = add_query_arg( 'autoplay', (int) $autoplay, $embed_url );
 
         $embed_url = add_query_arg( 'cc_load_policy', (int) $player_settings['cc_load_policy'], $embed_url );        
@@ -83,14 +82,16 @@ if ( ! empty( $embed_url ) ) {
             $embed_url = add_query_arg( 'fs', 0, $embed_url );
         } 
 
-        $loop = isset( $_GET[ 'loop' ] ) ? $_GET['loop'] : $player_settings['loop'];
+        $loop = isset( $_GET['loop'] ) ? $_GET['loop'] : $player_settings['loop'];
         $embed_url = add_query_arg( 'loop', (int) $loop, $embed_url );
 
-        $muted = isset( $_GET[ 'muted' ] ) ? $_GET['muted'] : $player_settings['muted'];
+        $muted = isset( $_GET['muted'] ) ? $_GET['muted'] : $player_settings['muted'];
         $embed_url = add_query_arg( 'mute', (int) $muted, $embed_url ); 
 
         $playsinline = ! empty( $player_settings['playsinline'] ) ? 1 : 0;
-        $embed_url = add_query_arg( 'playsinline', $playsinline, $embed_url );                
+        $embed_url = add_query_arg( 'playsinline', $playsinline, $embed_url );
+        
+        $embed_url = apply_filters( 'aiovg_youtube_embed_url', $embed_url, $post_id );
     }
 
     // Vimeo
@@ -114,31 +115,41 @@ if ( ! empty( $embed_url ) ) {
             }
         }
 
-        $autoplay = isset( $_GET[ 'autoplay' ] ) ? $_GET['autoplay'] : $player_settings['autoplay'];
+        $autoplay = isset( $_GET['autoplay'] ) ? $_GET['autoplay'] : $player_settings['autoplay'];
         $embed_url = add_query_arg( 'autoplay', (int) $autoplay, $embed_url );
 
-        $loop = isset( $_GET[ 'loop' ] ) ? $_GET['loop'] : $player_settings['loop'];
+        $loop = isset( $_GET['loop'] ) ? $_GET['loop'] : $player_settings['loop'];
         $embed_url = add_query_arg( 'loop', (int) $loop, $embed_url );
 
-        $muted = isset( $_GET[ 'muted' ] ) ? $_GET['muted'] : $player_settings['muted'];
+        $muted = isset( $_GET['muted'] ) ? $_GET['muted'] : $player_settings['muted'];
         $embed_url = add_query_arg( 'muted', (int) $muted, $embed_url );
 
         $playsinline = ! empty( $player_settings['playsinline'] ) ? 1 : 0;
         $embed_url = add_query_arg( 'playsinline', $playsinline, $embed_url );
+
+        $tracks = isset( $_GET['tracks'] ) ? (int) $_GET['tracks'] : isset( $player_settings['controls']['tracks'] );
+        $cc_load_policy = isset( $_GET['cc_load_policy'] ) ? (int) $_GET['cc_load_policy'] : (int) $player_settings['cc_load_policy'];
+        if ( ! empty( $tracks ) || ! empty( $cc_load_policy ) ) {
+			$embed_url = add_query_arg( 'texttrack', 'en-x-autogen', $embed_url );
+		}
+
+        $embed_url = apply_filters( 'aiovg_vimeo_embed_url', $embed_url, $post_id );
     }
 
     // Dailymotion
     if ( 'dailymotion' == $current_video_provider ) {
         $embed_url = 'https://www.dailymotion.com/embed/video/' . aiovg_get_dailymotion_id_from_url( $embed_url ) . '?queue-autoplay-next=0&queue-enable=0&sharing-enable=0&ui-logo=0&ui-start-screen-info=0';
 
-        $autoplay = isset( $_GET[ 'autoplay' ] ) ? $_GET['autoplay'] : $player_settings['autoplay'];
+        $autoplay = isset( $_GET['autoplay'] ) ? $_GET['autoplay'] : $player_settings['autoplay'];
         $embed_url = add_query_arg( 'autoplay', (int) $autoplay, $embed_url );
 
-        $loop = isset( $_GET[ 'loop' ] ) ? $_GET['loop'] : $player_settings['loop'];
+        $loop = isset( $_GET['loop'] ) ? $_GET['loop'] : $player_settings['loop'];
         $embed_url = add_query_arg( 'loop', (int) $loop, $embed_url );
 
-        $muted = isset( $_GET[ 'muted' ] ) ? $_GET['muted'] : $player_settings['muted'];
+        $muted = isset( $_GET['muted'] ) ? $_GET['muted'] : $player_settings['muted'];
         $embed_url = add_query_arg( 'mute', (int) $muted, $embed_url );
+
+        $embed_url = apply_filters( 'aiovg_dailymotion_embed_url', $embed_url, $post_id );
     }
 
     // Rumble
@@ -149,26 +160,56 @@ if ( ! empty( $embed_url ) ) {
             if ( $iframe_src = aiovg_extract_iframe_src( $oembed['html'] ) ) { 
                 $embed_url = add_query_arg( 'rel', 0, $iframe_src );	
                         
-                $autoplay = isset( $_GET[ 'autoplay' ] ) ? (int) $_GET['autoplay'] : (int) $player_settings['autoplay'];
+                $autoplay = isset( $_GET['autoplay'] ) ? (int) $_GET['autoplay'] : (int) $player_settings['autoplay'];
                 if ( ! empty( $autoplay ) ) {
                     $embed_url = add_query_arg( 'autoplay', 2, $embed_url );	
                 }
             }
         }
+
+        $embed_url = apply_filters( 'aiovg_rumble_embed_url', $embed_url, $post_id );
     }
 
     // Facebook
     if ( 'facebook' == $current_video_provider ) {
         $embed_url = 'https://www.facebook.com/plugins/video.php?href=' . urlencode( $embed_url ) . '&width=560&height=315&show_text=false&appId';
     
-        $autoplay = isset( $_GET[ 'autoplay' ] ) ? $_GET['autoplay'] : $player_settings['autoplay'];
+        $autoplay = isset( $_GET['autoplay'] ) ? $_GET['autoplay'] : $player_settings['autoplay'];
         $embed_url = add_query_arg( 'autoplay', (int) $autoplay, $embed_url );
 
-        $loop = isset( $_GET[ 'loop' ] ) ? $_GET['loop'] : $player_settings['loop'];
+        $loop = isset( $_GET['loop'] ) ? $_GET['loop'] : $player_settings['loop'];
         $embed_url = add_query_arg( 'loop', (int) $loop, $embed_url );
 
-        $muted = isset( $_GET[ 'muted' ] ) ? $_GET['muted'] : $player_settings['muted'];
+        $muted = isset( $_GET['muted'] ) ? $_GET['muted'] : $player_settings['muted'];
         $embed_url = add_query_arg( 'muted', (int) $muted, $embed_url );
+
+        $embed_url = apply_filters( 'aiovg_facebook_embed_url', $embed_url, $post_id );
+    }
+
+    // Bunny Stream
+    if ( 'bunny_stream' == $current_video_provider ) {
+        $autoplay = isset( $_GET['autoplay'] ) ? $_GET['autoplay'] : $player_settings['autoplay'];
+        $autoplay = ! empty( $autoplay ) ? 'true' : 'false';
+        $embed_url = add_query_arg( 'autoplay', $autoplay, $embed_url );
+
+        $preload = isset( $_GET['preload'] ) ? $_GET['preload'] : $player_settings['preload'];
+        $preload = ( 'none' == $preload ) ? 'false' : 'true';
+        $embed_url = add_query_arg( 'preload', $preload, $embed_url );
+
+        $muted = isset( $_GET['muted'] ) ? $_GET['muted'] : $player_settings['muted'];
+        $muted = ! empty( $muted ) ? 'true' : 'false';
+        $embed_url = add_query_arg( 'muted', $muted, $embed_url );
+
+        $loop = isset( $_GET['loop'] ) ? $_GET['loop'] : $player_settings['loop'];
+        $loop = ! empty( $loop ) ? 'true' : 'false';
+        $embed_url = add_query_arg( 'loop', $loop, $embed_url );
+
+        $playsinline = ! empty( $player_settings['playsinline'] ) ? 'true' : 'false';
+        $embed_url = add_query_arg( 'playsinline', $playsinline, $embed_url );
+
+        $speed = isset( $_GET['speed'] ) ? $_GET['speed'] : isset( $player_settings['controls']['speed'] );
+        $speed = ! empty( $speed ) ? 'true' : 'false';
+        $embed_url = add_query_arg( 'showSpeed', $speed, $embed_url );
     }
 
     // Build iframe code
