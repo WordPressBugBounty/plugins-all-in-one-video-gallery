@@ -6,7 +6,7 @@ Tags: video player, video gallery, youtube gallery, vimeo gallery, live stream
 Requires at least: 6.3
 Tested up to: 6.8
 Requires PHP: 5.6.20
-Stable tag: 4.3.2
+Stable tag: 4.3.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -151,6 +151,11 @@ Also, the videos from third-party services like "YouTube", "Vimeo", "Dailymotion
 7. Plugin Settings.
 
 == Changelog ==
+
+= 4.3.6 =
+
+* Tweak: Updated Freemius SDK (2.12.0).
+* Fix: Gallery thumbnails not showing in some WordPress environments after the last update due to a conflict with optimization plugins like Smush.
 
 = 4.3.2 =
 
@@ -523,6 +528,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 4.3.2 =
+= 4.3.6 =
 
-Introduces several new features, bug fixes & enhancements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)
+Gallery thumbnails not showing in some WordPress environments after the last update due to a conflict with optimization plugins like Smush. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

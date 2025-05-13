@@ -320,7 +320,7 @@ class AIOVG_Init {
 		$this->loader->add_filter( 'aiovg_videojs_player_sources', $video, 'filter_player_sources', 10, 2 );
 		$this->loader->add_filter( 'aiovg_vidstack_player_sources', $video, 'filter_player_sources', 10, 2 );
 		$this->loader->add_filter( 'aiovg_the_content', $video, 'wrap_timestamps_with_links' );
-		$this->loader->add_filter( 'the_content', $video, 'the_content', 20 );
+		$this->loader->add_filter( 'the_content', $video, 'the_content', 11 );
 		$this->loader->add_filter( 'comments_open', $video, 'comments_open', 10, 2 );		
 		
 		// Hooks specific to the search form

@@ -24,7 +24,7 @@ $lazyloading = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' :
 
 <div class="aiovg-thumbnail">
     <a href="<?php echo esc_url( $permalink ); ?>" class="aiovg-responsive-container" style="padding-bottom: <?php echo esc_attr( $attributes['ratio'] ); ?>;">
-        <img src="<?php echo esc_url( $image ); ?>" class="aiovg-responsive-element" alt="<?php echo esc_attr( $image_alt ); ?>" onerror="this.onerror=null; this.src='<?php echo AIOVG_PLUGIN_PLACEHOLDER_IMAGE_URL; ?>';" <?php echo $lazyloading; ?>/>
+        <img src="<?php echo esc_url( $image ); ?>" class="aiovg-responsive-element" alt="<?php echo esc_attr( $image_alt ); ?>" <?php echo $lazyloading; ?>/>
     </a>
     
     <div class="aiovg-caption">
