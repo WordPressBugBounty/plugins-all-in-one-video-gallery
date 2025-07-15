@@ -16,7 +16,7 @@ $image_alt          = isset( $post_meta['image_alt'] ) ? $post_meta['image_alt']
 $set_featured_image = isset( $post_meta['set_featured_image'] ) ? $post_meta['set_featured_image'][0] : 1;
 ?>
 
-<div class="aiovg-flex aiovg-flex-col aiovg-gap-4">
+<div class="aiovg-form-controls">
 	<div id="aiovg-field-image" class="aiovg-form-control">
 		<label for="aiovg-image" class="aiovg-form-label"><?php esc_html_e( 'Poster Image', 'all-in-one-video-gallery' ); ?></label>
 		<div class="aiovg-media-uploader">                                                

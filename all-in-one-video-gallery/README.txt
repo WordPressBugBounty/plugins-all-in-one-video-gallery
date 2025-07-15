@@ -6,7 +6,7 @@ Tags: video player, video gallery, youtube gallery, vimeo gallery, live stream
 Requires at least: 6.3
 Tested up to: 6.8
 Requires PHP: 5.6.20
-Stable tag: 4.3.6
+Stable tag: 4.4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -151,6 +151,22 @@ Also, the videos from third-party services like "YouTube", "Vimeo", "Dailymotion
 7. Plugin Settings.
 
 == Changelog ==
+
+= 4.4.0 =
+
+Security Fix: Addressed multiple security issues to enhance overall plugin security.
+New: Added an option to display the comments count in the grid view, with a link to the comment form in the player view.
+New: Introduced a setting to configure a custom videos archive page for better SEO.
+New: Added a reset button to allow users to clear filters easily.
+New: Introduced a developer filter hook "the_aiovg_socialshare_buttons" to customize the social sharing buttons output.
+Tweak: Restricted back-end access for the Editor role due to the "unfiltered_html" capability.
+Tweak: Improved the HTML output for video thumbnails.
+Tweak: Added a custom theme option for the Vidstack player.
+Tweak: Enhanced the front-end playlist layout for better usability.
+Tweak: Updated the Freemius SDK to version 2.12.1.
+Fix: Resolved an issue where Vimeo tags were not imported when using Video Automations to import from Vimeo folders.
+Fix: Fixed compatibility issues with the Oxygen page builder.
+Fix: Various minor bug fixes and performance improvements.
 
 = 4.3.6 =
 
@@ -528,6 +544,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 4.3.6 =
+= 4.4.0 =
 
-Gallery thumbnails not showing in some WordPress environments after the last update due to a conflict with optimization plugins like Smush. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)
+Introduces several bug fixes & enhancements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

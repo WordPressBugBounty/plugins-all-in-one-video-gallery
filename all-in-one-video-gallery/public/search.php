@@ -49,6 +49,7 @@ class AIOVG_Public_Search {
 			'has_tag'           => isset( $atts['tag'] ) ? (int) $atts['tag'] : 0,
 			'has_sort'          => isset( $atts['sort'] ) ? (int) $atts['sort'] : 0,
 			'has_search_button' => isset( $atts['search_button'] ) ? (int) $atts['search_button'] : 1,
+			'has_reset_button'  => isset( $atts['reset_button'] ) ? (int) $atts['reset_button'] : 1,
 			'target'            => isset( $atts['target'] ) ? sanitize_text_field( $atts['target'] ) : 'default'
 		);
 

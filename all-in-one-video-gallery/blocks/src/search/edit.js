@@ -28,6 +28,7 @@ function Edit( { attributes, setAttributes } ) {
 		tag,
 		sort,
 		search_button,
+		reset_button,
 		target 
 	} = attributes;
 	
@@ -90,6 +91,15 @@ function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.search_button }
 							checked={ search_button }
 							onChange={ () => setAttributes( { search_button: ! search_button } ) }
+							__nextHasNoMarginBottom
+						/>
+					</PanelRow>
+
+					<PanelRow>
+						<ToggleControl
+							label={ aiovg_blocks.i18n.reset_button }
+							checked={ reset_button }
+							onChange={ () => setAttributes( { reset_button: ! reset_button } ) }
 							__nextHasNoMarginBottom
 						/>
 					</PanelRow>

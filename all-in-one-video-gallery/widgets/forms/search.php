@@ -73,6 +73,13 @@
 			</label>
 		</div>
 
+		<div class="aiovg-widget-field aiovg-widget-field-has_reset_button">		
+			<label for="<?php echo esc_attr( $this->get_field_id( 'has_reset_button' ) ); ?>">
+				<input type="checkbox" name="<?php echo esc_attr( $this->get_field_name( 'has_reset_button' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'has_reset_button' ) ); ?>" class="aiovg-widget-input-has_reset_button" value="1" <?php checked( 1, $instance['has_reset_button'] ); ?> /> 
+				<?php esc_html_e( 'Reset Button', 'all-in-one-video-gallery' ); ?>
+			</label>
+		</div>
+
 		<div class="aiovg-widget-field aiovg-widget-field-target">
 			<label class="aiovg-widget-label" for="<?php echo esc_attr( $this->get_field_id( 'target' ) ); ?>"><?php esc_html_e( 'Search Results Page', 'all-in-one-video-gallery' ); ?></label>
 			<select name="<?php echo esc_attr( $this->get_field_name( 'target' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'target' ) ); ?>" class="widefat aiovg-widget-input-target"> 

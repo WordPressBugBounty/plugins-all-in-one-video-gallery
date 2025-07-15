@@ -2,7 +2,7 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 2,
   "name": "aiovg/categories",
-  "version": "3.9.3",
+  "version": "4.3.7",
   "title": "AIOVG - Video Categories",
   "category": "all-in-one-video-gallery",
   "keywords": [

@@ -278,7 +278,9 @@
 	 */
 	$(function() {		
 		// Register custom element
-		customElements.define( 'aiovg-like-button', AIOVGLikeButtonElement );
+        if ( ! customElements.get( 'aiovg-like-button' ) ) {
+		    customElements.define( 'aiovg-like-button', AIOVGLikeButtonElement );
+        }
 	});
     
 })( jQuery );

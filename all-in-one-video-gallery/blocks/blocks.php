@@ -103,6 +103,7 @@ class AIOVG_Blocks {
 				'search_by_tags'                => __( 'Search By Tags', 'all-in-one-video-gallery' ),
 				'sort_by_dropdown'              => __( 'Sort By Dropdown', 'all-in-one-video-gallery' ),
 				'search_button'                 => __( 'Search Button', 'all-in-one-video-gallery' ),
+				'reset_button'                  => __( 'Reset Button', 'all-in-one-video-gallery' ),
 				'search_results_page'           => __( 'Search Results Page', 'all-in-one-video-gallery' ),
 				'default_page'                  => __( "Use Plugin's Default Search Results Page", 'all-in-one-video-gallery' ),
 				'current_page'                  => __( 'Display Results on Current Page', 'all-in-one-video-gallery' ),

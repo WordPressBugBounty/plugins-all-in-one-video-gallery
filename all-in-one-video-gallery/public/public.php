@@ -22,12 +22,15 @@ if ( ! defined( 'WPINC' ) ) {
 class AIOVG_Public {
 	
 	/**
-	 * Remove 'redirect_canonical' hook to fix secondary loop pagination issue on single video 
-	 * pages.
+	 * Template redirect handler.
+	 *
+	 * - Fixes secondary loop pagination issues on single video pages.
+	 * - Redirects default video archive to custom archive page, if configured.
 	 *
 	 * @since 1.5.5
 	 */
-	public function template_redirect() {	
+	public function template_redirect() {
+		// Fix pagination on single video pages	
 		if ( is_singular( 'aiovg_videos' ) ) {		
 			global $wp_query;
 			
@@ -40,7 +43,27 @@ class AIOVG_Public {
 			
 			// Prevent redirect
 			remove_action( 'template_redirect', 'redirect_canonical' );		
-	  	}	
+	  	}
+		
+		// Redirect default archive to custom archive page (if configured)
+		if ( is_post_type_archive( 'aiovg_videos' ) ) {
+			$permalink_settings = get_option( 'aiovg_permalink_settings' );
+
+			if ( is_array( $permalink_settings ) && ! empty( $permalink_settings['video_archive_page'] ) ) {
+				$page_id  = (int) $permalink_settings['video_archive_page'];
+				$page_url = get_permalink( $page_id );
+
+				if ( $page_url ) {
+					// Avoid redirect loop if already on the custom archive page
+					$current_url = ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
+					if ( untrailingslashit( $current_url ) !== untrailingslashit( $page_url ) ) {
+						wp_redirect( $page_url, 301 );
+						exit;
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -49,7 +72,9 @@ class AIOVG_Public {
 	 * @since 1.0.0
 	 */
 	public function init() {
-		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_settings      = get_option( 'aiovg_page_settings' );
+		$permalink_settings = get_option( 'aiovg_permalink_settings' );
+
 		$site_url = home_url();
 		
 		// Rewrite tags
@@ -130,6 +155,24 @@ class AIOVG_Public {
 					$slug = urldecode( $slug );		
 					
 					add_rewrite_rule( "$slug/id/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_type=id&aiovg_video=$matches[1]', 'top' );
+				}
+			}
+		}
+
+		// Video archive page
+		if ( ! empty( $permalink_settings['video_archive_page'] ) ) {
+			$id   = (int) $permalink_settings['video_archive_page'];
+			$post = get_post( $id );
+
+			if ( $post && 'publish' === $post->post_status ) {
+				$permalink = get_permalink( $id );
+
+				if ( $permalink ) {
+					$slug = str_replace( $site_url, '', $permalink );			
+					$slug = trim( $slug, '/' );
+					$slug = urldecode( $slug );		
+					
+					add_rewrite_rule( "$slug/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&paged=$matches[1]', 'top' );
 				}
 			}
 		}

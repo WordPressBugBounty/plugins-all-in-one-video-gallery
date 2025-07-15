@@ -187,8 +187,11 @@ class AIOVG_Admin_Settings {
             ),                       
 			array(
                 'id'          => 'aiovg_permalink_settings',
-                'title'       => __( 'Custom Permalink Slugs', 'all-in-one-video-gallery' ),
-				'description' => __( 'NOTE: Just make sure that, after updating the fields in this section, you flush the rewrite rules by visiting "Settings > Permalinks". Otherwise you\'ll still see the old links.', 'all-in-one-video-gallery' ),
+                'title'       => __( 'Permalinks & Archive Settings', 'all-in-one-video-gallery' ),
+				'description' => sprintf(
+                    __( 'NOTE: After updating the fields in this section, please visit <a href="%s">Settings / Permalinks</a> and simply save the page without making any changes to flush rewrite rules. Otherwise, you might still see old links.', 'all-in-one-video-gallery' ),
+                    esc_url( admin_url( 'options-permalink.php' ) )
+                ),
                 'tab'         => 'seo',
                 'page'        => 'aiovg_permalink_settings'
             ),
@@ -232,7 +235,7 @@ class AIOVG_Admin_Settings {
                 'title'       => __( 'Bunny Stream (Optional)', 'all-in-one-video-gallery' ),
                 'menu_title'  => __( 'Bunny Stream', 'all-in-one-video-gallery' ),
                 'description' => sprintf(
-                    '<p>%s <a href="%s" class="button button-primary button-small" target="_blank" rel="noopener noreferrer">%s</a></p><div class="aiovg-notice aiovg-notice-success"><strong>%s:</strong> %s</div>',
+                    '<p>%s</p><p><a href="%s" class="button" target="_blank" rel="noopener noreferrer">%s</a></p><div class="aiovg-notice aiovg-notice-success"><strong>%s:</strong> %s</div>',
                     __( 'Set up Bunny Stream to easily upload, store, and securely deliver your video content with optimal performance. Simply configure the necessary settings below to get started.', 'all-in-one-video-gallery' ),
                     'https://plugins360.com/all-in-one-video-gallery/configure-bunny-stream/',
                     __( 'View Setup Guide', 'all-in-one-video-gallery' ),
@@ -282,7 +285,7 @@ class AIOVG_Admin_Settings {
                 ),
                 array(
                     'name'              => 'theme',
-                    'label'             => __( 'Video.js Theme', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Player Theme', 'all-in-one-video-gallery' ),
                     'description'       => '',
                     'type'              => 'radio',
                     'options'           => array(
@@ -633,6 +636,7 @@ class AIOVG_Admin_Settings {
 						'views'    => __( 'Views Count', 'all-in-one-video-gallery' ),
                         'likes'    => __( 'Likes Count', 'all-in-one-video-gallery' ),
                         'dislikes' => __( 'Dislikes Count', 'all-in-one-video-gallery' ),
+                        'comments' => __( 'Comments Count', 'all-in-one-video-gallery' ),
 						'duration' => __( 'Video Duration', 'all-in-one-video-gallery' ),
 						'excerpt'  => __( 'Video Excerpt (Short Description)', 'all-in-one-video-gallery' )
 					),
@@ -853,10 +857,21 @@ class AIOVG_Admin_Settings {
 			'aiovg_permalink_settings' => array(
 				array(
                     'name'              => 'video',
-                    'label'             => __( 'Video Detail Page', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Replaces the SLUG value used by custom post type "aiovg_videos".', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Single Video Page Slug', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Replaces the default slug value ("aiovg_videos") used by our plugin for single video page URLs. Please enter a slug that is not already used by any pages or posts on your website.', 'all-in-one-video-gallery' ),
                     'type'              => 'text',
                     'sanitize_callback' => 'sanitize_text_field'
+                ),
+                array(
+                    'name'              => 'video_archive_page',
+                    'label'             => __( 'Video Archive Page', 'all-in-one-video-gallery' ),
+                    'description' => sprintf(
+                        '<p>%s</p><p>%s</p>',
+                        esc_html__( 'Select a page to serve as the custom video archive. Requests to the default archive will be redirected here. The [aiovg_videos] shortcode must be on this page.', 'all-in-one-video-gallery' ),
+                        esc_html__( 'The selected page slug will be used as the base in single video URLs. This will override the value set in "Single Video Page Slug" above.', 'all-in-one-video-gallery' )
+                    ),
+                    'type'              => 'pages',
+					'sanitize_callback' => 'sanitize_key'
                 )
 			),
             'aiovg_restrictions_settings' => array(

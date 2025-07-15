@@ -533,10 +533,14 @@ img.aiovg-responsive-element {
 	font-size: 0.85em;	
 }
 
+.aiovg-now-playing {
+	padding: 0.25em 0.5em 0.35em 0.5em;	
+}
+
 .aiovg-caption {
 	display: flex;
 	flex-direction: column;
-	gap: 0.35em;
+	gap: 0.5em;
 }
 
 .aiovg-caption .aiovg-title {
@@ -957,14 +961,14 @@ img.aiovg-responsive-element {
 .aiovg-content-after-player {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 1em;
+	gap: 0.5em;
 	align-items: center;
 }
 
 /* Likes / Dislikes */
 aiovg-like-button {
 	display: flex;
-	gap: 0.25em;
+	gap: 0.5em;
 	align-items: center;
 }
 
@@ -983,6 +987,19 @@ aiovg-like-button button {
 aiovg-like-button:not([loaded]) {
 	pointer-events: none;
 	animation: aiovg-pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Comments */
+aiovg-comment-button:empty {
+	display: none;
+}
+
+aiovg-comment-button button {
+	display: flex;
+    gap: 0.35em;
+    align-items: center;
+    justify-content: center;
+	margin: 0;
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -1028,7 +1045,7 @@ aiovg-like-button:not([loaded]) {
 
 .aiovg-search-form .aiovg-field-keyword button,
 .aiovg-search-form .aiovg-field-keyword button:hover,
-.aiovg-search-form .aiovg-field-keyword button:focus {	
+.aiovg-search-form .aiovg-field-keyword button:focus {
 	margin: 0;
 	border: 0;
 	box-shadow: none;
@@ -1039,6 +1056,11 @@ aiovg-like-button:not([loaded]) {
 	width: 2em;
 	height: 100%;
 	line-height: 1;
+}
+
+.aiovg-search-form .aiovg-field-submit,
+.aiovg-search-form .aiovg-field-reset {	
+	flex-grow: 0;
 }
 
 /* Template: Compact */

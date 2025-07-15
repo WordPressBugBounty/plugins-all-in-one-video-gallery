@@ -647,10 +647,21 @@
      */
     document.addEventListener( 'DOMContentLoaded', function() {
         // Register custom elements
-        customElements.define( 'aiovg-youtube', AIOVGYouTubeElement );
-        customElements.define( 'aiovg-vimeo', AIOVGVimeoElement );
-        customElements.define( 'aiovg-dailymotion', AIOVGDailymotionElement );
-        customElements.define( 'aiovg-embed', AIOVGIframeElement );
+        if ( ! customElements.get( 'aiovg-youtube' ) ) {
+            customElements.define( 'aiovg-youtube', AIOVGYouTubeElement );
+        }
+
+        if ( ! customElements.get( 'aiovg-vimeo' ) ) {
+            customElements.define( 'aiovg-vimeo', AIOVGVimeoElement );
+        }
+
+        if ( ! customElements.get( 'aiovg-dailymotion' ) ) {
+            customElements.define( 'aiovg-dailymotion', AIOVGDailymotionElement );
+        }
+
+        if ( ! customElements.get( 'aiovg-embed' ) ) {
+            customElements.define( 'aiovg-embed', AIOVGIframeElement );
+        }
 
         // Update views count for the non-iframe embeds
         const videos = document.querySelectorAll( '.aiovg-player-raw' );

@@ -18,35 +18,33 @@ if ( ! empty( $post_meta['chapter'] ) ) {
 }
 ?>
 
-<div class="aiovg-flex aiovg-flex-col aiovg-gap-4">
+<div class="aiovg-form-controls aiovg-repeatable-ui">
 	<p class="description">
 		<?php printf( __( 'The chapters can also be included in the video description. Kindly <a href="%s" target="_blank" rel="noopener noreferrer">follow this link</a>.', 'all-in-one-video-gallery' ), 'https://plugins360.com/all-in-one-video-gallery/adding-chapters/' ); ?>
 	</p>
 
-	<table id="aiovg-chapters" class="aiovg-table form-table striped">
+	<table id="aiovg-chapters" class="aiovg-repeatable-table form-table striped">
 		<tbody>
 			<?php foreach ( $chapters as $key => $chapter ) : ?>
-				<tr class="aiovg-chapters-row">
-					<td class="aiovg-handle">
-						<span class="aiovg-text-muted dashicons dashicons-move"></span>
+				<tr>
+					<td class="aiovg-sort-handle">
+						<span class="dashicons dashicons-move"></span>
 					</td>
 					<td>
-						<div class="aiovg-chapter">
-							<div class="aiovg-chapter-time">
-								<label class="aiovg-text-small"><?php esc_html_e( 'Time', 'all-in-one-video-gallery' ); ?></label>				
+						<div class="aiovg-repeatable-fields">
+							<label class="aiovg-repeatable-field aiovg-chapter-time">
+								<?php esc_html_e( 'Time', 'all-in-one-video-gallery' ); ?>				
 								<input type="text" name="chapter_time[]" class="widefat" placeholder="<?php esc_attr_e( 'HH:MM:SS', 'all-in-one-video-gallery' ); ?>" value="<?php echo esc_attr( $chapter['time'] ); ?>" />
-							</div>	
+							</label>	
 
-							<div class="aiovg-chapter-label">
-								<label class="aiovg-text-small"><?php esc_html_e( 'Label', 'all-in-one-video-gallery' ); ?></label>				
+							<label class="aiovg-repeatable-field aiovg-chapter-label">
+								<?php esc_html_e( 'Label', 'all-in-one-video-gallery' ); ?>			
 								<input type="text" name="chapter_label[]" class="widefat" placeholder="<?php esc_attr_e( 'Chapter Title', 'all-in-one-video-gallery' ); ?>" value="<?php echo esc_attr( $chapter['label'] ); ?>" />
-							</div>													
+							</label>													
 					
-							<div class="aiovg-chapter-buttons">
-								<button type="button" class="aiovg-delete-chapter button">
-									<?php esc_html_e( 'Delete', 'all-in-one-video-gallery' ); ?>
-								</button>
-							</div>
+							<button type="button" class="aiovg-button aiovg-button-delete button">
+								<?php esc_html_e( 'Delete', 'all-in-one-video-gallery' ); ?>
+							</button>
 						</div>
 					</td>
 				</tr>
@@ -54,32 +52,33 @@ if ( ! empty( $post_meta['chapter'] ) ) {
 		</tbody>
 	</table>
 
-	<a href="javascript:;" id="aiovg-add-new-chapter" class="aiovg-font-bold">
-		<?php esc_html_e( '[+] Add New Chapter', 'all-in-one-video-gallery' ); ?>
-	</a>
+	<!-- Button: Add New Chapter -->
+	<div class="aiovg-repeatable-button">
+		<button type="button" class="aiovg-button aiovg-button-add button" data-href="#aiovg-template-chapter">
+			<?php esc_html_e( 'Add New Chapter', 'all-in-one-video-gallery' ); ?>
+		</button>
+	</div>
 
 	<template id="aiovg-template-chapter">
-		<tr class="aiovg-chapters-row">
-			<td class="aiovg-handle">
-				<span class="aiovg-text-muted dashicons dashicons-move"></span>
+		<tr>
+			<td class="aiovg-sort-handle">
+				<span class="dashicons dashicons-move"></span>
 			</td>
 			<td>
-				<div class="aiovg-chapter">
-					<div class="aiovg-chapter-time">
-						<label class="aiovg-text-small"><?php esc_html_e( 'Time', 'all-in-one-video-gallery' ); ?></label>				
+				<div class="aiovg-repeatable-fields">
+					<label class="aiovg-repeatable-field aiovg-chapter-time">
+						<?php esc_html_e( 'Time', 'all-in-one-video-gallery' ); ?>		
 						<input type="text" name="chapter_time[]" class="widefat" placeholder="<?php esc_attr_e( 'HH:MM:SS', 'all-in-one-video-gallery' ); ?>" />
-					</div>
+					</label>
 
-					<div class="aiovg-chapter-label">
-						<label class="aiovg-text-small"><?php esc_html_e( 'Label', 'all-in-one-video-gallery' ); ?></label>				
+					<label class="aiovg-repeatable-field aiovg-chapter-label">
+						<?php esc_html_e( 'Label', 'all-in-one-video-gallery' ); ?>			
 						<input type="text" name="chapter_label[]" class="widefat" placeholder="<?php esc_attr_e( 'Chapter Title', 'all-in-one-video-gallery' ); ?>" />
-					</div>
+					</label>
 			
-					<div class="aiovg-chapter-buttons">
-						<button type="button" class="aiovg-delete-chapter button">
-							<?php esc_html_e( 'Delete', 'all-in-one-video-gallery' ); ?>
-						</button>
-					</div>
+					<button type="button" class="aiovg-button aiovg-button-delete button">
+						<?php esc_html_e( 'Delete', 'all-in-one-video-gallery' ); ?>
+					</button>
 				</div>
 			</td>
 		</tr>		

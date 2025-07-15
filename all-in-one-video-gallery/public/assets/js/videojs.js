@@ -664,7 +664,9 @@
 	$(function() {
 		
 		// Register custom element
-		customElements.define( 'aiovg-video', AIOVGVideoElement );
+		if ( ! customElements.get( 'aiovg-video' ) ) {
+			customElements.define( 'aiovg-video', AIOVGVideoElement );
+		}
 
 		// Custom error message
 		if ( typeof videojs !== 'undefined' ) {

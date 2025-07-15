@@ -538,43 +538,68 @@ class AIOVG_Public_Videos {
 			$args['author_name'] = sanitize_text_field( $attributes['user_slug'] );
 		}		
 		
-		if ( ! empty( $attributes['include'] ) ) { // Include video IDs
-			$args['post__in'] = is_array( $attributes['include'] ) ? array_map( 'intval', $attributes['include'] ) : array_map( 'intval', explode( ',', $attributes['include'] ) );
+		if ( isset( $attributes['include'] ) ) { // Include video IDs
+			$include = is_array( $attributes['include'] ) ? array_map( 'intval', $attributes['include'] ) : array_map( 'intval', explode( ',', $attributes['include'] ) );
+			$include = array_filter( $include );
+
+			if ( ! empty( $include ) ) {
+				$args['post__in'] = $include;
+			}
 		}
 
-		if ( ! empty( $attributes['exclude'] ) ) { // Exclude video IDs
-			$args['post__not_in'] = is_array( $attributes['exclude'] ) ? array_map( 'intval', $attributes['exclude'] ) : array_map( 'intval', explode( ',', $attributes['exclude'] ) );
+		if ( isset( $attributes['exclude'] ) ) { // Exclude video IDs
+			$exclude = is_array( $attributes['exclude'] ) ? array_map( 'intval', $attributes['exclude'] ) : array_map( 'intval', explode( ',', $attributes['exclude'] ) );
+			$exclude = array_filter( $exclude );
+
+			if ( ! empty( $exclude ) ) {
+				$args['post__not_in'] = $exclude;
+			}
 		}
 
 		// Taxonomy Parameters
 		$tax_queries = array();		
 
-		if ( ! empty( $attributes['category'] ) ) { // Category
-			$tax_queries[] = array(
-				'taxonomy'         => 'aiovg_categories',
-				'field'            => 'term_id',
-				'terms'            => is_array( $attributes['category'] ) ? array_map( 'intval', $attributes['category'] ) : array_map( 'intval', explode( ',', $attributes['category'] ) ),
-				'include_children' => false
-			);
+		if ( isset( $attributes['category'] ) ) { // Category
+			$categories = is_array( $attributes['category'] ) ? array_map( 'intval', $attributes['category'] ) : array_map( 'intval', explode( ',', $attributes['category'] ) );
+			$categories = array_filter( $categories );
+
+			if ( ! empty( $categories ) ) {
+				$tax_queries[] = array(
+					'taxonomy'         => 'aiovg_categories',
+					'field'            => 'term_id',
+					'terms'            => $categories,
+					'include_children' => false
+				);
+			}
 		}
 
-		if ( ! empty( $attributes['category_exclude'] ) ) { // Exclude categories
-			$tax_queries[] = array(
-				'taxonomy'         => 'aiovg_categories',
-				'field'            => 'term_id',
-				'terms'            => is_array( $attributes['category_exclude'] ) ? array_map( 'intval', $attributes['category_exclude'] ) : array_map( 'intval', explode( ',', $attributes['category_exclude'] ) ),
-				'include_children' => false,
-				'operator'         => 'NOT IN'
-			);
+		if ( isset( $attributes['category_exclude'] ) ) { // Exclude categories
+			$category_exclude = is_array( $attributes['category_exclude'] ) ? array_map( 'intval', $attributes['category_exclude'] ) : array_map( 'intval', explode( ',', $attributes['category_exclude'] ) );
+			$category_exclude = array_filter( $category_exclude );
+
+			if ( ! empty( $category_exclude ) ) {
+				$tax_queries[] = array(
+					'taxonomy'         => 'aiovg_categories',
+					'field'            => 'term_id',
+					'terms'            => $category_exclude,
+					'include_children' => false,
+					'operator'         => 'NOT IN'
+				);
+			}
 		}
 
-		if ( ! empty( $attributes['tag'] ) ) { // Tag
-			$tax_queries[] = array(
-				'taxonomy'         => 'aiovg_tags',
-				'field'            => 'term_id',
-				'terms'            => is_array( $attributes['tag'] ) ? array_map( 'intval', $attributes['tag'] ) : array_map( 'intval', explode( ',', $attributes['tag'] ) ),
-				'include_children' => false
-			);
+		if ( isset( $attributes['tag'] ) ) { // Tag
+			$tags = is_array( $attributes['tag'] ) ? array_map( 'intval', $attributes['tag'] ) : array_map( 'intval', explode( ',', $attributes['tag'] ) );
+			$tags = array_filter( $tags );
+
+			if ( ! empty( $tags ) ) {
+				$tax_queries[] = array(
+					'taxonomy'         => 'aiovg_tags',
+					'field'            => 'term_id',
+					'terms'            => $tags,
+					'include_children' => false
+				);
+			}
 		}
 		
 		$count_tax_queries = count( $tax_queries );
@@ -724,8 +749,12 @@ class AIOVG_Public_Videos {
 			if ( isset( $_GET['ca'] ) ) {
 				$attributes['category'] = $_GET['ca'];
 			}
-	
-			if ( ! isset( $_GET['ca'] ) || ( isset( $_GET['ca'] ) && empty( $_GET['ca'] ) ) ) {
+
+			$categories = isset( $_GET['ca'] ) ? (array) $_GET['ca'] : array();
+			$categories = array_map( 'intval', $categories );
+			$categories = array_filter( $categories );
+
+			if ( empty( $categories ) ) {
 				$categories_excluded = get_terms( array(
 					'taxonomy'   => 'aiovg_categories',
 					'hide_empty' => false,
@@ -803,6 +832,7 @@ class AIOVG_Public_Videos {
 			$this->defaults['filters_category'] = 0;
 			$this->defaults['filters_tag'] = 0;
 			$this->defaults['filters_sort'] = 0;
+			$this->defaults['filters_reset_button'] = 0;
 			$this->defaults['filters_template'] = 'horizontal';
 			$this->defaults['filters_mode'] = 'live';
 			$this->defaults['filters_position'] = 'top';

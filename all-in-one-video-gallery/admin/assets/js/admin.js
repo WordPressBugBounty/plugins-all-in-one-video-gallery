@@ -118,36 +118,6 @@
 	}
 
 	/**
-	 * Make tracks in the video form sortable.
-	 */
-	function sortTracks() {				
-		var $el = $( '#aiovg-tracks tbody' );
-			
-		if ( $el.hasClass( 'ui-sortable' ) ) {
-			$el.sortable( 'destroy' );
-		}
-			
-		$el.sortable({
-			handle: '.aiovg-handle'
-		});
-	}
-
-	/**
-	 * Make chapters in the video form sortable.
-	 */
-	function sortChapters() {				
-		var $el = $( '#aiovg-chapters tbody' );
-			
-		if ( $el.hasClass( 'ui-sortable' ) ) {
-			$el.sortable( 'destroy' );
-		}
-			
-		$el.sortable({
-			handle: '.aiovg-handle'
-		});
-	}
-
-	/**
  	 * Init autocomplete ui to search videos. 
  	 */
 	function initAutocomplete( $el ) {
@@ -520,6 +490,67 @@
 			});
 		}
 
+		// Common: Repeatable fields.
+		$( '.aiovg-repeatable-ui' ).each(function() {
+			const $containerEl = $( this );
+
+			// Add new field.
+			$containerEl.find( '.aiovg-button-add' ).on( 'click', function( event ) { 
+				event.preventDefault();
+				
+				const href     = $( this ).data( 'href' );
+				const template = document.querySelector( href );
+
+				if ( template !== null ) {
+					const el = template.content.cloneNode( true );	
+							
+					$containerEl.find( 'tbody' ).append( el );
+					$containerEl.find( 'table' ).show();
+				}
+			});
+
+			// Add a field by default.
+			if ( $containerEl.find( 'tr' ).length === 0 ) {
+				$containerEl.find( '.aiovg-button-add' ).trigger( 'click' );
+			}	
+			
+			// Delete a field.
+			$containerEl.on( 'click', '.aiovg-button-delete', function( event ) { 
+				event.preventDefault();	
+
+				$( this ).closest( 'tr' ).remove(); 
+
+				if ( $containerEl.find( 'tr' ).length === 0 ) {
+					$containerEl.find( 'table' ).hide();
+				}
+			});
+			
+			// Make fields sortable.
+			if ( $.fn.sortable ) {
+				const $el = $containerEl.find( 'tbody' );
+							
+				if ( $el.hasClass( 'ui-sortable' ) ) {
+					$el.sortable( 'destroy' );
+				}
+					
+				$el.sortable({
+					handle: '.aiovg-sort-handle',
+					helper: function(e, ui) {
+						// ui is the original element being dragged
+						const $originals = ui.children();
+						const $helper    = ui.clone(); // Clone the original element
+
+						// Iterate through the children of the helper and set their widths
+						$helper.children().each(function( index ) {
+							$( this ).width( $originals.eq( index ).width() );
+						});
+
+						return $helper;
+					}
+				}).disableSelection();
+			}
+		});
+
 		// Dashboard: Toggle shortcode forms.
 		$( '#aiovg-shortcode-selector input[type=radio]' ).on( 'change', function() {
 			var value = $( '#aiovg-shortcode-selector input[type=radio]:checked' ).val();
@@ -662,7 +693,7 @@
 			} else {
 				$( '#aiovg-thumbnail-generator' ).hide();
 			}
-		}).trigger( 'change' );
+		});
 		
 		// Videos: Add new source fields when "Add More Quality Levels" link is clicked.
 		$( '#aiovg-add-new-source' ).on( 'click', function( event ) {
@@ -681,8 +712,8 @@
 			var template = document.querySelector( '#aiovg-template-source' );
 			if ( template !== null ) {
 				var el = template.content.cloneNode( true );
-				el.querySelector( 'input[type=radio]' ).setAttribute( 'name', 'quality_levels[' + index + ']' );
-				el.querySelector( 'input[type=text]' ).setAttribute( 'name', 'sources[' + index + ']' );
+				$( el ).find( 'input[type=radio]' ).attr( 'name', 'quality_levels[' + index + ']' );
+				$( el ).find( 'input[type=text]' ).attr( 'name', 'sources[' + index + ']' );
 
 				$this.before( el );
 			} 		
@@ -716,21 +747,6 @@
 			toggleThumbnailGenerator();				
 		});
 
-		// Videos: Add new track fields when "Add New File" button is clicked.
-		$( '#aiovg-add-new-track' ).on( 'click', function( event ) { 
-            event.preventDefault();
-			
-			var template = document.querySelector( '#aiovg-template-track' );
-			if ( template !== null ) {
-				var el = template.content.cloneNode( true );		
-				$( '#aiovg-tracks tbody' ).append( el );
-			} 
-        });
-		
-		if ( $( '#aiovg-tracks .aiovg-tracks-row' ).length == 0 ) {
-			$( '#aiovg-add-new-track' ).trigger( 'click' );
-		}
-
 		// Videos: Upload tracks.	
 		$( document ).on( 'click', '.aiovg-upload-track', function( event ) { 
             event.preventDefault();
@@ -743,43 +759,6 @@
 					.val( json.url );
 			}); 
         });
-		
-		// Videos: Delete tracks.
-		$( document ).on( 'click', '.aiovg-delete-track', function( event ) { 
-            event.preventDefault();			
-            $( this ).closest( 'tr' ).remove(); 
-        });
-		
-		// Videos: Make the tracks fields sortable.
-		if ( $.fn.sortable ) {
-			sortTracks();
-		}
-		
-		// Videos: Add new chapter fields when "Add New Chapter" button is clicked.
-		$( '#aiovg-add-new-chapter' ).on( 'click', function( event ) { 
-            event.preventDefault();
-			
-			var template = document.querySelector( '#aiovg-template-chapter' );
-			if ( template !== null ) {
-				var el = template.content.cloneNode( true );			
-				$( '#aiovg-chapters tbody' ).append( el ); 
-			}
-        });
-		
-		if ( $( '#aiovg-chapters .aiovg-chapters-row' ).length == 0 ) {
-			$( '#aiovg-add-new-chapter' ).trigger( 'click' );
-		}
-		
-		// Videos: Delete chapters.
-		$( document ).on( 'click', '.aiovg-delete-chapter', function( event ) { 
-            event.preventDefault();			
-            $( this ).closest( 'tr' ).remove(); 
-        });
-		
-		// Videos: Make the chapters fields sortable.
-		if ( $.fn.sortable ) {
-			sortChapters();
-		}
 
 		// Videos: Toggle fields based on the selected access control.
 		$( '#aiovg-field-access_control select' ).on( 'change', function() {	

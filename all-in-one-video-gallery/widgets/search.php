@@ -65,6 +65,7 @@ class AIOVG_Widget_Search extends WP_Widget {
 			'has_tag'           => isset( $instance['has_tag'] ) ? (int) $instance['has_tag'] : 0,
 			'has_sort'          => isset( $instance['has_sort'] ) ? (int) $instance['has_sort'] : 0,
 			'has_search_button' => isset( $instance['has_search_button'] ) ? (int) $instance['has_search_button'] : 1,
+			'has_reset_button'  => isset( $atts['has_reset_button'] ) ? (int) $atts['has_reset_button'] : 1,
 			'target'            => isset( $instance['target'] ) ? sanitize_text_field( $instance['target'] ) : 'default'
 		);
 
@@ -122,6 +123,7 @@ class AIOVG_Widget_Search extends WP_Widget {
 		$instance['has_tag']           = isset( $new_instance['has_tag'] ) ? (int) $new_instance['has_tag'] : 0;
 		$instance['has_sort']          = isset( $new_instance['has_sort'] ) ? (int) $new_instance['has_sort'] : 0;
 		$instance['has_search_button'] = isset( $new_instance['has_search_button'] ) ? (int) $new_instance['has_search_button'] : 0;
+		$instance['has_reset_button']  = isset( $new_instance['has_reset_button'] ) ? (int) $new_instance['has_reset_button'] : 0;
 		$instance['target']            = isset( $new_instance['target'] ) ? sanitize_text_field( $new_instance['target'] ) : 'default';
 		
 		return $instance;		
@@ -143,6 +145,7 @@ class AIOVG_Widget_Search extends WP_Widget {
 			'has_tag'           => 0,
 			'has_sort'          => 0,
 			'has_search_button' => 1,
+			'has_reset_button'  => 1,
 			'target'            => 'default'
 		);
 		

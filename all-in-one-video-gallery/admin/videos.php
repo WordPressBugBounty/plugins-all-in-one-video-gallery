@@ -129,18 +129,35 @@ class AIOVG_Admin_Videos {
 			'map_meta_cap'          => true,
 		);
 
-		if ( ! current_user_can( 'manage_aiovg_options' ) ) { // Not an admin
-			if ( current_user_can( 'editor' ) ) {
-				$args['show_in_menu']  = true;
-				$args['menu_position'] = 5;
-				$args['menu_icon']     = 'dashicons-playlist-video';
+		if ( is_array( $permalink_settings ) ) {
+			if ( ! empty( $permalink_settings['video'] ) ) {
+				$args['rewrite'] = array(
+					'slug' => sanitize_title( $permalink_settings['video'] )
+				);
 			}
-		}
-		
-		if ( ! empty( $permalink_settings['video'] ) ) {
-			$args['rewrite'] = array(
-				'slug' => $permalink_settings['video']
-			);
+
+			if ( ! empty( $permalink_settings['video_archive_page'] ) ) {
+				$page_id = (int) $permalink_settings['video_archive_page'];
+				$post    = get_post( $page_id );
+
+				if ( $post && 'publish' === $post->post_status ) {
+					$permalink = get_permalink( $page_id );
+
+					if ( $permalink ) {
+						$site_url = trailingslashit( home_url() );
+
+						$slug = str_replace( $site_url, '', $permalink );            
+						$slug = trim( $slug, '/' );
+						$slug = urldecode( $slug );
+
+						$args['rewrite'] = array(
+							'slug' => $slug
+						);
+
+						$args['has_archive'] = false;
+					}
+				}
+			}
 		}
 		
 		register_post_type( 'aiovg_videos', $args );	

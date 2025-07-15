@@ -22,6 +22,13 @@ if ( ! $attributes['has_search_button'] ) {
 	}
 }
 
+$has_search_button = $attributes['has_search_button'];
+
+$has_reset_button = $attributes['has_reset_button'];
+if ( $has_reset_button && 'ajax' !== $search_form_mode ) {
+	$has_reset_button = $is_form_submitted;
+}
+
 $search_page_id  = (int) $attributes['search_page_id'];
 $search_page_url = aiovg_get_search_page_url( $search_page_id );
 ?>
@@ -35,11 +42,6 @@ $search_page_url = aiovg_get_search_page_url( $search_page_id );
 		<?php if ( $attributes['has_keyword'] ) : ?>
 			<div class="aiovg-form-group aiovg-field-keyword">
 				<input type="text" name="vi" class="aiovg-form-control" placeholder="<?php esc_attr_e( 'Enter your Keyword', 'all-in-one-video-gallery' ); ?>" value="<?php echo isset( $_GET['vi'] ) ? esc_attr( stripslashes( $_GET['vi'] ) ) : ''; ?>" />
-				<button type="submit" class="aiovg-button"> 
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="aiovg-flex-shrink-0">
-						<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-					</svg>
-				</button>
 			</div>
 		<?php endif; ?>
 		
@@ -48,6 +50,7 @@ $search_page_url = aiovg_get_search_page_url( $search_page_id );
 		
 		<?php if ( $attributes['has_category'] ) : ?>  
 			<div class="aiovg-form-group aiovg-field-category">
+				<input type="hidden" name="ca[]" value="" />
 				<?php
 				$categories_selected = array();
 
@@ -102,6 +105,7 @@ $search_page_url = aiovg_get_search_page_url( $search_page_id );
 
 		<?php if ( $attributes['has_tag'] ) : ?>  
 			<div class="aiovg-form-group aiovg-field-tag">
+				<input type="hidden" name="ta[]" value="" />
 				<?php
 				$tags_selected = array();
 
@@ -164,13 +168,24 @@ $search_page_url = aiovg_get_search_page_url( $search_page_id );
 			</div>
 		<?php endif; ?>
 
-		<?php if ( $attributes['has_search_button'] ) : ?>
-			<div class="aiovg-form-group aiovg-field-submit aiovg-flex aiovg-gap-2 aiovg-items-center">
-				<input type="submit" class="aiovg-button" value="<?php esc_attr_e( 'Search Videos', 'all-in-one-video-gallery' ); ?>" /> 
-				<?php if ( $is_form_submitted ) : ?>
-					<input type="button" onclick="location.href='<?php echo esc_url( $search_page_url ); ?>';" value="<?php esc_attr_e( 'Reset', 'all-in-one-video-gallery' ); ?>" />
-				<?php endif; ?>
+		<?php if ( $has_search_button && $has_reset_button ) : ?>
+			<div class="aiovg-button-group aiovg-flex aiovg-gap-2 aiovg-items-center">
+		<?php endif; ?>
+
+		<?php if ( $has_search_button ) : ?>
+			<div class="aiovg-form-group aiovg-field-submit">
+				<input type="submit" class="aiovg-button aiovg-button-submit" value="<?php esc_attr_e( 'Search Videos', 'all-in-one-video-gallery' ); ?>" /> 
 			</div>
-		<?php endif; ?>	 
+		<?php endif; ?>
+		
+		<?php if ( $has_reset_button ) : ?>
+			<div class="aiovg-form-group aiovg-field-reset"<?php if ( 'ajax' === $search_form_mode ) echo ' hidden'; ?>>
+				<input type="button" class="aiovg-button aiovg-button-reset" onclick="location.href='<?php echo esc_url( $search_page_url ); ?>';" value="<?php esc_attr_e( 'Reset', 'all-in-one-video-gallery' ); ?>" />
+			</div>
+		<?php endif; ?>
+
+		<?php if ( $has_search_button && $has_reset_button ) : ?>
+			</div>
+		<?php endif; ?>
 	</form> 
 </div>

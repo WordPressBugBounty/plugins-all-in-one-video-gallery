@@ -139,6 +139,18 @@
 
 			// On ready
 			this._player.on( 'ready', () => {
+				// Insert custom spacer
+				const restartButton = this._player.elements.container.querySelector( '[data-plyr="restart"]' );
+
+				if ( restartButton ) {
+					const spacer = document.createElement( 'div' );
+					spacer.className = 'plyr__controls__item plyr__spacer';
+					spacer.setAttribute( 'aria-hidden', 'true' );
+
+					// Replace the restart button with the spacer
+					restartButton.parentNode.replaceChild( spacer, restartButton );
+				}
+
 				// Share / Embed				
 				if ( this._params.hasOwnProperty( 'share' ) || this._params.hasOwnProperty( 'embed' ) ) {					
 					this._initShareEmbed();
@@ -525,7 +537,9 @@
 	 */
 	document.addEventListener( 'DOMContentLoaded', function() {
 		// Register custom element
-		customElements.define( 'aiovg-video', AIOVGVideoElement );
+		if ( ! customElements.get( 'aiovg-video' ) ) {
+			customElements.define( 'aiovg-video', AIOVGVideoElement );
+		}
 
 		// Listen to the iframe player events
 		window.addEventListener( 'message', function( event ) {

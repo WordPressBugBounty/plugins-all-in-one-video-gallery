@@ -96,7 +96,8 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 			'ajax_nonce'  => sanitize_text_field( wp_create_nonce( 'aiovg_ajax_nonce' ) ),
 			'lazyloading' => (int) $player_settings['lazyloading'],
 			'player'  => array(
-				'volume' => 0.5				
+				'iconUrl' => AIOVG_PLUGIN_URL . 'vendor/vidstack/plyr.svg',
+				'volume'  => 0.5				
 			)
 		);		
 
@@ -240,16 +241,30 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 			$controls[] = 'play';
 		}
 
-		if ( ! empty( $player_settings['current'] ) ) {
-			$controls[] = 'current-time';
-		}
-		
-		if ( ! empty( $player_settings['progress'] ) ) {
-			$controls[] = 'progress';
+		if ( 'custom' === $player_settings['theme'] ) {
+			if ( ! empty( $player_settings['progress'] ) ) {
+				$controls[] = 'progress';
+			}
+
+			if ( ! empty( $player_settings['current'] ) ) {
+				$controls[] = 'current-time';
+			}			
+		} else {
+			if ( ! empty( $player_settings['current'] ) ) {
+				$controls[] = 'current-time';
+			}
+			
+			if ( ! empty( $player_settings['progress'] ) ) {
+				$controls[] = 'progress';
+			}
 		}
 
 		if ( ! empty( $player_settings['duration'] ) ) {
 			$controls[] = 'duration';
+		}
+
+		if ( 'custom' === $player_settings['theme'] ) {
+			$controls[] = 'restart';
 		}
 
 		if ( ! empty( $player_settings['volume'] ) ) {
@@ -580,7 +595,7 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 		);
 
 		$attributes = array(			
-			'class' => 'aiovg-player aiovg-player-element',
+			'class' => 'aiovg-player aiovg-player-element aiovg-player-theme-' . sanitize_text_field( $player_settings['theme'] ),
 			'style' => 'padding-bottom: ' . (float) $player_settings['ratio'] . '%;',
 			'reference_id' => $this->reference_id
 		);		

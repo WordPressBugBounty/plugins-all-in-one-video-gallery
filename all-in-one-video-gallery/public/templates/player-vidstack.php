@@ -14,7 +14,8 @@ $settings = array(
 	'post_id'   => $post_id,
 	'post_type' => $post_type,
 	'player'    => array(
-		'volume' => 0.5
+		'iconUrl' => AIOVG_PLUGIN_URL . 'vendor/vidstack/plyr.svg',
+		'volume'  => 0.5
 	)
 );
 
@@ -184,6 +185,7 @@ if ( $has_chapters && 'aiovg_videos' == $post_type ) {
 }
 
 // Video Attributes
+$player_theme = ( isset( $player_settings['theme'] ) && 'custom' == $player_settings['theme'] ) ? 'custom' : 'default';
 $player_theme_color = ! empty( $player_settings['theme_color'] ) ? $player_settings['theme_color'] : '#00b2ff';
 
 $attributes = array(
@@ -252,16 +254,30 @@ if ( $has_play ) {
 	$controls[] = 'play';
 }
 
-if ( $has_current_time ) {
-	$controls[] = 'current-time';
-}
+if ( 'custom' === $player_theme ) {
+	if ( $has_progress ) {
+		$controls[] = 'progress';
+	}
 
-if ( $has_progress ) {
-	$controls[] = 'progress';
+	if ( $has_current_time ) {
+		$controls[] = 'current-time';
+	}
+} else {
+	if ( $has_current_time ) {
+		$controls[] = 'current-time';
+	}
+
+	if ( $has_progress ) {
+		$controls[] = 'progress';
+	}	
 }
 
 if ( $has_duration ) {
 	$controls[] = 'duration';
+}
+
+if ( 'custom' === $player_theme ) {
+	$controls[] = 'restart';
 }
 
 if ( $has_volume ) {
@@ -668,8 +684,49 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
         .aiovg-player .plyr a:hover,
         .aiovg-player .plyr a:focus {
             text-decoration: none;
-        } 
-		
+        }
+
+		/* Custom Theme */
+		.aiovg-player-theme-custom .plyr__control--overlaid {
+			--plyr-control-spacing: 15px;
+		}
+
+		.aiovg-player-theme-custom .plyr__control--overlaid svg {
+			--plyr-control-icon-size: 27px;
+		}		
+
+		.aiovg-player-theme-custom .plyr__controls {
+			flex-wrap: wrap;
+			justify-content: flex-start;
+		}			
+
+		.aiovg-player-theme-custom .plyr__controls .plyr__controls__item:first-child {
+			margin-right: 0;
+		}
+
+		.aiovg-player-theme-custom .plyr__controls .plyr__controls__item.plyr__progress__container {
+			position: relative;
+			order: -1;
+			flex: 1 0 100%;
+			margin-left: 0;
+			padding-left: 0;
+		}	
+
+		.aiovg-player-theme-custom .plyr__controls [data-plyr="restart"] {
+			visibility: hidden;
+		}
+
+		.aiovg-player-theme-custom .plyr__controls .plyr__spacer {
+			flex: 1 1 auto;
+			height: 100%;
+		}
+
+		@media (max-width: 767px) {
+			.aiovg-player-theme-custom .plyr__time+.plyr__time {
+				display: flex;
+			}
+		}
+
 		/* Ads */
 		.aiovg-player .plyr--playing .plyr__ads {
 			display: none;
@@ -686,6 +743,14 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 
 		.aiovg-player .plyr__progress .plyr__cues {
 			visibility: hidden;
+		}
+
+		.aiovg-player .plyr__progress .plyr__progress__marker {	
+			border: 2px solid var( --plyr-video-control-color, #ffffff );	
+			border-radius: 50%;
+			background: transparent;
+			width: 10px;
+			height: 10px;
 		}
 
 		/* Share & Embed */
@@ -909,7 +974,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 	
 	<?php do_action( 'aiovg_iframe_vidstack_player_head', $settings, $attributes, $sources, $tracks ); ?>
 </head>
-<body class="aiovg-player">
+<body class="aiovg-player aiovg-player-theme-<?php echo esc_attr( $player_theme ); ?>">
 	<?php
 	// YouTube
 	if ( isset( $sources['youtube'] ) ) {
@@ -1068,6 +1133,18 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 			// On ready.
 			player.on( 'ready', function() {
 				lastEvent = 'ready';
+
+				// Insert custom spacer
+				const restartButton = player.elements.container.querySelector( '[data-plyr="restart"]' );
+
+				if ( restartButton ) {
+					const spacer = document.createElement( 'div' );
+					spacer.className = 'plyr__controls__item plyr__spacer';
+					spacer.setAttribute( 'aria-hidden', 'true' );
+
+					// Replace the restart button with the spacer
+					restartButton.parentNode.replaceChild( spacer, restartButton );
+				}
 
 				// Share / Embed.
 				if ( settings.hasOwnProperty( 'share' ) || settings.hasOwnProperty( 'embed' ) ) {

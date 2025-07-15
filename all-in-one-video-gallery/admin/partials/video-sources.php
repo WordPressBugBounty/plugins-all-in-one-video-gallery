@@ -15,6 +15,7 @@ $quality_levels = explode( "\n", $player_settings['quality_levels'] );
 $quality_levels = array_filter( $quality_levels );
 $quality_levels = array_map( 'sanitize_text_field', $quality_levels );
 
+$type          = isset( $post_meta['type'] ) ? $post_meta['type'][0] : 'default';
 $mp4           = isset( $post_meta['mp4'] ) ? $post_meta['mp4'][0] : '';
 $has_webm      = isset( $post_meta['has_webm'] ) ? $post_meta['has_webm'][0] : 0;
 $webm          = isset( $post_meta['webm'] ) ? $post_meta['webm'][0] : '';
@@ -30,6 +31,7 @@ $dailymotion   = isset( $post_meta['dailymotion'] ) ? $post_meta['dailymotion'][
 $rumble        = isset( $post_meta['rumble'] ) ? $post_meta['rumble'][0] : '';
 $facebook      = isset( $post_meta['facebook'] ) ? $post_meta['facebook'][0] : '';
 $embedcode     = isset( $post_meta['embedcode'] ) ? $post_meta['embedcode'][0] : '';
+$download      = isset( $post_meta['download'] ) ? $post_meta['download'][0] : 1;
 
 $can_upload_to_bunny_stream = false;
 if ( aiovg_current_user_can( 'edit_aiovg_video', $post->ID ) ) {
@@ -39,8 +41,8 @@ if ( aiovg_current_user_can( 'edit_aiovg_video', $post->ID ) ) {
 $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_meta['bunny_stream_video_id'][0] : '';
 ?>
 
-<div class="aiovg-flex aiovg-flex-col aiovg-gap-6">
-	<div id="aiovg-field-mp4" class="aiovg-form-control aiovg-toggle-fields aiovg-type-default<?php if ( ! empty( $bunny_stream_video_id ) ) echo ' aiovg-is-bunny-stream'; ?>">
+<div class="aiovg-form-controls">
+	<div id="aiovg-field-mp4" class="aiovg-form-control aiovg-toggle-fields aiovg-type-default<?php if ( ! empty( $bunny_stream_video_id ) ) echo ' aiovg-is-bunny-stream'; ?>"<?php if ( 'default' !== $type ) echo ' style="display: none;"'; ?>>
 		<div class="aiovg-flex aiovg-items-center aiovg-gap-2">
 			<label for="aiovg-mp4" class="aiovg-form-label"><?php esc_html_e( 'Video File', 'all-in-one-video-gallery' ); ?></label>
 			<span class="description">(mp4, webm, ogv, m4v, mov)</span>
@@ -50,12 +52,12 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 				<?php
 				if ( ! empty( $quality_levels ) ) {
 					echo sprintf( 
-						'<div class="aiovg-quality-selector aiovg-flex aiovg-flex-col aiovg-gap-2 aiovg-margin-top"%s>', 
+						'<div class="aiovg-quality-selector aiovg-flex aiovg-flex-col aiovg-gap-3 aiovg-margin-top"%s>', 
 						( empty( $sources ) ? ' style="display: none;"' : '' ) 
 					);
 
 					echo sprintf(
-						'<div class="aiovg-flex aiovg-items-center aiovg-gap-1 aiovg-text-muted"><span class="dashicons dashicons-format-video"></span> %s (%s)</div>',
+						'<div class="aiovg-flex aiovg-items-center aiovg-gap-1 aiovg-text-muted"><span class="dashicons dashicons-video-alt3"></span> %s (%s)</div>',
 						esc_html__( 'Select a Quality Level', 'all-in-one-video-gallery' ),
 						esc_html__( 'Default quality', 'all-in-one-video-gallery' )
 					);
@@ -104,10 +106,10 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 					foreach ( $sources as $index => $source ) :	?>
 						<div class="aiovg-source aiovg-flex aiovg-flex-col aiovg-gap-2">
 							<?php
-							echo '<div class="aiovg-quality-selector aiovg-flex aiovg-flex-col aiovg-gap-2">';
+							echo '<div class="aiovg-quality-selector aiovg-flex aiovg-flex-col aiovg-gap-3">';
 
 							echo sprintf(
-								'<div class="aiovg-flex aiovg-items-center aiovg-gap-1 aiovg-text-muted"><span class="dashicons dashicons-format-video"></span> %s</div>',
+								'<div class="aiovg-flex aiovg-items-center aiovg-gap-1 aiovg-text-muted"><span class="dashicons dashicons-video-alt3"></span> %s</div>',
 								esc_html__( 'Select a Quality Level', 'all-in-one-video-gallery' )
 							);
 
@@ -145,7 +147,7 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 
 				<?php if ( count( $sources ) < ( count( $quality_levels ) - 1 ) ) : ?>
 					<a href="javascript:;" id="aiovg-add-new-source" class="aiovg-font-bold" data-limit="<?php echo count( $quality_levels ); ?>">
-						<?php esc_html_e( '[+] Add More Quality Levels', 'all-in-one-video-gallery' ); ?>
+						<?php esc_html_e( 'Add More Quality Levels', 'all-in-one-video-gallery' ); ?>
 					</a>
 				<?php endif; ?>
 			<?php endif; ?>  
@@ -153,7 +155,7 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 	</div>
 
 	<?php if ( ! empty( $webm ) ) : ?>
-		<div id="aiovg-field-webm" class="aiovg-form-control aiovg-toggle-fields aiovg-type-default">
+		<div id="aiovg-field-webm" class="aiovg-form-control aiovg-toggle-fields aiovg-type-default"<?php if ( 'default' !== $type ) echo ' style="display: none;"'; ?>>
 			<div class="aiovg-flex aiovg-items-center aiovg-gap-2">
 				<label for="aiovg-webm" class="aiovg-form-label"><?php esc_html_e( 'WebM', 'all-in-one-video-gallery' ); ?></label>
 				<span class="description">(<?php esc_html_e( 'deprecated', 'all-in-one-video-gallery' ); ?>)</span>
@@ -168,7 +170,7 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 	<?php endif; ?>
 
 	<?php if ( ! empty( $ogv ) ) : ?>
-		<div id="aiovg-field-ogv" class="aiovg-form-control aiovg-toggle-fields aiovg-type-default">
+		<div id="aiovg-field-ogv" class="aiovg-form-control aiovg-toggle-fields aiovg-type-default"<?php if ( 'default' !== $type ) echo ' style="display: none;"'; ?>>
 			<div class="aiovg-flex aiovg-items-center aiovg-gap-2">
 				<label for="aiovg-ogv" class="aiovg-form-label"><?php esc_html_e( 'OGV', 'all-in-one-video-gallery' ); ?></label>
 				<span class="description">(<?php esc_html_e( 'deprecated', 'all-in-one-video-gallery' ); ?>)</span>
@@ -182,42 +184,42 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 		</div> 
 	<?php endif; ?> 
 
-	<div class="aiovg-form-control aiovg-toggle-fields aiovg-type-adaptive">
+	<div class="aiovg-form-control aiovg-toggle-fields aiovg-type-adaptive"<?php if ( 'adaptive' !== $type ) echo ' style="display: none;"'; ?>>
 		<label for="aiovg-hls" class="aiovg-form-label"><?php esc_html_e( 'HLS URL', 'all-in-one-video-gallery' ); ?></label>
 		<input type="text" name="hls" id="aiovg-hls" class="widefat" placeholder="<?php printf( '%s: https://www.mysite.com/stream.m3u8', esc_attr__( 'Example', 'all-in-one-video-gallery' ) ); ?>" value="<?php echo esc_url( $hls ); ?>" />
 	</div>
 
-	<div class="aiovg-form-control aiovg-toggle-fields aiovg-type-adaptive">
+	<div class="aiovg-form-control aiovg-toggle-fields aiovg-type-adaptive"<?php if ( 'adaptive' !== $type ) echo ' style="display: none;"'; ?>>
 		<label for="aiovg-dash" class="aiovg-form-label"><?php esc_html_e( 'MPEG-DASH URL', 'all-in-one-video-gallery' ); ?></label>
 		<input type="text" name="dash" id="aiovg-dash" class="widefat" placeholder="<?php printf( '%s: https://www.mysite.com/stream.mpd', esc_attr__( 'Example', 'all-in-one-video-gallery' ) ); ?>" value="<?php echo esc_url( $dash ); ?>" />
 	</div>
 
-	<div id="aiovg-field-youtube" class="aiovg-form-control aiovg-toggle-fields aiovg-type-youtube">
+	<div id="aiovg-field-youtube" class="aiovg-form-control aiovg-toggle-fields aiovg-type-youtube"<?php if ( 'youtube' !== $type ) echo ' style="display: none;"'; ?>>
 		<label for="aiovg-youtube" class="aiovg-form-label"><?php esc_html_e( 'YouTube URL', 'all-in-one-video-gallery' ); ?></label>
 		<input type="text" name="youtube" id="aiovg-youtube" class="widefat" placeholder="<?php printf( '%s: https://www.youtube.com/watch?v=twYp6W6vt2U', esc_attr__( 'Example', 'all-in-one-video-gallery' ) ); ?>" value="<?php echo esc_url( $youtube ); ?>" />
 	</div>
 
-	<div id="aiovg-field-vimeo" class="aiovg-form-control aiovg-toggle-fields aiovg-type-vimeo">
+	<div id="aiovg-field-vimeo" class="aiovg-form-control aiovg-toggle-fields aiovg-type-vimeo"<?php if ( 'vimeo' !== $type ) echo ' style="display: none;"'; ?>>
 		<label for="aiovg-vimeo" class="aiovg-form-label"><?php esc_html_e( 'Vimeo URL', 'all-in-one-video-gallery' ); ?></label>
 		<input type="text" name="vimeo" id="aiovg-vimeo" class="widefat" placeholder="<?php printf( '%s: https://vimeo.com/108018156', esc_attr__( 'Example', 'all-in-one-video-gallery' ) ); ?>" value="<?php echo esc_url( $vimeo ); ?>" />
 	</div>
 
-	<div id="aiovg-field-dailymotion" class="aiovg-form-control aiovg-toggle-fields aiovg-type-dailymotion">
+	<div id="aiovg-field-dailymotion" class="aiovg-form-control aiovg-toggle-fields aiovg-type-dailymotion"<?php if ( 'dailymotion' !== $type ) echo ' style="display: none;"'; ?>>
 		<label for="aiovg-dailymotion" class="aiovg-form-label"><?php esc_html_e( 'Dailymotion URL', 'all-in-one-video-gallery' ); ?></label>
 		<input type="text" name="dailymotion" id="aiovg-dailymotion" class="widefat" placeholder="<?php printf( '%s: https://www.dailymotion.com/video/x11prnt', esc_attr__( 'Example', 'all-in-one-video-gallery' ) ); ?>" value="<?php echo esc_url( $dailymotion ); ?>" />
 	</div>
 			
-	<div id="aiovg-field-rumble" class="aiovg-form-control aiovg-toggle-fields aiovg-type-rumble">
+	<div id="aiovg-field-rumble" class="aiovg-form-control aiovg-toggle-fields aiovg-type-rumble"<?php if ( 'rumble' !== $type ) echo ' style="display: none;"'; ?>>
 		<label for="aiovg-rumble" class="aiovg-form-label"><?php esc_html_e( 'Rumble URL', 'all-in-one-video-gallery' ); ?></label>
 		<input type="text" name="rumble" id="aiovg-rumble" class="widefat" placeholder="<?php printf( '%s: https://rumble.com/val8vm-how-to-use-rumble.html', esc_attr__( 'Example', 'all-in-one-video-gallery' ) ); ?>" value="<?php echo esc_url( $rumble ); ?>" />
 	</div>
 
-	<div id="aiovg-field-facebook" class="aiovg-form-control aiovg-toggle-fields aiovg-type-facebook">
+	<div id="aiovg-field-facebook" class="aiovg-form-control aiovg-toggle-fields aiovg-type-facebook"<?php if ( 'facebook' !== $type ) echo ' style="display: none;"'; ?>>
 		<label for="aiovg-facebook" class="aiovg-form-label"><?php esc_html_e( 'Facebook URL', 'all-in-one-video-gallery' ); ?></label>
 		<input type="text" name="facebook" id="aiovg-facebook" class="widefat" placeholder="<?php printf( '%s: https://www.facebook.com/facebook/videos/10155278547321729', esc_attr__( 'Example', 'all-in-one-video-gallery' ) ); ?>" value="<?php echo esc_url( $facebook ); ?>" />
 	</div>
 
-	<div id="aiovg-field-embedcode" class="aiovg-form-control aiovg-toggle-fields aiovg-type-embedcode">
+	<div id="aiovg-field-embedcode" class="aiovg-form-control aiovg-toggle-fields aiovg-type-embedcode"<?php if ( 'embedcode' !== $type ) echo ' style="display: none;"'; ?>>
 		<label for="aiovg-embedcode" class="aiovg-form-label"><?php esc_html_e( 'Player Code', 'all-in-one-video-gallery' ); ?></label>
 		<textarea name="embedcode" id="aiovg-embedcode" class="widefat" rows="6" placeholder="<?php esc_attr_e( 'Enter your Player Code', 'all-in-one-video-gallery' ); ?>"><?php echo esc_textarea( $embedcode ); ?></textarea>
 		<p class="description">
@@ -231,15 +233,22 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 		</p>
 	</div>
 
+	<div id="aiovg-field-download" class="aiovg-form-control aiovg-toggle-fields aiovg-type-default"<?php if ( 'default' !== $type ) echo ' style="display: none;"'; ?>>
+		<label>
+			<input type="checkbox" name="download" id="aiovg-download" value="1" <?php checked( $download, 1 ); ?> />
+			<?php esc_html_e( 'Check this option to allow users to download this video.', 'all-in-one-video-gallery' ); ?>
+		</label>
+	</div>
+
 	<?php do_action( 'aiovg_admin_add_video_source_fields', $post->ID ); ?>
 
 	<template id="aiovg-template-source">
 		<div class="aiovg-source aiovg-flex aiovg-flex-col aiovg-gap-2">
 			<?php
-			echo '<div class="aiovg-quality-selector aiovg-flex aiovg-flex-col aiovg-gap-2">';
+			echo '<div class="aiovg-quality-selector aiovg-flex aiovg-flex-col aiovg-gap-3">';
 
 			echo sprintf(
-				'<div class="aiovg-flex aiovg-items-center aiovg-gap-1 aiovg-text-muted"><span class="dashicons dashicons-format-video"></span> %s</div>',
+				'<div class="aiovg-flex aiovg-items-center aiovg-gap-1 aiovg-text-muted"><span class="dashicons dashicons-video-alt3"></span> %s</div>',
 				esc_html__( 'Select a Quality Level', 'all-in-one-video-gallery' )
 			);
 

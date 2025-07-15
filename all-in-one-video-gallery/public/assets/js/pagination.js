@@ -149,7 +149,9 @@
 	 */
 	$(function() {
 		// Register custom element
-		customElements.define( 'aiovg-pagination', AIOVGPaginationElement );
+		if ( ! customElements.get( 'aiovg-pagination' ) ) {
+			customElements.define( 'aiovg-pagination', AIOVGPaginationElement );
+		}
 	});
 
 })( jQuery );

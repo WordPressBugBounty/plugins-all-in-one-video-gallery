@@ -557,6 +557,27 @@ function aiovg_extract_player_attributes( $attributes = array() ) {
 }
 
 /**
+ * Format a large numeric count (e.g., views, likes) in YouTube style and support translations.
+ *
+ * @since  1.0.0
+ * @param  int|float $number The number to format.
+ * @return string            Formatted number with localized suffix.
+ */
+function aiovg_format_count( $number ) {
+	if ( $number >= 1000000000 ) {
+		$formatted = sprintf( _x( '%sB', 'billion short form', 'all-in-one-video-gallery' ), round( $number / 1000000000, 1 ) );
+	} elseif ( $number >= 1000000 ) {
+		$formatted = sprintf( _x( '%sM', 'million short form', 'all-in-one-video-gallery' ), round( $number / 1000000, 1 ) );
+	} elseif ( $number >= 1000 ) {
+		$formatted = sprintf( _x( '%sK', 'thousand short form', 'all-in-one-video-gallery' ), round( $number / 1000, 1 ) );
+	} else {
+		$formatted = number_format_i18n( $number );
+	}
+
+	return apply_filters( 'aiovg_format_count', $formatted, $number );
+}
+
+/**
  * Get attachment ID of the given URL.
  * 
  * @since      1.0.0
@@ -753,6 +774,7 @@ function aiovg_get_default_settings() {
 				'title'    => 'title',
 				'category' => 'category',
 				'tag'      => 'tag',
+				'date'     => 'date',
 				'views'    => 'views',
 				'duration' => 'duration'
 			),
@@ -810,7 +832,8 @@ function aiovg_get_default_settings() {
 			)
 		),					
 		'aiovg_permalink_settings' => array(
-			'video' => $video_page_slug
+			'video'              => $video_page_slug,
+			'video_archive_page' => -1
 		),
 		'aiovg_restrictions_settings' => array(
 			'enable_restrictions'         => 0,
@@ -1597,6 +1620,13 @@ function aiovg_get_shortcode_fields() {
 							'description' => '',
 							'type'        => 'checkbox',
 							'value'       => isset( $videos_settings['display']['dislikes'] )
+						),
+						array(
+							'name'        => 'show_comments',
+							'label'       => __( 'Comments Count', 'all-in-one-video-gallery' ),
+							'description' => '',
+							'type'        => 'checkbox',
+							'value'       => isset( $videos_settings['display']['comments'] )
 						),		
 						array(
 							'name'        => 'show_duration',
@@ -1684,6 +1714,13 @@ function aiovg_get_shortcode_fields() {
 							'name'        => 'filters_sort',
 							'label'       => __( 'Sort By Dropdown', 'all-in-one-video-gallery' ),
 							'description' => __( 'Enable a dropdown to let visitors sort videos by options like date, title, or popularity.', 'all-in-one-video-gallery' ),
+							'type'        => 'checkbox',
+							'value'       => 0
+						),
+						array(
+							'name'        => 'filters_reset_button',
+							'label'       => __( 'Reset Button', 'all-in-one-video-gallery' ),
+							'description' => __( 'Show a reset button to allow visitors to clear all selected filters.', 'all-in-one-video-gallery' ),
 							'type'        => 'checkbox',
 							'value'       => 0
 						),
@@ -1912,6 +1949,13 @@ function aiovg_get_shortcode_fields() {
 						array(
 							'name'        => 'search_button',
 							'label'       => __( 'Search Button', 'all-in-one-video-gallery' ),
+							'description' => '',
+							'type'        => 'checkbox',
+							'value'       => 1
+						),
+						array(
+							'name'        => 'reset_button',
+							'label'       => __( 'Reset Button', 'all-in-one-video-gallery' ),
 							'description' => '',
 							'type'        => 'checkbox',
 							'value'       => 1

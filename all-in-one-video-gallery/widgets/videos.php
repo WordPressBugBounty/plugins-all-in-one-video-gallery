@@ -122,39 +122,59 @@ class AIOVG_Widget_Videos extends WP_Widget {
 			$query['s'] = sanitize_text_field( $attributes['search_query'] );
 		}
 
-		if ( isset( $attributes['exclude'] ) && ! empty( $attributes['exclude'] ) ) { // Exclude video IDs
-			$query['post__not_in'] = is_array( $attributes['exclude'] ) ? array_map( 'intval', $attributes['exclude'] ) : array_map( 'intval', explode( ',', $attributes['exclude'] ) );
+		if ( isset( $attributes['exclude'] ) ) { // Exclude video IDs
+			$exclude = is_array( $attributes['exclude'] ) ? array_map( 'intval', $attributes['exclude'] ) : array_map( 'intval', explode( ',', $attributes['exclude'] ) );
+			$exclude = array_filter( $exclude );
+
+			if ( ! empty( $exclude ) ) {
+				$query['post__not_in'] = $exclude;
+			}
 		}
 		
 		// Taxonomy Parameters
 		$tax_queries = array();
 
-		if ( ! empty( $attributes['category'] ) ) { // Category
-			$tax_queries[] = array(
-				'taxonomy'         => 'aiovg_categories',
-				'field'            => 'term_id',
-				'terms'            => is_array( $attributes['category'] ) ? array_map( 'intval', $attributes['category'] ) : array_map( 'intval', explode( ',', $attributes['category'] ) ),
-				'include_children' => false
-			);
+		if ( isset( $attributes['category'] ) ) { // Category
+			$categories = is_array( $attributes['category'] ) ? array_map( 'intval', $attributes['category'] ) : array_map( 'intval', explode( ',', $attributes['category'] ) );
+			$categories = array_filter( $categories );
+
+			if ( ! empty( $categories ) ) {
+				$tax_queries[] = array(
+					'taxonomy'         => 'aiovg_categories',
+					'field'            => 'term_id',
+					'terms'            => $categories,
+					'include_children' => false
+				);
+			}
 		}
 
-		if ( isset( $attributes['category_exclude'] ) && ! empty( $attributes['category_exclude'] ) ) { // Exclude categories
-			$tax_queries[] = array(
-				'taxonomy'         => 'aiovg_categories',
-				'field'            => 'term_id',
-				'terms'            => is_array( $attributes['category_exclude'] ) ? array_map( 'intval', $attributes['category_exclude'] ) : array_map( 'intval', explode( ',', $attributes['category_exclude'] ) ),
-				'include_children' => false,
-				'operator'         => 'NOT IN'
-			);
+		if ( isset( $attributes['category_exclude'] ) ) { // Exclude categories
+			$category_exclude = is_array( $attributes['category_exclude'] ) ? array_map( 'intval', $attributes['category_exclude'] ) : array_map( 'intval', explode( ',', $attributes['category_exclude'] ) );
+			$category_exclude = array_filter( $category_exclude );
+
+			if ( ! empty( $category_exclude ) ) {
+				$tax_queries[] = array(
+					'taxonomy'         => 'aiovg_categories',
+					'field'            => 'term_id',
+					'terms'            => $category_exclude,
+					'include_children' => false,
+					'operator'         => 'NOT IN'
+				);
+			}
 		}
 		
-		if ( ! empty( $attributes['tag'] ) ) { // Tag
-			$tax_queries[] = array(
-				'taxonomy'         => 'aiovg_tags',
-				'field'            => 'term_id',
-				'terms'            => is_array( $attributes['tag'] ) ? array_map( 'intval', $attributes['tag'] ) : array_map( 'intval', explode( ',', $attributes['tag'] ) ),
-				'include_children' => false
-			);
+		if ( isset( $attributes['tag'] ) ) { // Tag
+			$tags = is_array( $attributes['tag'] ) ? array_map( 'intval', $attributes['tag'] ) : array_map( 'intval', explode( ',', $attributes['tag'] ) );
+			$tags = array_filter( $tags );
+
+			if ( ! empty( $tags ) ) {
+				$tax_queries[] = array(
+					'taxonomy'         => 'aiovg_tags',
+					'field'            => 'term_id',
+					'terms'            => $tags,
+					'include_children' => false
+				);
+			}
 		}
 
 		$count_tax_queries = count( $tax_queries );
@@ -378,8 +398,12 @@ class AIOVG_Widget_Videos extends WP_Widget {
 			if ( isset( $_GET['ca'] ) ) {
 				$attributes['category'] = $_GET['ca'];
 			}
-	
-			if ( ! isset( $_GET['ca'] ) || ( isset( $_GET['ca'] ) && empty( $_GET['ca'] ) ) ) {
+
+			$categories = isset( $_GET['ca'] ) ? (array) $_GET['ca'] : array();
+			$categories = array_map( 'intval', $categories );
+			$categories = array_filter( $categories );
+
+			if ( empty( $categories ) ) {
 				$categories_excluded = get_terms( array(
 					'taxonomy'   => 'aiovg_categories',
 					'hide_empty' => false,

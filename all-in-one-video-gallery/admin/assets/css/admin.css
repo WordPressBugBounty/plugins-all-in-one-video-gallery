@@ -288,15 +288,15 @@
 /* Metabox UI (Tabs + Accordion) */
 .aiovg-metabox-ui .aiovg-tabs {
 	display: flex;
-	flex-wrap: wrap;	
+	flex-wrap: wrap;
+	border-bottom: 1px solid #dcdcde;	
 	background: #f6f7f7;
-	padding: 0 1em;
 }
 
 .aiovg-metabox-ui .aiovg-tab {
 	display: flex;	
 	align-items: center;
-	gap: 0.25em;
+	gap: 0.5em;
 	transition: all 0.2s ease;
 	border: none;
 	border-bottom: 3px solid transparent;
@@ -304,6 +304,7 @@
 	cursor: pointer;
 	padding: 1em 1.5em;	
 	color: #5a6065;
+	font-weight: 500;
 }
 
 .aiovg-metabox-ui .aiovg-tab.aiovg-active {	
@@ -313,22 +314,31 @@
 
 .aiovg-metabox-ui .aiovg-accordion {
 	border-top: 1px solid #dcdcde;
-	overflow: hidden;
+}
+
+.aiovg-metabox-ui .aiovg-accordion:first-child {
+	border-top: none;
 }
 
 .aiovg-metabox-ui .aiovg-accordion .aiovg-accordion-header {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
+	gap: 0.5em;
 	outline: none;	
 	border: none;
 	background: none;
 	cursor: pointer;
 	padding: 1em;
 	width: 100%;
-	color: #3c434a;
+	color: #2271b1;
 	font-size: 1.1em;
 	font-weight: 500;	
+}
+
+.aiovg-metabox-ui .aiovg-accordion[data-collapsible="false"] .aiovg-accordion-header {
+	pointer-events: none;
+	border-bottom: 1px solid #dcdcde;
+	background: #f6f7f7;
 }
 
 .aiovg-metabox-ui .aiovg-accordion .aiovg-accordion-header:hover {
@@ -345,6 +355,7 @@
 	align-items: center;
 	justify-content: center;
 	transition: transform 0.2s ease;
+	margin-left: auto;
 	font-size: 1.2em;
 }
 
@@ -362,14 +373,13 @@
 	display: block;
 }
 
-.aiovg-metabox-ui .aiovg-grid {
-	display: grid;
-	gap: 1.5em;
+.aiovg-metabox-ui .description {
+	margin: 0;
 }
 
-@media (min-width: 783px) {
-	.aiovg-metabox-ui .aiovg-col-2 {
-		grid-template-columns: repeat( 2, 1fr );
+@media screen and (max-width: 599px) {
+	.aiovg-metabox-ui .aiovg-tabs {
+		justify-content: space-evenly;
 	}
 }
 
@@ -438,6 +448,12 @@
 }
 
 /* Form */
+.aiovg .aiovg-form-controls {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5em;
+}
+
 .aiovg .aiovg-form-control {
 	display: flex;
 	flex-direction: column;
@@ -446,6 +462,17 @@
 
 .aiovg .aiovg-form-label {
 	font-weight: 500;
+}
+
+.aiovg .aiovg-form-grid {
+	display: grid;
+	gap: 1.5em;
+}
+
+@media screen and (min-width: 783px) {
+	.aiovg .aiovg-form-grid {
+		grid-template-columns: repeat( 2, 1fr );
+	}
 }
 
 /* Checklist */
@@ -489,17 +516,6 @@
 	}
 }
 
-/* Media Uploader */
-.aiovg .aiovg-media-uploader {
-	display: flex;
-	gap: 0.25em;
-	align-items: center;
-}
-
-.aiovg .aiovg-media-uploader button {
-	margin: 0;
-}
-
 /* Table */
 .aiovg .aiovg-table th label {
 	display: block;
@@ -516,6 +532,68 @@
 		border: 1px solid #dcdcde;
 		background-color: #f6f7f7;
 		padding: 1em;
+	}
+}
+
+/* Media Uploader */
+.aiovg .aiovg-media-uploader {
+	display: flex;
+	gap: 0.25em;
+	align-items: center;
+}
+
+.aiovg .aiovg-media-uploader button {
+	margin: 0;
+}
+
+/* Repeatable Fields */
+.aiovg .aiovg-repeatable-table {
+	margin-top: 0;
+	border-collapse: separate !important;
+    border-spacing: 2px;
+}
+
+.aiovg .aiovg-repeatable-table > tbody > tr {
+	background-color: #f6f7f7;
+}
+
+.aiovg .aiovg-repeatable-table > tbody > tr:nth-child(even) {
+	background: #fdfdfd;
+}
+
+.aiovg .aiovg-repeatable-fields {
+	display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 0.5em;
+}
+
+.aiovg .aiovg-repeatable-fields label {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	gap: 0.25em;
+	padding: 0;
+	font-size: 90%;
+}
+
+.aiovg .aiovg-repeatable-fields button {
+	margin: 0;
+}
+
+.aiovg .aiovg-sort-handle {
+	cursor: move;
+	text-align: center;
+	color: #2271b1;
+}
+
+@media screen and (max-width: 782px) {
+	.aiovg .aiovg-repeatable-fields {
+		padding: 1em;
+	}	
+
+	.aiovg .aiovg-sort-handle .dashicons::before {
+		content: "\f11c";
 	}
 }
 
@@ -578,6 +656,7 @@
 
 .driver-popover.driverjs-theme .driver-popover-title {
 	color: #135e96;
+	font-weight: 500;
 }
 
 .driver-popover.driverjs-theme .driver-popover-navigation-btns button {	
@@ -799,8 +878,16 @@
 	background-color: #fdfdfd;
 }
 
-#aiovg-tab-content-general .aiovg-accordion[data-collapsible="false"] .aiovg-form-label {
+#aiovg-tab-content-general .aiovg-accordion[data-collapsible="false"] .aiovg-accordion-body .aiovg-form-label {
 	font-size: 1.1em;
+}
+
+#aiovg-tab-content-general .aiovg-quality-selector label {
+	font-size: 90%;
+}
+
+#aiovg-add-new-source {
+	align-self: flex-start;
 }
 
 /* Bunny Stream */
@@ -864,85 +951,16 @@
 	padding: 1em;
 }
 
-/* Tables */
-#aiovg-video-metabox .aiovg-table {
-	margin-top: 0;
-}
-
-#aiovg-video-metabox .aiovg-table > tbody > :nth-child(even) {
-	background: #fff;
-}
-
-#aiovg-video-metabox .aiovg-table tr {
-	border-bottom: 1px solid #dcdcde;
-}
-
-#aiovg-video-metabox .aiovg-table .aiovg-handle {
-	cursor: move;
-	text-align: center;
-}
-
-@media screen and (max-width: 782px) {
-	#aiovg-video-metabox .aiovg-table td {
-		padding: 1em;
-	}
-
-	#aiovg-video-metabox .aiovg-table .aiovg-handle .dashicons::before {
-		content: "\f11c";
-	}
-}
-
 /* Tracks */
-#aiovg-tracks .aiovg-track {
-	display: flex;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    gap: 0.5em;
-}
-
-#aiovg-tracks .aiovg-track > div:not(.aiovg-track-buttons) {
-	display: flex;
-	flex-direction: column;
-	gap: 0.25em;
-}
-
-#aiovg-tracks .aiovg-track .aiovg-track-src {
+#aiovg-tracks .aiovg-track-src {
 	flex-basis: 240px;
 	flex-grow: 3;
 }
 
-#aiovg-tracks .aiovg-track .aiovg-track-label {
+#aiovg-tracks .aiovg-track-label,
+#aiovg-tracks .aiovg-track-srclang {
 	flex-basis: 80px;
 	flex-grow: 1;
-}
-
-#aiovg-tracks .aiovg-track .aiovg-track-srclang {
-	flex-basis: 80px;
-	flex-grow: 1;
-}
-
-#aiovg-tracks .aiovg-track button {
-	margin: 0;
-}
-
-/* Chapters */
-#aiovg-chapters .aiovg-chapter {
-	display: flex;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    gap: 0.5em;
-}
-
-#aiovg-chapters .aiovg-chapter .aiovg-chapter-label,
-#aiovg-chapters .aiovg-chapter .aiovg-chapter-time {
-	display: flex;
-	flex-direction: column;
-	flex-grow: 1;
-	gap: 0.25em;	
-}
-
-#aiovg-chapters .aiovg-chapter button {
-	margin: 0;
 }
 
 /* Categories Metabox */
@@ -965,10 +983,6 @@
  *
  *--------------------------------------------------------------------------------------------*/
 #aiovg-player-settings.aiovg-player-videojs tr.theme_color {
-	display: none;
-}
-
-#aiovg-player-settings.aiovg-player-vidstack tr.theme {
 	display: none;
 }
 

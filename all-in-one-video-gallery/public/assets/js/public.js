@@ -144,7 +144,7 @@
 			// Submit the form
             var submitForm = function() {
 				$form.submit();
-			}
+			};
 
 			// Attach events to inputs and selects
 			$form.find( 'input[name="vi"]' ).on( 'blur', submitForm );
@@ -154,16 +154,43 @@
 
 		// Search Form: Ajax
         $( '.aiovg-search-form-mode-ajax' ).each(function() {
-            var $this = $( this );
-			var $el   = $this.closest( '.aiovg-videos-filters-wrapper' );
-            var $form = $this.find( 'form' );			
+            var $this    = $( this );
+			var $el      = $this.closest( '.aiovg-videos-filters-wrapper' );
+            var $form    = $this.find( 'form' );
+			var template = $this.hasClass( 'aiovg-search-form-template-compact' ) ? 'compact' : null;			
 
             // Base parameters to send with request
             var params = $el.data( 'params' ) || {};
             params.action = 'aiovg_load_videos';
             params.security = aiovg_public.ajax_nonce;
 
-            // Function to fetch videos via AJAX
+			// Check if the form values has been changed
+			var getSortedSerializedArray = function( form ) {
+				return $form.serializeArray()
+					.map( field => [ field.name, field.value ] )
+					.sort( ( a, b ) => {
+						if ( a[0] === b[0] ) return a[1].localeCompare( b[1] );
+						return a[0].localeCompare( b[0] );
+					});
+			}
+
+			var isFormChanged = function() {
+				var currentData = getSortedSerializedArray( $form );
+
+				if ( defaultData.length !== currentData.length ) return true;
+
+				for ( var i = 0; i < defaultData.length; i++ ) {
+					if ( defaultData[i][0] !== currentData[i][0] ||	defaultData[i][1] !== currentData[i][1]	) {
+						return true;
+					}
+				}
+
+				return false;
+			}
+
+			var defaultData = getSortedSerializedArray( $form );
+
+            // Fetch videos via AJAX
             var fetchVideos = function( event ) {
 				if ( event ) {
 					event.preventDefault();
@@ -195,26 +222,36 @@
                 });
 
                 // Categories
-                var categories = [];
+				if ( $form.find( '.aiovg-field-category' ).length > 0 ) {
+					var categories = [];
 
-                $form.find( '.aiovg-field-category input[type="checkbox"]:checked' ).each(function() {
-                    categories.push( $( this ).val() );
-                });
+					$form.find( '.aiovg-field-category input[type="checkbox"]:checked' ).each(function() {
+						categories.push( $( this ).val() );
+					});
 
-				if ( categories.length ) {
-                    requestData.category = categories;
-                }
+					requestData.category = categories;
+				}
 
 				// Tags
-                var tags = [];
+				if ( $form.find( '.aiovg-field-tag' ).length > 0 ) {
+					var tags = [];
 
-                $form.find( '.aiovg-field-tag input[type="checkbox"]:checked' ).each(function() {
-                    tags.push( $( this ).val() );
-                });                
+					$form.find( '.aiovg-field-tag input[type="checkbox"]:checked' ).each(function() {
+						tags.push( $( this ).val() );
+					});                
 
-                if ( tags.length ) {
-                    requestData.tag = tags;
-                }
+					requestData.tag = tags;
+				}
+
+				// Toggle buttons visibility
+				var showResetButton = isFormChanged();
+
+				if ( 'compact' === template ) {
+					$form.find( '.aiovg-button-submit' ).prop( 'hidden', showResetButton );
+					$form.find( '.aiovg-button-reset' ).prop( 'hidden', ! showResetButton );
+				} else {
+					$form.find( '.aiovg-field-reset' ).prop( 'hidden', ! showResetButton );
+				}
 
                 // Perform the AJAX request
                 $.post( aiovg_public.ajax_url, requestData, function( response ) {					
@@ -231,10 +268,24 @@
             };
 
             // Attach events to inputs and selects
-            $form.find( 'input[name="vi"]' ).on( 'blur', fetchVideos );
-            $form.find( 'input[type="checkbox"]' ).on( 'change', fetchVideos );
-            $form.find( 'select' ).on( 'change', fetchVideos );
+            $form.find( 'input[name="vi"]' ).on( 'blur', fetchVideos );            
+            $form.find( 'select' ).on( 'change', fetchVideos );			
 			$form.on( 'submit', fetchVideos );
+
+			var $checkboxes = $form.find( 'input[type="checkbox"]' );			
+			$checkboxes.on( 'change', fetchVideos );
+
+			$form.find( '.aiovg-button-reset' ).on( 'click', function( event ) {
+                event.preventDefault();
+
+                $form[0].reset();
+				
+				$checkboxes.off( 'change', fetchVideos );
+				$checkboxes.trigger( 'change' );
+				$checkboxes.on( 'change', fetchVideos );
+
+				fetchVideos();
+            }).removeAttr( 'onclick' );
         });			
 		
 	});

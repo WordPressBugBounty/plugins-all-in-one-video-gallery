@@ -9,6 +9,47 @@
 	text-decoration: none;
 }
 
+/* Custom Theme */
+.aiovg-player-theme-custom .plyr__control--overlaid {
+	--plyr-control-spacing: 15px;
+}
+
+.aiovg-player-theme-custom .plyr__control--overlaid svg {
+	--plyr-control-icon-size: 27px;
+}		
+
+.aiovg-player-theme-custom .plyr__controls {
+	flex-wrap: wrap;
+	justify-content: flex-start;
+}			
+
+.aiovg-player-theme-custom .plyr__controls .plyr__controls__item:first-child {
+	margin-right: 0;
+}
+
+.aiovg-player-theme-custom .plyr__controls .plyr__controls__item.plyr__progress__container {
+	position: relative;
+	order: -1;
+	flex: 1 0 100%;
+	margin-left: 0;
+	padding-left: 0;
+}	
+
+.aiovg-player-theme-custom .plyr__controls [data-plyr="restart"] {
+	visibility: hidden;
+}
+
+.aiovg-player-theme-custom .plyr__controls .plyr__spacer {
+	flex: 1 1 auto;
+	height: 100%;
+}
+
+@media (max-width: 767px) {
+	.aiovg-player-theme-custom .plyr__time+.plyr__time {
+		display: flex;
+	}
+}
+
 /* Ads */
 .aiovg-player .plyr--playing .plyr__ads {
 	display: none;
@@ -25,6 +66,14 @@
 
 .aiovg-player .plyr__progress .plyr__cues {
 	visibility: hidden;
+}
+
+.aiovg-player .plyr__progress .plyr__progress__marker {	
+	border: 2px solid var( --plyr-video-control-color, #ffffff );	
+	border-radius: 50%;
+	background: transparent;
+	width: 10px;
+	height: 10px;
 }
 
 /* Share & Embed */

@@ -13,7 +13,7 @@ $access_control   = isset( $post_meta['access_control'] ) ? $post_meta['access_c
 $restricted_roles = isset( $post_meta['restricted_roles'] ) ? $post_meta['restricted_roles'][0] : array();
 ?>
 
-<div class="aiovg-flex aiovg-flex-col aiovg-gap-6">
+<div class="aiovg-form-controls">
 	<div id="aiovg-field-access_control" class="aiovg-form-control">
 		<label for="aiovg-access_control" class="aiovg-form-label"><?php esc_html_e( 'Who Can Access this Video?', 'all-in-one-video-gallery' ); ?></label>
 		
