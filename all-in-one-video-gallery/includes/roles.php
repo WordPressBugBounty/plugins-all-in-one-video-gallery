@@ -46,17 +46,12 @@ class AIOVG_Roles {
 			$wp_roles->add_cap( 'administrator', 'manage_aiovg_options' );
 			
 			// Add the "editor" capabilities
-			$wp_roles->add_cap( 'editor', 'edit_aiovg_videos' );			
-			$wp_roles->add_cap( 'editor', 'edit_others_aiovg_videos' );			
-			$wp_roles->add_cap( 'editor', 'publish_aiovg_videos' );			
-			$wp_roles->add_cap( 'editor', 'read_private_aiovg_videos' );	
-			$wp_roles->add_cap( 'editor', 'delete_aiovg_videos' );			
-			$wp_roles->add_cap( 'editor', 'delete_private_aiovg_videos' );
+			$wp_roles->add_cap( 'editor', 'edit_aiovg_videos' );						
+			$wp_roles->add_cap( 'editor', 'publish_aiovg_videos' );
+			$wp_roles->add_cap( 'editor', 'delete_aiovg_videos' );
 			$wp_roles->add_cap( 'editor', 'delete_published_aiovg_videos' );
-			$wp_roles->add_cap( 'editor', 'delete_others_aiovg_videos' );
-			$wp_roles->add_cap( 'editor', 'edit_private_aiovg_videos' );
 			$wp_roles->add_cap( 'editor', 'edit_published_aiovg_videos' );
-			
+
 			// Add the "author" capabilities
 			$wp_roles->add_cap( 'author', 'edit_aiovg_videos' );						
 			$wp_roles->add_cap( 'author', 'publish_aiovg_videos' );
@@ -195,15 +190,10 @@ class AIOVG_Roles {
 			$wp_roles->remove_cap( 'administrator', 'manage_aiovg_options' );
 			
 			// Remove the "editor" capabilities
-			$wp_roles->remove_cap( 'editor', 'edit_aiovg_videos' );			
-			$wp_roles->remove_cap( 'editor', 'edit_others_aiovg_videos' );			
-			$wp_roles->remove_cap( 'editor', 'publish_aiovg_videos' );			
-			$wp_roles->remove_cap( 'editor', 'read_private_aiovg_videos' );
-			$wp_roles->remove_cap( 'editor', 'delete_aiovg_videos' );			
-			$wp_roles->remove_cap( 'editor', 'delete_private_aiovg_videos' );
+			$wp_roles->remove_cap( 'editor', 'edit_aiovg_videos' );						
+			$wp_roles->remove_cap( 'editor', 'publish_aiovg_videos' );
+			$wp_roles->remove_cap( 'editor', 'delete_aiovg_videos' );
 			$wp_roles->remove_cap( 'editor', 'delete_published_aiovg_videos' );
-			$wp_roles->remove_cap( 'editor', 'delete_others_aiovg_videos' );
-			$wp_roles->remove_cap( 'editor', 'edit_private_aiovg_videos' );
 			$wp_roles->remove_cap( 'editor', 'edit_published_aiovg_videos' );
 			
 			// Remove the "author" capabilities

@@ -66,7 +66,7 @@
         $meta['views'] = sprintf(
             '%s<span class="aiovg-views-count">%s</span><span class="aiovg-views-label">%s</span>',
             $icon,
-            esc_html( aiovg_format_count( $views_count ) ),
+            esc_html( number_format_i18n( $views_count ) ),
             esc_html__( 'views', 'all-in-one-video-gallery' )
         );
     }

@@ -275,6 +275,9 @@ class AIOVG_Admin {
 
 			// Delete the unwanted plugin options
 			delete_option( 'aiovg_image_settings' );
+
+			// Remove the unfiltered_html capability from editors
+			aiovg_remove_unfiltered_html_capability_from_editors();
 		}
 	}		
 

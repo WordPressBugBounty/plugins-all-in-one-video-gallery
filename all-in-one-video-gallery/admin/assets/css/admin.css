@@ -338,16 +338,16 @@
 .aiovg-metabox-ui .aiovg-accordion[data-collapsible="false"] .aiovg-accordion-header {
 	pointer-events: none;
 	border-bottom: 1px solid #dcdcde;
-	background: #f6f7f7;
+	background: #fdfdfd;
 }
 
 .aiovg-metabox-ui .aiovg-accordion .aiovg-accordion-header:hover {
-	background: #f6f7f7;
+	background: #fdfdfd;
 }
 
 .aiovg-metabox-ui .aiovg-accordion .aiovg-accordion-header.aiovg-open {
 	border-bottom: 1px solid #dcdcde;
-	background: #f6f7f7;
+	background: #fdfdfd;
 }
 
 .aiovg-metabox-ui .aiovg-accordion .aiovg-accordion-header .dashicons {
@@ -469,7 +469,24 @@
 	gap: 1.5em;
 }
 
+.aiovg .aiovg-input-wrap {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+	width: 100%;
+}
+
 @media screen and (min-width: 783px) {
+	.aiovg-form-horizontal .aiovg-form-control {
+		flex-direction: row;
+		align-items: flex-start;
+	}
+
+	.aiovg-form-horizontal .aiovg-form-label {
+		flex-shrink: 0;
+		width: 180px;
+	}
+
 	.aiovg .aiovg-form-grid {
 		grid-template-columns: repeat( 2, 1fr );
 	}
@@ -882,7 +899,7 @@
 	font-size: 1.1em;
 }
 
-#aiovg-tab-content-general .aiovg-quality-selector label {
+#aiovg-field-mp4 .aiovg-quality-selector label {
 	font-size: 90%;
 }
 

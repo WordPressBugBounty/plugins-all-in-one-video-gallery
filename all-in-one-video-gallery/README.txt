@@ -6,7 +6,7 @@ Tags: video player, video gallery, youtube gallery, vimeo gallery, live stream
 Requires at least: 6.3
 Tested up to: 6.8
 Requires PHP: 5.6.20
-Stable tag: 4.4.0
+Stable tag: 4.5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -152,21 +152,26 @@ Also, the videos from third-party services like "YouTube", "Vimeo", "Dailymotion
 
 == Changelog ==
 
+= 4.5.1 =
+
+* Security Hardening: Removed "unfiltered_html" capability from Editor role to reduce potential risk e.g. Stored XSS in certain configurations. Thanks to Mohamad Nour Almujarkesh for reporting.
+* Tweak: The previous version forced a short number format, which isn't supported in regions like Europe. This update adds an option to choose the number format, with the full format now set as the default.
+* Fix: Various minor bug fixes and performance improvements.
+
 = 4.4.0 =
 
-Security Fix: Addressed multiple security issues to enhance overall plugin security.
-New: Added an option to display the comments count in the grid view, with a link to the comment form in the player view.
-New: Introduced a setting to configure a custom videos archive page for better SEO.
-New: Added a reset button to allow users to clear filters easily.
-New: Introduced a developer filter hook "the_aiovg_socialshare_buttons" to customize the social sharing buttons output.
-Tweak: Restricted back-end access for the Editor role due to the "unfiltered_html" capability.
-Tweak: Improved the HTML output for video thumbnails.
-Tweak: Added a custom theme option for the Vidstack player.
-Tweak: Enhanced the front-end playlist layout for better usability.
-Tweak: Updated the Freemius SDK to version 2.12.1.
-Fix: Resolved an issue where Vimeo tags were not imported when using Video Automations to import from Vimeo folders.
-Fix: Fixed compatibility issues with the Oxygen page builder.
-Fix: Various minor bug fixes and performance improvements.
+* New: Added an option to display the comments count in the grid view, with a link to the comment form in the player view.
+* New: Introduced a setting to configure a custom videos archive page for better SEO.
+* New: Added a reset button to allow users to clear filters easily.
+* New: Introduced a developer filter hook "the_aiovg_socialshare_buttons" to customize the social sharing buttons output.
+* Tweak: Restricted back-end access for the Editor role due to the "unfiltered_html" capability.
+* Tweak: Improved the HTML output for video thumbnails.
+* Tweak: Added a custom theme option for the Vidstack player.
+* Tweak: Enhanced the front-end playlist layout for better usability.
+* Tweak: Updated the Freemius SDK to version 2.12.1.
+* Fix: Resolved an issue where Vimeo tags were not imported when using Video Automations to import from Vimeo folders.
+* Fix: Fixed compatibility issues with the Oxygen page builder.
+* Fix: Various minor bug fixes and performance improvements.
 
 = 4.3.6 =
 
@@ -544,6 +549,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 4.4.0 =
+= 4.5.1 =
 
-Introduces several bug fixes & enhancements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)
+Introduces several new features, bug fixes & enhancements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

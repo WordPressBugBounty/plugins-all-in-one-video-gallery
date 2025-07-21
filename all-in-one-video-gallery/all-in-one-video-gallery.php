@@ -11,7 +11,7 @@
  * Plugin Name:     All-in-One Video Gallery
  * Plugin URI:      https://plugins360.com/all-in-one-video-gallery/
  * Description:     An ultimate video player and video gallery plugin – no coding required. Suitable for YouTubers, Video Bloggers, Course Creators, Podcasters, Sales & Marketing Professionals, and anyone using video on a website.
- * Version:         4.4.0
+ * Version:         4.5.1
  * Author:          Team Plugins360
  * Author URI:      https://plugins360.com
  * License:         GPL-2.0+
@@ -68,7 +68,7 @@ if ( !function_exists( 'aiovg_fs' ) ) {
 }
 // The current version of the plugin
 if ( !defined( 'AIOVG_PLUGIN_VERSION' ) ) {
-    define( 'AIOVG_PLUGIN_VERSION', '4.4.0' );
+    define( 'AIOVG_PLUGIN_VERSION', '4.5.1' );
 }
 // The unique identifier of the plugin
 if ( !defined( 'AIOVG_PLUGIN_SLUG' ) ) {

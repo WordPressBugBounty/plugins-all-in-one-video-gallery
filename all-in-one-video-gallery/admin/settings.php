@@ -994,6 +994,18 @@ class AIOVG_Admin_Settings {
                     'sanitize_callback' => 'sanitize_text_field'
                 ),
                 array(
+                    'name'              => 'number_format',
+                    'label'             => __( 'Number Format', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Choose how to display large numbers when displaying views, likes, etc.', 'all-in-one-video-gallery' ),
+                    'type'              => 'select',
+                    'options'           => array(                        
+                        'full'  => __( 'Full Format (e.g., 1,200, 3,400,000)', 'all-in-one-video-gallery' ),
+                        'short' => __( 'Short Format (e.g., 1.2K, 3.4M)', 'all-in-one-video-gallery' )
+                    ),
+                    'default'           => 'full',
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                array(
                     'name'              => 'maybe_flush_rewrite_rules',
                     'label'             => __( 'Auto Flush Rewrite Rules', 'all-in-one-video-gallery' ),
                     'description'       => __( 'Check this box to automatically detect and insert the missing permalink rules. Rarely, this option can cause issues in some WordPress environments. Kindly disable this option If you find a frequent 404 or 500 error on your website.', 'all-in-one-video-gallery' ),

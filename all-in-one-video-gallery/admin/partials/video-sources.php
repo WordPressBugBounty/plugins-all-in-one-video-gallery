@@ -146,7 +146,7 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 				<?php endif; ?>
 
 				<?php if ( count( $sources ) < ( count( $quality_levels ) - 1 ) ) : ?>
-					<a href="javascript:;" id="aiovg-add-new-source" class="aiovg-font-bold" data-limit="<?php echo count( $quality_levels ); ?>">
+					<a href="javascript:;" id="aiovg-add-new-source" data-limit="<?php echo count( $quality_levels ); ?>">
 						<?php esc_html_e( 'Add More Quality Levels', 'all-in-one-video-gallery' ); ?>
 					</a>
 				<?php endif; ?>

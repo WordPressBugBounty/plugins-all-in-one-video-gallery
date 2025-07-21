@@ -40,7 +40,10 @@ class AIOVG_Activator {
 		if ( ! get_option( 'aiovg_version' ) ) {
 			$roles = new AIOVG_Roles;
 			$roles->add_caps();
-		}		
+		}
+		
+		// Remove the unfiltered_html capability from editors
+		aiovg_remove_unfiltered_html_capability_from_editors();
 
 		// Insert the plugin version
 		add_option( 'aiovg_version', AIOVG_PLUGIN_VERSION );

@@ -564,12 +564,18 @@ function aiovg_extract_player_attributes( $attributes = array() ) {
  * @return string            Formatted number with localized suffix.
  */
 function aiovg_format_count( $number ) {
-	if ( $number >= 1000000000 ) {
-		$formatted = sprintf( _x( '%sB', 'billion short form', 'all-in-one-video-gallery' ), round( $number / 1000000000, 1 ) );
-	} elseif ( $number >= 1000000 ) {
-		$formatted = sprintf( _x( '%sM', 'million short form', 'all-in-one-video-gallery' ), round( $number / 1000000, 1 ) );
-	} elseif ( $number >= 1000 ) {
-		$formatted = sprintf( _x( '%sK', 'thousand short form', 'all-in-one-video-gallery' ), round( $number / 1000, 1 ) );
+	$general_settings = get_option( 'aiovg_general_settings' );
+
+	if ( isset( $general_settings['number_format'] ) && 'short' === $general_settings['number_format'] ) {
+		if ( $number >= 1000000000 ) {
+			$formatted = sprintf( _x( '%sB', 'billion short form', 'all-in-one-video-gallery' ), round( $number / 1000000000, 1 ) );
+		} elseif ( $number >= 1000000 ) {
+			$formatted = sprintf( _x( '%sM', 'million short form', 'all-in-one-video-gallery' ), round( $number / 1000000, 1 ) );
+		} elseif ( $number >= 1000 ) {
+			$formatted = sprintf( _x( '%sK', 'thousand short form', 'all-in-one-video-gallery' ), round( $number / 1000, 1 ) );
+		} else {
+			$formatted = number_format_i18n( $number );
+		}
 	} else {
 		$formatted = number_format_i18n( $number );
 	}
@@ -854,6 +860,7 @@ function aiovg_get_default_settings() {
 		'aiovg_general_settings' => array(
 			'lazyloading'               => 0,
 			'datetime_format'           => '',
+			'number_format'             => 'full',
 			'maybe_flush_rewrite_rules' => 1,
 			'delete_plugin_data'        => 1,
 			'delete_media_files'        => 1,
@@ -2042,8 +2049,8 @@ function aiovg_get_uniqid() {
  */
 function aiovg_get_video_source_types( $is_admin = false ) {
 	$types = array(
-		'default'     => __( 'Self Hosted', 'all-in-one-video-gallery' ) . ' / ' . __( 'External URL', 'all-in-one-video-gallery' ),
-		'adaptive'    => __( 'Adaptive / Live Streaming', 'all-in-one-video-gallery' ),
+		'default'     => __( 'Video File (mp4, webm, ogv, m4v, mov)', 'all-in-one-video-gallery' ),
+		'adaptive'    => __( 'HLS / MPEG-DASH', 'all-in-one-video-gallery' ),
 		'youtube'     => __( 'YouTube', 'all-in-one-video-gallery' ),
 		'vimeo'       => __( 'Vimeo', 'all-in-one-video-gallery' ),
 		'dailymotion' => __( 'Dailymotion', 'all-in-one-video-gallery' ),
@@ -2304,6 +2311,21 @@ function aiovg_remove_query_arg( $key, $query = false ) {
 	}
 		
 	return add_query_arg( $key, false, $query );	
+}
+
+/**
+ * Remove 'unfiltered_html' capability from editors.
+ * 
+ * @since 4.4.1
+ */
+function aiovg_remove_unfiltered_html_capability_from_editors() {
+    // Get the Editor role
+    $editor = get_role( 'editor' );
+
+    // Remove the unfiltered_html capability if it exists
+    if ( $editor && $editor->has_cap( 'unfiltered_html' ) ) {
+        $editor->remove_cap( 'unfiltered_html' );
+    }
 }
 
 /**
