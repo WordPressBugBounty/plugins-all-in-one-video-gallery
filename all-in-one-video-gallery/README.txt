@@ -4,9 +4,9 @@ Contributors: plugins360, wpvideogallery, freemius
 Donate link: https://plugins360.com
 Tags: video player, video gallery, youtube gallery, vimeo gallery, live stream
 Requires at least: 6.3
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 5.6.20
-Stable tag: 4.5.1
+Stable tag: 4.7.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,6 +24,7 @@ No coding is required. Suitable for all kinds of websites that require a single 
 
 ### LATEST ADDITION
 
+* **Bulk Import & Export!** Effortlessly **import multiple videos at once** from a **folder or CSV file**, and **export all your videos** from your website in just a few clicks—making large-scale management faster than ever.
 * **Bunny Stream Integration!** Now, you can **host and deliver your videos securely through Bunny Stream**, with native player support and token authentication options!
 * **New Video Restriction Options!** Now, you can **restrict videos for logged-in users, logged-out users, or specific user roles—globally or per video!**
 * **New Gallery Filtering Options!** Now, you can **filter videos on the same page using AJAX** with keywords, categories, tags, and sort them by title, date, popularity, and more!
@@ -151,6 +152,41 @@ Also, the videos from third-party services like "YouTube", "Vimeo", "Dailymotion
 7. Plugin Settings.
 
 == Changelog ==
+
+= 4.7.1 = 
+
+* Security Fix: "Missing Authorization to Unauthenticated Bunny Stream Video Creation/Deletion" issue that was discovered by [andrea bocchetti](https://www.wordfence.com/threat-intel/vulnerabilities/researchers/andrea-bocchetti), and reported responsibly to us by [Wordfence](https://www.wordfence.com/).
+* Security Fix: "Missing Authorization to Authenticated (Subscriber+) Limited User Meta Update" issue that was discovered by [kr0d](https://www.wordfence.com/threat-intel/vulnerabilities/researchers/kr0d), and reported responsibly to us by [Wordfence](https://www.wordfence.com/).
+* Tweak: Added options to force-load the plugin's CSS (recommended) and JavaScript (advanced) on all front-end pages to resolve layout or functionality issues caused by themes, page builders, or optimization plugins.
+* Tweak: Added an option during folder bulk import to control video page URL slug generation, including support for random slugs to prevent direct video URL guessing.
+* Tweak: Video URLs are now made private when using the front-end video submission feature to prevent URL guessing and misuse.
+* Tweak: Improved slider dots behavior by limiting the maximum number of dots to 5 and automatically enabling dots during navigation when using the slider template.
+* Fix: Various minor bug fixes and performance improvements.
+
+= 4.6.4 = 
+
+* Security Fix: "Authenticated (Author+) Arbitrary File Upload via VTT Upload Bypass" issue that was discovered by [mikemyers](https://www.wordfence.com/threat-intel/vulnerabilities/researchers/michael-mazzolini), and reported responsibly to us by Peter Greaves (Customer Support Engineer) from [Wordfence](https://www.wordfence.com/).
+* Security Fix: "Authenticated (Author+) Arbitrary File Upload via Import ZIP" issue that was discovered by [kr0d](https://www.wordfence.com/threat-intel/vulnerabilities/researchers/kr0d), and reported responsibly to us by Alex Thomas (Wordfence Vulnerability Researcher) from [Wordfence](https://www.wordfence.com/).
+* Tweak: Replaced the deprecated WordPress core function get_page_title() with an internal equivalent for improved compatibility.
+* Tweak: Updated the Freemius SDK to version 2.13.0.
+* Fix: Improved compatibility with the Divi page builder.
+* Fix: Resolved several minor issues and improved overall plugin stability and reliability.
+
+= 4.5.7 =
+
+* New: Introduced an experimental option to hide the YouTube logo when using our custom video player.
+* New: Added a setting to customize the "Related Videos" heading directly from the plugin options.
+* Fix: Resolved the YouTube "Error 153 – Video player configuration error" by implementing a referrer policy for embeds.
+* Fix: Addressed an issue where the popup on the Single Video shortcode did not function properly when the shortcode element was dynamically added.
+
+= 4.5.4 =
+
+* New: Added the ability to bulk import videos from a CSV file or folder.
+* New: Introduced a video export feature to easily back up or migrate content.
+* New: Added deeplinking support for popup templates, allowing direct links to individual videos.
+* Tweak: Updated the Freemius SDK to version 2.12.2.
+* Tweak: Improved overall performance and stability.
+* Fix: Addressed several minor bugs and enhanced plugin reliability.
 
 = 4.5.1 =
 
@@ -549,6 +585,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 4.5.1 =
+= 4.7.1 =
 
-Introduces several new features, bug fixes & enhancements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)
+Addresses multiple security issues reported by Wordfence. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

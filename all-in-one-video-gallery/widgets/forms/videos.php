@@ -12,7 +12,7 @@
 
 <div class="aiovg aiovg-widget-form aiovg-widget-form-videos aiovg-template-<?php echo esc_attr( $instance['template'] ); ?>">
 	<?php foreach ( $this->fields['videos']['sections'] as $key => $section ) :	?>
-		<details class="aiovg-accordion"<?php if ( 'general' == $key ) { echo ' open'; } ?>>
+		<details<?php if ( 'general' == $key ) { echo ' open'; } ?>>
 			<summary>
 				<?php echo wp_kses_post( $section['title'] ); ?>
 			</summary>

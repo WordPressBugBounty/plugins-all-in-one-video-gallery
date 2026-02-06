@@ -365,6 +365,11 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 			if ( isset( $queries['end'] ) ) {
 				$settings['end'] = (int) $queries['end'];
 			}
+
+			// Hide YouTube Logo
+			if ( ! empty( $player_settings['hide_youtube_logo'] ) ) {
+				$attributes['class'] .= ' vjs-hide-youtube-logo';
+			}
 		}
 		
 		if ( isset( $sources['vimeo'] ) ) { // Vimeo

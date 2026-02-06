@@ -9,15 +9,15 @@
 	text-decoration: none;
 }
 
-/* Custom Theme */
-.aiovg-player-theme-custom .plyr__control--overlaid {
+.aiovg-player .plyr__control--overlaid {
 	--plyr-control-spacing: 15px;
 }
 
-.aiovg-player-theme-custom .plyr__control--overlaid svg {
+.aiovg-player .plyr__control--overlaid svg {
 	--plyr-control-icon-size: 27px;
 }		
 
+/* Custom Theme */
 .aiovg-player-theme-custom .plyr__controls {
 	flex-wrap: wrap;
 	justify-content: flex-start;
@@ -317,6 +317,13 @@
 
 .aiovg-player .aiovg-privacy-consent-button:hover {
 	opacity: 0.8;
+}
+
+/* Tech: YouTube */
+.aiovg-hide-youtube-logo .plyr--youtube .plyr__video-wrapper iframe {
+	pointer-events: none;
+	top: -50% !important;
+	height: 200% !important;			
 }
 
 /* Custom ContextMenu */

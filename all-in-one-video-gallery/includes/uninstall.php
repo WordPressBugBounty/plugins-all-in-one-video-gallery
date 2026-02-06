@@ -27,7 +27,7 @@ class AIOVG_Uninstall {
         if ( !defined( 'AIOVG_UNINSTALL_PLUGIN' ) ) {
             define( 'AIOVG_UNINSTALL_PLUGIN', true );
         }
-        $general_settings = get_option( 'aiovg_general_settings' );
+        $general_settings = get_option( 'aiovg_general_settings', array() );
         if ( empty( $general_settings['delete_plugin_data'] ) ) {
             return;
         }
@@ -68,7 +68,8 @@ class AIOVG_Uninstall {
             ), array('%s') );
         }
         // Delete the plugin pages
-        if ( $aiovg_created_pages = get_option( 'aiovg_page_settings' ) ) {
+        $aiovg_created_pages = get_option( 'aiovg_page_settings' );
+        if ( is_array( $aiovg_created_pages ) ) {
             foreach ( $aiovg_created_pages as $page => $id ) {
                 if ( $id > 0 ) {
                     wp_delete_post( $id, true );

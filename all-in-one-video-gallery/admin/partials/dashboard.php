@@ -14,17 +14,24 @@
 	<h1><?php esc_html_e( 'All-in-One Video Gallery', 'all-in-one-video-gallery' ); ?></h1>
     
     <p class="about-text">
-        <?php esc_html_e( 'An ultimate video player and video gallery plugin – no coding required. Suitable for YouTubers, Video Bloggers, Course Creators, Podcasters, Sales & Marketing Professionals, and anyone using video on a website.', 'all-in-one-video-gallery' ); ?>
+        <?php esc_html_e( 'An ultimate video player and video gallery plugin - no coding required. Suitable for YouTubers, Video Bloggers, Course Creators, Podcasters, Sales & Marketing Professionals, and anyone using video on a website.', 'all-in-one-video-gallery' ); ?>
     </p>
 
-    <p class="about-description">
+    <p class="about-description aiovg-button-group">
         <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=aiovg_videos' ) ); ?>" class="button button-primary button-hero">
             <span class="dashicons dashicons-format-video"></span>
             <?php esc_html_e( 'Add New Video', 'all-in-one-video-gallery' ); ?>
         </a>
-        <a href="https://plugins360.com/all-in-one-video-gallery/getting-started/" class="button button-hero" target="_blank" rel="noopener noreferrer">
-            <span class="dashicons dashicons-external"></span>
-            <?php esc_html_e( 'Learn How to Use', 'all-in-one-video-gallery' ); ?>
+        <a href="<?php echo esc_url( admin_url( 'admin.php?page=aiovg_import_export' ) ); ?>" class="button button-hero">
+            <span class="dashicons dashicons-download"></span>
+            <?php esc_html_e( 'Bulk Import / Export Videos', 'all-in-one-video-gallery' ); ?>
+        </a>
+    </p>
+
+    <p>
+        <strong><?php esc_html_e( 'Need help?', 'all-in-one-video-gallery' ); ?></strong>
+        <a href="https://plugins360.com/all-in-one-video-gallery/getting-started/" target="_blank" rel="noopener noreferrer">
+            <?php esc_html_e( 'Start with our Quick Start Guide →', 'all-in-one-video-gallery' ); ?>
         </a>
     </p>
         
@@ -32,6 +39,8 @@
         <?php printf( esc_html__( 'Version %s', 'all-in-one-video-gallery' ), AIOVG_PLUGIN_VERSION ); ?>
     </div>
     
+    <br />
+
     <h2 class="nav-tab-wrapper wp-clearfix">
 		<?php		
         foreach ( $tabs as $tab => $title ) {

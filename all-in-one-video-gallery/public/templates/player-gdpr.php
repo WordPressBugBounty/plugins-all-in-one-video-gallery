@@ -177,7 +177,7 @@ $consent_button_label = apply_filters( 'aiovg_translate_strings', $privacy_setti
 				}					
 			}
 
-			xmlhttp.open( 'POST', '<?php echo admin_url( 'admin-ajax.php' ); ?>?action=aiovg_set_cookie&security=<?php echo wp_create_nonce( 'aiovg_ajax_nonce' ); ?>', true );
+			xmlhttp.open( 'POST', '<?php echo admin_url( 'admin-ajax.php' ); ?>?action=aiovg_set_cookie&security=<?php echo wp_create_nonce( 'aiovg_public_ajax_nonce' ); ?>', true );
 			xmlhttp.setRequestHeader( 'Content-type', 'application/x-www-form-urlencoded' );
 			xmlhttp.send( 'action=aiovg_set_cookie' );							
 		}

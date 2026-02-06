@@ -20,7 +20,7 @@
             this._params     = {};
 
             // Bind the event handlers to ensure the reference remains stable
-            this._toggleLikes = this._toggleLikes.bind( this );
+            this._toggleLikes    = this._toggleLikes.bind( this );
             this._toggleDislikes = this._toggleDislikes.bind( this );
         }
 
@@ -29,21 +29,16 @@
          * (can be called many times if an element is repeatedly added/removed)
          */
         connectedCallback() {    
-            if ( this._isRendered ) {
-                return false; 
-            }           
+            if ( this._isRendered ) return false; 
+            this._isRendered = true;
             
-            if ( this.postId == 0 ) {
-                return false;
-            }
+            if ( this.postId == 0 ) return false;
 
-            this._options = window.aiovg_likes;
+            this._options = window.aiovg_likes || window.aiovg_public;
 
             if ( ! this.hasLikeButton && ! this.hasDislikeButton ) { 
                 return false; 
             }
-
-            this._isRendered = true;       
 
             this._params = {
                 'likes': parseInt( this.getAttribute( 'likes' ) || 0 ),                

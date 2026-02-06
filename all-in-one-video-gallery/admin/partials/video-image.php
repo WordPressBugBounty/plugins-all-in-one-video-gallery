@@ -9,11 +9,24 @@
  * @package All_In_One_Video_Gallery
  */
 
-$featured_images_settings = get_option( 'aiovg_featured_images_settings' );
+$featured_images_settings = aiovg_get_option( 'aiovg_featured_images_settings' );
 
 $image              = isset( $post_meta['image'] ) ? $post_meta['image'][0] : '';
 $image_alt          = isset( $post_meta['image_alt'] ) ? $post_meta['image_alt'][0] : '';
 $set_featured_image = isset( $post_meta['set_featured_image'] ) ? $post_meta['set_featured_image'][0] : 1;
+
+if ( ! empty( $image ) ) {	
+	$is_image_uploaded = isset( $post_meta['is_image_uploaded'] ) ? (int) $post_meta['is_image_uploaded'][0] : 0;	
+
+	if ( ! empty( $is_image_uploaded ) ) {
+		$private_base_url = aiovg_get_private_base_url();
+
+		// Mask the URL only if it is not already masked
+		if ( 0 !== strpos( $image, $private_base_url ) ) {
+			$image = $private_base_url .  aiovg_base64_encode( $image );
+		}
+	}
+}
 ?>
 
 <div class="aiovg-form-controls">

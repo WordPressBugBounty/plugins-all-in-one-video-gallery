@@ -9,7 +9,7 @@
  * @package All_In_One_Video_Gallery
  */
 
-$restrictions_settings = get_option( 'aiovg_restrictions_settings' );
+$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
 
 $restricted_message = $restrictions_settings['restricted_message'];
 if ( empty( $restricted_message ) ) {

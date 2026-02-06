@@ -9,23 +9,34 @@
  * @package All_In_One_Video_Gallery
  */
 
-$general_settings = get_option( 'aiovg_general_settings' );
-$images_settings  = get_option( 'aiovg_images_settings' );
+$general_settings = aiovg_get_option( 'aiovg_general_settings' );
+$images_settings  = aiovg_get_option( 'aiovg_images_settings' );
 
-$permalink = aiovg_get_category_page_url( $term );   
+$permalink  = aiovg_get_category_page_url( $term );   
 
 $image_size = ! empty( $images_settings['size'] ) ? $images_settings['size'] : 'large';
 $image_data = aiovg_get_image( $term->term_id, $image_size, 'term', true );
 $image      = $image_data['src'];
 $image_alt  = ! empty( $image_data['alt'] ) ? $image_data['alt'] : $term->name;
-
-$lazyloading = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' : '';
 ?>
 
 <div class="aiovg-thumbnail">
-    <a href="<?php echo esc_url( $permalink ); ?>" class="aiovg-responsive-container" style="padding-bottom: <?php echo esc_attr( $attributes['ratio'] ); ?>;">
-        <img src="<?php echo esc_url( $image ); ?>" class="aiovg-responsive-element" alt="<?php echo esc_attr( $image_alt ); ?>" <?php echo $lazyloading; ?>/>
-    </a>
+    <?php
+    echo sprintf( 
+        '<a href="%s" class="aiovg-responsive-container" style="padding-bottom: %s;">',
+        esc_url( $permalink ),
+        esc_attr( $attributes['ratio'] )
+    );
+
+    echo sprintf( 
+        '<img src="%s" alt="%s" class="aiovg-responsive-element"%s/>',
+        esc_url( $image ),
+        esc_attr( $image_alt ),
+        ( ! empty( $general_settings['lazyloading'] ) ? ' loading="lazy"' : '' )
+    );
+
+    echo '</a>';
+    ?>
     
     <div class="aiovg-caption">
         <div class="aiovg-title">

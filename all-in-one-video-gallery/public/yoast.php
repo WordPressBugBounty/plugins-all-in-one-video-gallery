@@ -35,7 +35,7 @@ class AIOVG_Public_Yoast {
 			return $title;
 		}
 
-		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 
 		if ( $post->ID != $page_settings['category'] && $post->ID != $page_settings['tag'] && $post->ID != $page_settings['user_videos'] ) {
 			return $title;
@@ -152,7 +152,7 @@ class AIOVG_Public_Yoast {
 			return $desc;
 		}
 
-		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 		
 		if ( $post->ID != $page_settings['category'] && $post->ID != $page_settings['tag'] && $post->ID != $page_settings['user_videos'] ) {
 			return $desc;
@@ -270,7 +270,7 @@ class AIOVG_Public_Yoast {
 			return $url;
 		}
 		
-		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 
 		// Category page
 		if ( $post->ID == $page_settings['category'] ) {			
@@ -328,7 +328,7 @@ class AIOVG_Public_Yoast {
 				$url = $image;
 			}			
 		} else {
-			$page_settings = get_option( 'aiovg_page_settings' );
+			$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 
 			// Category page
 			if ( $post->ID == $page_settings['category'] ) {			
@@ -410,7 +410,7 @@ class AIOVG_Public_Yoast {
 				$url = $image;
 			}			
 		} else {
-			$page_settings = get_option( 'aiovg_page_settings' );
+			$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 
 			// Category page
 			if ( $post->ID == $page_settings['category'] ) {			
@@ -492,7 +492,7 @@ class AIOVG_Public_Yoast {
 				}
 			}
 		} else {
-			$page_settings = get_option( 'aiovg_page_settings' );
+			$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 
 			if ( $post->ID == $page_settings['category'] ) {
 				if ( $slug = get_query_var( 'aiovg_category' ) ) {

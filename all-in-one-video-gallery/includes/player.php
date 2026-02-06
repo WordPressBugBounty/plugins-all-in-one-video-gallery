@@ -133,7 +133,7 @@ class AIOVG_Player {
 			return $args['player'];
 		}
 
-		$player_settings = get_option( 'aiovg_player_settings' );
+		$player_settings = aiovg_get_option( 'aiovg_player_settings' );
 
 		$player_type = ( 'vidstack' == $player_settings['player'] ? 'vidstack' : 'videojs' );
 

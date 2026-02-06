@@ -103,7 +103,10 @@ class AIOVG_Widget_Videos extends WP_Widget {
 
 		$orderby = sanitize_text_field( $attributes['orderby'] );
 		$order   = sanitize_text_field( $attributes['order'] );
-		
+
+		if ( 'classic' == $attributes['template'] ) $attributes['deeplinking'] = 0;		
+		$deeplink_video_id = ! empty( $attributes['deeplinking'] ) ? (int) $attributes['deeplink_video'] : 0;
+
 		// Added for backward compatibility (version < 1.5.7)
 		if ( isset( $instance['image_position'] ) && 'left' == $instance['image_position'] ) {
 			$attributes['thumbnail_style'] = 'image-left';
@@ -250,8 +253,27 @@ class AIOVG_Widget_Videos extends WP_Widget {
 				$query['order']   = $order;
 		}
 		
+		// Deeplinking: Add the filter if conditions are met
+		$deeplink_video_callback = function( $orderby_sql, $query ) use ( $deeplink_video_id ) {
+			if ( $query->get('post_type') !== 'aiovg_videos' ) {
+				return $orderby_sql;
+			}
+			
+			global $wpdb;
+			return "CASE {$wpdb->posts}.ID WHEN {$deeplink_video_id} THEN 0 ELSE 1 END, " . $orderby_sql;
+		};
+
+		if ( ! empty( $deeplink_video_id ) ) {
+			add_filter( 'posts_orderby', $deeplink_video_callback, 10, 2 );
+		}
+
 		$query = apply_filters( 'aiovg_query_args', $query, $attributes );
 		$aiovg_query = new WP_Query( $query );
+
+		// Deeplinking: Remove the filter if conditions were met
+		if ( ! empty( $deeplink_video_id ) ) {
+			remove_filter( 'posts_orderby', $deeplink_video_callback, 10 );
+		}
 		
 		// Enqueue dependencies
 		wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-public' );
@@ -453,7 +475,7 @@ class AIOVG_Widget_Videos extends WP_Widget {
 	 * @return array An associative array of attributes.
 	 */
 	public function get_defaults() {
-		$pagination_settings = get_option( 'aiovg_pagination_settings', array() ); 
+		$pagination_settings = aiovg_get_option( 'aiovg_pagination_settings' ); 
 
 		$defaults = array();
 
@@ -491,6 +513,9 @@ class AIOVG_Widget_Videos extends WP_Widget {
 		$defaults['count'] = 0;
 		$defaults['paged'] = 1;
 		$defaults['pagination_ajax'] = isset( $pagination_settings['ajax'] ) && ! empty( $pagination_settings['ajax'] ) ? 1 : 0;
+		$defaults['deeplink_video'] = aiovg_get_deeplink_video_id();
+		$defaults['show_player_category'] = 0;
+		$defaults['show_player_tag'] = 0;
 
 		$defaults = array_merge(
 			$defaults,

@@ -54,16 +54,13 @@
 	 * Render media uploader.
 	 */
 	function renderMediaUploader( callback ) { 
-		var fileFrame;
-
-		// If an instance of fileFrame already exists, then we can open it rather than creating a new instance.
-		if ( fileFrame ) {
-			fileFrame.open();
-			return false;
+		// Check if the wp.media library is available
+		if ( typeof wp === 'undefined' || typeof wp.media === 'undefined' ) {
+			return;
 		}
 
 		// Use the wp.media library to define the settings of the media uploader.
-		fileFrame = wp.media.frames.file_frame = wp.media({
+		var fileFrame = wp.media.frames.file_frame = wp.media({
 			frame: 'post',
 			state: 'insert',
 			multiple: false
@@ -107,7 +104,7 @@
 	 * Toggle Thumbnail Generator.
 	 */
 	function toggleThumbnailGenerator() {
-		var url = $( '#aiovg-mp4' ).val();
+		var url = window.aiovgResolveUrl( $( '#aiovg-mp4' ).val() );
 
 		if ( url && url.trim().length > 0 && ! /\.m3u8/.test( url.toLowerCase() ) ) {
 			$( '#aiovg-field-mp4' ).removeClass( 'aiovg-is-bunny-stream' );
@@ -271,6 +268,7 @@
 			const data = {
 				action: 'aiovg_create_bunny_stream_video',
 				security: aiovg_admin.ajax_nonce,
+				post_id: aiovg_admin.post_id,
 				title: title
 			};
 	  
@@ -372,6 +370,7 @@
 			  	data: {
 					action: 'aiovg_get_bunny_stream_video',
 					security: aiovg_admin.ajax_nonce,
+					post_id: aiovg_admin.post_id,
 					video_id: this.options.videoId
 			  	},
 			  	success: ( response ) => {
@@ -426,6 +425,7 @@
 			const data = {
 			  	action: 'aiovg_delete_bunny_stream_video',
 			  	security: aiovg_admin.ajax_nonce,
+				post_id: aiovg_admin.post_id,
 			  	video_id: this.options.videoId
 			};
 	
@@ -562,24 +562,6 @@
 			$( '#aiovg-shortcode-instructions-' + value ).show();
 		}).trigger( 'change' );
 
-		// Dashboard: Toggle field sections.
-		$( '#aiovg-shortcode-forms .aiovg-shortcode-section-header' ).on( 'click', function() {
-			var $this   = $( this );
-			var $parent = $this.parent();
-
-			if ( ! $parent.hasClass( 'aiovg-active' ) ) {
-				$this.closest( '.aiovg-shortcode-form' )
-					.find( '.aiovg-active' )
-					.removeClass( 'aiovg-active' )
-					.find( '.aiovg-shortcode-controls' )
-					.slideToggle();
-			}			
-
-			$parent.toggleClass( 'aiovg-active' )
-				.find( '.aiovg-shortcode-controls' )
-				.slideToggle();
-		});		
-
 		// Dashboard: Toggle fields based on the selected video source type.
 		$( '#aiovg-shortcode-form-video select[name=type]' ).on( 'change', function() {			
 			var value = $( this ).val();			
@@ -655,7 +637,7 @@
 		});	
 
 		// Dashboard: Validate the issues form.
-		$( '#aiovg-issues-form' ).submit(function() {
+		$( '#aiovg-issues-form' ).on( 'submit', function() {
 			var hasValue = $( '#aiovg-issues .aiovg-issue:checked' ).length > 0;
 
 			if ( ! hasValue ) {
@@ -693,7 +675,7 @@
 			} else {
 				$( '#aiovg-thumbnail-generator' ).hide();
 			}
-		});
+		}).trigger( 'change' );
 		
 		// Videos: Add new source fields when "Add More Quality Levels" link is clicked.
 		$( '#aiovg-add-new-source' ).on( 'click', function( event ) {
@@ -910,3 +892,55 @@
 	});	
 
 })( jQuery );
+
+/**
+ * Resolves a masked, relative, or absolute URL into a usable absolute URL.
+ */
+(function( window ) {
+
+	window.aiovgResolveUrl = function( url ) {
+		if ( ! url || ! url.trim() ) {
+			return url;
+		}
+
+		url = url.trim();
+
+		const siteUrl    = aiovg_admin.site_url.replace( /\/+$/, '' );
+		const maskPrefix = siteUrl + '/private/';
+
+		// Step 1: Unmask private URLs
+		if ( url.indexOf( maskPrefix ) === 0 ) {
+			const encoded = url.substring( maskPrefix.length );
+
+			if ( encoded ) {
+				try {
+					const base64 = encoded
+						.replace( /-/g, '+' )
+						.replace( /_/g, '/' )
+						.replace( /\./g, '=' );
+
+					const binary = atob( base64 );
+					const bytes  = Uint8Array.from( binary, c => c.charCodeAt( 0 ) );
+
+					url = new TextDecoder().decode( bytes );
+				} catch ( error ) {
+					// Fail-safe: keep original URL
+					return url;
+				}
+			}
+		}
+
+		// Step 2: Already absolute URL
+		if ( url.indexOf( '://' ) > 0 || url.indexOf( '//' ) === 0 ) {
+			return url;
+		}
+
+		// Step 3: Resolve relative paths
+		if ( url.charAt( 0 ) === '/' ) {
+			return siteUrl + url;
+		}
+
+		return siteUrl + '/' + url;
+	};
+
+})( window );

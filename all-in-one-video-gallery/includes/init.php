@@ -105,6 +105,7 @@ class AIOVG_Init {
 		require_once AIOVG_PLUGIN_DIR . 'admin/categories.php';
 		require_once AIOVG_PLUGIN_DIR . 'admin/tags.php';
 		require_once AIOVG_PLUGIN_DIR . 'admin/settings.php';
+		require_once AIOVG_PLUGIN_DIR . 'admin/import-export.php';
 
 		/**
 		 * The classes responsible for defining all actions that occur in the public-facing
@@ -171,7 +172,9 @@ class AIOVG_Init {
 
 		$this->loader->add_filter( 'display_post_states', $admin, 'add_display_post_states', 10, 2 );
 		$this->loader->add_filter( 'plugin_action_links_' . AIOVG_PLUGIN_FILE_NAME, $admin, 'plugin_action_links' );
-		$this->loader->add_filter( 'wp_check_filetype_and_ext', $admin, 'add_filetype_and_ext', 10, 4 );	
+		$this->loader->add_filter( 'upload_mimes', $admin, 'add_mime_types' );
+		$this->loader->add_filter( 'wp_check_filetype_and_ext', $admin, 'add_filetype_and_ext', 10, 4 );
+		$this->loader->add_filter( 'wp_handle_upload_prefilter', $admin, 'wp_handle_upload_prefilter' );	
 		
 		// Hooks specific to the videos page
 		$videos = new AIOVG_Admin_Videos();
@@ -229,6 +232,17 @@ class AIOVG_Init {
 		
 		$this->loader->add_action( 'admin_menu', $settings, 'admin_menu' );
 		$this->loader->add_action( 'admin_init', $settings, 'admin_init' );
+
+		// Hooks specific to the import / export page
+		$import_export = new AIOVG_Admin_Import_Export();
+		
+		$this->loader->add_action( 'admin_menu', $import_export, 'admin_menu' );
+		$this->loader->add_action( 'wp_ajax_aiovg_import_folder', $import_export, 'ajax_callback_import_folder' );
+		$this->loader->add_action( 'wp_ajax_aiovg_import_csv', $import_export, 'ajax_callback_import_csv' );
+		$this->loader->add_action( 'wp_ajax_aiovg_get_csv_columns', $import_export, 'ajax_callback_get_csv_columns' );
+		$this->loader->add_action( 'wp_ajax_aiovg_export_csv', $import_export, 'ajax_callback_export_csv' );
+		$this->loader->add_action( 'wp_ajax_aiovg_export_zip', $import_export, 'ajax_callback_export_zip' );
+		$this->loader->add_action( 'aiovg_cleanup_export_directory', $import_export, 'cleanup_export_directory' );
 	}
 
 	/**
@@ -246,6 +260,7 @@ class AIOVG_Init {
 		$this->loader->add_action( 'init', $public, 'init' );
 		$this->loader->add_action( 'init', $public, 'register_styles' );
 		$this->loader->add_action( 'init', $public, 'register_scripts' );
+		$this->loader->add_action( 'wp_enqueue_scripts', $public, 'enqueue_assets', 99 );
 		$this->loader->add_action( 'aiovg_enqueue_block_editor_assets', $public, 'enqueue_block_editor_assets' );	
 		$this->loader->add_action( 'elementor/editor/after_enqueue_scripts', $public, 'enqueue_block_editor_assets' );
 		$this->loader->add_action( 'elementor/preview/enqueue_scripts', $public, 'enqueue_block_editor_assets' );	
@@ -308,13 +323,12 @@ class AIOVG_Init {
 		// Hooks specific to the single video page
 		$video = new AIOVG_Public_Video();
 		
-		$this->loader->add_action( 'template_include', $video, 'template_include', 999 );
 		$this->loader->add_action( 'init', $video, 'download_video', 1 );		
 		$this->loader->add_action( 'wp_ajax_aiovg_update_views_count', $video, 'ajax_callback_update_views_count' );
 		$this->loader->add_action( 'wp_ajax_nopriv_aiovg_update_views_count', $video, 'ajax_callback_update_views_count' );	
 
+		$this->loader->add_filter( 'template_include', $video, 'template_include', 999 );
 		$this->loader->add_filter( 'show_admin_bar', $video, 'remove_admin_bar' );
-		$this->loader->add_filter( 'upload_mimes', $video, 'add_mime_types' );
 		$this->loader->add_filter( 'aiovg_iframe_videojs_player_sources', $video, 'filter_player_sources', 10, 2 );
 		$this->loader->add_filter( 'aiovg_iframe_vidstack_player_sources', $video, 'filter_player_sources', 10, 2 );
 		$this->loader->add_filter( 'aiovg_videojs_player_sources', $video, 'filter_player_sources', 10, 2 );
@@ -327,7 +341,7 @@ class AIOVG_Init {
 		$search = new AIOVG_Public_Search();
 
 		// Hooks specific to the like / dislike button
-		$likes_settings = get_option( 'aiovg_likes_settings' );
+		$likes_settings = aiovg_get_option( 'aiovg_likes_settings' );
 
 		if ( ! empty( $likes_settings['like_button'] ) || ! empty( $likes_settings['dislike_button'] ) ) {
 			$likes = new AIOVG_Public_Likes();
@@ -357,11 +371,8 @@ class AIOVG_Init {
 
 		$this->loader->add_action( 'aiovg_save_video', $bunny_stream, 'save_bunny_stream_data' );
 		$this->loader->add_action( 'wp_ajax_aiovg_create_bunny_stream_video', $bunny_stream, 'ajax_callback_create_bunny_stream_video' );
-		$this->loader->add_action( 'wp_ajax_nopriv_aiovg_create_bunny_stream_video', $bunny_stream, 'ajax_callback_create_bunny_stream_video' );
 		$this->loader->add_action( 'wp_ajax_aiovg_get_bunny_stream_video', $bunny_stream, 'ajax_callback_get_bunny_stream_video' );
-		$this->loader->add_action( 'wp_ajax_nopriv_aiovg_get_bunny_stream_video', $bunny_stream, 'ajax_callback_get_bunny_stream_video' );
 		$this->loader->add_action( 'wp_ajax_aiovg_delete_bunny_stream_video', $bunny_stream, 'ajax_callback_delete_bunny_stream_video' );
-		$this->loader->add_action( 'wp_ajax_nopriv_aiovg_delete_bunny_stream_video', $bunny_stream, 'ajax_callback_delete_bunny_stream_video' );
 		$this->loader->add_action( 'before_delete_post', $bunny_stream, 'before_delete_post', 1 );
 
 		$this->loader->add_filter( 'aiovg_get_image', $bunny_stream, 'filter_image_url', 10, 4 );

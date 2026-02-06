@@ -373,8 +373,8 @@ class AIOVG_Player_Base {
 			return $this->cache['player_settings'];
 		}
 
-		$player_settings  = get_option( 'aiovg_player_settings' );
-		$general_settings = get_option( 'aiovg_general_settings' );			
+		$player_settings  = aiovg_get_option( 'aiovg_player_settings' );
+		$general_settings = aiovg_get_option( 'aiovg_general_settings' );			
 
 		$defaults = array(
 			'width' 			  => $player_settings['width'],
@@ -403,6 +403,7 @@ class AIOVG_Player_Base {
 			'hotkeys'             => isset( $player_settings['hotkeys'] ) ? $player_settings['hotkeys'] : 0,
 			'cc_load_policy'      => $player_settings['cc_load_policy'],
 			'use_native_controls' => $player_settings['use_native_controls'],
+			'hide_youtube_logo'   => isset( $player_settings['hide_youtube_logo'] ) ? $player_settings['hide_youtube_logo'] : 0,
 			'lazyloading'         => isset( $general_settings['lazyloading'] ) ? $general_settings['lazyloading'] : 0
 		);
 
@@ -433,7 +434,7 @@ class AIOVG_Player_Base {
 				'show_consent' => false 
 			);
 		} else {
-			$privacy_settings = get_option( 'aiovg_privacy_settings' );			
+			$privacy_settings = aiovg_get_option( 'aiovg_privacy_settings' );			
 
 			$settings = shortcode_atts( $privacy_settings, $this->args );
 
@@ -463,7 +464,7 @@ class AIOVG_Player_Base {
 			return $this->cache['logo_settings'];
 		}
 
-		$brand_settings = get_option( 'aiovg_brand_settings', array() );			
+		$brand_settings = aiovg_get_option( 'aiovg_brand_settings' );			
 
 		$settings = shortcode_atts( $brand_settings, $this->args );
 
@@ -493,7 +494,7 @@ class AIOVG_Player_Base {
 			return $this->cache['share_buttons'];
 		}
 
-		$socialshare_settings = get_option( 'aiovg_socialshare_settings' );
+		$socialshare_settings = aiovg_get_option( 'aiovg_socialshare_settings' );
 
 		$share_url = get_permalink( $this->post_id );
 			
@@ -660,7 +661,7 @@ class AIOVG_Player_Base {
  	 * @return string $html The HTML message for restricted access.
 	 */
 	public function get_player_restricted_message() {
-		$restrictions_settings = get_option( 'aiovg_restrictions_settings' );
+		$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
 		$player_settings = $this->get_player_settings();
 
 		$restricted_message = $restrictions_settings['restricted_message'];

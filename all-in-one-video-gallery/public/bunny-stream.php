@@ -66,7 +66,27 @@ class AIOVG_Public_Bunny_Stream {
 	 */
 	public function save_bunny_stream_data( $post_id ) {
 		$type = isset( $_POST['type'] ) ? sanitize_text_field( $_POST['type'] ) : 'default';
-		$mp4  = isset( $_POST['mp4'] ) ? aiovg_sanitize_url( $_POST['mp4'] ) : '';
+		$mp4  = isset( $_POST['mp4'] ) ? trim( $_POST['mp4'] ) : '';
+
+		if ( ! empty( $mp4 ) ) {
+			$private_base_url = aiovg_get_private_base_url();
+
+			// Check if the URL is a masked uploaded file
+			if ( 0 === strpos( $mp4, $private_base_url ) ) {
+				// Extract the encoded portion
+				$encoded = substr( $mp4, strlen( $private_base_url ) );
+
+				// Decode the masked URL
+				$decoded = aiovg_base64_decode( $encoded );
+
+				// Sanitize the real file URL
+				$mp4 = aiovg_sanitize_url( $decoded );
+			} else {
+				// Direct URL entered by the user
+				$mp4 = aiovg_sanitize_url( $mp4 );
+			}
+		}
+
 		$bunny_stream_video_id = isset( $_POST['bunny_stream_video_id'] ) ? sanitize_text_field( $_POST['bunny_stream_video_id'] ) : 0;
 
 		if ( ! empty( $bunny_stream_video_id ) ) {
@@ -129,8 +149,34 @@ class AIOVG_Public_Bunny_Stream {
 	 * @since 4.2.0
 	 */
 	public function ajax_callback_create_bunny_stream_video() {
-		check_ajax_referer( 'aiovg_ajax_nonce', 'security' ); // Verify the nonce for security
+		// Verify nonce
+		check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
 
+		// Ensure user is logged in
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error( __( 'You do not have sufficient permissions to do this action.', 'all-in-one-video-gallery' ) );
+		}
+
+		// Verify user capability
+		$post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+			
+		if ( $post_id > 0 ) {
+			$post = get_post( $post_id );
+
+			if ( ! $post || 'aiovg_videos' !== $post->post_type ) {
+				wp_send_json_error( __( 'You do not have sufficient permissions to do this action.', 'all-in-one-video-gallery' ) );
+			}
+
+			if ( ! aiovg_current_user_can( 'edit_aiovg_video', $post_id ) ) {
+				wp_send_json_error( __( 'You do not have sufficient permissions to do this action.', 'all-in-one-video-gallery' ) );
+			}
+		} else {
+			if ( ! aiovg_current_user_can( 'edit_aiovg_videos' ) ) {
+				wp_send_json_error( __( 'You do not have sufficient permissions to do this action.', 'all-in-one-video-gallery' ) );
+			}
+		}
+
+		// Vars
 		$settings = aiovg_has_bunny_stream_enabled(); // Fetch Bunny Stream settings
 		$response = array();
 
@@ -210,8 +256,34 @@ class AIOVG_Public_Bunny_Stream {
 	 * @since 4.2.0
 	 */
 	public function ajax_callback_get_bunny_stream_video() {
-		check_ajax_referer( 'aiovg_ajax_nonce', 'security' ); // Verify the nonce for security
+		// Verify nonce
+		check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
 
+		// Ensure user is logged in
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error( __( 'You do not have sufficient permissions to do this action.', 'all-in-one-video-gallery' ) );
+		}
+
+		// Verify user capability
+		$post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+			
+		if ( $post_id > 0 ) {
+			$post = get_post( $post_id );
+
+			if ( ! $post || 'aiovg_videos' !== $post->post_type ) {
+				wp_send_json_error( __( 'You do not have sufficient permissions to do this action.', 'all-in-one-video-gallery' ) );
+			}
+
+			if ( ! aiovg_current_user_can( 'edit_aiovg_video', $post_id ) ) {
+				wp_send_json_error( __( 'You do not have sufficient permissions to do this action.', 'all-in-one-video-gallery' ) );
+			}
+		} else {
+			if ( ! aiovg_current_user_can( 'edit_aiovg_videos' ) ) {
+				wp_send_json_error( __( 'You do not have sufficient permissions to do this action.', 'all-in-one-video-gallery' ) );
+			}
+		}
+
+		// Vars
 		$settings = aiovg_has_bunny_stream_enabled(); // Fetch Bunny Stream API settings
 		$response = array();
 
@@ -283,8 +355,35 @@ class AIOVG_Public_Bunny_Stream {
 	 * @since 4.2.2
 	 */
 	public function ajax_callback_delete_bunny_stream_video() {
-		check_ajax_referer( 'aiovg_ajax_nonce', 'security' ); // Verify the nonce for security
+		// Verify nonce
+		check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
 
+		// Ensure user is logged in
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error( __( 'You do not have sufficient permissions to do this action.', 'all-in-one-video-gallery' ) );
+		}
+
+		// Verify user capability
+		$post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+			
+		if ( $post_id > 0 ) {
+			$post = get_post( $post_id );
+
+			if ( ! $post || 'aiovg_videos' !== $post->post_type ) {
+				wp_send_json_error( __( 'You do not have sufficient permissions to do this action.', 'all-in-one-video-gallery' ) );
+			}
+
+			if ( ! aiovg_current_user_can( 'delete_aiovg_video', $post_id ) ) {
+				wp_send_json_error( __( 'You do not have sufficient permissions to do this action.', 'all-in-one-video-gallery' ) );
+			}
+		} else {
+			// If no post exists yet, this is a cancel-upload cleanup
+			if ( ! aiovg_current_user_can( 'edit_aiovg_videos' ) ) {
+				wp_send_json_error( __( 'You do not have sufficient permissions to do this action.', 'all-in-one-video-gallery' ) );
+			}
+		}
+
+		// Vars
 		$response = array();
 		$video_id = isset( $_POST['video_id'] ) ? sanitize_text_field( $_POST['video_id'] ) : '';
 
@@ -306,7 +405,7 @@ class AIOVG_Public_Bunny_Stream {
 	 * @return bool             True on success, false on failure.
 	 */
 	public function delete_bunny_stream_video( $video_id ) {
-		$settings = (array) get_option( 'aiovg_bunny_stream_settings' );
+		$settings = aiovg_get_option( 'aiovg_bunny_stream_settings' );
 
 		if ( empty( $settings['api_key'] ) || empty( $settings['library_id'] ) ) {
 			return false;

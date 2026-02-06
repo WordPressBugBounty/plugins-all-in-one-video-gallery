@@ -38,7 +38,7 @@ class AIOVG_Admin_Videos {
 		add_submenu_page(
 			'all-in-one-video-gallery',
 			__( 'Add New Video', 'all-in-one-video-gallery' ),
-			__( 'Add New', 'all-in-one-video-gallery' ),
+			__( 'Add New Video', 'all-in-one-video-gallery' ),
 			'manage_aiovg_options',
 			'post-new.php?post_type=aiovg_videos'
 		);
@@ -68,8 +68,8 @@ class AIOVG_Admin_Videos {
 	 * @since 1.0.0
 	 */
 	public function register_post_type() {			
-		$featured_images_settings = get_option( 'aiovg_featured_images_settings', array() );
-		$permalink_settings = get_option( 'aiovg_permalink_settings' );
+		$featured_images_settings = aiovg_get_option( 'aiovg_featured_images_settings' );
+		$permalink_settings = aiovg_get_option( 'aiovg_permalink_settings' );
 		
 		$labels = array(
 			'name'                  => _x( 'Videos', 'Post Type General Name', 'all-in-one-video-gallery' ),
@@ -126,13 +126,14 @@ class AIOVG_Admin_Videos {
 			'exclude_from_search'   => false,
 			'publicly_queryable'    => true,
 			'capability_type'       => 'aiovg_video',
-			'map_meta_cap'          => true,
+			'map_meta_cap'          => true
 		);
 
 		if ( is_array( $permalink_settings ) ) {
 			if ( ! empty( $permalink_settings['video'] ) ) {
 				$args['rewrite'] = array(
-					'slug' => sanitize_title( $permalink_settings['video'] )
+					'slug'       => sanitize_title( $permalink_settings['video'] ),
+					'with_front' => false
 				);
 			}
 
@@ -151,7 +152,8 @@ class AIOVG_Admin_Videos {
 						$slug = urldecode( $slug );
 
 						$args['rewrite'] = array(
-							'slug' => $slug
+							'slug'       => $slug,
+							'with_front' => false
 						);
 
 						$args['has_archive'] = false;
@@ -254,28 +256,52 @@ class AIOVG_Admin_Videos {
 			// Verify that the nonce is valid
     		if ( wp_verify_nonce( $_POST['aiovg_video_metabox_nonce'], 'aiovg_save_video_metabox' ) ) {			
 				// OK to save meta data		
-				$featured_images_settings = get_option( 'aiovg_featured_images_settings' );
+				$featured_images_settings = aiovg_get_option( 'aiovg_featured_images_settings' );
+
+				$private_base_url = aiovg_get_private_base_url();
 
 				$type = isset( $_POST['type'] ) ? sanitize_text_field( $_POST['type'] ) : 'default';
 				update_post_meta( $post_id, 'type', $type );
 				
-				$mp4 = isset( $_POST['mp4'] ) ? aiovg_sanitize_url( $_POST['mp4'] ) : '';
+				delete_post_meta( $post_id, 'is_video_uploaded' );
+
+				$mp4 = isset( $_POST['mp4'] ) ? trim( $_POST['mp4'] ) : '';
+
+				if ( ! empty( $mp4 ) ) {
+					// Check if the URL is a masked uploaded file
+					if ( 0 === strpos( $mp4, $private_base_url ) ) {
+						// Extract the encoded portion
+						$encoded = substr( $mp4, strlen( $private_base_url ) );
+
+						// Decode the masked URL
+						$decoded = aiovg_base64_decode( $encoded );
+
+						// Sanitize the real file URL
+						$mp4 = aiovg_sanitize_url( $decoded );
+
+						update_post_meta( $post_id, 'is_video_uploaded', 1 );
+					} else {
+						// Direct URL entered by the user
+						$mp4 = aiovg_sanitize_url( $mp4 );						
+					}
+				}
+
 				update_post_meta( $post_id, 'mp4', $mp4 );
-				update_post_meta( $post_id, 'mp4_id', attachment_url_to_postid( $mp4, 'video' ) );
-				
+				update_post_meta( $post_id, 'mp4_id', attachment_url_to_postid( $mp4 ) );
+
 				$has_webm = isset( $_POST['has_webm'] ) ? 1 : 0;
 				update_post_meta( $post_id, 'has_webm', $has_webm );
 				
 				$webm = isset( $_POST['webm'] ) ? aiovg_sanitize_url( $_POST['webm'] ) : '';
 				update_post_meta( $post_id, 'webm', $webm );
-				update_post_meta( $post_id, 'webm_id', attachment_url_to_postid( $webm, 'video' ) );
+				update_post_meta( $post_id, 'webm_id', attachment_url_to_postid( $webm ) );
 				
 				$has_ogv = isset( $_POST['has_ogv'] ) ? 1 : 0;
 				update_post_meta( $post_id, 'has_ogv', $has_ogv );
 				
 				$ogv = isset( $_POST['ogv'] ) ? aiovg_sanitize_url( $_POST['ogv'] ) : '';
 				update_post_meta( $post_id, 'ogv', $ogv );
-				update_post_meta( $post_id, 'ogv_id', attachment_url_to_postid( $ogv, 'video' ) );
+				update_post_meta( $post_id, 'ogv_id', attachment_url_to_postid( $ogv ) );
 
 				$quality_level = isset( $_POST['quality_level'] ) ? sanitize_text_field( $_POST['quality_level'] ) : '';
 				update_post_meta( $post_id, 'quality_level', $quality_level );
@@ -289,8 +315,9 @@ class AIOVG_Admin_Videos {
 					foreach ( $sources as $index => $source ) {
 						if ( ! empty( $source ) && ! empty( $quality_levels[ $index ] ) ) {
 							$values[] = array(
-								'quality' => $quality_levels[ $index ],
-								'src'     => $source
+								'src'     => $source,
+								'src_id'  => attachment_url_to_postid( $source ),  
+								'quality' => $quality_levels[ $index ]								
 							);
 						}
 					}
@@ -319,8 +346,22 @@ class AIOVG_Admin_Videos {
 				$facebook = isset( $_POST['facebook'] ) ? aiovg_sanitize_url( $_POST['facebook'] ) : '';
 				update_post_meta( $post_id, 'facebook', $facebook );
 				
+				$embedcode = isset( $_POST['embedcode'] ) ? trim( wp_unslash( $_POST['embedcode'] ) ) : '';
+				
+				if ( $embedcode && filter_var( $embedcode, FILTER_VALIDATE_URL ) ) {
+					$parsed = wp_parse_url( $embedcode );
+
+					// Allow only http / https URLs
+					if ( isset( $parsed['scheme'] ) && in_array( $parsed['scheme'], array( 'http', 'https' ) ) ) {
+						$embedcode = sprintf(
+							'<iframe src="%s" width="560" height="315" frameborder="0" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>',
+							esc_url( $embedcode )
+						);
+					}
+				}
+
 				add_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
-				$embedcode = isset( $_POST['embedcode'] ) ? wp_kses_post( str_replace( "'", '"', $_POST['embedcode'] ) ) : '';
+				$embedcode = ! empty( $embedcode ) ? wp_kses_post( str_replace( "'", '"', $embedcode ) ) : '';
 				update_post_meta( $post_id, 'embedcode', $embedcode );
 				remove_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
 				
@@ -357,12 +398,30 @@ class AIOVG_Admin_Videos {
 				update_post_meta( $post_id, 'download', $download );
 	
 				// Poster Image	
-				$image    = '';
+				delete_post_meta( $post_id, 'is_image_uploaded' );
+
+				$image    = isset( $_POST['image'] ) ? trim( $_POST['image'] ) : '';
 				$image_id = 0;
 
-				if ( ! empty( $_POST['image'] ) ) {
-					$image    = aiovg_sanitize_url( $_POST['image'] );
-					$image_id = attachment_url_to_postid( $image, 'image' );
+				if ( ! empty( $image ) ) {
+					// Check if the URL is a masked uploaded file
+					if ( 0 === strpos( $image, $private_base_url ) ) {
+						// Extract the encoded portion
+						$encoded = substr( $image, strlen( $private_base_url ) );
+
+						// Decode the masked URL
+						$decoded = aiovg_base64_decode( $encoded );
+
+						// Sanitize the real file URL
+						$image = aiovg_sanitize_url( $decoded );
+
+						update_post_meta( $post_id, 'is_image_uploaded', 1 );
+					} else {
+						// Direct URL entered by the user
+						$image = aiovg_sanitize_url( $image );
+					}
+
+					$image_id = attachment_url_to_postid( $image );
 				} else {
 					if ( 'youtube' == $type && ! empty( $youtube ) ) {
 						$image = aiovg_get_youtube_image_url( $youtube );
@@ -424,7 +483,7 @@ class AIOVG_Admin_Videos {
 					foreach ( $sources as $key => $source ) {
 						$track = array(
 							'src'     => aiovg_sanitize_url( $source ),
-							'src_id'  => attachment_url_to_postid( $source, 'track' ),  
+							'src_id'  => attachment_url_to_postid( $source ),  
 							'label'   => sanitize_text_field( $_POST['track_label'][ $key ] ),
 							'srclang' => sanitize_text_field( $_POST['track_srclang'][ $key ] )
 						);
@@ -806,7 +865,7 @@ class AIOVG_Admin_Videos {
 		));
 
 		$columns = aiovg_insert_array_after( 'taxonomy-aiovg_tags', $columns, array(
-			'post_meta' => __( 'Additional Info', 'all-in-one-video-gallery' ),
+			'post_meta' => __( 'Stats', 'all-in-one-video-gallery' ),
 			'post_id'   => __( 'ID', 'all-in-one-video-gallery' )
 		));
 

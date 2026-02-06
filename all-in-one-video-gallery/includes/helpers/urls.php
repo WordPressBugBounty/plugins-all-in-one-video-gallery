@@ -22,7 +22,7 @@ if ( ! defined( 'WPINC' ) ) {
  * @return string       Category page URL.
  */
 function aiovg_get_category_page_url( $term ) {
-	$page_settings = get_option( 'aiovg_page_settings' );
+	$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 	
 	$url = '/';
 	
@@ -48,7 +48,7 @@ function aiovg_get_category_page_url( $term ) {
  * @return string $url     Player page URL.
  */
 function aiovg_get_player_page_url( $post_id = 0, $atts = array() ) {
-	$page_settings = get_option( 'aiovg_page_settings' );
+	$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 
 	$url = '';
 	
@@ -140,7 +140,7 @@ function aiovg_get_player_page_url( $post_id = 0, $atts = array() ) {
  */
 function aiovg_get_search_page_url( $page_id = 0 ) {
 	if ( empty( $page_id ) ) {
-		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 		$page_id = $page_settings['search'];
 	}	
 	
@@ -161,7 +161,7 @@ function aiovg_get_search_page_url( $page_id = 0 ) {
  * @return string       Tag page URL.
  */
 function aiovg_get_tag_page_url( $term ) {
-	$page_settings = get_option( 'aiovg_page_settings' );
+	$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 	
 	$url = '/';
 	
@@ -186,7 +186,7 @@ function aiovg_get_tag_page_url( $term ) {
  * @return string          User videos page URL.
  */
 function aiovg_get_user_videos_page_url( $user_id ) {
-	$page_settings = get_option( 'aiovg_page_settings' );
+	$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 	
 	$url = '/';
 

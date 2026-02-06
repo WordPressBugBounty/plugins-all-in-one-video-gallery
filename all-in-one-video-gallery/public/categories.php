@@ -47,7 +47,7 @@ class AIOVG_Public_Categories {
 	 */
 	public function ajax_callback_load_categories() {
 		// Security check
-		check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
+		check_ajax_referer( 'aiovg_public_ajax_nonce', 'security' );
 
 		// Proceed safe
 		$json = array();
@@ -74,7 +74,7 @@ class AIOVG_Public_Categories {
 		wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-public' );
 
 		if ( 'dropdown' == $template ) {
-			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-public' );
+			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-categories' );
 		}
 		
 		// Process output
@@ -196,7 +196,7 @@ class AIOVG_Public_Categories {
 	 */
 	public function get_defaults() {	
 		if ( empty( $this->defaults ) ) {
-			$pagination_settings = get_option( 'aiovg_pagination_settings', array() ); 
+			$pagination_settings = aiovg_get_option( 'aiovg_pagination_settings' ); 
 
 			$fields = aiovg_get_shortcode_fields();
 

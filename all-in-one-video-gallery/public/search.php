@@ -39,7 +39,7 @@ class AIOVG_Public_Search {
 	 */
 	public function run_shortcode_search_form( $atts ) {	
 		// Vars
-		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 		
 		$attributes = array(
 			'template'          => isset( $atts['template'] ) ? sanitize_text_field( $atts['template'] ) : 'horizontal',
@@ -75,7 +75,7 @@ class AIOVG_Public_Search {
 		wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-public' );
 
 		if ( empty( $attributes['has_search_button'] ) ) {
-			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-public' );
+			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-search' );
 		}
 
 		if ( ! empty( $attributes['has_category'] ) || ! empty( $attributes['has_tag'] ) ) {

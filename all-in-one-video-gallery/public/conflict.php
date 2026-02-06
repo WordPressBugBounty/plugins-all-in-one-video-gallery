@@ -28,7 +28,7 @@ class AIOVG_Public_Conflict {
 	 * @param bool  "true" to stop optimizing, "false" to optimize.
 	 */
 	public function noptimize() {
-		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 
 		if ( $page_settings['player'] > 0 ) {
 			$post = get_post( $page_settings['player'] );
@@ -50,7 +50,7 @@ class AIOVG_Public_Conflict {
 	 * @return bool
 	 */
 	public function smush( $skip, $src ) {
-		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 		$post_id = (int) get_query_var( 'aiovg_video', 0 );
 
 		if ( $page_settings['player'] > 0 ) {

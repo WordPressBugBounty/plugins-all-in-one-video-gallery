@@ -434,7 +434,7 @@ if ( isset( $sources['dash'] ) ) {
 // Share
 $has_share = isset( $_GET['share'] ) ? (int) $_GET['share'] : isset( $player_settings['controls']['share'] );
 if ( $has_share ) {
-	$socialshare_settings = get_option( 'aiovg_socialshare_settings' );
+	$socialshare_settings = aiovg_get_option( 'aiovg_socialshare_settings' );
 
 	$share_url = $post_url;
 
@@ -686,15 +686,15 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
             text-decoration: none;
         }
 
-		/* Custom Theme */
-		.aiovg-player-theme-custom .plyr__control--overlaid {
+		.aiovg-player .plyr__control--overlaid {
 			--plyr-control-spacing: 15px;
 		}
 
-		.aiovg-player-theme-custom .plyr__control--overlaid svg {
+		.aiovg-player .plyr__control--overlaid svg {
 			--plyr-control-icon-size: 27px;
 		}		
 
+		/* Custom Theme */
 		.aiovg-player-theme-custom .plyr__controls {
 			flex-wrap: wrap;
 			justify-content: flex-start;
@@ -943,6 +943,13 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 			max-width: 150px;
 		}		
 
+		/* Tech: YouTube */
+		.aiovg-hide-youtube-logo .plyr--youtube .plyr__video-wrapper iframe {
+			pointer-events: none;
+			top: -50% !important;
+			height: 200% !important;			
+		}
+
 		/* Custom ContextMenu */
 		.aiovg-player .plyr__contextmenu {
             position: absolute;
@@ -974,7 +981,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 	
 	<?php do_action( 'aiovg_iframe_vidstack_player_head', $settings, $attributes, $sources, $tracks ); ?>
 </head>
-<body class="aiovg-player aiovg-player-theme-<?php echo esc_attr( $player_theme ); ?>">
+<body class="aiovg-player aiovg-player-theme-<?php echo esc_attr( $player_theme ); ?><?php if ( ! empty( $player_settings['hide_youtube_logo'] ) ) : ?> aiovg-hide-youtube-logo<?php endif; ?>">
 	<?php
 	// YouTube
 	if ( isset( $sources['youtube'] ) ) {
@@ -1111,7 +1118,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 
 			var duration = player.duration || 0;
 
-			xmlhttp.open( 'GET', '<?php echo admin_url( 'admin-ajax.php' ); ?>?action=aiovg_update_views_count&post_id=<?php echo $post_id; ?>&duration=' + duration + '&security=<?php echo wp_create_nonce( 'aiovg_ajax_nonce' ); ?>', true );
+			xmlhttp.open( 'GET', '<?php echo admin_url( 'admin-ajax.php' ); ?>?action=aiovg_update_views_count&post_id=<?php echo $post_id; ?>&duration=' + duration + '&security=<?php echo wp_create_nonce( 'aiovg_public_ajax_nonce' ); ?>', true );
 			xmlhttp.send();							
 		}
 

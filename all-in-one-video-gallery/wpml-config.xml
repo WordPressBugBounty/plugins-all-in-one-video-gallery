@@ -36,6 +36,9 @@
         <custom-term-field action="copy-once">exclude_video_form</custom-term-field> 
     </custom-term-fields>
     <admin-texts>
+        <key name="aiovg_related_videos_settings">
+            <key name="title"/>
+        </key>
         <key name="aiovg_brand_settings">
             <key name="logo_link"/>
             <key name="copyright_text"/>

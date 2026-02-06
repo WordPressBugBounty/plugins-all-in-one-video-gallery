@@ -9,7 +9,7 @@
  * @package All_In_One_Video_Gallery
  */
 
-$page_settings = get_option( 'aiovg_page_settings' );
+$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 
 $category_url = '/';
 if ( ! empty( $page_settings['category'] ) ) {

@@ -233,7 +233,7 @@
 				playButton.type = 'button';
 				playButton.className = 'plyr__control plyr__control--overlaid';
 				playButton.style.display = 'none';
-				playButton.innerHTML = '<svg aria-hidden="true" focusable="false"><use xlink:href="#plyr-play"></use></svg><span class="plyr__sr-only">Play</span>';
+				playButton.innerHTML = '<svg aria-hidden="true" focusable="false"><use href="' + this._params.player.iconUrl + '#plyr-play"></use></svg><span class="plyr__sr-only">Play</span>';
 				
 				this.querySelector( '.plyr__ads' ).appendChild( playButton );                        
 

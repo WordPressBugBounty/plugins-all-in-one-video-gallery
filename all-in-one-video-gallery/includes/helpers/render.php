@@ -35,6 +35,7 @@ function aiovg_dropdown_terms( $args ) {
 	} 
 
 	$input_placeholder = isset( $args['show_option_none'] ) ? $args['show_option_none'] : '';
+	$stay_open = isset( $args['stay_open'] ) ? $args['stay_open'] : 0;
 	$show_search_threshold = isset( $args['show_search_threshold'] ) ? $args['show_search_threshold'] : 20;
 	
 	unset( $args['show_option_none'], $args['option_none_value'] );
@@ -50,9 +51,9 @@ function aiovg_dropdown_terms( $args ) {
 	$html .= sprintf( '<input type="text" class="aiovg-dropdown-input aiovg-form-control" placeholder="%s" readonly />', esc_attr( $input_placeholder )	);	
 	$html .= '<div class="aiovg-dropdown" style="display: none;">';
 
-	$html .= sprintf( '<div class="aiovg-dropdown-search" hidden data-show_search_threshold="%d">', $show_search_threshold );
+	$html .= sprintf( '<div class="aiovg-dropdown-search" hidden data-stay_open="%d" data-show_search_threshold="%d">', $stay_open, $show_search_threshold );
 	$html .= sprintf( '<input type="text" placeholder="%s..." />', esc_html__( 'Search', 'all-in-one-video-gallery' ) );
-	$html .= '<button type="button" hidden>';
+	$html .= '<button type="button" tabindex="-1" hidden>';
 	$html .= '<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="aiovg-flex-shrink-0">';
 	$html .= '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>';
 	$html .= '</svg>';
@@ -83,7 +84,7 @@ function aiovg_dropdown_terms( $args ) {
  * @return string       Category breadcrumbs.
  */
 function aiovg_get_category_breadcrumbs( $term = null ) {
-	$page_settings = get_option( 'aiovg_page_settings' );
+	$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 
 	$id = $page_settings['category'];
 	if ( empty( $id ) )	return '';
@@ -186,7 +187,7 @@ function aiovg_get_like_button( $post_id ) {
 		$liked    = (array) get_user_meta( $user_id, 'aiovg_videos_likes' );	
 		$disliked = (array) get_user_meta( $user_id, 'aiovg_videos_dislikes' );		
 	} else {
-		$likes_settings = get_option( 'aiovg_likes_settings' );
+		$likes_settings = aiovg_get_option( 'aiovg_likes_settings' );
 
 		$liked    = array();		
 		$disliked = array();
@@ -280,7 +281,7 @@ function aiovg_wrap_with_filters( $content, $attributes ) {
 	wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-public' );
 
 	if ( 'search' != $attributes['filters_mode'] ) {
-		wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-public' );
+		wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-search' );
 	}
 
 	if ( ! empty( $attributes['has_category'] ) || ! empty( $attributes['has_tag'] ) ) {
@@ -474,7 +475,7 @@ function the_aiovg_pagination( $numpages = '', $pagerange = '', $paged = '', $at
   	}
 	
 	if ( empty( $pagerange ) ) {
-		$pagination_settings = get_option( 'aiovg_pagination_settings', array() );
+		$pagination_settings = aiovg_get_option( 'aiovg_pagination_settings' );
 	
 		$pagerange = isset( $pagination_settings['mid_size'] ) ? (int) $pagination_settings['mid_size'] : 2;
 					
@@ -556,6 +557,46 @@ function the_aiovg_pagination( $numpages = '', $pagerange = '', $paged = '', $at
 }
 
 /**
+ * Display a notice if PHP limits are below recommended values.
+ *
+ * @since 4.5.2
+ */
+function the_aiovg_php_server_limits_notice() {
+    $recommended_memory = 256; // MB
+    $recommended_time   = 120; // seconds
+
+    $current_memory = (int) str_replace( 'M', '', ini_get( 'memory_limit' ) );
+    $current_time   = (int) ini_get( 'max_execution_time' );
+
+    $errors = array();
+
+    if ( $current_memory < $recommended_memory ) {
+        $errors[] = sprintf(
+            __( 'Your PHP memory limit is %dMB. It is recommended to have at least %dMB for smooth import/export operations.', 'all-in-one-video-gallery' ),
+            $current_memory,
+            $recommended_memory
+        );
+    }
+
+    if ( $current_time < $recommended_time ) {
+        $errors[] = sprintf(
+            __( 'Your PHP max execution time is %d seconds. It is recommended to have at least %d seconds to avoid timeouts during batch processing.', 'all-in-one-video-gallery' ),
+            $current_time,
+            $recommended_time
+        );
+    }
+
+    if ( ! empty( $errors ) ) {
+        foreach ( $errors as $error ) {
+            printf(
+                '<div class="aiovg-notice aiovg-notice-error">%s</div>',
+                esc_html( $error )
+            );
+        }
+    }
+}
+
+/**
  * Display a video player.
  * 
  * @since 1.0.0
@@ -578,7 +619,7 @@ function the_aiovg_socialshare_buttons() {
 
 	global $post;
 	
-	$socialshare_settings = get_option( 'aiovg_socialshare_settings' );
+	$socialshare_settings = aiovg_get_option( 'aiovg_socialshare_settings' );
 	
 	// Get current page url
 	$url = get_permalink();

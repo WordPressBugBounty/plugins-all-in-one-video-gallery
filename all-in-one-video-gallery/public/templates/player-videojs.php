@@ -342,6 +342,11 @@ if ( isset( $sources['youtube'] ) ) {
 	if ( isset( $queries['end'] ) ) {
 		$settings['end'] = (int) $queries['end'];
 	}
+
+	// Hide YouTube Logo
+	if ( ! empty( $player_settings['hide_youtube_logo'] ) ) {
+		$attributes['class'] .= ' vjs-hide-youtube-logo';
+	}
 }
 
 // Vimeo
@@ -360,7 +365,7 @@ if ( isset( $sources['vimeo'] ) ) {
 // Share
 $has_share = isset( $_GET['share'] ) ? (int) $_GET['share'] : isset( $player_settings['controls']['share'] );
 if ( $has_share ) {
-	$socialshare_settings = get_option( 'aiovg_socialshare_settings' );
+	$socialshare_settings = aiovg_get_option( 'aiovg_socialshare_settings' );
 
 	$share_url = $post_url;
 
@@ -729,7 +734,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 		.aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li:focus {
 			margin-bottom: 1px;
 			border-radius: 2px;			
-			background-color: rgba( 0, 0, 0, 0.8 );			
+			background-color: rgba( 43, 51, 63, 0.7 );
 			padding: 0.5em;
 			color: #fff;
 			text-transform: initial;
@@ -737,13 +742,13 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 
 		.aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li:hover,
 		.aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li:focus {
-			background-color: #000;
+			background-color: rgba( 0, 0, 0, 0.8 );
 		}
 
 		.aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li.vjs-selected,
 		.aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li.vjs-selected:hover,
 		.aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li.vjs-selected:focus {			
-			background-color: #fff;	
+			background-color: rgba( 255, 255, 255, 0.9 );
 			color: #000;
 		}
 
@@ -1182,6 +1187,12 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 			top: -3.4em;
 		}
 
+		/* Tech: YouTube */
+		.aiovg-player .vjs-hide-youtube-logo iframe.vjs-tech {
+			top: -50% !important;
+			height: 200% !important;
+		}
+
 		/* Custom ContextMenu */
 		#aiovg-contextmenu {
             position: absolute;
@@ -1503,7 +1514,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 
 			var duration = player.duration() || 0;
 
-			xmlhttp.open( 'GET', '<?php echo admin_url( 'admin-ajax.php' ); ?>?action=aiovg_update_views_count&post_id=<?php echo $post_id; ?>&duration=' + duration + '&security=<?php echo wp_create_nonce( 'aiovg_ajax_nonce' ); ?>', true );
+			xmlhttp.open( 'GET', '<?php echo admin_url( 'admin-ajax.php' ); ?>?action=aiovg_update_views_count&post_id=<?php echo $post_id; ?>&duration=' + duration + '&security=<?php echo wp_create_nonce( 'aiovg_public_ajax_nonce' ); ?>', true );
 			xmlhttp.send();							
 		}		
 

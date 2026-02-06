@@ -134,7 +134,7 @@ class AIOVG_Widget_Video extends WP_Widget {
 	 * @param array $instance The array of keys and values for the widget.
 	 */
 	public function form( $instance ) {
-		$player_settings = get_option( 'aiovg_player_settings' );
+		$player_settings = aiovg_get_option( 'aiovg_player_settings' );
 		
 		// Define the array of defaults
 		$defaults = array(

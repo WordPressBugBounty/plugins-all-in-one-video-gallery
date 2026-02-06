@@ -9,10 +9,10 @@
  * @package All_In_One_Video_Gallery
  */
  
-$player_settings  = get_option( 'aiovg_player_settings' );
-$privacy_settings = get_option( 'aiovg_privacy_settings' );
-$brand_settings   = get_option( 'aiovg_brand_settings', array() );
-$general_settings = get_option( 'aiovg_general_settings' );
+$player_settings  = aiovg_get_option( 'aiovg_player_settings' );
+$privacy_settings = aiovg_get_option( 'aiovg_privacy_settings' );
+$brand_settings   = aiovg_get_option( 'aiovg_brand_settings' );
+$general_settings = aiovg_get_option( 'aiovg_general_settings' );
 
 $post_id    = (int) get_query_var( 'aiovg_video', 0 );
 $post_type  = 'page';

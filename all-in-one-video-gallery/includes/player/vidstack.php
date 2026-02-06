@@ -93,7 +93,7 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 			'post_id'     => $this->post_id,
 			'post_type'   => sanitize_text_field( $this->post_type ),
 			'ajax_url'    => sanitize_url( admin_url( 'admin-ajax.php' ) ),
-			'ajax_nonce'  => sanitize_text_field( wp_create_nonce( 'aiovg_ajax_nonce' ) ),
+			'ajax_nonce'  => wp_create_nonce( 'aiovg_public_ajax_nonce' ),
 			'lazyloading' => (int) $player_settings['lazyloading'],
 			'player'  => array(
 				'iconUrl' => AIOVG_PLUGIN_URL . 'vendor/vidstack/plyr.svg',
@@ -599,6 +599,10 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 			'style' => 'padding-bottom: ' . (float) $player_settings['ratio'] . '%;',
 			'reference_id' => $this->reference_id
 		);		
+
+		if ( ! empty( $player_settings['hide_youtube_logo'] ) ) { // Hide YouTube Logo
+			$attributes['class'] .= ' aiovg-hide-youtube-logo';
+		}
 
 		if ( isset( $settings['cookie_consent'] ) ) {
 			$attributes['cookieconsent'] = '';

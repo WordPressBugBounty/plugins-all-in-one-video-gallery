@@ -1,6 +1,6 @@
 {
 	"name": "aiovg-blocks",
-	"version": "4.3.7",
+	"version": "4.5.2",
 	"private": true,
 	"scripts": {
 		"build": "wp-scripts build --webpack-copy-php",

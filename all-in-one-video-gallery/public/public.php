@@ -47,7 +47,7 @@ class AIOVG_Public {
 		
 		// Redirect default archive to custom archive page (if configured)
 		if ( is_post_type_archive( 'aiovg_videos' ) ) {
-			$permalink_settings = get_option( 'aiovg_permalink_settings' );
+			$permalink_settings = aiovg_get_option( 'aiovg_permalink_settings' );
 
 			if ( is_array( $permalink_settings ) && ! empty( $permalink_settings['video_archive_page'] ) ) {
 				$page_id  = (int) $permalink_settings['video_archive_page'];
@@ -72,8 +72,8 @@ class AIOVG_Public {
 	 * @since 1.0.0
 	 */
 	public function init() {
-		$page_settings      = get_option( 'aiovg_page_settings' );
-		$permalink_settings = get_option( 'aiovg_permalink_settings' );
+		$page_settings      = aiovg_get_option( 'aiovg_page_settings' );
+		$permalink_settings = aiovg_get_option( 'aiovg_permalink_settings' );
 
 		$site_url = home_url();
 		
@@ -97,8 +97,8 @@ class AIOVG_Public {
 					$slug = trim( $slug, '/' );
 					$slug = urldecode( $slug );		
 					
-					add_rewrite_rule( "$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&aiovg_category=$matches[1]&paged=$matches[2]', 'top' );
-					add_rewrite_rule( "$slug/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_category=$matches[1]', 'top' );
+					add_rewrite_rule( "^$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&aiovg_category=$matches[1]&paged=$matches[2]', 'top' );
+					add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_category=$matches[1]', 'top' );
 				}
 			}
 		}
@@ -116,8 +116,8 @@ class AIOVG_Public {
 					$slug = trim( $slug, '/' );
 					$slug = urldecode( $slug );		
 					
-					add_rewrite_rule( "$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&aiovg_tag=$matches[1]&paged=$matches[2]', 'top' );
-					add_rewrite_rule( "$slug/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_tag=$matches[1]', 'top' );
+					add_rewrite_rule( "^$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&aiovg_tag=$matches[1]&paged=$matches[2]', 'top' );
+					add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_tag=$matches[1]', 'top' );
 				}
 			}
 		}
@@ -135,8 +135,8 @@ class AIOVG_Public {
 					$slug = trim( $slug, '/' );
 					$slug = urldecode( $slug );		
 					
-					add_rewrite_rule( "$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&aiovg_user=$matches[1]&paged=$matches[2]', 'top' );
-					add_rewrite_rule( "$slug/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_user=$matches[1]', 'top' );
+					add_rewrite_rule( "^$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&aiovg_user=$matches[1]&paged=$matches[2]', 'top' );
+					add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_user=$matches[1]', 'top' );
 				}
 			}
 		}
@@ -154,7 +154,7 @@ class AIOVG_Public {
 					$slug = trim( $slug, '/' );
 					$slug = urldecode( $slug );		
 					
-					add_rewrite_rule( "$slug/id/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_type=id&aiovg_video=$matches[1]', 'top' );
+					add_rewrite_rule( "^$slug/id/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_type=id&aiovg_video=$matches[1]', 'top' );
 				}
 			}
 		}
@@ -172,7 +172,10 @@ class AIOVG_Public {
 					$slug = trim( $slug, '/' );
 					$slug = urldecode( $slug );		
 					
-					add_rewrite_rule( "$slug/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&paged=$matches[1]', 'top' );
+					add_rewrite_rule( "^$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?post_type=aiovg_videos&name=$matches[1]&paged=$matches[2]', 'top' );
+					add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?post_type=aiovg_videos&name=$matches[1]', 'top' );
+					
+					add_rewrite_rule( "^$slug/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&paged=$matches[1]', 'top' );
 				}
 			}
 		}
@@ -184,7 +187,7 @@ class AIOVG_Public {
 	 * @since 1.0.0
 	 */
 	public function register_styles() {
-		$player_settings = get_option( 'aiovg_player_settings' );
+		$player_settings = aiovg_get_option( 'aiovg_player_settings' );
 
 		wp_register_style( 
 			AIOVG_PLUGIN_SLUG . '-magnific-popup', 
@@ -235,10 +238,10 @@ class AIOVG_Public {
 	 * @since 1.0.0
 	 */
 	public function register_scripts() {
-		$likes_settings = get_option( 'aiovg_likes_settings' );
+		$likes_settings = aiovg_get_option( 'aiovg_likes_settings' );
 
 		$ajax_url   = admin_url( 'admin-ajax.php' );
-		$ajax_nonce = wp_create_nonce( 'aiovg_ajax_nonce' );
+		$ajax_nonce = wp_create_nonce( 'aiovg_public_ajax_nonce' );
 		$user_id    = get_current_user_id();
 
 		$scroll_to_top_offset = 20;
@@ -254,6 +257,31 @@ class AIOVG_Public {
 			array( 'strategy' => 'defer' ) 
 		);		
 		
+		wp_register_script( 
+			AIOVG_PLUGIN_SLUG . '-categories', 
+			AIOVG_PLUGIN_URL . 'public/assets/js/categories.min.js', 
+			array( 'jquery' ), 
+			AIOVG_PLUGIN_VERSION, 
+			array( 'strategy' => 'defer' ) 
+		);
+
+		wp_register_script( 
+			AIOVG_PLUGIN_SLUG . '-search', 
+			AIOVG_PLUGIN_URL . 'public/assets/js/search.min.js', 
+			array( 'jquery' ), 
+			AIOVG_PLUGIN_VERSION, 
+			array( 'strategy' => 'defer' ) 
+		);
+
+		wp_localize_script( 
+			AIOVG_PLUGIN_SLUG . '-search', 
+			'aiovg_search', 
+			array(
+				'ajax_url'   => $ajax_url,
+				'ajax_nonce' => $ajax_nonce
+			) 
+		);
+
 		wp_register_script( 
 			AIOVG_PLUGIN_SLUG . '-pagination', 
 			AIOVG_PLUGIN_URL . 'public/assets/js/pagination.min.js', 
@@ -356,6 +384,22 @@ class AIOVG_Public {
 		);
 		
 		wp_register_script( 
+			AIOVG_PLUGIN_SLUG . '-chapters', 
+			AIOVG_PLUGIN_URL . 'public/assets/js/chapters.min.js', 
+			array( 'jquery' ), 
+			AIOVG_PLUGIN_VERSION, 
+			array( 'strategy' => 'defer' ) 
+		);
+
+		wp_localize_script( 
+			AIOVG_PLUGIN_SLUG . '-chapters', 
+			'aiovg_chapters', 
+			array(
+				'scroll_to_top_offset' => $scroll_to_top_offset
+			) 
+		);
+
+		wp_register_script( 
 			AIOVG_PLUGIN_SLUG . '-public', 
 			AIOVG_PLUGIN_URL . 'public/assets/js/public.min.js', 
 			array( 'jquery' ), 
@@ -367,42 +411,58 @@ class AIOVG_Public {
 			AIOVG_PLUGIN_SLUG . '-public', 
 			'aiovg_public', 
 			array(
-				'plugin_url'           => AIOVG_PLUGIN_URL,
-				'plugin_version'       => AIOVG_PLUGIN_VERSION,
-				'ajax_url'             => $ajax_url,
-				'ajax_nonce'           => $ajax_nonce,
-				'scroll_to_top_offset' => $scroll_to_top_offset,
-				'i18n'                 => array(				
-					'no_tags_found' => __( 'No tags found', 'all-in-one-video-gallery' )
+				'plugin_url'             => AIOVG_PLUGIN_URL,
+				'plugin_version'         => AIOVG_PLUGIN_VERSION,
+				'user_id'                => $user_id,
+				'ajax_url'               => $ajax_url,
+				'ajax_nonce'             => $ajax_nonce,				
+				'show_like_button'       => ( ! empty( $likes_settings['like_button'] ) ? 1 : 0 ),
+				'show_dislike_button'    => ( ! empty( $likes_settings['dislike_button'] ) ? 1 : 0 ),
+				'login_required_to_vote' => ( ! empty( $likes_settings['login_required_to_vote'] ) ? 1 : 0 ),
+				'scroll_to_top_offset'   => $scroll_to_top_offset,
+				'i18n'                   => array(				
+					'now_playing'          => __( 'Now Playing', 'all-in-one-video-gallery' ),
+					'no_tags_found'        => __( 'No tags found', 'all-in-one-video-gallery' ),
+					'likes'                => __( 'Likes', 'all-in-one-video-gallery' ),
+					'dislikes'             => __( 'Dislikes', 'all-in-one-video-gallery' ),
+					'alert_login_required' => __( 'Sorry, you must login to vote.', 'all-in-one-video-gallery' )
 				)
 			) 
 		);		
 	}	
 
 	/**
-	 * Set MySQL's RAND function seed value in a cookie.
+	 * Enqueue frontend CSS and JavaScript files based on the "force_load_assets" setting.
 	 *
-	 * @since 3.9.3
+	 * @since 4.7.0
 	 */
-	public function set_mysql_rand_seed_value() {
-		$privacy_settings = get_option( 'aiovg_privacy_settings' );
-		
-		if ( isset( $privacy_settings['disable_cookies'] ) && isset( $privacy_settings['disable_cookies']['aiovg_rand_seed'] ) ) {
-			unset( $_COOKIE['aiovg_rand_seed'] );
-			return false;
+	public function enqueue_assets() {
+		if ( is_admin() ) {
+			return;
 		}
-		
-		if ( headers_sent() ) {
-			return false;
-		}
-		
-		$paged = aiovg_get_page_number();
-		if ( ! isset( $_COOKIE['aiovg_rand_seed'] ) || $paged == 1 ) {
-			$seed = wp_rand();
-			setcookie( 'aiovg_rand_seed', $seed, time() + ( 86400 * 1 ), COOKIEPATH, COOKIE_DOMAIN );
 
-			// Update $_COOKIE for immediate use in this request
-			$_COOKIE['aiovg_rand_seed'] = $seed;
+		$general_settings = aiovg_get_option( 'aiovg_general_settings' );
+		if ( ! isset( $general_settings['force_load_assets'] ) ) {
+			return;
+		}
+
+		// Styles
+		if ( isset( $general_settings['force_load_assets']['css'] ) ) {
+			wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-icons' ); 
+			wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-public' ); 
+		}
+
+		// Scripts
+		if ( isset( $general_settings['force_load_assets']['js'] ) ) {
+			if ( is_singular( 'aiovg_videos' ) ) {
+				$player_settings = aiovg_get_option( 'aiovg_player_settings' );	
+
+				if ( isset( $player_settings['controls']['chapters'] ) ) {
+					wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-chapters' );
+				}
+			}
+
+			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-public' );
 		}
 	}
 
@@ -424,12 +484,39 @@ class AIOVG_Public {
 	}
 
 	/**
+	 * Set MySQL's RAND function seed value in a cookie.
+	 *
+	 * @since 3.9.3
+	 */
+	public function set_mysql_rand_seed_value() {
+		$privacy_settings = aiovg_get_option( 'aiovg_privacy_settings' );
+		
+		if ( isset( $privacy_settings['disable_cookies'] ) && isset( $privacy_settings['disable_cookies']['aiovg_rand_seed'] ) ) {
+			unset( $_COOKIE['aiovg_rand_seed'] );
+			return false;
+		}
+		
+		if ( headers_sent() ) {
+			return false;
+		}
+		
+		$paged = aiovg_get_page_number();
+		if ( ! isset( $_COOKIE['aiovg_rand_seed'] ) || $paged == 1 ) {
+			$seed = wp_rand();
+			setcookie( 'aiovg_rand_seed', $seed, time() + ( 86400 * 1 ), COOKIEPATH, COOKIE_DOMAIN );
+
+			// Update $_COOKIE for immediate use in this request
+			$_COOKIE['aiovg_rand_seed'] = $seed;
+		}
+	}
+
+	/**
 	 * Flush rewrite rules when it's necessary.
 	 *
 	 * @since 1.0.0
 	 */
 	 public function maybe_flush_rules() {
-		$general_settings = get_option( 'aiovg_general_settings' );
+		$general_settings = aiovg_get_option( 'aiovg_general_settings' );
 
 		if ( empty( $general_settings['maybe_flush_rewrite_rules'] ) ) {
 			return false;
@@ -475,7 +562,7 @@ class AIOVG_Public {
 		
 		if ( ! isset( $post ) ) return $title;
 		
-		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 		$site_name     = sanitize_text_field( get_bloginfo( 'name' ) );
 		$custom_title  = '';		
 		
@@ -525,7 +612,7 @@ class AIOVG_Public {
 		
 		if ( ! isset( $post ) ) return $title;
 		
-		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 		
 		// Get category page title
 		if ( $post->ID == $page_settings['category'] ) {			
@@ -566,8 +653,8 @@ class AIOVG_Public {
 			
 		// Facebook OG tags & Twitter Cards
 		if ( isset( $post ) && is_singular( 'aiovg_videos' ) ) {
-			$video_settings = get_option( 'aiovg_video_settings' );
-			$socialshare_settings = get_option( 'aiovg_socialshare_settings' );
+			$video_settings = aiovg_get_option( 'aiovg_video_settings' );
+			$socialshare_settings = aiovg_get_option( 'aiovg_socialshare_settings' );
 
 			if ( isset( $video_settings['display']['share'] ) && ! empty( $socialshare_settings['open_graph_tags'] ) ) {
 				$site_name = get_bloginfo( 'name' );
@@ -632,8 +719,8 @@ class AIOVG_Public {
 		}
 		
 		// Custom common CSS code
-		$player_settings  = get_option( 'aiovg_player_settings' );
-		$general_settings = get_option( 'aiovg_general_settings' );
+		$player_settings  = aiovg_get_option( 'aiovg_player_settings' );
+		$general_settings = aiovg_get_option( 'aiovg_general_settings' );
 
 		$player_theme_color = ! empty( $player_settings['theme_color'] ) ? $player_settings['theme_color'] : '#00b2ff';
 
@@ -641,6 +728,7 @@ class AIOVG_Public {
 			.aiovg-player {
 				display: block;
 				position: relative;
+				border-radius: 3px;
 				padding-bottom: 56.25%;
 				width: 100%;
 				height: 0;	
@@ -748,7 +836,7 @@ class AIOVG_Public {
 			}
 		}
 		
-		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 		
 		// Change category page title
 		if ( $post_id == $page_settings['category'] ) {		
@@ -847,7 +935,7 @@ class AIOVG_Public {
 			global $wp_the_query;
 			
 			if ( $post->ID == $wp_the_query->get_queried_object_id() ) {
-				$featured_images_settings = get_option( 'aiovg_featured_images_settings' );
+				$featured_images_settings = aiovg_get_option( 'aiovg_featured_images_settings' );
 
 				if ( ! empty( $featured_images_settings['hide_on_single_video_pages'] ) ) {
 					return false;
@@ -887,7 +975,7 @@ class AIOVG_Public {
 			global $wp_the_query;
 			
 			if ( $post_id == $wp_the_query->get_queried_object_id() ) {
-				$featured_images_settings = get_option( 'aiovg_featured_images_settings' );
+				$featured_images_settings = aiovg_get_option( 'aiovg_featured_images_settings' );
 
 				if ( ! empty( $featured_images_settings['hide_on_single_video_pages'] ) ) {
 					return '';
@@ -963,7 +1051,7 @@ class AIOVG_Public {
 	 * @since 1.0.0
 	 */
 	public function set_gdpr_cookie() {	
-		check_ajax_referer( 'aiovg_ajax_nonce', 'security' );	
+		check_ajax_referer( 'aiovg_public_ajax_nonce', 'security' );	
 		setcookie( 'aiovg_gdpr_consent', 1, time() + ( 86400 * 30 ), COOKIEPATH, COOKIE_DOMAIN );		
 		wp_send_json_success();			
 	}

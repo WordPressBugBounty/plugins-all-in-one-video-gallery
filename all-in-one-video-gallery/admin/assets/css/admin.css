@@ -11,6 +11,10 @@
 	max-width: 100%;
 }
 
+.aiovg .description {
+	color: #646970;
+}
+
 .aiovg .spinner {
 	float: none;
 	visibility: visible;
@@ -19,6 +23,20 @@
 
 .aiovg .aiovg-toggle-fields {
 	display: none;
+}
+
+/* Separator for custom plugin submenu */
+ #toplevel_page_all-in-one-video-gallery .wp-submenu a[href*="all-in-one-video-gallery-separator"] { 
+	pointer-events: none; 
+	margin: 6px 0; 
+	border-top: 1px solid rgba( 255, 255, 255, 0.15 );
+	box-shadow: 0 1px 1px rgba( 0, 0, 0, 0.08 );
+	background: transparent; 
+	cursor: default; 
+	padding: 0 !important; 
+	height: 1px; 
+	line-height: 0; 
+	font-size: 0;	
 }
 
 /* Player */
@@ -38,6 +56,26 @@
 	padding: 0;
 	width: 100%;
 	height: 100%;
+}
+
+/* Tabs */
+.aiovg .nav-tab {
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+	padding: 5px 15px;
+}
+
+@media screen and (max-width: 782px) {
+	.aiovg h2.nav-tab-wrapper {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.5em;
+	}
+
+	.aiovg h2.nav-tab-wrapper .nav-tab {
+		margin: 0;
+	}
 }
 
 /* Block Editor */
@@ -205,10 +243,6 @@
 
 .aiovg .aiovg-no-border {
 	border: none;
-}
-
-.aiovg .aiovg-shadow {
-	box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 }
 
 .aiovg .aiovg-text-left {
@@ -384,48 +418,66 @@
 }
 
 /* Accordion (HTML <details> Tag) */
-.aiovg details.aiovg-accordion {
-	transition: background-color 0.3s ease;
-	margin-bottom: 8px;
-    border: 1px solid #ddd;
-	border-radius: 4px;
-    background-color: #f9f9f9;
-    cursor: pointer;	    
+.aiovg details {
+	transition: box-shadow 0.3s ease;
+	margin-bottom: 0.5em;
+    border: 1px solid #c3c4c7;
+	border-radius: 0.25em;
+    background-color: #fff;
 }
 
-.aiovg details.aiovg-accordion:hover {
-    background-color: #f1f1f1;
+.aiovg details:hover {
+    box-shadow: 0 1px 4px rgba( 0, 0, 0, 0.08 );
 }
 
-.aiovg details.aiovg-accordion[open] {
-	border-color: #bbb;
-    background-color: #fff;    
-}
-
-.aiovg details.aiovg-accordion > summary {
+.aiovg details > summary {
+	display: flex;
+	align-items: center;
+	gap: 0.25em;
 	outline: none;
 	cursor: pointer;
-	padding: 12px 15px;
-	color: #333;
-    font-weight: 600;    
+	padding: 0.75em 1em;
+	list-style: none; 
+	color: #333;	
 }
 
-.aiovg details.aiovg-accordion > div,
-.aiovg details.aiovg-accordion > ol {
+.aiovg details[open] > summary {
+	border-bottom: 1px solid #bbb;
+}
+
+.aiovg details > summary::after {
+	display: inline-block; 
+	transform-origin: 50% 50%;
+    transform: rotate(0deg); 
+	transition: transform 0.2s ease;
+	margin-left: auto;
+	width: 16px;
+	height: 16px;
+	vertical-align: middle;
+	line-height: 1;
+	font-family: dashicons;
+	font-size: 16px;
+	content: "\f347";
+}
+
+.aiovg details[open] > summary::after {
+	transform: rotate(180deg);
+}
+
+.aiovg details > div,
+.aiovg details > ol {
 	margin: 0;
-	padding: 12px 15px;
-	line-height: 1.6;
-    font-size: 14px;
+	padding: 1em 1.25em;
     color: #555;    
 }
 
-.aiovg details.aiovg-accordion > ol {
+.aiovg details > ol {
 	list-style-position: inside;
 }
 
 /* Alert */
 .aiovg .aiovg-notice {
-	border-radius: 2px;
+	border-radius: 3px;
 	padding: 1em; 
 }
 
@@ -454,6 +506,11 @@
 	gap: 1.5em;
 }
 
+.aiovg .aiovg-form-grid {
+	display: grid;
+	gap: 1.5em;
+}
+
 .aiovg .aiovg-form-control {
 	display: flex;
 	flex-direction: column;
@@ -464,9 +521,8 @@
 	font-weight: 500;
 }
 
-.aiovg .aiovg-form-grid {
-	display: grid;
-	gap: 1.5em;
+.aiovg .aiovg-form-required {
+	color: #b31105;
 }
 
 .aiovg .aiovg-input-wrap {
@@ -474,6 +530,51 @@
 	flex-direction: column;
 	gap: 0.5em;
 	width: 100%;
+}
+
+.aiovg .aiovg-input-wrap p {
+	margin: 0;
+}
+
+.aiovg .aiovg-form-control input[readonly] {
+	pointer-events: none;
+	background-color: #fff;
+}
+
+.aiovg .aiovg-form-disabled {
+	pointer-events: none;
+}
+
+.aiovg .aiovg-form-action {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+}
+
+.aiovg .aiovg-form-status {
+	font-weight: 500;
+}
+
+.aiovg .aiovg-form-status:empty {
+	display: none;
+}
+
+.aiovg .aiovg-form-status .spinner {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.aiovg .aiovg-form-status span {
+	line-height: 20px;
+}
+
+.aiovg .aiovg-form-invalid .aiovg-form-label {
+	color: #b31105;
+}
+
+.aiovg .aiovg-form-invalid input[type="text"],
+.aiovg .aiovg-form-invalid select {
+	border: 1px solid #b31105;
 }
 
 @media screen and (min-width: 783px) {
@@ -489,6 +590,14 @@
 
 	.aiovg .aiovg-form-grid {
 		grid-template-columns: repeat( 2, 1fr );
+	}
+}
+
+/* Checkbox & Radio */
+@media screen and (max-width: 782px) {
+	.aiovg input[type="checkbox"], 
+	.aiovg input[type="radio"] {
+		margin-top: 0;
 	}
 }
 
@@ -695,7 +804,12 @@
  *	Page: Dashboard
  *
  *--------------------------------------------------------------------------------------------*/
+#aiovg-dashboard h1 {
+	font-size: 2.4em;
+}
+
 #aiovg-dashboard .wp-badge {	
+	border-radius: 3px;
 	background: #0073aa url( '../images/logo.png' ) no-repeat top;
 }
 
@@ -710,8 +824,38 @@
 	font-weight: 500;
 }
 
-@media screen and (max-width: 500px) {
-	#aiovg-dashboard .button-hero {
+#aiovg-dashboard .aiovg-right-col .aiovg-shortcode-instructions {
+	line-height: 1.6;
+}
+
+#aiovg-dashboard .aiovg-right-col .aiovg-shortcode-instructions h4,
+#aiovg-dashboard .aiovg-right-col .aiovg-shortcode-instructions p,
+#aiovg-dashboard .aiovg-right-col .aiovg-shortcode-instructions ul,
+#aiovg-dashboard .aiovg-right-col .aiovg-shortcode-instructions li {
+	margin: 0;
+	margin-bottom: 0.5em;
+} 
+
+#aiovg-dashboard .aiovg-right-col .aiovg-shortcode-instructions h4 {
+	margin-top: 0.75em;
+}
+
+#aiovg-dashboard .aiovg-right-col .aiovg-shortcode-instructions ul {
+	margin-left: 1.2em;
+	margin-bottom: 1.5em;
+	list-style-type: circle;
+}
+
+#aiovg-dashboard .aiovg-right-col .aiovg-shortcode-instructions ul h4 {
+	font-size: 14px;
+}
+
+#aiovg-dashboard .aiovg-right-col .aiovg-shortcode-instructions hr {
+	margin: 1.5em 0;
+}
+
+@media screen and (max-width: 599px) {
+	#aiovg-dashboard .aiovg-button-group .button-hero {
 		width: 100%;
 	}
 }
@@ -727,66 +871,36 @@
 	display: flex;
 	flex-direction: column;
 	gap: 0.5em;
-	box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+	border: 1px solid #c3c4c7;
+	border-top: 0;
 	padding: 1em;
 }
 
 #aiovg-shortcode-forms {
 	display: grid;
 	gap: 2em;
+	font-size: 14px;
 }
 
-.aiovg-shortcode-form {
-	display: flex;
-	flex-direction: column;
-	gap: 0.25em;
-}
-
-.aiovg-shortcode-section-header {	
-	border: 1px solid #ccc; 
-	background-color: #e5e5e5; 
-	cursor: pointer;
-	padding: 0.75em;
-}
-
-.aiovg-shortcode-section-header:hover {	
-	background-color: #f9f9f9;
-}
-
-.aiovg-shortcode-section-header .dashicons-before {	
-	color: #0073aa;
-}
-
-.aiovg-shortcode-section-header .dashicons-plus {
-	display: inline-block;
-}
-
-.aiovg-shortcode-section-header .dashicons-minus {
-	display: none;
-}
-
-.aiovg-active .aiovg-shortcode-section-header .dashicons-plus {
-	display: none;
-}
-
-.aiovg-active .aiovg-shortcode-section-header .dashicons-minus {
-	display: inline-block;
+#aiovg-shortcode-forms details > summary {
+	font-weight: 500;
 }
 
 .aiovg-shortcode-controls {
 	display: flex;
 	flex-direction: column;
-	gap: 1em;
-	border: 1px solid #ccc;
-	border-top: none;
-	background-color: #fff;
+	gap: 1.15em;
 	padding: 1em;
 }
 
 .aiovg-shortcode-control {
 	display: flex;
 	flex-direction: column;
-	gap: 0.25em;
+	gap: 0.35em;
+}
+
+.aiovg-shortcode-label {
+	font-weight: 500;
 }
 
 .aiovg .aiovg-shortcode-control-title,
@@ -867,10 +981,25 @@
 	display: none;
 }
 
+@media screen and (max-width: 782px) {
+	#aiovg-shortcode-selector {
+		gap: 0.75em;
+		border: 0;
+		padding-bottom: 0;
+	}
+}
+
 @media screen and (min-width: 783px) {
 	#aiovg-shortcode-forms { 
 		grid-template-columns: 3fr 2fr;
 	}
+}
+
+/* Tab: Help & Tutorials */
+#aiovg-help details > div,
+#aiovg-help details > ol {
+	line-height: 1.6;
+    font-size: 14px;
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -878,6 +1007,22 @@
  *	Page: Videos
  *
  *--------------------------------------------------------------------------------------------*/
+.post-type-aiovg_videos .wp-list-table .column-image {
+	width: 80px;
+	text-align: center;
+}
+
+.post-type-aiovg_videos .wp-list-table .column-image img {
+	border-radius: 3px;
+	background-color: #f0f0f0;
+}
+
+.post-type-aiovg_videos .wp-list-table .column-posts,
+.post-type-aiovg_videos .wp-list-table .column-tax_id {
+	width: 100px;
+	text-align: left;
+}
+
 @media screen and (max-width: 1200px) {
 	.post-type-aiovg_videos .wp-list-table th.column-image,
 	.post-type-aiovg_videos .wp-list-table td.image {
@@ -991,6 +1136,7 @@
  *
  *--------------------------------------------------------------------------------------------*/
 #aiovg-categories-image-wrapper img {
+	border-radius: 3px;
   	max-width: 200px;
 }
 
@@ -999,6 +1145,44 @@
  *	Page: Settings
  *
  *--------------------------------------------------------------------------------------------*/
+#aiovg-settings h1 {
+	margin-bottom: 0.25em;
+}
+
+#aiovg-settings details:first-of-type {
+	margin-top: 1.5em;
+}
+
+#aiovg-settings details > summary {
+	padding: 1em;
+	font-size: 1.15em;
+	font-weight: 500;
+}
+
+#aiovg-settings details > summary::after {
+	width: 20px;
+	height: 20px;
+	font-size: 20px;
+}
+
+#aiovg-settings details > div {
+	padding: 1.5em;
+	padding-top: 0.5em;
+}
+
+#aiovg-settings details > div.inside {
+	padding-top: 1.5em;
+	padding-bottom: 0;
+}
+
+#aiovg-settings details table {
+	margin: 0;
+}
+
+#aiovg-settings .submit {
+	margin-top: 0;
+}
+
 #aiovg-player-settings.aiovg-player-videojs tr.theme_color {
 	display: none;
 }
@@ -1041,6 +1225,16 @@
 	line-height: normal;
 }
 
+@media screen and (max-width: 782px) {
+	#aiovg-settings .subsubsub {
+		width: 100%;
+	}
+	
+	#aiovg-settings .form-table td {
+		padding: 6px 0;
+	}
+}
+
 @media screen and ( min-width: 783px ) {
 	#aiovg-settings input[type="text"],
 	#aiovg-settings input[type="number"],
@@ -1051,9 +1245,145 @@
 
 /*----------------------------------------------------------------------------------------------
  *
+ *	Page: Import / Export
+ *
+ *--------------------------------------------------------------------------------------------*/
+#aiovg-import-export .aiovg-container {
+	display: flex;
+	flex-direction: column;
+	gap: 2em;
+	max-width: 900px;
+	margin: 0 auto;
+	padding: 25px 20px 0 10px;
+}
+
+#aiovg-import-export .aiovg-header h1 {
+	margin-bottom: 0.25em;
+	line-height: 1.2;
+	font-size: 2.4em;
+	font-weight: 400;
+}
+
+#aiovg-import-export .aiovg-header p {
+	margin: 0;
+	line-height: 1.5;
+	font-size: 1.3em;
+	font-weight: 400;	
+}
+
+#aiovg-import-export .aiovg-body {
+	display: flex;
+	flex-direction: column;
+}
+
+#aiovg-import-export details > summary {
+	padding: 1em 1.25em;
+	font-size: 1.15em;
+	font-weight: 500;
+}
+
+#aiovg-import-export details > summary::after {
+	width: 20px;
+	height: 20px;
+	font-size: 20px;
+}
+
+#aiovg-import-export details .aiovg-summary-text {
+	flex: 1;
+	min-width: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#aiovg-import-export details .aiovg-details-content {
+	padding: 1.5em 1.25em;
+}
+
+#aiovg-import-export .aiovg-form-controls .description {
+	margin: 0;
+}
+
+#aiovg-import-export .aiovg-form-controls .description.aiovg-margin-top {
+	margin-top: 0.75em;
+}
+
+#aiovg-import-export .aiovg-form-controls .aiovg-button-group {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
+
+#aiovg-import-export .aiovg-form-controls .button-hero {
+	align-self: flex-start;
+}
+
+#aiovg-import-export .aiovg-form-fieldset {
+	margin-top: 1em;
+	border-radius: 5px;
+	background: #f9f9f9;
+	padding: 1.5em;
+}
+
+#aiovg-import-export .aiovg-form-fieldset h3 {
+	margin: 0;
+	margin-bottom: 0.75em;
+}
+
+#aiovg-import-export .aiovg-form-fieldset .aiovg-status-item {
+	display: block;
+	margin-top: 0.5em;
+	font-weight: normal;
+}
+
+#aiovg-field-csv_columns .aiovg-form-grid {
+	margin-top: 1.5em;
+}
+
+#aiovg-field-csv_columns h3 {
+	margin: 1.5em 0 0.5em 0;
+}
+
+#aiovg-field-csv_columns.aiovg-form-invalid h3,
+#aiovg-field-csv_columns.aiovg-form-invalid p {
+	color: #b31105;
+}
+
+#aiovg-field-csv_columns.aiovg-form-invalid .aiovg-form-label {
+	color: inherit;
+}
+
+#aiovg-field-csv_columns.aiovg-form-invalid select {
+	border-color: inherit;
+}
+
+@media screen and (max-width: 599px) {
+	#aiovg-import-export details summary .dashicons {
+		display: none;
+	}
+
+	#aiovg-import-export .aiovg-form-controls .aiovg-button-group {
+		flex-direction: column;
+	}
+
+	#aiovg-import-export .aiovg-form-controls .aiovg-button-group .button-hero {
+		width: 100%;
+	}
+}
+
+/*----------------------------------------------------------------------------------------------
+ *
  *	Widgets
  *
  *--------------------------------------------------------------------------------------------*/
+.aiovg-widget-form details {
+	border-radius: 0;
+}
+
+.aiovg-widget-form details summary {
+	background-color: #f0f0f0;
+}
+
 .aiovg-widget-section-header {
 	margin-top: 2em;
 	border-radius: 2px; 

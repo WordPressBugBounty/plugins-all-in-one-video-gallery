@@ -39,11 +39,17 @@ class AIOVG_Public_Video {
 	 * @return string $template Filtered template path.
 	 */
 	public function template_include( $template ) {	
-		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 
+		// Check the assigned player page
 		$player_page_id = apply_filters( 'wpml_object_id', (int) $page_settings['player'], 'page' );		
 		if ( ! empty( $player_page_id ) && is_page( $player_page_id ) ) {
-			$template = AIOVG_PLUGIN_DIR . 'public/templates/player.php';
+			return AIOVG_PLUGIN_DIR . 'public/templates/player.php';
+		}
+
+		// Extra fallback: match requests to /player-embed/
+		if ( strpos( $_SERVER['REQUEST_URI'], 'player-embed' ) !== false ) {
+			return AIOVG_PLUGIN_DIR . 'public/templates/player.php';
 		}
 		
 		return $template;		
@@ -57,7 +63,7 @@ class AIOVG_Public_Video {
 	 * @return bool  $show_admin_bar Filtered value.
 	 */
 	public function remove_admin_bar( $show_admin_bar ) {
-		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 
 		$player_page_id = apply_filters( 'wpml_object_id', (int) $page_settings['player'], 'page' );
 		if ( ! empty( $player_page_id ) && is_page( $player_page_id ) ) {
@@ -65,20 +71,6 @@ class AIOVG_Public_Video {
 		}
 
 		return $show_admin_bar;
-	}
-	
-	/**
-	 * Add support for HLS & MPEG-DASH.
-	 *
-	 * @since  3.0.0
-	 * @param  array $mimes Array of allowed mime types.
-	 * @return array        Filtered mime types array.
-	 */
-	public function add_mime_types( $mimes ) {			
-		$mimes['m3u8'] = 'application/x-mpegurl';
-		$mimes['mpd']  = 'application/dash+xml';
-
-		return $mimes;		
 	}
 	
 	/**
@@ -324,9 +316,9 @@ class AIOVG_Public_Video {
 			$title_position = isset( $attributes['title_position'] ) ? sanitize_text_field( $attributes['title_position'] ) : '';
 
 			$allowed_title_tags = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'p' );
-			$title_tag = isset( $attributes['title_tag'] ) ? sanitize_key( $attributes['title_tag'] ) : 'h2';
+			$title_tag = isset( $attributes['title_tag'] ) ? sanitize_key( $attributes['title_tag'] ) : 'div';
 			if ( ! in_array( $title_tag, $allowed_title_tags) ) {
-				$title_tag = 'h2';
+				$title_tag = 'div';
 			}			
 
 			$html = '<div class="aiovg aiovg-video-shortcode">';
@@ -422,7 +414,7 @@ class AIOVG_Public_Video {
 	 * @return string          The modified description with timestamps wrapped in links.
 	 */
 	public function wrap_timestamps_with_links( $content ) {
-		$player_settings = get_option( 'aiovg_player_settings' );
+		$player_settings = aiovg_get_option( 'aiovg_player_settings' );
 
 		if ( isset( $player_settings['controls']['chapters'] ) ) {
 			$pattern = '/(\d{1,2}:)?\d{1,2}:\d{2}/';
@@ -464,7 +456,7 @@ class AIOVG_Public_Video {
 			}
 
 			if ( ! aiovg_current_user_can( 'play_aiovg_video', $post->ID ) ) {
-				$restrictions_settings = get_option( 'aiovg_restrictions_settings' );
+				$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
 
 				$restricted_message = $restrictions_settings['restricted_message'];
 				if ( empty( $restricted_message ) ) {
@@ -476,11 +468,11 @@ class AIOVG_Public_Video {
 			}
 			
 			// Vars
-			$player_settings = get_option( 'aiovg_player_settings' );	
-			$video_settings = get_option( 'aiovg_video_settings' );					
-			$related_videos_settings = get_option( 'aiovg_related_videos_settings' );
-			$categories_settings = get_option( 'aiovg_categories_settings' );
-			$likes_settings = get_option( 'aiovg_likes_settings' );	
+			$player_settings = aiovg_get_option( 'aiovg_player_settings' );	
+			$video_settings = aiovg_get_option( 'aiovg_video_settings' );					
+			$related_videos_settings = aiovg_get_option( 'aiovg_related_videos_settings' );
+			$categories_settings = aiovg_get_option( 'aiovg_categories_settings' );
+			$likes_settings = aiovg_get_option( 'aiovg_likes_settings' );	
 			
 			$attributes = array(
 				'id'              => $post->ID,				
@@ -491,6 +483,7 @@ class AIOVG_Public_Video {
 				'show_views'      => isset( $video_settings['display']['views'] ),
 				'related'         => isset( $video_settings['display']['related'] ),
 				'share'           => isset( $video_settings['display']['share'] ),
+				'title'           => isset( $related_videos_settings['title'] ) ? $related_videos_settings['title'] : __( 'You may also like', 'all-in-one-video-gallery' ),
 				'columns'         => $related_videos_settings['columns'],
 				'limit'           => $related_videos_settings['limit'],
 				'orderby'         => $related_videos_settings['orderby'],
@@ -526,7 +519,7 @@ class AIOVG_Public_Video {
 			wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-public' );
 
 			if ( isset( $player_settings['controls']['chapters'] ) ) {
-				wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-public' );
+				wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-chapters' );
 			}
 			
 			// Process output
@@ -552,7 +545,7 @@ class AIOVG_Public_Video {
 			$post_type = get_post_type( $post_id );
 				
 			if ( 'aiovg_videos' == $post_type ) {
-				$video_settings = get_option( 'aiovg_video_settings' );
+				$video_settings = aiovg_get_option( 'aiovg_video_settings' );
 
 				$has_comments = (int) $video_settings['has_comments'];
 
@@ -579,7 +572,7 @@ class AIOVG_Public_Video {
 			$post_id = (int) $_REQUEST['post_id'];
 						
 			if ( $post_id > 0 ) {
-				check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
+				check_ajax_referer( 'aiovg_public_ajax_nonce', 'security' );
 				aiovg_update_views_count( $post_id );
 
 				// Update video duration if applicable

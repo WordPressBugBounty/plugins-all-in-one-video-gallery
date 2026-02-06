@@ -166,6 +166,8 @@ class AIOVG_Admin_Categories {
 	 * @return array $columns Updated list of table columns.
 	 */
 	public function get_columns( $columns ) {
+		unset( $columns['slug'] );
+
 		$columns = aiovg_insert_array_after( 'cb', $columns, array( 
 			'image' => ''
 		));

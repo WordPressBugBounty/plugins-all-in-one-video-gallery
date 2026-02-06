@@ -31,13 +31,13 @@ class AIOVG_Activator {
 		$defaults = aiovg_get_default_settings();
 
 		foreach ( $defaults as $option_name => $values ) {
-			if ( false == get_option( $option_name ) ) {	
+			if ( false === get_option( $option_name ) ) {	
         		add_option( $option_name, $values );						
     		}
 		}
 		
 		// Add custom AIOVG capabilities
-		if ( ! get_option( 'aiovg_version' ) ) {
+		if ( false === get_option( 'aiovg_version' ) ) {
 			$roles = new AIOVG_Roles;
 			$roles->add_caps();
 		}

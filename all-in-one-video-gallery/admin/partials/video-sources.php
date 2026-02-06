@@ -9,7 +9,7 @@
  * @package All_In_One_Video_Gallery
  */
 
-$player_settings = get_option( 'aiovg_player_settings' );
+$player_settings = aiovg_get_option( 'aiovg_player_settings' );
 
 $quality_levels = explode( "\n", $player_settings['quality_levels'] );
 $quality_levels = array_filter( $quality_levels );
@@ -32,6 +32,19 @@ $rumble        = isset( $post_meta['rumble'] ) ? $post_meta['rumble'][0] : '';
 $facebook      = isset( $post_meta['facebook'] ) ? $post_meta['facebook'][0] : '';
 $embedcode     = isset( $post_meta['embedcode'] ) ? $post_meta['embedcode'][0] : '';
 $download      = isset( $post_meta['download'] ) ? $post_meta['download'][0] : 1;
+
+if ( ! empty( $mp4 ) ) {	
+	$is_video_uploaded = isset( $post_meta['is_video_uploaded'] ) ? (int) $post_meta['is_video_uploaded'][0] : 0;	
+
+	if ( ! empty( $is_video_uploaded ) ) {
+		$private_base_url = aiovg_get_private_base_url();
+
+		// Mask the URL only if it is not already masked
+		if ( 0 !== strpos( $mp4, $private_base_url ) ) {
+			$mp4 = $private_base_url .  aiovg_base64_encode( $mp4 );
+		}
+	}
+}
 
 $can_upload_to_bunny_stream = false;
 if ( aiovg_current_user_can( 'edit_aiovg_video', $post->ID ) ) {

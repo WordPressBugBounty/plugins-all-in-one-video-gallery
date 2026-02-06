@@ -47,8 +47,8 @@ class AIOVG_Widget_Categories extends WP_Widget {
 	public function __construct() {		
 		$this->widget_slug = 'aiovg-widget-categories';
 
-		$categories_settings = get_option( 'aiovg_categories_settings' );
-		$images_settings     = get_option( 'aiovg_images_settings' );
+		$categories_settings = aiovg_get_option( 'aiovg_categories_settings' );
+		$images_settings     = aiovg_get_option( 'aiovg_images_settings' );
 		
 		$this->defaults = array(
 			'title'            => __( 'Video Categories', 'all-in-one-video-gallery' ),
@@ -101,7 +101,7 @@ class AIOVG_Widget_Categories extends WP_Widget {
 		wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-public' );
 		
 		if ( 'dropdown' == $template ) {
-			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-public' );
+			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-categories' );
 		}
 
 		// Process output

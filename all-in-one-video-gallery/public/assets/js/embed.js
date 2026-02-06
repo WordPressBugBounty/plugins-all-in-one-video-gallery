@@ -429,6 +429,10 @@
             iframeEl.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
             iframeEl.allowFullscreen = true;
 
+            if ( /youtube\.com|youtu\.be/.test( this.src ) ) {
+                iframeEl.referrerPolicy = 'strict-origin-when-cross-origin';
+            }
+
             if ( autoplayRequested ) {
                 const url = new URL( this.src );
 

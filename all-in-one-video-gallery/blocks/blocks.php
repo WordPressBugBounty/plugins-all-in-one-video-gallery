@@ -46,9 +46,9 @@ class AIOVG_Blocks {
 	 * @since 1.5.6
 	 */
 	public function enqueue_block_editor_assets() {	
-		$categories_settings = get_option( 'aiovg_categories_settings' );
-		$videos_settings     = get_option( 'aiovg_videos_settings' );
-		$player_settings     = get_option( 'aiovg_player_settings' );
+		$categories_settings = aiovg_get_option( 'aiovg_categories_settings' );
+		$videos_settings     = aiovg_get_option( 'aiovg_videos_settings' );
+		$player_settings     = aiovg_get_option( 'aiovg_player_settings' );
 
 		$fields = aiovg_get_shortcode_fields();
 		$videos = $fields['videos']['sections'];

@@ -65,7 +65,7 @@ function aiovg_extract_iframe_src( $html ) {
  * @return string|false           The signed Bunny Stream embed URL or false if not applicable.
  */
 function aiovg_get_bunny_stream_embed_url( $url, $video_id ) {
-	$settings = (array) get_option( 'aiovg_bunny_stream_settings' );
+	$settings = aiovg_get_option( 'aiovg_bunny_stream_settings' );
 
 	if ( empty( $settings['library_id'] ) ) {
 		return false;
@@ -108,7 +108,7 @@ function aiovg_get_bunny_stream_embed_url( $url, $video_id ) {
  * @return string           Signed Bunny Stream URL with token and restrictions appended.
  */
 function aiovg_get_bunny_stream_signed_url( $url, $video_id ) {
-	$settings = (array) get_option( 'aiovg_bunny_stream_settings' );
+	$settings = aiovg_get_option( 'aiovg_bunny_stream_settings' );
 
 	if ( empty( $settings['enable_token_authentication'] ) || empty( $settings['token_authentication_key'] ) ) {
 		return $url;
@@ -497,7 +497,7 @@ function aiovg_get_vimeo_image_url( $url ) {
 
 	// Get images from private videos
 	if ( ! empty( $data['video_id'] ) && empty( $data['thumbnail_url'] ) ) {
-		$api_settings = get_option( 'aiovg_api_settings' );	
+		$api_settings = aiovg_get_option( 'aiovg_api_settings' );	
 
 		if ( isset( $api_settings['vimeo_access_token'] ) && ! empty( $api_settings['vimeo_access_token'] ) ) {
 			$args = array(
@@ -672,7 +672,7 @@ function aiovg_get_youtube_image_url( $url ) {
  * @return array|false Returns the Bunny Stream settings array if all conditions are met; otherwise, false.
  */
 function aiovg_has_bunny_stream_enabled() {
-	$settings = (array) get_option( 'aiovg_bunny_stream_settings' );
+	$settings = aiovg_get_option( 'aiovg_bunny_stream_settings' );
 
 	// Basic Bunny Stream setup check
 	if (

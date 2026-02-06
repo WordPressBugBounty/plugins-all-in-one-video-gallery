@@ -19,10 +19,11 @@
 			// Set references to the private properties used by the component
 			const aiovg = window.aiovg_pagination || window.aiovg_public;
 
-			this._params = {};
+			this._isRendered    = false;			
 			this._isAjaxEnabled = false;
-			this._ajaxUrl = aiovg.ajax_url;
-			this._ajaxNonce = aiovg.ajax_nonce;
+			this._params        = {};
+			this._ajaxUrl       = aiovg.ajax_url;
+			this._ajaxNonce     = aiovg.ajax_nonce;
 			this._pageTopOffset = parseInt( aiovg.scroll_to_top_offset );
 
 			// Bind the event handlers to ensure the reference remains stable		
@@ -35,15 +36,16 @@
 		 * (can be called many times if an element is repeatedly added/removed)
 		 */
 		connectedCallback() {
+			if ( this._isRendered ) return false; 
+            this._isRendered = true;
+
 			this.$el = $( this );		
 
 			if ( this.$el.hasClass( 'aiovg-pagination-ajax' ) || this.$el.hasClass( 'aiovg-more-ajax' ) ) {
 				this._isAjaxEnabled = true;
 			}
 
-			if ( ! this._isAjaxEnabled ) {
-				return false;
-			}
+			if ( ! this._isAjaxEnabled ) return false;
 
 			this._params = this.$el.data( 'params' );
 			this._params.action = 'aiovg_load_' + this._params.source;
@@ -60,9 +62,7 @@
 		 * (can be called many times if an element is repeatedly added/removed)
 		 */
 		disconnectedCallback() {
-			if ( ! this._isAjaxEnabled ) {
-				return false;
-			}
+			if ( ! this._isAjaxEnabled ) return false;
 
 			this.$el.off( 'click', 'a.page-numbers', this._onNextOrPreviousPageButtonClicked );
 			this.$el.off( 'click', 'button', this._onMoreButtonClicked );

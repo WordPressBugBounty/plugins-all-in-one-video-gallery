@@ -97,7 +97,7 @@
 .aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li:focus {
 	margin-bottom: 1px;
 	border-radius: 2px;			
-	background-color: rgba( 0, 0, 0, 0.8 );			
+	background-color: rgba( 43, 51, 63, 0.7 );		
 	padding: 0.5em;
 	color: #fff;
 	text-transform: initial;
@@ -105,13 +105,13 @@
 
 .aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li:hover,
 .aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li:focus {
-	background-color: #000;
+	background-color: rgba( 0, 0, 0, 0.8 );
 }
 
 .aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li.vjs-selected,
 .aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li.vjs-selected:hover,
 .aiovg-player .video-js .vjs-menu-button-popup .vjs-menu li.vjs-selected:focus {			
-	background-color: #fff;	
+	background-color: rgba( 255, 255, 255, 0.9 );	
 	color: #000;
 }
 
@@ -600,6 +600,12 @@
 
 .aiovg-player .aiovg-privacy-consent-button:hover {
 	opacity: 0.8;
+}
+
+/* Tech: YouTube */
+.aiovg-player .vjs-hide-youtube-logo iframe.vjs-tech {
+	top: -50% !important;
+	height: 200% !important;
 }
 
 /* Custom ContextMenu */

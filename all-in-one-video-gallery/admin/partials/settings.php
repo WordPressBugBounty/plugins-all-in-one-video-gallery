@@ -82,18 +82,58 @@ foreach ( $this->sections as $section ) {
 	}
 
 	if ( count( $section_links ) > 1 ) : ?>
-		<ul class="aiovg-margin-bottom subsubsub"><li><?php echo implode( ' | </li><li>', $section_links ); ?></li></ul>
+		<ul class="subsubsub"><li><?php echo implode( ' | </li><li>', $section_links ); ?></li></ul>
 		<div class="clear"></div>
 	<?php endif; ?>
     
 	<form method="post" action="options.php"> 
         <?php
         $page_hook = $active_section;
-        
         settings_fields( $page_hook );
-        do_settings_sections( $page_hook );
-        
-        submit_button();
+
+        global $wp_settings_sections, $wp_settings_fields;
+
+        if ( isset( $wp_settings_sections[ $page_hook ] ) ) {
+            $i = 0;
+
+            foreach ( (array) $wp_settings_sections[ $page_hook ] as $section ) {
+                echo sprintf( '<details%s>', ( 0 === $i ? ' open' : '' ) );
+
+                if ( '' !== $section['before_section'] ) {
+                    if ( '' !== $section['section_class'] ) {
+                        echo wp_kses_post( sprintf( $section['before_section'], esc_attr( $section['section_class'] ) ) );
+                    } else {
+                        echo wp_kses_post( $section['before_section'] );
+                    }
+                }
+
+                if ( $section['title'] ) {
+                    echo sprintf( '<summary><span class="dashicons dashicons-arrow-right"></span> %s</summary>', esc_html( $section['title'] ) );
+                }
+
+                if ( $section['callback'] ) {
+                    call_user_func( $section['callback'], $section );
+                }
+
+                if ( isset( $wp_settings_fields[ $page_hook ][ $section['id'] ] ) ) {
+                    echo '<div>';
+                    echo '<table class="form-table" role="presentation">';
+                    do_settings_fields( $page_hook, $section['id'] );
+                    echo '</table>';
+                    echo '</div>';
+                }
+
+                if ( '' !== $section['after_section'] ) {
+                    echo wp_kses_post( $section['after_section'] );
+                }
+
+                echo '</details>';
+
+                ++$i;
+            }
+        }
+
+        submit_button( __( 'Save Changes', 'all-in-one-video-gallery' ), 'primary button-hero' );
         ?>
     </form>
 </div>

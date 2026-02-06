@@ -9,7 +9,7 @@
  * @package All_In_One_Video_Gallery
  */
 
-$restrictions_settings = get_option( 'aiovg_restrictions_settings' );
+$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
 
 $type = isset( $post_meta['type'] ) ? $post_meta['type'][0] : 'default';
 ?>

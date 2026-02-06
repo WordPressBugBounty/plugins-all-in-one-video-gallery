@@ -235,15 +235,15 @@ class AIOVG_Admin_Settings {
                 'title'       => __( 'Bunny Stream (Optional)', 'all-in-one-video-gallery' ),
                 'menu_title'  => __( 'Bunny Stream', 'all-in-one-video-gallery' ),
                 'description' => sprintf(
-                    '<p>%s</p><p><a href="%s" class="button" target="_blank" rel="noopener noreferrer">%s</a></p><div class="aiovg-notice aiovg-notice-success"><strong>%s:</strong> %s</div>',
-                    __( 'Set up Bunny Stream to easily upload, store, and securely deliver your video content with optimal performance. Simply configure the necessary settings below to get started.', 'all-in-one-video-gallery' ),
-                    'https://plugins360.com/all-in-one-video-gallery/configure-bunny-stream/',
-                    __( 'View Setup Guide', 'all-in-one-video-gallery' ),
+                    '<div class="aiovg-notice aiovg-notice-success aiovg-margin-bottom"><strong>%s:</strong> %s</div>%s <a href="%s" target="_blank" rel="noopener noreferrer"><strong>%s</strong></a>',
                     __( 'Important', 'all-in-one-video-gallery' ),
                     sprintf(
                         __( 'Modifying your Bunny Stream settings (API Key, Library ID, or CDN Hostname) after your site is live may cause videos to stop functioning or result in data loss. <a href="%s">Contact us</a> if you want to make any changes after your site is live.', 'all-in-one-video-gallery' ),
                         esc_url( admin_url( 'admin.php?page=all-in-one-video-gallery-contact' ) )
-                    )
+                    ),
+                    __( 'Set up Bunny Stream to easily upload, store, and securely deliver your video content with optimal performance. Simply configure the necessary settings below to get started.', 'all-in-one-video-gallery' ),
+                    'https://plugins360.com/all-in-one-video-gallery/configure-bunny-stream/',
+                    __( 'View Setup Guide →', 'all-in-one-video-gallery' )                                       
                 ),
                 'tab'         => 'hosting',
                 'page'        => 'aiovg_bunny_stream_settings'
@@ -312,7 +312,7 @@ class AIOVG_Admin_Settings {
                     'name'              => 'ratio',
                     'label'             => __( 'Height (Ratio)', 'all-in-one-video-gallery' ),
                     'description'       => sprintf(
-						'%s<br /><br /><strong>%s:</strong><br />"56.25" - %s<br />"62.5" - %s<br />"75" - %s<br />"67" - %s<br />"100" - %s<br />"41.7" - %s', 
+						'%s<br /><br /><ul class="aiovg-no-margin"><li><strong>%s:</strong></li><li>"56.25" - %s</li><li>"62.5" - %s</li><li>"75" - %s</li><li>"67" - %s</li><li>"100" - %s</li><li>"41.7" - %s</li></ul>', 
 						__( "In percentage. 1 to 100. Calculate player's height using the ratio value entered.", 'all-in-one-video-gallery' ),
 						__( 'Examples', 'all-in-one-video-gallery' ),
 						__( 'Wide Screen TV', 'all-in-one-video-gallery' ),
@@ -350,7 +350,7 @@ class AIOVG_Admin_Settings {
                     'name'              => 'preload',
                     'label'             => __( 'Preload', 'all-in-one-video-gallery' ),
                     'description'       => sprintf(
-						'%s<br /><br />%s<br />%s<br />%s',
+						'%s<br /><br /><ul class="aiovg-no-margin"><li>%s</li><li>%s</li><li>%s</li></ul>',
 						__( 'Specifies if and how the video should be loaded when the page loads.', 'all-in-one-video-gallery' ),
 						__( '"Auto" - The video should be loaded entirely when the page loads', 'all-in-one-video-gallery' ),
 						__( '"Metadata" - Only metadata should be loaded when the page loads', 'all-in-one-video-gallery' ),
@@ -401,7 +401,7 @@ class AIOVG_Admin_Settings {
                     'name'              => 'hotkeys',
                     'label'             => __( 'Keyboard Hotkeys', 'all-in-one-video-gallery' ),
                     'description'       => sprintf(
-						'%s<br /><br />%s<br />%s<br />%s<br />%s<br />%s<br />%s<br />%s',
+						'%s<br /><br /><ul class="aiovg-no-margin"><li>%s</li><li>%s</li><li>%s</li><li>%s</li><li>%s</li><li>%s</li><li>%s</li></ul>',
                         __( 'Check this option to enable keyboard shortcuts to control the player.', 'all-in-one-video-gallery' ),
 						__( '"Spacebar" - Toggles between Play and Pause.', 'all-in-one-video-gallery' ),
 						__( '"Left Arrow" - Rewinds the video.', 'all-in-one-video-gallery' ),
@@ -446,6 +446,13 @@ class AIOVG_Admin_Settings {
                     'description'       => __( 'By default, the plugin adds the player as an iframe to avoid conflicts with other javascript-based libraries on your website. Check this option to force the standard javascript-based player initialization if you are not a fan of the iframes.', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'hide_youtube_logo',
+                    'label'             => __( 'Hide YouTube Logo', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'YouTube\'s logo cannot be officially hidden, but this experimental option reduces its visibility in our custom player. Use with caution, as it may cause scaling or layout issues, especially with YouTube Shorts. Disable this option if you experience display problems.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
                 )
 			),
             'aiovg_images_settings' => array(
@@ -798,7 +805,15 @@ class AIOVG_Admin_Settings {
 					'sanitize_callback' => 'intval'
                 )
             ),            
-            'aiovg_related_videos_settings' => array(             
+            'aiovg_related_videos_settings' => array(  
+                array(
+                    'name'              => 'title',
+                    'label'             => __( 'Title', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enter the title to be displayed above the related videos section.', 'all-in-one-video-gallery' ),
+                    'placeholder'       => __( 'Related Videos', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),           
 				array(
                     'name'              => 'columns',
                     'label'             => __( 'Columns', 'all-in-one-video-gallery' ),
@@ -973,6 +988,17 @@ class AIOVG_Admin_Settings {
                 ),
 			),			
             'aiovg_general_settings' => array(
+                array( 
+                    'name'              => 'force_load_assets', 
+                    'label'             => __( 'Force Load Plugin Assets', 'all-in-one-video-gallery' ), 
+                    'description'       => __( 'Force-load the plugin\'s CSS and/or JavaScript files on all front-end pages. Enable this option only if layouts do not render correctly due to page builders or theme conflicts.', 'all-in-one-video-gallery' ),
+                    'type'              => 'multicheck', 
+                    'options'           => array( 
+                        'css' => __( 'Force load CSS (recommended)', 'all-in-one-video-gallery' ), 
+                        'js'  => __( 'Force load JavaScript (advanced)', 'all-in-one-video-gallery' ), 
+                    ), 
+                    'sanitize_callback' => 'aiovg_sanitize_array' 
+                ),
                 array(
                     'name'              => 'lazyloading',
                     'label'             => __( 'Lazyload Images / Videos', 'all-in-one-video-gallery' ),
@@ -1214,7 +1240,7 @@ class AIOVG_Admin_Settings {
 			$page_hook = isset( $section['page'] ) ? $section['page'] : $section['id'];
 			
 			// Sections
-            if ( false == get_option( $section['id'] ) ) {
+            if ( false === get_option( $section['id'] ) ) {
                 add_option( $section['id'] );
             }
 			
@@ -1288,7 +1314,7 @@ class AIOVG_Admin_Settings {
         $type        = isset( $args['type'] ) ? $args['type'] : 'text';
         $placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . $args['placeholder'] . '"';
 		
-        $html        = sprintf( '<input type="%1$s" class="%2$s-text" id="%3$s[%4$s]" name="%3$s[%4$s]" value="%5$s"%6$s/>', $type, $size, $args['section'], $args['id'], $value, $placeholder );
+        $html        = sprintf( '<input type="%1$s" class="%2$s-text widefat" id="%3$s[%4$s]" name="%3$s[%4$s]" value="%5$s"%6$s/>', $type, $size, $args['section'], $args['id'], $value, $placeholder );
         $html       .= $this->get_field_description( $args );
 		
         echo $html;		
@@ -1319,7 +1345,7 @@ class AIOVG_Admin_Settings {
         $max         = empty( $args['max'] ) ? '' : ' max="' . $args['max'] . '"';
         $step        = empty( $args['max'] ) ? '' : ' step="' . $args['step'] . '"';
 		
-        $html        = sprintf( '<input type="%1$s" class="%2$s-number" id="%3$s[%4$s]" name="%3$s[%4$s]" value="%5$s"%6$s%7$s%8$s%9$s/>', $type, $size, $args['section'], $args['id'], $value, $placeholder, $min, $max, $step );
+        $html        = sprintf( '<input type="%1$s" class="%2$s-number widefat" id="%3$s[%4$s]" name="%3$s[%4$s]" value="%5$s"%6$s%7$s%8$s%9$s/>', $type, $size, $args['section'], $args['id'], $value, $placeholder, $min, $max, $step );
         $html       .= $this->get_field_description( $args );
 		
         echo $html;		

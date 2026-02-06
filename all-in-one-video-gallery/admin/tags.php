@@ -34,6 +34,15 @@ class AIOVG_Admin_Tags {
 			'manage_aiovg_options',
 			'edit-tags.php?taxonomy=aiovg_tags&post_type=aiovg_videos'
 		);	
+
+		add_submenu_page(
+            'all-in-one-video-gallery',
+            '',
+            '<span class="aiovg-menu-separator"></span>',
+            'manage_aiovg_options',
+            'all-in-one-video-gallery-separator-1',
+            '__return_null'
+        );
 	}
 
 	/**
@@ -110,7 +119,9 @@ class AIOVG_Admin_Tags {
 	 * @param  array $columns Array of default table columns.
 	 * @return array $columns Updated list of table columns.
 	 */
-	public function get_columns( $columns ) {	
+	public function get_columns( $columns ) {
+		unset( $columns['slug'] );
+			
 		$columns['tax_id'] = __( 'ID', 'all-in-one-video-gallery' );
     	return $columns;		
 	}

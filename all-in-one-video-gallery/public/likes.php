@@ -76,7 +76,7 @@ class AIOVG_Public_Likes {
 	 * @since 3.6.1
 	 */
 	public function ajax_callback_get_likes_dislikes_info() {
-		check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
+		check_ajax_referer( 'aiovg_public_ajax_nonce', 'security' );
 
 		// Proceed safe
 		$response = array( 
@@ -103,7 +103,7 @@ class AIOVG_Public_Likes {
 				$liked    = (array) get_user_meta( $user_id, 'aiovg_videos_likes' );	
 				$disliked = (array) get_user_meta( $user_id, 'aiovg_videos_dislikes' );		
 			} else {
-				$likes_settings = get_option( 'aiovg_likes_settings' );
+				$likes_settings = aiovg_get_option( 'aiovg_likes_settings' );
 
 				if ( empty( $likes_settings['login_required_to_vote'] ) ) {
 					if ( isset( $_COOKIE['aiovg_videos_likes'] ) ) {
@@ -136,7 +136,7 @@ class AIOVG_Public_Likes {
 	 * @since 3.6.1
 	 */
 	public function ajax_callback_toggle_likes() {
-		check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
+		check_ajax_referer( 'aiovg_public_ajax_nonce', 'security' );
 
 		// Proceed safe
 		$response = array( 
@@ -194,7 +194,7 @@ class AIOVG_Public_Likes {
 	 * @since 3.6.1
 	 */
 	public function ajax_callback_toggle_dislikes() {
-		check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
+		check_ajax_referer( 'aiovg_public_ajax_nonce', 'security' );
 
 		// Proceed safe
 		$response = array( 
@@ -267,7 +267,7 @@ class AIOVG_Public_Likes {
 				update_post_meta( $post_id, 'likes', $likes );
 			}
 		} else {
-			$likes_settings = get_option( 'aiovg_likes_settings' );
+			$likes_settings = aiovg_get_option( 'aiovg_likes_settings' );
 
 			if ( empty( $likes_settings['login_required_to_vote'] ) ) {
 				$liked = array();
@@ -312,7 +312,7 @@ class AIOVG_Public_Likes {
 				update_post_meta( $post_id, 'dislikes', $dislikes );
 			}
 		} else {
-			$likes_settings = get_option( 'aiovg_likes_settings' );
+			$likes_settings = aiovg_get_option( 'aiovg_likes_settings' );
 
 			if ( empty( $likes_settings['login_required_to_vote'] ) ) {
 				$disliked = array();
@@ -357,7 +357,7 @@ class AIOVG_Public_Likes {
 				update_post_meta( $post_id, 'likes', $likes );
 			}
 		} else {
-			$likes_settings = get_option( 'aiovg_likes_settings' );
+			$likes_settings = aiovg_get_option( 'aiovg_likes_settings' );
 
 			if ( empty( $likes_settings['login_required_to_vote'] ) ) {
 				$liked = array();
@@ -405,7 +405,7 @@ class AIOVG_Public_Likes {
 				update_post_meta( $post_id, 'dislikes', $dislikes );
 			}
 		} else {
-			$likes_settings = get_option( 'aiovg_likes_settings' );
+			$likes_settings = aiovg_get_option( 'aiovg_likes_settings' );
 
 			if ( empty( $likes_settings['login_required_to_vote'] ) ) {
 				$disliked = array();

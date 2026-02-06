@@ -260,12 +260,14 @@ function aiovg_create_attachment_from_external_image_url( $image_url, $post_id )
     // Get image data using file_get_contents
     $image_data = @file_get_contents( $image_url );
 
-    if ( $image_data === false ) {
+    if ( false === $image_data ) {
         return 0;
     }
 
     // Create the image file on the server
-    file_put_contents( $file_path, $image_data );
+	if ( false === @file_put_contents( $file_path, $image_data ) ) {
+		return 0;
+	}
 
     // Create the attachment
     require_once( ABSPATH . 'wp-admin/includes/image.php' );
@@ -370,7 +372,7 @@ function aiovg_current_user_has_video_access( $post_id = 0 ) {
 		return true;
 	}
 
-	$restrictions_settings = get_option( 'aiovg_restrictions_settings' );
+	$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
 	if ( empty( $restrictions_settings['enable_restrictions'] ) ) {
 		return true;
 	}
@@ -431,7 +433,7 @@ function aiovg_current_user_has_video_access( $post_id = 0 ) {
  * @param int   $term_id Term ID.
  */
 function aiovg_delete_category_attachments( $term_id ) {
-	$general_settings = get_option( 'aiovg_general_settings' );
+	$general_settings = aiovg_get_option( 'aiovg_general_settings' );
 	
 	if ( ! empty( $general_settings['delete_media_files'] ) ) {
 		$image_id = get_term_meta( $term_id, 'image_id', true );
@@ -446,7 +448,7 @@ function aiovg_delete_category_attachments( $term_id ) {
  * @param int   $post_id Post ID.
  */
 function aiovg_delete_video_attachments( $post_id ) {	
-	$general_settings = get_option( 'aiovg_general_settings' );
+	$general_settings = aiovg_get_option( 'aiovg_general_settings' );
 	
 	if ( ! empty( $general_settings['delete_media_files'] ) ) {
 		$mp4_id = get_post_meta( $post_id, 'mp4_id', true );
@@ -461,6 +463,15 @@ function aiovg_delete_video_attachments( $post_id ) {
 		$image_id = get_post_meta( $post_id, 'image_id', true );
 		if ( ! empty( $image_id ) ) wp_delete_attachment( $image_id, true );
 		
+		$sources = get_post_meta( $post_id, 'sources', true );	
+		if ( ! empty( $sources ) && is_array( $sources ) ) {
+			foreach ( $sources as $source ) {
+				if ( ! empty( $source['src_id'] ) ) {
+					wp_delete_attachment( (int) $source['src_id'], true );
+				}
+			}
+		}
+
 		$tracks = get_post_meta( $post_id, 'track' );	
 		if ( ! empty( $tracks ) ) {
 			foreach ( $tracks as $track ) {
@@ -511,7 +522,7 @@ function aiovg_extract_chapters_from_string( $string ) {
  * @return array             Filtered array of attributes.
  */
 function aiovg_extract_player_attributes( $attributes = array() ) {
-	$player_settings = get_option( 'aiovg_player_settings' );
+	$player_settings = aiovg_get_option( 'aiovg_player_settings' );
 
 	$player_attributes = array( 
 		'autoplay', 
@@ -564,7 +575,7 @@ function aiovg_extract_player_attributes( $attributes = array() ) {
  * @return string            Formatted number with localized suffix.
  */
 function aiovg_format_count( $number ) {
-	$general_settings = get_option( 'aiovg_general_settings' );
+	$general_settings = aiovg_get_option( 'aiovg_general_settings' );
 
 	if ( isset( $general_settings['number_format'] ) && 'short' === $general_settings['number_format'] ) {
 		if ( $number >= 1000000000 ) {
@@ -707,12 +718,45 @@ function aiovg_get_custom_pages_list() {
 }
 
 /**
+ * Get the deeplink query parameter name.
+ *
+ * @since  4.5.2
+ * @return string The query parameter name for deeplink videos.
+ */
+function aiovg_get_deeplink_param() {
+	$param = apply_filters( 'aiovg_deeplink_param', 'video' );
+	return sanitize_key( $param );
+}
+
+/**
+ * Get deeplink video ID from URL.
+ *
+ * @since  4.5.2
+ * @return int   $video_id The deeplink video ID.
+ */
+function aiovg_get_deeplink_video_id() {
+	$param = aiovg_get_deeplink_param();
+
+	if ( isset( $_GET[ $param ] ) ) {
+		return (int) $_GET[ $param ];
+	}
+
+	return 0;
+}
+
+/**
  * Get default plugin settings.
  *
  * @since  1.5.3
  * @return array $defaults Array of plugin settings.
  */
 function aiovg_get_default_settings() {
+	static $defaults = null;
+
+	if ( null !== $defaults ) {
+		return $defaults;
+	}
+
 	$video_page_slug = 'aiovg_videos';
 	$slugs = array( 'video', 'watch' );
 
@@ -753,7 +797,8 @@ function aiovg_get_default_settings() {
 			'cc_load_policy' => 0,
 			'quality_levels' => implode( "\n", array( '360p', '480p', '720p', '1080p' ) ),
 			'use_native_controls'     => array(),
-			'force_js_initialization' => 0			
+			'force_js_initialization' => 0,
+			'hide_youtube_logo'       => 1			
 		),
 		'aiovg_socialshare_settings' => array(				
 			'services' => array( 
@@ -776,7 +821,6 @@ function aiovg_get_default_settings() {
 			'order'           => 'desc',
 			'thumbnail_style' => 'standard',
 			'display'         => array(
-				'count'    => 'count',
 				'title'    => 'title',
 				'category' => 'category',
 				'tag'      => 'tag',
@@ -829,6 +873,7 @@ function aiovg_get_default_settings() {
 			'has_comments' => 1
 		),			
 		'aiovg_related_videos_settings' => array(
+			'title'   => __( 'Related Videos', 'all-in-one-video-gallery' ),
 			'columns' => 3,
 			'limit'   => 10,
 			'orderby' => 'date',
@@ -855,9 +900,14 @@ function aiovg_get_default_settings() {
 			'show_consent'         => 0,
 			'consent_message'      => __( '<strong>Please accept cookies to play this video</strong>. By accepting you will be accessing content from a service provided by an external third party.', 'all-in-one-video-gallery' ),
 			'consent_button_label' => __( 'I Agree', 'all-in-one-video-gallery' ),
-			'disable_cookies'      => array()
+			'disable_cookies'      => array(
+				'aiovg_rand_seed' => 'aiovg_rand_seed'
+			)
 		),
 		'aiovg_general_settings' => array(
+			'force_load_assets'         => array(
+				'css' => 'css'
+			),
 			'lazyloading'               => 0,
 			'datetime_format'           => '',
 			'number_format'             => 'full',
@@ -1127,6 +1177,24 @@ function aiovg_get_message( $msg_id ) {
 }
 
 /**
+ * Retrieve a plugin option with fallback to default settings.
+ *
+ * @since  4.5.2
+ * @param  string $option The option name to retrieve.
+ * @return mixed           The option value from the database or the default setting.
+ */
+function aiovg_get_option( $option ) {
+	$settings = get_option( $option );
+
+	if ( ! is_array( $settings ) || empty( $settings ) ) {
+		$defaults = aiovg_get_default_settings();
+		$settings = isset( $defaults[ $option ] ) ? $defaults[ $option ] : array();
+	}
+
+	return $settings;
+}
+
+/**
  * Get MySQL's RAND function seed value.
  * 
  * @since  1.6.5
@@ -1140,6 +1208,49 @@ function aiovg_get_orderby_rand_seed( $paged = 'no_longer_required' ) {
 	}
 
 	return $seed;
+}
+
+/**
+ * Retrieves a page given its title.
+ *
+ * @since  4.6.2
+ * @param  string       $page_title Page title.
+ * @param  string       $output     The required return type. One of OBJECT, ARRAY_A, or ARRAY_N, which correspond
+ *                                  to a WP_Post object, an associative array, or a numeric array, respectively.
+ * @param  string|array $post_type  Optional. Post type or array of post types. Default 'page'.
+ * @return WP_Post|array|null       WP_Post (or array) on success, or null on failure.
+ */
+function aiovg_get_page_by_title( $page_title, $output = OBJECT, $post_type = 'page' ) {
+	global $wpdb;
+
+	if ( is_array( $post_type ) ) {
+		$post_type           = esc_sql( $post_type );
+		$post_type_in_string = "'" . implode( "','", $post_type ) . "'";
+		$sql                 = $wpdb->prepare(
+			"SELECT ID
+			FROM $wpdb->posts
+			WHERE post_title = %s
+			AND post_type IN ($post_type_in_string)",
+			$page_title
+		);
+	} else {
+		$sql = $wpdb->prepare(
+			"SELECT ID
+			FROM $wpdb->posts
+			WHERE post_title = %s
+			AND post_type = %s",
+			$page_title,
+			$post_type
+		);
+	}
+
+	$page = $wpdb->get_var( $sql );
+
+	if ( $page ) {
+		return get_post( $page, $output );
+	}
+
+	return null;
 }
 
 /**
@@ -1163,6 +1274,16 @@ function aiovg_get_page_number() {
 }
 
 /**
+ * Returns the base URL used for private masked media.
+ *
+ * @since  4.7.0
+ * @return string
+ */
+function aiovg_get_private_base_url() {
+	return untrailingslashit( get_site_url() ) . '/private/';
+}
+
+/**
  * Get the sorting options for the search form.
  * 
  * @since  3.8.4
@@ -1177,7 +1298,7 @@ function aiovg_get_search_form_sort_options() {
 		'views-desc' => __( 'Most Viewed', 'all-in-one-video-gallery' )
 	);
 
-	$likes_settings = get_option( 'aiovg_likes_settings' );
+	$likes_settings = aiovg_get_option( 'aiovg_likes_settings' );
 	if ( ! empty( $likes_settings['like_button'] ) ) {
 		$options['likes-desc'] = __( 'Most Liked', 'all-in-one-video-gallery' );
 	}
@@ -1192,10 +1313,10 @@ function aiovg_get_search_form_sort_options() {
  */
 function aiovg_get_shortcode_fields() {
 	$defaults            = aiovg_get_default_settings();
-	$categories_settings = array_merge( $defaults['aiovg_categories_settings'], get_option( 'aiovg_categories_settings', array() ) );
-	$videos_settings     = array_merge( $defaults['aiovg_videos_settings'], get_option( 'aiovg_videos_settings', array() ) );
-	$player_settings     = array_merge( $defaults['aiovg_player_settings'], get_option( 'aiovg_player_settings', array() ) );
-	$images_settings     = array_merge( $defaults['aiovg_images_settings'], (array) get_option( 'aiovg_images_settings', array() ) );
+	$categories_settings = array_merge( $defaults['aiovg_categories_settings'], aiovg_get_option( 'aiovg_categories_settings' ) );
+	$videos_settings     = array_merge( $defaults['aiovg_videos_settings'], aiovg_get_option( 'aiovg_videos_settings' ) );
+	$player_settings     = array_merge( $defaults['aiovg_player_settings'], aiovg_get_option( 'aiovg_player_settings' ) );
+	$images_settings     = array_merge( $defaults['aiovg_images_settings'], aiovg_get_option( 'aiovg_images_settings' ) );
 	
 	// Fields	
 	$fields = array(
@@ -2010,7 +2131,7 @@ function aiovg_get_temporary_file_download_id( $path ) {
  * @return string Date the current video was added. 
  */
 function aiovg_get_the_date() {
-	$general_settings = get_option( 'aiovg_general_settings' );
+	$general_settings = aiovg_get_option( 'aiovg_general_settings' );
 
 	if ( isset( $general_settings['datetime_format'] ) && ! empty( $general_settings['datetime_format'] ) ) {
 		$date = get_the_date( $general_settings['datetime_format'] );
@@ -2031,13 +2152,8 @@ function aiovg_get_the_date() {
  * @return string Unique ID.
  */
 function aiovg_get_uniqid() {
-	global $aiovg;
-
-	if ( ! isset( $aiovg['uniqid'] ) ) {
-		$aiovg['uniqid'] = 0;
-	}
-
-	return uniqid() . ++$aiovg['uniqid'];
+	static $counter = 0;
+	return uniqid() . ++$counter;
 }
 
 /**
@@ -2126,12 +2242,14 @@ function aiovg_insert_array_after( $key, $array, $new_array ) {
  */
 function aiovg_insert_custom_pages() {
 	// Vars
-	if ( false == get_option( 'aiovg_page_settings' ) ) {		
+	$page_settings = get_option( 'aiovg_page_settings' );
+
+	if ( ! is_array( $page_settings ) || empty( $page_settings ) ) {
 		$pages = array();
 		$page_definitions = aiovg_get_custom_pages_list();
 		
 		foreach ( $page_definitions as $slug => $page ) {
-			$page_check = get_page_by_title( $page['title'] );
+			$page_check = aiovg_get_page_by_title( $page['title'] );
 
 			if ( ! isset( $page_check->ID ) ) {
 				$id = wp_insert_post(
@@ -2151,7 +2269,7 @@ function aiovg_insert_custom_pages() {
 			}		
 		}
 	} else {
-		$pages = get_option( 'aiovg_page_settings' );
+		$pages = $page_settings;
 	}
 
 	return $pages;
@@ -2163,12 +2281,12 @@ function aiovg_insert_custom_pages() {
  * @since 2.4.3
  */
 function aiovg_insert_missing_pages() {
-	$pages = get_option( 'aiovg_page_settings' );
+	$pages = aiovg_get_option( 'aiovg_page_settings' );
 	$page_definitions = aiovg_get_custom_pages_list();		
 
 	foreach ( $page_definitions as $slug => $page ) {
 		if ( ! array_key_exists( $slug, $pages ) ) {
-			$page_check = get_page_by_title( $page['title'] );
+			$page_check = aiovg_get_page_by_title( $page['title'] );
 
 			if ( ! isset( $page_check->ID ) ) {
 				$id = wp_insert_post(
@@ -2415,7 +2533,12 @@ function aiovg_truncate( $text, $char_length = 55, $append = '...' ) {
  * @param int   $post_id Post ID
  */
 function aiovg_update_views_count( $post_id ) {	
-	$privacy_settings = get_option( 'aiovg_privacy_settings' );
+	$can_update_views_count = apply_filters( 'aiovg_can_update_views_count', true, $post_id );
+	if ( ! $can_update_views_count ) {
+		return;
+	}
+
+	$privacy_settings = aiovg_get_option( 'aiovg_privacy_settings' );
 	
 	if ( isset( $privacy_settings['disable_cookies'] ) && isset( $privacy_settings['disable_cookies']['aiovg_videos_views'] ) ) {
 		$count = (int) get_post_meta( $post_id, 'views', true );

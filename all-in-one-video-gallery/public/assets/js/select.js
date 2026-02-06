@@ -11,13 +11,16 @@
 		var $inputEl          = $this.find( '.aiovg-dropdown-input' );
 		var $dropdownEl       = $this.find( '.aiovg-dropdown' );		
 		var $dropdownListEl   = $this.find( '.aiovg-dropdown-list' );
-		var $dropdownSearchEl = $this.find( '.aiovg-dropdown-search' );		
+		var $dropdownSearchEl = $this.find( '.aiovg-dropdown-search' );	
+		var $dropdownItems    = $this.find( '.aiovg-dropdown-item' );	
 		var $searchEmptyEl    = $this.find( '.aiovg-dropdown-no-items' ); 
 		var $searchInputEl    = $dropdownSearchEl.find( 'input[type="text"]' );     
         var $searchResetBtn   = $dropdownSearchEl.find( 'button' ); 
 
-		var totalItems = $dropdownListEl.find( '.aiovg-dropdown-item' ).length;
+		var totalItems = $dropdownItems.length;
+		var stayOpen = parseInt( $dropdownSearchEl.data( 'stay_open' ) );
 		var showSearchThreshold = parseInt( $dropdownSearchEl.data( 'show_search_threshold' ) );
+		var currentFocus = -1;
 
 		if ( totalItems == 0 ) {
 			return false;
@@ -27,16 +30,57 @@
 			$dropdownSearchEl.prop( 'hidden', false );
 		}
 
+		// Helpers
 		var setCategoryNames = function() {
 			var terms = [];
 
 			$dropdownListEl.find( '.aiovg-item-selected' ).each(function() {
-				var termName = $( this ).find( '.aiovg-item-name' ).html().trim();
+				var termName = $( this ).find( '.aiovg-item-name' ).text();
 				terms.push( termName );
 			});
 
 			$inputEl.val( terms.join( ', ' ) );
-		}				
+		}	
+		
+		var setActive = function( index ) {
+			var $visible = $dropdownItems.filter( ':not([hidden])' );
+
+			if ( $visible.length === 0 ) return;
+
+			// Up arrow at top → return to search box
+			if ( index < 0 ) {
+				if ( ! $dropdownSearchEl.prop( 'hidden' ) ) {
+					$searchInputEl.focus();
+				}
+
+				$dropdownItems.removeClass( 'aiovg-item-active' );
+				currentFocus = -1;
+				return;
+			}
+
+			if ( index >= $visible.length ) index = 0;
+			currentFocus = index;
+
+			$dropdownItems.removeClass( 'aiovg-item-active' );
+			
+			var $item = $visible.eq( currentFocus );
+			$item.addClass( 'aiovg-item-active' );
+
+			// Auto-scroll
+			var container = $dropdownEl.get( 0 );
+			var el = $item.get( 0 );
+
+			if ( container && el ) {
+				var top = el.offsetTop;
+				var bottom = top + el.offsetHeight;
+
+				if ( top < container.scrollTop ) {
+					container.scrollTop = top;
+				} else if ( bottom > container.scrollTop + container.clientHeight ) {
+					container.scrollTop = bottom - container.clientHeight;
+				}
+			}
+		}
 
 		// Toggle Dropdown
 		$inputEl.on( 'click', function() {
@@ -50,12 +94,13 @@
 			$searchResetBtn.prop( 'hidden', false );
 			$searchEmptyEl.prop( 'hidden', true );			
 
-			var value = this.value.trim().toLowerCase();
-			var matchesFound = false;
+			var value = this.value.trim().toLowerCase();			
 
 			if ( value ) {
+				var matchesFound = false;
+
 				$dropdownListEl.find( '.aiovg-dropdown-item' ).each(function() {
-					var itemName = $( this ).find( '.aiovg-item-name' ).html();
+					var itemName = $( this ).find( '.aiovg-item-name' ).text();
 
 					if ( itemName.toLowerCase().indexOf( value.toString() ) === -1 ) {
 						this.hidden = true;
@@ -64,12 +109,15 @@
 						matchesFound = true;
 					}   
 				});
-			} else {
-				$dropdownListEl.find( '.aiovg-dropdown-item' ).prop( 'hidden', true );
-			}
 
-			if ( ! matchesFound ) {
-				$searchEmptyEl.prop( 'hidden', false );
+				if ( ! matchesFound ) {
+					$searchEmptyEl.prop( 'hidden', false );
+				}
+			} else {
+				$this.removeClass( 'aiovg-is-searching' );
+
+				$searchResetBtn.prop( 'hidden', true );
+				$dropdownListEl.find( '.aiovg-dropdown-item' ).prop( 'hidden', false );
 			}
 		});
 
@@ -107,10 +155,88 @@
 
 			setCategoryNames();
 
-			$dropdownEl.hide();
+			if ( ! stayOpen ) {
+				$dropdownEl.hide();
+			}
 		});	
 		
 		setCategoryNames();
+
+		// Auto-focus search when typing
+		$inputEl.on( 'keydown', function( event ) {
+			if ( ! $dropdownSearchEl.prop( 'hidden' ) ) {
+				if ( /^[a-zA-Z0-9]$/.test( event.key ) ) {
+					$dropdownEl.show();
+					$searchInputEl.focus();
+					return;
+				}
+			}
+		});
+
+		// Keyboard navigation
+		$inputEl.on( 'keydown', function( event ) {
+			// TAB → close dropdown
+			if ( event.keyCode === 9 ) {
+				$dropdownEl.hide();
+				currentFocus = -1;
+				return;
+			}
+
+			// Open on down arrow
+			if ( $dropdownEl.is( ':hidden' ) ) {
+				if ( event.keyCode === 40 || event.keyCode === 13 || event.keyCode === 32 ) {
+					event.preventDefault(); // Prevent page scroll on space
+					$dropdownEl.show();
+				} else {
+					return;
+				}
+			}
+
+			var key = event.keyCode;
+
+			if ( key === 40 ) { // ↓
+				event.preventDefault();
+				setActive( currentFocus + 1 );
+			} else if ( key === 38 ) { // ↑
+				event.preventDefault();
+				setActive( currentFocus - 1 );
+			} else if ( key === 13 ) { // ENTER
+				event.preventDefault();
+				var $visible = $dropdownItems.filter( ':not([hidden])' );
+				if ( currentFocus > -1 && $visible.length > 0 ) {
+					$visible.eq( currentFocus ).trigger( 'click' );
+				}
+			}
+		});
+
+		// ESC inside search field
+		$searchInputEl.on( 'keydown', function( event ) {
+			// TAB → close dropdown
+			if ( event.keyCode === 9 ) {
+				$dropdownEl.hide();
+				currentFocus = -1;
+				return;
+			}
+
+			// ESC → close dropdown
+			if ( event.keyCode === 27 ) {
+				$dropdownEl.hide();
+				$inputEl.focus();
+				currentFocus = -1;
+			}
+
+			// Down key → move from search → first item
+			if ( event.keyCode === 40 ) {
+				event.preventDefault();
+				
+				var $visible = $dropdownItems.filter( ':not([hidden])' );
+				if ( $visible.length > 0 ) {
+					currentFocus = 0;
+					setActive( 0 );
+					$inputEl.focus();
+				}
+			}
+		});
 	}
 
 	/**

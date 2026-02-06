@@ -11,6 +11,7 @@
  
 $player_html = '';
 $maybe_shortcode = false;
+$enable_referrer_policy = false;
 
 if ( ! empty( $post_meta ) ) {
     if ( in_array( $current_video_provider, $thirdparty_providers_all ) ) {
@@ -22,6 +23,10 @@ if ( ! empty( $post_meta ) ) {
 
 		if ( $iframe_src = aiovg_extract_iframe_src( $embedcode ) ) { 
             $embed_url = $iframe_src; 
+
+            if ( false !== strpos( $embed_url, 'youtube.com' ) || false !== strpos( $embed_url, 'youtu.be' ) ) {
+                $enable_referrer_policy = true;
+            }
         } else {
             $player_html     = $embedcode;
             $maybe_shortcode = true;
@@ -53,6 +58,8 @@ if ( ! empty( $embed_url ) ) {
 
     // YouTube
     if ( 'youtube' == $current_video_provider ) {
+        $enable_referrer_policy = true;
+
         parse_str( $embed_url, $queries );
                     
         $embed_url = 'https://www.youtube.com/embed/' . aiovg_get_youtube_id_from_url( $embed_url ) . '?iv_load_policy=3&modestbranding=1&rel=0&showinfo=0';	                    
@@ -214,9 +221,10 @@ if ( ! empty( $embed_url ) ) {
 
     // Build iframe code
     $player_html = sprintf(
-        '<iframe src="%s" title="%s" width="560" height="315" frameborder="0" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>',
+        '<iframe src="%s" title="%s" width="560" height="315" frameborder="0" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen%s></iframe>',
         esc_url( $embed_url ),
-        esc_attr( $post_title )
+        esc_attr( $post_title ),
+        ( $enable_referrer_policy ? ' referrerpolicy="strict-origin-when-cross-origin"' : '' )
     );
 }
 ?>
@@ -276,7 +284,7 @@ if ( ! empty( $embed_url ) ) {
                     }					
                 }
 
-                xmlhttp.open( 'GET', '<?php echo admin_url( 'admin-ajax.php' ); ?>?action=aiovg_update_views_count&post_id=<?php echo $post_id; ?>&security=<?php echo wp_create_nonce( 'aiovg_ajax_nonce' ); ?>', true );
+                xmlhttp.open( 'GET', '<?php echo admin_url( 'admin-ajax.php' ); ?>?action=aiovg_update_views_count&post_id=<?php echo $post_id; ?>&security=<?php echo wp_create_nonce( 'aiovg_public_ajax_nonce' ); ?>', true );
                 xmlhttp.send();							
             }
 

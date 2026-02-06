@@ -41,7 +41,7 @@ class AIOVG_Player_Popup extends AIOVG_Player_Base {
 	 */
 	public function get_player() {		
 		$player_settings  = $this->get_player_settings();
-		$general_settings = get_option( 'aiovg_general_settings' );
+		$general_settings = aiovg_get_option( 'aiovg_general_settings' );
 		
 		$lazyloading   = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' : '';
 		$popup_content = __( 'Open Popup', 'all-in-one-video-gallery' );
@@ -55,11 +55,16 @@ class AIOVG_Player_Popup extends AIOVG_Player_Base {
 				$is_image = 1;
 			}
 		} else {
-			$popup_content = trim( $this->args['content'] );
+			$popup_content = trim( (string) $this->args['content'] );
 
-			if ( ! filter_var( $popup_content, FILTER_VALIDATE_URL ) === FALSE ) {
-				$popup_content = sprintf( '<img src="%s" alt="" %s/>', esc_url( $popup_content ), $lazyloading );
-				$is_image = 1;
+			if ( $popup_content && filter_var( $popup_content, FILTER_VALIDATE_URL ) ) {
+				$parsed = wp_parse_url( $popup_content );
+
+				// Allow only http / https URLs
+				if ( isset( $parsed['scheme'] ) && in_array( $parsed['scheme'], array( 'http', 'https' ) ) ) {
+					$popup_content = sprintf( '<img src="%s" alt="" %s/>', esc_url( $popup_content ), $lazyloading );
+					$is_image = 1;
+				}
 			}
 		}
 

@@ -36,6 +36,11 @@ class AIOVG_Admin {
 			// Insert the missing player settings
 			$player_settings = get_option( 'aiovg_player_settings' );
 
+			if ( ! is_array( $player_settings ) || empty( $player_settings ) ) {
+				$player_settings = $defaults['aiovg_player_settings'];
+				update_option( 'aiovg_player_settings', $player_settings );
+			}
+
 			$new_player_settings = array();
 			
 			if ( ! array_key_exists( 'theme', $player_settings ) ) {
@@ -67,13 +72,27 @@ class AIOVG_Admin {
 				$new_player_settings['force_js_initialization'] = ( isset( $player_settings['player'] ) && 'standard' == $player_settings['player'] ) ? 1 : 0;				
 			}
 
+			if ( ! array_key_exists( 'hide_youtube_logo', $player_settings ) ) {
+				$new_player_settings['hide_youtube_logo'] = $defaults['aiovg_player_settings']['hide_youtube_logo'];
+			}
+
 			if ( count( $new_player_settings ) ) {
 				update_option( 'aiovg_player_settings', array_merge( $player_settings, $new_player_settings ) );
 			}						
 
 			// Insert the missing videos settings
 			$videos_settings = get_option( 'aiovg_videos_settings' );
-			$image_settings  = get_option( 'aiovg_image_settings', array() );
+
+			if ( ! is_array( $videos_settings ) || empty( $videos_settings ) ) {
+				$videos_settings = $defaults['aiovg_videos_settings'];
+				update_option( 'aiovg_videos_settings', $videos_settings );
+			}
+
+			$image_settings = get_option( 'aiovg_image_settings' );
+
+			if ( ! is_array( $image_settings ) || empty( $image_settings ) ) {
+				$image_settings = array();
+			}
 
 			$new_videos_settings = array();
 
@@ -82,7 +101,7 @@ class AIOVG_Admin {
 			}
 
 			if ( ! empty( $image_settings ) ) {
-				$new_videos_settings['display'] = $videos_settings['display'];
+				$new_videos_settings['display'] = isset( $videos_settings['display'] ) ? $videos_settings['display'] : $defaults['aiovg_videos_settings']['display'];
 				$new_videos_settings['display']['title'] = 'title';
 			}
 
@@ -96,6 +115,11 @@ class AIOVG_Admin {
 
 			// Insert the missing categories settings
 			$categories_settings = get_option( 'aiovg_categories_settings' );
+
+			if ( ! is_array( $categories_settings ) || empty( $categories_settings ) ) {
+				$categories_settings = $defaults['aiovg_categories_settings'];
+				update_option( 'aiovg_categories_settings', $categories_settings );
+			}
 
 			$new_categories_settings = array();
 
@@ -126,10 +150,15 @@ class AIOVG_Admin {
 			// Insert the missing video settings
 			$video_settings = get_option( 'aiovg_video_settings' );
 
+			if ( ! is_array( $video_settings ) || empty( $video_settings ) ) {
+				$video_settings = $defaults['aiovg_video_settings'];
+				update_option( 'aiovg_video_settings', $video_settings );
+			}
+
 			$new_video_settings = array();
 
 			if ( ! empty( $image_settings ) ) {
-				$new_video_settings['display'] = $video_settings['display'];
+				$new_video_settings['display'] = isset( $video_settings['display'] ) ? $video_settings['display'] : $defaults['aiovg_video_settings']['display'];
 				$new_video_settings['display']['share'] = 'share';
 			}
 
@@ -142,14 +171,16 @@ class AIOVG_Admin {
 			}
 
 			// Insert the images settings
-			if ( false == get_option( 'aiovg_images_settings' ) ) {
+			$images_settings = get_option( 'aiovg_images_settings' );
+
+			if ( ! is_array( $images_settings ) || empty( $images_settings ) ) {
 				$images_settings = array(
 					'width' => $defaults['aiovg_images_settings']['width'],
 					'ratio' => $defaults['aiovg_images_settings']['ratio'],
 					'size'  => $defaults['aiovg_images_settings']['size']
 				);
 
-				if ( ! empty( $image_settings ) ) {
+				if ( isset( $image_settings['ratio'] ) ) {
 					$images_settings['ratio'] = $image_settings['ratio'];
 				}
 
@@ -157,42 +188,70 @@ class AIOVG_Admin {
 					$images_settings['ratio'] = $videos_settings['ratio'];
 				}
 
-				add_option( 'aiovg_images_settings', $images_settings );
+				update_option( 'aiovg_images_settings', $images_settings );
 			}
 
 			// Insert the featured images settings
-			if ( false == get_option( 'aiovg_featured_images_settings' ) ) {
-				add_option( 'aiovg_featured_images_settings', array(
+			$featured_images_settings = get_option( 'aiovg_featured_images_settings' );
+
+			if ( ! is_array( $featured_images_settings ) || empty( $featured_images_settings ) ) {
+				$featured_images_settings = array(
 					'enabled'                    => $defaults['aiovg_featured_images_settings']['enabled'],
 					'download_external_images'   => $defaults['aiovg_featured_images_settings']['download_external_images'],
 					'hide_on_single_video_pages' => $defaults['aiovg_featured_images_settings']['hide_on_single_video_pages']
-				));
+				);
+
+				update_option( 'aiovg_featured_images_settings', $featured_images_settings );
 			}
 
 			// Insert the likes / dislikes settings
-			if ( false == get_option( 'aiovg_likes_settings' ) ) {
-				add_option( 'aiovg_likes_settings', array(
+			$likes_settings = get_option( 'aiovg_likes_settings' );
+
+			if ( ! is_array( $likes_settings ) || empty( $likes_settings ) ) {
+				$likes_settings = array(
 					'like_button'            => $defaults['aiovg_likes_settings']['like_button'],
 					'dislike_button'         => $defaults['aiovg_likes_settings']['dislike_button'],
 					'login_required_to_vote' => $defaults['aiovg_likes_settings']['login_required_to_vote']
-				));
+				);
+
+				update_option( 'aiovg_likes_settings', $likes_settings );
 			}
 
 			// Insert the related videos settings
-			if ( false == get_option( 'aiovg_related_videos_settings' ) ) {
-				add_option( 'aiovg_related_videos_settings', array(
-					'columns' => $videos_settings['columns'],
-					'limit'   => $videos_settings['limit'],
-					'orderby' => $videos_settings['orderby'],
-					'order'   => $videos_settings['order'],
+			$related_videos_settings = get_option( 'aiovg_related_videos_settings' );
+
+			if ( ! is_array( $related_videos_settings ) || empty( $related_videos_settings ) ) {
+				$related_videos_settings = array(
+					'title'   => $defaults['aiovg_related_videos_settings']['title'],
+					'columns' => isset( $videos_settings['columns'] ) ? $videos_settings['columns'] : $defaults['aiovg_videos_settings']['columns'],
+					'limit'   => isset( $videos_settings['limit'] ) ? $videos_settings['limit'] : $defaults['aiovg_videos_settings']['limit'],
+					'orderby' => isset( $videos_settings['orderby'] ) ? $videos_settings['orderby'] : $defaults['aiovg_videos_settings']['orderby'],
+					'order'   => isset( $videos_settings['order'] ) ? $videos_settings['order'] : $defaults['aiovg_videos_settings']['order'],
 					'display' => array(
 						'pagination' => 'pagination'
 					)
-				));
+				);
+
+				update_option( 'aiovg_related_videos_settings', $related_videos_settings );
+			}
+
+			$new_related_videos_settings = array();
+
+			if ( ! array_key_exists( 'title', $related_videos_settings ) ) {
+				$new_related_videos_settings['title'] = __( 'You may also like', 'all-in-one-video-gallery' );				
+			}
+
+			if ( count( $new_related_videos_settings ) ) {
+				update_option( 'aiovg_related_videos_settings', array_merge( $related_videos_settings, $new_related_videos_settings ) );
 			}
 			
 			// Insert the missing socialshare settings
 			$socialshare_settings = get_option( 'aiovg_socialshare_settings' );
+
+			if ( ! is_array( $socialshare_settings ) || empty( $socialshare_settings ) ) {
+				$socialshare_settings = $defaults['aiovg_socialshare_settings'];
+				update_option( 'aiovg_socialshare_settings', $socialshare_settings );
+			}
 
 			$new_socialshare_settings = array();
 
@@ -210,6 +269,11 @@ class AIOVG_Admin {
 			
 			// Insert the missing general settings
 			$general_settings = get_option( 'aiovg_general_settings' );
+
+			if ( ! is_array( $general_settings ) || empty( $general_settings ) ) {
+				$general_settings = $defaults['aiovg_general_settings'];
+				update_option( 'aiovg_general_settings', $general_settings );
+			}
 
 			$new_general_settings = array();
 
@@ -234,19 +298,30 @@ class AIOVG_Admin {
 			}
 
 			// Insert the api settings
-			if ( false == get_option( 'aiovg_api_settings' ) ) {
-				$automations_settings = get_option( 'aiovg_automations_settings', array() );
+			$api_settings = get_option( 'aiovg_api_settings' );
+
+			if ( ! is_array( $api_settings ) || empty( $api_settings ) ) {
+				$automations_settings = get_option( 'aiovg_automations_settings' );
+
+				if ( ! is_array( $automations_settings ) || empty( $automations_settings ) ) {
+					$automations_settings = array();
+				}
 
 				$defaults = array(
 					'youtube_api_key'    => isset( $automations_settings['youtube_api_key'] ) ? $automations_settings['youtube_api_key'] : '',
 					'vimeo_access_token' => isset( $general_settings['vimeo_access_token'] ) ? $general_settings['vimeo_access_token'] : ''
 				);
 					
-				add_option( 'aiovg_api_settings', $defaults );			
+				update_option( 'aiovg_api_settings', $defaults );			
 			}
 			
 			// Insert the missing page settings
 			$page_settings = get_option( 'aiovg_page_settings' );
+
+			if ( ! is_array( $page_settings ) || empty( $page_settings ) ) {
+				$page_settings = $defaults['aiovg_page_settings'];
+				update_option( 'aiovg_page_settings', $page_settings );
+			}
 
 			if ( ! array_key_exists( 'tag', $page_settings ) ) {
 				aiovg_insert_missing_pages();			
@@ -255,22 +330,29 @@ class AIOVG_Admin {
 			// Insert / Update the restrictions settings
 			$restrictions_settings = get_option( 'aiovg_restrictions_settings' );
 
-			if ( false == $restrictions_settings ) {
-				add_option( 'aiovg_restrictions_settings', $defaults['aiovg_restrictions_settings'] );
-			} else {
-				if ( ! array_key_exists( 'show_restricted_label', $restrictions_settings ) ) {
-					update_option( 'aiovg_restrictions_settings', array_merge( $defaults['aiovg_restrictions_settings'], $restrictions_settings ) );
-				}
+			if ( ! is_array( $restrictions_settings ) || empty( $restrictions_settings ) ) {
+				$restrictions_settings = $defaults['aiovg_restrictions_settings'];
+				update_option( 'aiovg_restrictions_settings', $restrictions_settings );
 			}
 
-			// Insert the privacy settings			
-			if ( false == get_option( 'aiovg_privacy_settings' ) ) {
-				add_option( 'aiovg_privacy_settings', $defaults['aiovg_privacy_settings'] );
+			if ( ! array_key_exists( 'show_restricted_label', $restrictions_settings ) ) {
+				update_option( 'aiovg_restrictions_settings', array_merge( $defaults['aiovg_restrictions_settings'], $restrictions_settings ) );
+			}
+
+			// Insert the privacy settings
+			$privacy_settings = get_option( 'aiovg_privacy_settings' );
+
+			if ( ! is_array( $privacy_settings ) || empty( $privacy_settings ) ) {
+				$privacy_settings = $defaults['aiovg_privacy_settings'];
+				update_option( 'aiovg_privacy_settings', $privacy_settings );
 			}	
 			
 			// Insert the bunny stream settings			
-			if ( false == get_option( 'aiovg_bunny_stream_settings' ) ) {
-				add_option( 'aiovg_bunny_stream_settings', $defaults['aiovg_bunny_stream_settings'] );
+			$bunny_stream_settings = get_option( 'aiovg_bunny_stream_settings' );
+
+			if ( ! is_array( $bunny_stream_settings ) || empty( $bunny_stream_settings ) ) {
+				$bunny_stream_settings = $defaults['aiovg_bunny_stream_settings'];
+				update_option( 'aiovg_bunny_stream_settings', $bunny_stream_settings );
 			}
 
 			// Delete the unwanted plugin options
@@ -395,12 +477,12 @@ class AIOVG_Admin {
 		$ignored = $_issues['ignored'];		
 
 		// Check: pages_misconfigured
-		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 		$pages = aiovg_get_custom_pages_list();
 
 		foreach ( $pages as $key => $page ) {
 			$issue_found = 0;
-			$post_id = $page_settings[ $key ];
+			$post_id = isset( $page_settings[ $key ] ) ? $page_settings[ $key ] : 0;
 			
 			$pattern = '';
 			if ( ! empty( $pages[ $key ]['content'] ) ) {
@@ -455,13 +537,12 @@ class AIOVG_Admin {
 				case 'pages_misconfigured':	
 					global $wpdb;
 
-					$page_settings = get_option( 'aiovg_page_settings' );
-
+					$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 					$pages = aiovg_get_custom_pages_list();					
 
 					foreach ( $pages as $key => $page ) {
 						$issue_found = 0;
-						$post_id = $page_settings[ $key ];			
+						$post_id = isset( $page_settings[ $key ] ) ? $page_settings[ $key ] : 0;			
 			
 						$pattern = '';
 						if ( ! empty( $pages[ $key ]['content'] ) ) {
@@ -672,7 +753,20 @@ class AIOVG_Admin {
 	public function enqueue_scripts( $hook ) {
 		global $post_type;
 
-		wp_enqueue_media();
+		$post_id = 0;
+
+		$screen = get_current_screen();
+		if ( $screen && 'aiovg_videos' === $screen->post_type && ! empty( $_GET['post'] ) ) {
+			$post_id = absint( $_GET['post'] );
+		}
+
+		if ( 
+			( isset( $_GET['page'] ) && in_array( $_GET['page'], array( 'all-in-one-video-gallery', 'aiovg_settings', 'aiovg_import_export' ) ) ) ||
+			( in_array( $hook, array( 'post-new.php', 'post.php' ) ) && 'aiovg_videos' === $post_type ) || 
+			( isset( $_GET['taxonomy'] ) && in_array( $_GET['taxonomy'], array( 'aiovg_categories' ) ) )
+		) {
+			wp_enqueue_media();
+		}
 		
         wp_enqueue_script( 'wp-color-picker' );
 
@@ -729,8 +823,9 @@ class AIOVG_Admin {
 			AIOVG_PLUGIN_SLUG . '-admin', 
 			'aiovg_admin', 
 			array(
-				'ajax_nonce' => wp_create_nonce( 'aiovg_ajax_nonce' ),
 				'site_url'   => get_site_url(),
+				'post_id'    => $post_id,
+				'ajax_nonce' => wp_create_nonce( 'aiovg_ajax_nonce' ),
 				'i18n'       => array(
 					'copied'             => __( 'Copied!', 'all-in-one-video-gallery' ),
 					'no_issues_selected' => __( 'Please select at least one issue.', 'all-in-one-video-gallery' ),
@@ -744,6 +839,40 @@ class AIOVG_Admin {
 				)				
 			)
 		);
+
+		if ( isset( $_GET['page'] ) && 'aiovg_import_export' === $_GET['page'] ) {
+			wp_enqueue_script( 
+				AIOVG_PLUGIN_SLUG . '-import-export', 
+				AIOVG_PLUGIN_URL . 'admin/assets/js/import-export.min.js', 
+				array( AIOVG_PLUGIN_SLUG . '-admin' ), 
+				AIOVG_PLUGIN_VERSION, 
+				array( 'strategy' => 'defer' ) 
+			);
+
+			wp_localize_script( 
+				AIOVG_PLUGIN_SLUG . '-import-export', 
+				'aiovg_import_export', 
+				array(
+					'i18n' => array(
+						'fields_required'                     => __( 'Please fill in all required fields.', 'all-in-one-video-gallery' ),
+						'preparing_import'                    => __( 'Preparing import.', 'all-in-one-video-gallery' ),
+						'preparing_export'                    => __( 'Preparing export.', 'all-in-one-video-gallery' ),
+						'fetching_csv_columns'                => __( 'Please wait while we fetch the column headers from your CSV file.', 'all-in-one-video-gallery' ),
+						'csv_columns_loaded'                  => __( 'CSV columns loaded successfully. You can proceed with the import now.', 'all-in-one-video-gallery' ),
+						'import_folder_failed_status_heading' => __( 'Sorry, some videos could not be imported. Please try again later.', 'all-in-one-video-gallery' ),		
+						'import_csv_error_status_heading'     => __( 'Some items could not be imported from the CSV. Please review the details below.', 'all-in-one-video-gallery' ),		
+						'export_zip_success_status_heading'   => __( 'Your export is ready. Download the ZIP files below.', 'all-in-one-video-gallery' ),
+						'export_zip_failed_status_heading'    => __( 'Sorry, the following videos could not be exported because their file size exceeds the maximum allowed ZIP size.', 'all-in-one-video-gallery' ),
+						'export_zip_empty_status'             => sprintf(
+							__( 'Your export is complete. %s video records processed, and %s skipped. However, no ZIP file was created because no files were found.', 'all-in-one-video-gallery' ),
+							'%%exported%%',
+							'%%skipped%%'
+						),
+						'unexpected_error'                    => __( 'An unexpected error occurred. Please try again later.', 'all-in-one-video-gallery' )
+					)				
+				)
+			);
+		}
 	}
 
 	/**
@@ -754,7 +883,7 @@ class AIOVG_Admin {
 	 * @param WP_Post $post        The current post object.
 	 */
 	public function add_display_post_states( $post_states, $post ) {
-		$page_settings = get_option( 'aiovg_page_settings', array() );
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 		
 		if ( isset( $page_settings['category'] ) && $page_settings['category'] == $post->ID ) {
 			$post_states['aiovg_page_for_category'] = __( 'Video Category Page', 'all-in-one-video-gallery' );
@@ -811,22 +940,126 @@ class AIOVG_Admin {
 	}
 
 	/**
-	 * Sets the extension and mime type for .vtt files.
+	 * Extend MIME type recognition for media and streaming files.
+	 *
+	 * Adds support for WebVTT (.vtt) and SRT (.srt) subtitle uploads,
+	 * and registers MIME types for HLS (.m3u8) and MPEG-DASH (.mpd)
+	 * playlist files to ensure proper file type validation within WordPress.
+	 * The HLS and DASH file types are not permitted for upload, but are
+	 * recognized to avoid MIME type mismatches during playback or external
+	 * media reference checks.
+	 *
+	 * @since  3.0.0
+	 * @param  array $mimes Array of allowed mime types.
+	 * @return array        Filtered mime types array.
+	 */
+	public function add_mime_types( $mimes ) {
+		$mimes['vtt']  = 'text/vtt';	
+		$mimes['srt']  = 'application/x-subrip';		
+		$mimes['m3u8'] = 'application/x-mpegurl';
+		$mimes['mpd']  = 'application/dash+xml';
+
+		return $mimes;		
+	}
+
+	/**
+	 * Ensure WordPress properly recognizes .vtt and .srt files.
 	 *
 	 * @since  1.5.7
 	 * @param  array  $types    File data array containing 'ext', 'type', and 'proper_filename' keys.
-     * @param  string $file     Full path to the file.
-     * @param  string $filename The name of the file (may differ from $file due to $file being in a tmp directory).
-     * @param  array  $mimes    Key is the file extension with value as the mime type.
+	 * @param  string $file     Full path to the file.
+	 * @param  string $filename The name of the file (may differ from $file due to $filename being in a tmp directory).
+	 * @param  array  $mimes    Key is the file extension with value as the mime type.
 	 * @return array  $types    Filtered file data array.
 	 */
 	public function add_filetype_and_ext( $types, $file, $filename, $mimes ) {
-		if ( false !== strpos( $filename, '.vtt' ) ) {			
+		$type = wp_check_filetype( $filename, $mimes );
+
+		if ( 'vtt' === $type['ext'] ) {
 			$types['ext']  = 'vtt';
 			$types['type'] = 'text/vtt';
 		}
+
+		if ( 'srt' === $type['ext'] ) {
+			$types['ext'] = 'srt';
+			
+			// Prioritize standard MIME but fall back safely
+			if ( in_array( $type['type'], array( 'application/x-subrip', 'text/srt', 'text/plain' ) ) ) {
+				$types['type'] = $type['type']; // Use whichever the server assigns
+			} else {
+				$types['type'] = 'application/x-subrip'; // Safe default
+			}
+		}
 	
 		return $types;
+	}
+
+	/**
+	 * Validate uploaded WebVTT (.vtt) and SubRip (.srt) subtitle files.
+	 *
+	 * Uses real MIME detection via finfo (preferred and more secure).
+	 * Falls back to structure-based validation if finfo is unavailable.
+	 *
+	 * @since  4.5.8
+	 * @param  array $file Reference to a single element from the `$_FILES` array.
+	 * @return array       Modified file array or error response.
+	 */
+	public function wp_handle_upload_prefilter( $file ) {
+		$filename = strtolower( $file['name'] );
+
+		// Only handle VTT/SRT uploads
+		if ( ! str_ends_with( $filename, '.vtt' ) && ! str_ends_with( $filename, '.srt' ) ) {
+			return $file;
+		}
+
+		// Real MIME detection
+		if ( function_exists( 'finfo_open' ) ) {
+			$finfo     = finfo_open( FILEINFO_MIME_TYPE );
+			$real_mime = finfo_file( $finfo, $file['tmp_name'] );
+			finfo_close( $finfo );
+
+			$allowed_mimes = array(
+				'text/vtt',
+				'application/x-subrip',
+				'text/srt',
+				'text/plain'
+			);
+
+			if ( ! in_array( $real_mime, $allowed_mimes, true ) ) {
+				$file['error'] = __( 'Upload blocked — file MIME type is not a valid subtitle format.', 'all-in-one-video-gallery' );
+				return $file;
+			}
+
+			return $file; // MIME safe — no further checks needed
+		}
+
+		// Fallback — Subtitle structure validation
+		if ( str_ends_with( $filename, '.vtt' ) ) {
+			$handle = fopen( $file['tmp_name'], 'r' );
+			$first_line = trim( fgets( $handle ) );
+			fclose( $handle );
+
+			if ( strpos( $first_line, 'WEBVTT' ) !== 0 ) {
+				$file['error'] = __( 'Invalid WebVTT file — must start with "WEBVTT".', 'all-in-one-video-gallery' );
+			}
+		}
+
+		// Fallback Validate SRT
+		if ( str_ends_with( $filename, '.srt' ) ) {
+			$handle = fopen( $file['tmp_name'], 'r' );
+			$first_line  = trim( fgets( $handle ) );
+			$second_line = trim( fgets( $handle ) );
+			fclose( $handle );
+
+			$valid_index = preg_match( '/^\d+$/', $first_line );
+			$valid_time  = preg_match( '/^\d{2}:\d{2}:\d{2},\d{3} --> \d{2}:\d{2}:\d{2},\d{3}$/', $second_line );
+
+			if ( ! $valid_index || ! $valid_time ) {
+				$file['error'] = __( 'Invalid SRT file — does not follow standard SubRip formatting.', 'all-in-one-video-gallery' );
+			}
+		}
+
+		return $file;
 	}
 
 	/**
@@ -838,14 +1071,28 @@ class AIOVG_Admin {
 		check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
 
 		$user_id = get_current_user_id();
-		$key     = isset( $_POST['key'] ) ? sanitize_text_field( $_POST['key'] ) : '';
-		$value   = isset( $_POST['value'] ) ? sanitize_text_field( $_POST['value'] ) : '';
-
-		if ( ! empty( $user_id ) && ! empty( $key ) ) {
-			update_user_meta( $user_id, $key, $value );
+		if ( ! $user_id ) {
+			wp_die();
 		}
 
-		wp_die();	
+		if ( ! current_user_can( 'manage_aiovg_options' ) ) {
+			wp_die();
+		}
+
+		$key = isset( $_POST['key'] ) ? sanitize_key( $_POST['key'] ) : '';
+		$allowed_keys = array( 'aiovg_video_form_tour',	'aiovg_automation_form_tour' );
+
+		if ( ! in_array( $key, $allowed_keys ) ) {
+			wp_die();
+		}
+
+		$value = isset( $_POST['value'] ) ? trim( $_POST['value'] ) : 0;
+		if ( 'completed' !== $value ) {
+			$value = (int) $value;
+		}
+
+		update_user_meta( $user_id, $key, $value );
+		wp_die();
 	}
 
 }

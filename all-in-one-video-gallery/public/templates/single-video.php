@@ -154,7 +154,7 @@
 if ( $attributes['related'] ) {
     $shortcode = sprintf(
         '[aiovg_related_videos title="%s"]',
-        esc_html__( 'You may also like', 'all-in-one-video-gallery' )
+        esc_html( $attributes['title'] )
     );
 
 	$related_videos = do_shortcode( $shortcode );

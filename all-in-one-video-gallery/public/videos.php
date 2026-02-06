@@ -77,7 +77,7 @@ class AIOVG_Public_Videos {
 	 * @param array $atts An associative array of attributes.
 	 */
 	public function run_shortcode_category( $atts ) {
-		$categories_settings = get_option( 'aiovg_categories_settings' );
+		$categories_settings = aiovg_get_option( 'aiovg_categories_settings' );
 
 		$term_slug = get_query_var( 'aiovg_category' );
 		$content   = '';
@@ -90,7 +90,7 @@ class AIOVG_Public_Videos {
 		
 		if ( isset( $term ) && ! empty( $term ) ) {			
 			if ( ! empty( $categories_settings['breadcrumbs'] ) ) {
-				$page_settings = get_option( 'aiovg_page_settings' );
+				$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 				
 				// An ugly fallback for the users who have overwritten the deprecated "Back to Categories" link
 				$back_button_url = apply_filters( 'aiovg_back_to_categories_link', '#' );
@@ -194,7 +194,7 @@ class AIOVG_Public_Videos {
 		}
 		
 		if ( isset( $term ) && ! empty( $term ) ) {
-			$page_settings = get_option( 'aiovg_page_settings' );
+			$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 			$content = '';
 	
 			if ( ! empty( $term->description ) ) {
@@ -275,7 +275,7 @@ class AIOVG_Public_Videos {
 			return '';
 		}
 
-		$related_videos_settings = get_option( 'aiovg_related_videos_settings' );
+		$related_videos_settings = aiovg_get_option( 'aiovg_related_videos_settings' );
 
 		global $wp_the_query;
 		$post_id = $wp_the_query->get_queried_object_id();
@@ -365,7 +365,7 @@ class AIOVG_Public_Videos {
 	 * @param array $atts An associative array of attributes.
 	 */
 	public function run_shortcode_liked_videos( $atts ) {
-		$likes_settings = get_option( 'aiovg_likes_settings' );
+		$likes_settings = aiovg_get_option( 'aiovg_likes_settings' );
 
 		$user_id = get_current_user_id();
 		$liked   = array();
@@ -374,7 +374,7 @@ class AIOVG_Public_Videos {
 		if ( $user_id > 0 ) {
 			$liked = (array) get_user_meta( $user_id, 'aiovg_videos_likes' );	
 		} else {
-			$likes_settings = get_option( 'aiovg_likes_settings' );
+			$likes_settings = aiovg_get_option( 'aiovg_likes_settings' );
 
 			if ( empty( $likes_settings['login_required_to_vote'] ) ) {
 				if ( isset( $_COOKIE['aiovg_videos_likes'] ) ) {
@@ -420,7 +420,7 @@ class AIOVG_Public_Videos {
 	 * @param array $atts An associative array of attributes.
 	 */
 	public function run_shortcode_disliked_videos( $atts ) {	
-		$likes_settings = get_option( 'aiovg_likes_settings' );
+		$likes_settings = aiovg_get_option( 'aiovg_likes_settings' );
 
 		$user_id  = get_current_user_id();
 		$disliked = array();
@@ -429,7 +429,7 @@ class AIOVG_Public_Videos {
 		if ( $user_id > 0 ) {
 			$disliked = (array) get_user_meta( $user_id, 'aiovg_videos_dislikes' );		
 		} else {
-			$likes_settings = get_option( 'aiovg_likes_settings' );
+			$likes_settings = aiovg_get_option( 'aiovg_likes_settings' );
 
 			if ( empty( $likes_settings['login_required_to_vote'] ) ) {
 				if ( isset( $_COOKIE['aiovg_videos_dislikes'] ) ) {
@@ -475,7 +475,7 @@ class AIOVG_Public_Videos {
 	 */
 	public function ajax_callback_load_videos() {
 		// Security check
-		check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
+		check_ajax_referer( 'aiovg_public_ajax_nonce', 'security' );
 
 		// Proceed safe
 		$attributes = array();
@@ -513,8 +513,12 @@ class AIOVG_Public_Videos {
 	public function get_content( $attributes ) {		
 		$attributes['ratio'] = ! empty( $attributes['ratio'] ) ? (float) $attributes['ratio'] . '%' : '56.25%';
 		
+		$paged   = ! empty( $attributes['paged'] ) ? (int) $attributes['paged'] : 1;
 		$orderby = sanitize_text_field( $attributes['orderby'] );
 		$order   = sanitize_text_field( $attributes['order'] );
+
+		if ( 'classic' == $attributes['template'] ) $attributes['deeplinking'] = 0;
+		$deeplink_video_id = ! empty( $attributes['deeplinking'] ) ? (int) $attributes['deeplink_video'] : 0;
 		
 		// Enqueue style dependencies
 		wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-public' );
@@ -527,7 +531,7 @@ class AIOVG_Public_Videos {
 		);
 
 		if ( ! empty( $attributes['show_pagination'] ) || ! empty( $attributes['show_more'] ) ) { // Pagination
-			$args['paged'] = (int) $attributes['paged'];
+			$args['paged'] = $paged;
 		}
 		
 		if ( ! empty( $attributes['search_query'] ) ) { // Search
@@ -554,6 +558,13 @@ class AIOVG_Public_Videos {
 			if ( ! empty( $exclude ) ) {
 				$args['post__not_in'] = $exclude;
 			}
+		}
+
+		// If we have a deeplink video and are NOT on the first page, exclude it from the results
+		// to prevent it from appearing twice.
+		if ( ! empty( $deeplink_video_id ) && $paged > 1 ) {
+			$exclude = isset( $args['post__not_in'] ) ? array_merge( $args['post__not_in'], array( $deeplink_video_id ) ) : array( $deeplink_video_id );
+			$args['post__not_in'] = array_unique( $exclude );
 		}
 
 		// Taxonomy Parameters
@@ -675,8 +686,27 @@ class AIOVG_Public_Videos {
 				$args['order']    = $order;
 		}
 	
+		// Deeplinking: Add the filter if conditions are met
+		$deeplink_video_callback = function( $orderby_sql, $query ) use ( $deeplink_video_id ) {
+			if ( $query->get('post_type') !== 'aiovg_videos' ) {
+				return $orderby_sql;
+			}
+			
+			global $wpdb;
+			return "CASE {$wpdb->posts}.ID WHEN {$deeplink_video_id} THEN 0 ELSE 1 END, " . $orderby_sql;
+		};
+
+		if ( ! empty( $deeplink_video_id ) && $paged < 2 ) {
+			add_filter( 'posts_orderby', $deeplink_video_callback, 10, 2 );
+		}
+
 		$args = apply_filters( 'aiovg_query_args', $args, $attributes );
 		$aiovg_query = new WP_Query( $args );
+
+		// Deeplinking: Remove the filter if conditions were met
+		if ( ! empty( $deeplink_video_id ) && $paged < 2 ) {
+			remove_filter( 'posts_orderby', $deeplink_video_callback, 10 );
+		}
 		
 		// Start the loop
 		global $post;
@@ -801,7 +831,7 @@ class AIOVG_Public_Videos {
 	 */
 	public function get_defaults() {	
 		if ( empty( $this->defaults ) ) {	
-			$pagination_settings = get_option( 'aiovg_pagination_settings', array() ); 
+			$pagination_settings = aiovg_get_option( 'aiovg_pagination_settings' ); 
 
 			$fields = aiovg_get_shortcode_fields();
 
@@ -840,7 +870,10 @@ class AIOVG_Public_Videos {
 			$this->defaults['source'] = 'videos';
 			$this->defaults['count'] = 0;
 			$this->defaults['paged'] = aiovg_get_page_number();	
-			$this->defaults['pagination_ajax'] = isset( $pagination_settings['ajax'] ) && ! empty( $pagination_settings['ajax'] ) ? 1 : 0;		
+			$this->defaults['pagination_ajax'] = isset( $pagination_settings['ajax'] ) && ! empty( $pagination_settings['ajax'] ) ? 1 : 0;
+			$this->defaults['deeplink_video'] = aiovg_get_deeplink_video_id();	
+			$this->defaults['show_player_category'] = 0;
+			$this->defaults['show_player_tag'] = 0;	
 		}
 
 		$this->defaults['uid'] = aiovg_get_uniqid();

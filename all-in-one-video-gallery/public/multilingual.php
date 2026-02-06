@@ -36,7 +36,7 @@ class AIOVG_Public_Multilingual {
 			return;
 		}
 
-		$page_settings = get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 		$site_url = home_url();
 		
 		// Single category page		
@@ -55,8 +55,8 @@ class AIOVG_Public_Multilingual {
 						$slug = trim( $slug, '/' );
 						$slug = urldecode( $slug );		
 						
-						add_rewrite_rule( "$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $post_id . '&aiovg_category=$matches[1]&paged=$matches[2]', 'top' );
-						add_rewrite_rule( "$slug/([^/]+)/?$", 'index.php?page_id=' . $post_id . '&aiovg_category=$matches[1]', 'top' );
+						add_rewrite_rule( "^$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $post_id . '&aiovg_category=$matches[1]&paged=$matches[2]', 'top' );
+						add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?page_id=' . $post_id . '&aiovg_category=$matches[1]', 'top' );
 					}
 				}
 			}
@@ -78,8 +78,8 @@ class AIOVG_Public_Multilingual {
 						$slug = trim( $slug, '/' );
 						$slug = urldecode( $slug );		
 						
-						add_rewrite_rule( "$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $post_id . '&aiovg_tag=$matches[1]&paged=$matches[2]', 'top' );
-						add_rewrite_rule( "$slug/([^/]+)/?$", 'index.php?page_id=' . $post_id . '&aiovg_tag=$matches[1]', 'top' );
+						add_rewrite_rule( "^$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $post_id . '&aiovg_tag=$matches[1]&paged=$matches[2]', 'top' );
+						add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?page_id=' . $post_id . '&aiovg_tag=$matches[1]', 'top' );
 					}
 				}
 			}
@@ -101,8 +101,8 @@ class AIOVG_Public_Multilingual {
 						$slug = trim( $slug, '/' );
 						$slug = urldecode( $slug );		
 						
-						add_rewrite_rule( "$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $post_id . '&aiovg_user=$matches[1]&paged=$matches[2]', 'top' );
-						add_rewrite_rule( "$slug/([^/]+)/?$", 'index.php?page_id=' . $post_id . '&aiovg_user=$matches[1]', 'top' );
+						add_rewrite_rule( "^$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $post_id . '&aiovg_user=$matches[1]&paged=$matches[2]', 'top' );
+						add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?page_id=' . $post_id . '&aiovg_user=$matches[1]', 'top' );
 					}
 				}
 			}
@@ -124,7 +124,7 @@ class AIOVG_Public_Multilingual {
 						$slug = trim( $slug, '/' );
 						$slug = urldecode( $slug );		
 						
-						add_rewrite_rule( "$slug/id/([^/]+)/?$", 'index.php?page_id=' . $post_id . '&aiovg_type=id&aiovg_video=$matches[1]', 'top' );
+						add_rewrite_rule( "^$slug/id/([^/]+)/?$", 'index.php?page_id=' . $post_id . '&aiovg_type=id&aiovg_video=$matches[1]', 'top' );
 					}
 				}
 			}
@@ -146,8 +146,8 @@ class AIOVG_Public_Multilingual {
 						$slug = trim( $slug, '/' );	
 						$slug = urldecode( $slug );		
 						
-						add_rewrite_rule( "$slug/edit/([^/]+)/?$", 'index.php?page_id=' . $post_id . '&aiovg_action=edit&aiovg_video=$matches[1]', 'top' );
-						add_rewrite_rule( "$slug/delete/([^/]+)/?$", 'index.php?page_id=' . $post_id . '&aiovg_action=delete&aiovg_video=$matches[1]', 'top' );
+						add_rewrite_rule( "^$slug/edit/([^/]+)/?$", 'index.php?page_id=' . $post_id . '&aiovg_action=edit&aiovg_video=$matches[1]', 'top' );
+						add_rewrite_rule( "^$slug/delete/([^/]+)/?$", 'index.php?page_id=' . $post_id . '&aiovg_action=delete&aiovg_video=$matches[1]', 'top' );
 					}
 				}
 			}
@@ -169,7 +169,7 @@ class AIOVG_Public_Multilingual {
 						$slug = trim( $slug, '/' );	
 						$slug = urldecode( $slug );		
 						
-						add_rewrite_rule( "$slug/([^/]+)/?$", 'index.php?page_id=' . $post_id . '&aiovg_playlist=$matches[1]', 'top' );
+						add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?page_id=' . $post_id . '&aiovg_playlist=$matches[1]', 'top' );
 					}
 				}
 			}

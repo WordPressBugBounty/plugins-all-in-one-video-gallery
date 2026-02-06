@@ -9,44 +9,60 @@
  * @package All_In_One_Video_Gallery
  */
 
-$general_settings = get_option( 'aiovg_general_settings' );
-$images_settings  = get_option( 'aiovg_images_settings' );
+$general_settings = aiovg_get_option( 'aiovg_general_settings' );
+$images_settings  = aiovg_get_option( 'aiovg_images_settings' );
 
-$post_meta = get_post_meta( $post->ID );
+$post_meta  = get_post_meta( $post->ID );
 
 $image_size = ! empty( $images_settings['size'] ) ? $images_settings['size'] : 'large';
 $image_data = aiovg_get_image( $post->ID, $image_size, 'post', true );
-$image = $image_data['src'];
-$image_alt = ! empty( $image_data['alt'] ) ? $image_data['alt'] : $post->post_title;
+$image      = $image_data['src'];
+$image_alt  = ! empty( $image_data['alt'] ) ? $image_data['alt'] : $post->post_title;
 
 $has_access = aiovg_current_user_can( 'play_aiovg_video', $post->ID );
-
-$lazyloading = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' : '';
 ?>
 
 <div class="aiovg-thumbnail aiovg-thumbnail-style-image-top">
-    <a href="<?php the_permalink(); ?>" class="aiovg-responsive-container" style="padding-bottom: <?php echo esc_attr( $attributes['ratio'] ); ?>;">
-        <img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( $image_alt ); ?>" class="aiovg-responsive-element" <?php echo $lazyloading; ?>/>                    
-        
-        <?php if ( $attributes['show_duration'] && ! empty( $post_meta['duration'][0] ) ) : ?>
-            <div class="aiovg-duration">
-                <?php echo esc_html( $post_meta['duration'][0] ); ?>
-            </div>
-        <?php endif; ?>
+    <?php
+    echo sprintf( 
+        '<a href="%s" class="aiovg-responsive-container" style="padding-bottom: %s;">',
+        esc_url( get_permalink() ),
+        esc_attr( $attributes['ratio'] )
+    );
 
-        <?php if ( $has_access ) : ?>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="white" width="40" height="40" viewBox="0 0 24 24" class="aiovg-svg-icon-play aiovg-flex-shrink-0">
-                <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
-            </svg>
-        <?php else : ?>
-            <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="32" height="32" viewBox="0 0 50 50" class="aiovg-svg-icon-locked aiovg-flex-shrink-0">
-                <path d="M 25 3 C 18.363281 3 13 8.363281 13 15 L 13 20 L 9 20 C 7.300781 20 6 21.300781 6 23 L 6 47 C 6 48.699219 7.300781 50 9 50 L 41 50 C 42.699219 50 44 48.699219 44 47 L 44 23 C 44 21.300781 42.699219 20 41 20 L 37 20 L 37 15 C 37 8.363281 31.636719 3 25 3 Z M 25 5 C 30.566406 5 35 9.433594 35 15 L 35 20 L 15 20 L 15 15 C 15 9.433594 19.433594 5 25 5 Z M 25 30 C 26.699219 30 28 31.300781 28 33 C 28 33.898438 27.601563 34.6875 27 35.1875 L 27 38 C 27 39.101563 26.101563 40 25 40 C 23.898438 40 23 39.101563 23 38 L 23 35.1875 C 22.398438 34.6875 22 33.898438 22 33 C 22 31.300781 23.300781 30 25 30 Z"></path>
-            </svg>
-        <?php endif; ?>
+    // Image
+    echo sprintf( 
+        '<img src="%s" alt="%s" class="aiovg-responsive-element"%s/>',
+        esc_url( $image ),
+        esc_attr( $image_alt ),
+        ( ! empty( $general_settings['lazyloading'] ) ? ' loading="lazy"' : '' )
+    );
 
-        <?php the_aiovg_content_after_thumbnail_image( $attributes ); // After Thumbnail Image ?>
-    </a>    	
-    
+    // Duration
+    if ( $attributes['show_duration'] && ! empty( $post_meta['duration'][0] ) ) {
+        echo sprintf( 
+            '<div class="aiovg-duration">%s</div>',
+            esc_html( $post_meta['duration'][0] )
+        );
+    }
+
+    // Play Icon
+    if ( $has_access ) {
+        echo '<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="40" height="40" viewBox="0 0 24 24" class="aiovg-svg-icon-play aiovg-flex-shrink-0">
+            <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+        </svg>';
+    } else {
+        echo '<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="32" height="32" viewBox="0 0 50 50" class="aiovg-svg-icon-locked aiovg-flex-shrink-0">
+            <path d="M 25 3 C 18.363281 3 13 8.363281 13 15 L 13 20 L 9 20 C 7.300781 20 6 21.300781 6 23 L 6 47 C 6 48.699219 7.300781 50 9 50 L 41 50 C 42.699219 50 44 48.699219 44 47 L 44 23 C 44 21.300781 42.699219 20 41 20 L 37 20 L 37 15 C 37 8.363281 31.636719 3 25 3 Z M 25 5 C 30.566406 5 35 9.433594 35 15 L 35 20 L 15 20 L 15 15 C 15 9.433594 19.433594 5 25 5 Z M 25 30 C 26.699219 30 28 31.300781 28 33 C 28 33.898438 27.601563 34.6875 27 35.1875 L 27 38 C 27 39.101563 26.101563 40 25 40 C 23.898438 40 23 39.101563 23 38 L 23 35.1875 C 22.398438 34.6875 22 33.898438 22 33 C 22 31.300781 23.300781 30 25 30 Z"></path>
+        </svg>';
+    }
+
+    // After Thumbnail Image
+    the_aiovg_content_after_thumbnail_image( $attributes );
+
+    echo '</a>';
+    ?>
+ 
     <div class="aiovg-caption">
         <?php if ( $attributes['show_title'] ) : ?>
             <div class="aiovg-title">
@@ -64,7 +80,7 @@ $lazyloading = ! empty( $general_settings['lazyloading'] ) ? 'loading="lazy" ' :
         <?php
         // Labels
         if ( ! $has_access ) {
-            $restrictions_settings = get_option( 'aiovg_restrictions_settings' );
+            $restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
 
 			if ( ! empty( $restrictions_settings['show_restricted_label'] ) && ! empty( $restrictions_settings['restricted_label_text'] ) ) {
 				$styles = array();				
