@@ -771,17 +771,19 @@ function aiovg_get_default_settings() {
 
 	$defaults = array(		
 		'aiovg_player_settings' => array(
-			'player'      => 'videojs',
-			'theme'       => 'default',
-			'theme_color' => '#00b2ff',
-			'width'       => '',
-			'ratio'       => 56.25,
-			'autoplay'    => 0,
-			'loop'        => 0,
-			'muted'       => 0,
-			'preload'     => 'auto',
-			'playsinline' => 1,			
-			'controls'    => array(
+			'player'                  => 'videojs',
+			'theme'                   => 'default',
+			'theme_color'             => '#00b2ff',
+			'force_js_initialization' => 0,
+			'width'                   => '',
+			'ratio'                   => 56.25,
+			'autoplay'                => 0,
+			'loop'                    => 0,
+			'muted'                   => 0,
+			'preload'                 => 'auto',
+			'playsinline'             => 1,			
+			'quality_levels'          => implode( "\n", array( '360p', '480p', '720p', '1080p' ) ),
+			'controls'                => array(
 				'playpause'  => 'playpause',
 				'current'    => 'current',
 				'progress'   => 'progress', 
@@ -793,12 +795,11 @@ function aiovg_get_default_settings() {
 				'volume'     => 'volume', 
 				'fullscreen' => 'fullscreen'					
 			),
-			'hotkeys'        => 0,
-			'cc_load_policy' => 0,
-			'quality_levels' => implode( "\n", array( '360p', '480p', '720p', '1080p' ) ),
 			'use_native_controls'     => array(),
-			'force_js_initialization' => 0,
-			'hide_youtube_logo'       => 1			
+			'hide_youtube_logo'       => 0,
+			'cc_load_policy'          => 0,
+			'statistics'              => 1,
+			'hotkeys'                 => 0
 		),
 		'aiovg_socialshare_settings' => array(				
 			'services' => array( 
@@ -911,7 +912,7 @@ function aiovg_get_default_settings() {
 			'lazyloading'               => 0,
 			'datetime_format'           => '',
 			'number_format'             => 'full',
-			'maybe_flush_rewrite_rules' => 1,
+			'maybe_flush_rewrite_rules' => 0,
 			'delete_plugin_data'        => 1,
 			'delete_media_files'        => 1,
 			'custom_css'                => ''
@@ -1201,10 +1202,10 @@ function aiovg_get_option( $option ) {
  * @return string $seed Seed value.
  */
 function aiovg_get_orderby_rand_seed( $paged = 'no_longer_required' ) {
-	$seed = '';
-	
+	$seed = wp_rand( 1, 999999 );
+
 	if ( isset( $_COOKIE['aiovg_rand_seed'] ) ) {
-		$seed = (int) $_COOKIE['aiovg_rand_seed'];	
+		$seed = absint( $_COOKIE['aiovg_rand_seed'] );
 	}
 
 	return $seed;
@@ -1414,7 +1415,7 @@ function aiovg_get_shortcode_fields() {
 						array(
 							'name'        => 'ratio',
 							'label'       => __( 'Height (Ratio)', 'all-in-one-video-gallery' ),
-							'description' => __( "In percentage. 1 to 100. Calculate player's height using the ratio value entered.", 'all-in-one-video-gallery' ),
+							'description' => __( "In percentage. Calculates the player’s height based on the entered ratio.", 'all-in-one-video-gallery' ),
 							'type'        => 'text',
 							'value'       => $player_settings['ratio']
 						),
@@ -2533,7 +2534,14 @@ function aiovg_truncate( $text, $char_length = 55, $append = '...' ) {
  * @param int   $post_id Post ID
  */
 function aiovg_update_views_count( $post_id ) {	
-	$can_update_views_count = apply_filters( 'aiovg_can_update_views_count', true, $post_id );
+	$player_settings = aiovg_get_option( 'aiovg_player_settings' );
+
+	$can_update_views_count = apply_filters(
+		'aiovg_can_update_views_count',
+		isset( $player_settings['statistics'] ) ? (int) $player_settings['statistics'] : 1,
+		$post_id
+	);
+
 	if ( ! $can_update_views_count ) {
 		return;
 	}

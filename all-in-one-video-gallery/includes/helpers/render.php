@@ -298,10 +298,12 @@ function aiovg_wrap_with_filters( $content, $attributes ) {
 	$filters = ob_get_clean();
 
 	// Now load the combined layout (filters + videos)
+	$data_params = ( 'ajax' == $attributes['filters_mode'] ) ? wp_json_encode( $json_params ) : '';
+
 	$html = sprintf( 
-		'<div class="aiovg-videos-filters-wrapper aiovg-filters-position-%s" data-params=\'%s\'>', 
+		'<div class="aiovg-videos-filters-wrapper aiovg-filters-position-%s" data-params="%s">', 
 		esc_attr( $attributes['filters_position'] ),
-		( 'ajax' == $attributes['filters_mode'] ? wp_json_encode( $json_params ) : '' )
+		esc_attr( $data_params )
 	);
 
 	if ( 'ajax' == $attributes['filters_mode'] ) {
@@ -440,7 +442,7 @@ function the_aiovg_more_button( $numpages = '', $atts = array() ) {
 
 			$json_params = aiovg_prepare_attributes_for_ajax( $atts );			
 
-			echo sprintf( '<aiovg-pagination class="aiovg-more aiovg-more-ajax aiovg-text-center" data-params=\'%s\'>', wp_json_encode( $json_params ) );
+			echo sprintf( '<aiovg-pagination class="aiovg-more aiovg-more-ajax aiovg-text-center" data-params="%s">', esc_attr( wp_json_encode( $json_params ) ) );
 			echo sprintf( 
 				'<button type="button" class="aiovg-link-more" data-numpages="%d" data-paged="%d">%s</button>', 
 				$numpages,
@@ -534,8 +536,8 @@ function the_aiovg_pagination( $numpages = '', $pagerange = '', $paged = '', $at
 			$json_params = aiovg_prepare_attributes_for_ajax( $atts );	
 
 			printf(
-				'<aiovg-pagination class="aiovg-pagination aiovg-pagination-ajax aiovg-text-center" data-params=\'%s\' data-current="%d">',			
-				wp_json_encode( $json_params ),
+				'<aiovg-pagination class="aiovg-pagination aiovg-pagination-ajax aiovg-text-center" data-params="%s" data-current="%d">',			
+				esc_attr( wp_json_encode( $json_params ) ),
 				$paged
 			);
 		} else {

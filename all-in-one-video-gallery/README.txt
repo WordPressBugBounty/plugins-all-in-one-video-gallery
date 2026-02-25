@@ -6,7 +6,7 @@ Tags: video player, video gallery, youtube gallery, vimeo gallery, live stream
 Requires at least: 6.3
 Tested up to: 6.9
 Requires PHP: 5.6.20
-Stable tag: 4.7.1
+Stable tag: 4.7.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -152,6 +152,18 @@ Also, the videos from third-party services like "YouTube", "Vimeo", "Dailymotion
 7. Plugin Settings.
 
 == Changelog ==
+
+= 4.7.5 = 
+
+* Security Fix: "Reflected Cross-Site Scripting via 'vi' Parameter" issue that was discovered by [Muhammad Yudha - DJ](https://www.wordfence.com/threat-intel/vulnerabilities/researchers/yudha), and reported responsibly to us by [Wordfence](https://www.wordfence.com/).
+* New: Added an option to enable or disable video view counting for improved performance control.
+* New: Enhanced chapters support for native YouTube and Vimeo embeds.
+* New: Added support for displaying descriptions in the single video shortcode using show_description="1".
+* Tweak: Improved popup player behavior — the player now consistently fits within the viewport.
+* Tweak: Updated default slider settings.
+* Fix: Registered custom query variables to prevent conflicts with SEO and optimization plugins that may remove unrecognized query vars.
+* Fix: Improved rewrite rules handling — rewrite rules are now safely refreshed when assigned pages or permalink-related settings change, improving reliability and preventing 404 errors.
+* Fix: Various minor bug fixes and performance improvements.
 
 = 4.7.1 = 
 
@@ -585,6 +597,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 4.7.1 =
+= 4.7.5 =
 
-Addresses multiple security issues reported by Wordfence. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)
+Introduces several new features, bug fixes & enhancements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

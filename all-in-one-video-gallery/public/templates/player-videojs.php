@@ -14,17 +14,18 @@ $settings = array(
 	'post_id'        => $post_id,
 	'post_type'      => $post_type,
 	'cc_load_policy' => isset( $_GET['cc_load_policy'] ) ? (int) $_GET['cc_load_policy'] : (int) $player_settings['cc_load_policy'],
+	'statistics'     => isset( $player_settings['statistics'] ) ? (int) $player_settings['statistics'] : 1,	
 	'hotkeys'        => isset( $player_settings['hotkeys'] ) && ! empty( $player_settings['hotkeys'] ) ? 1 : 0,	
-	'i18n'           => array(
-		'stream_not_found' => __( 'This stream is currently not live. Please check back or refresh your page.', 'all-in-one-video-gallery' )
-	),
-	'player' => array(
+	'player'         => array(
 		'controlBar'                => array(),
 		'liveui'                    => true,
 		'textTrackSettings'         => false,
 		'playbackRates'             => array( 0.5, 0.75, 1, 1.5, 2 ),
 		'techCanOverridePoster'     => true,
 		'suppressNotSupportedError' => true
+	),
+	'i18n'           => array(
+		'stream_not_found' => __( 'This stream is currently not live. Please check back or refresh your page.', 'all-in-one-video-gallery' )
 	)
 );
 
@@ -1659,7 +1660,7 @@ $settings = apply_filters( 'aiovg_iframe_videojs_player_settings', $settings );
 					hasVideoStarted = true;
 					body.classList.remove( 'vjs-waiting' );
 
-					if ( settings.post_type == 'aiovg_videos' ) {
+					if ( settings.statistics && settings.post_type == 'aiovg_videos' ) {
 						updateViewsCount( player );
 					}
 				}

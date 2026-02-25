@@ -301,6 +301,13 @@ class AIOVG_Admin_Settings {
 					'type'              => 'color',
 					'sanitize_callback' => 'sanitize_text_field'
 				),
+                array(
+                    'name'              => 'force_js_initialization',
+                    'label'             => __( 'Force JavaScript Based Initialization', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'By default, the plugin adds the player as an iframe to avoid conflicts with other javascript-based libraries on your website. Check this option to force the standard javascript-based player initialization if you are not a fan of the iframes.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+					'sanitize_callback' => 'intval'
+                ),
 				array(
                     'name'              => 'width',
                     'label'             => __( 'Width', 'all-in-one-video-gallery' ),
@@ -312,15 +319,17 @@ class AIOVG_Admin_Settings {
                     'name'              => 'ratio',
                     'label'             => __( 'Height (Ratio)', 'all-in-one-video-gallery' ),
                     'description'       => sprintf(
-						'%s<br /><br /><ul class="aiovg-no-margin"><li><strong>%s:</strong></li><li>"56.25" - %s</li><li>"62.5" - %s</li><li>"75" - %s</li><li>"67" - %s</li><li>"100" - %s</li><li>"41.7" - %s</li></ul>', 
-						__( "In percentage. 1 to 100. Calculate player's height using the ratio value entered.", 'all-in-one-video-gallery' ),
+						'%s<br /><br /><ul class="aiovg-no-margin"><li><strong>%s:</strong></li><li>"56.25" - %s</li><li>"62.5" - %s</li><li>"75" - %s</li><li>"67" - %s</li><li>"100" - %s</li><li>"41.7" - %s</li><li>"177.78" - %s</li><li>"133.33" - %s</li></ul>', 
+						__( "In percentage. Calculates the player’s height based on the entered ratio.", 'all-in-one-video-gallery' ),
 						__( 'Examples', 'all-in-one-video-gallery' ),
-						__( 'Wide Screen TV', 'all-in-one-video-gallery' ),
-						__( 'Monitor Screens', 'all-in-one-video-gallery' ),
-						__( 'Classic TV', 'all-in-one-video-gallery' ),
-						__( 'Photo Camera', 'all-in-one-video-gallery' ),
-						__( 'Square', 'all-in-one-video-gallery' ),
-						__( 'Cinemascope', 'all-in-one-video-gallery' )
+						__( 'Wide Screen TV (16:9)', 'all-in-one-video-gallery' ),
+						__( 'Monitor Screens (16:10)', 'all-in-one-video-gallery' ),
+						__( 'Classic TV (4:3)', 'all-in-one-video-gallery' ),
+						__( 'Photo Camera (3:2)', 'all-in-one-video-gallery' ),
+						__( 'Square (1:1)', 'all-in-one-video-gallery' ),
+						__( 'Cinemascope (21:9)', 'all-in-one-video-gallery' ),
+                        __( 'Vertical / Shorts (9:16)', 'all-in-one-video-gallery' ),
+                        __( 'Vertical Classic (3:4)', 'all-in-one-video-gallery' )
 					),
                     'type'              => 'text',
                     'sanitize_callback' => 'floatval'
@@ -371,6 +380,13 @@ class AIOVG_Admin_Settings {
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
                 ),
+                array(
+                    'name'              => 'quality_levels',
+                    'label'             => __( 'Quality Levels', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enter the video quality levels, one per line.<br />Valid options are "4320p", "2880p", "2160p", "1440p", "1080p", "720p", "576p", "480p", "360p", and "240p".', 'all-in-one-video-gallery' ),
+					'type'              => 'textarea',
+					'sanitize_callback' => 'sanitize_textarea_field'
+				),
 				array(
                     'name'              => 'controls',
                     'label'             => __( 'Player Controls', 'all-in-one-video-gallery' ),
@@ -398,6 +414,39 @@ class AIOVG_Admin_Settings {
 					'sanitize_callback' => 'aiovg_sanitize_array'
                 ),
                 array(
+                    'name'              => 'use_native_controls',
+                    'label'             => __( 'Use Native Controls', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enables native player controls on the selected source types. For example, uses YouTube Player for playing YouTube videos, Vimeo Player for playing Vimeo videos, and Bunny Stream\'s native player for videos uploaded to Bunny Stream. Note that none of our custom player features will work on the selected sources.', 'all-in-one-video-gallery' ),
+                    'type'              => 'multicheck',
+                    'options'           => array(
+                        'youtube'      => __( 'YouTube', 'all-in-one-video-gallery' ),
+                        'vimeo'        => __( 'Vimeo', 'all-in-one-video-gallery' ),
+                        'bunny_stream' => __( 'Bunny Stream', 'all-in-one-video-gallery' )
+                    ),
+                    'sanitize_callback' => 'aiovg_sanitize_array'
+                ),
+                array(
+                    'name'              => 'hide_youtube_logo',
+                    'label'             => __( 'Hide YouTube Logo', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'YouTube\'s logo cannot be officially hidden, but this experimental option reduces its visibility in our custom player. Use with caution, as it may cause scaling or layout issues, especially with YouTube Shorts. Disable this option if you experience display problems.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'cc_load_policy',
+                    'label'             => __( 'Automatically Show Subtitles', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Check this option to automatically show subtitles on the player if available.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+					'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'statistics',
+                    'label'             => __( 'Enable Views Counting', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Counts how many times visitors play your videos. Turn this off if you do not need view statistics.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
+                ),
+                array(
                     'name'              => 'hotkeys',
                     'label'             => __( 'Keyboard Hotkeys', 'all-in-one-video-gallery' ),
                     'description'       => sprintf(
@@ -413,46 +462,6 @@ class AIOVG_Admin_Settings {
 					),
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
-                ),
-                array(
-                    'name'              => 'cc_load_policy',
-                    'label'             => __( 'Automatically Show Subtitles', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Check this option to automatically show subtitles on the player if available.', 'all-in-one-video-gallery' ),
-                    'type'              => 'checkbox',
-					'sanitize_callback' => 'intval'
-                ),
-                array(
-                    'name'              => 'quality_levels',
-                    'label'             => __( 'Quality Levels', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Enter the video quality levels, one per line.<br />Valid options are "4320p", "2880p", "2160p", "1440p", "1080p", "720p", "576p", "480p", "360p", and "240p".', 'all-in-one-video-gallery' ),
-					'type'              => 'textarea',
-					'sanitize_callback' => 'sanitize_textarea_field'
-				),
-                array(
-                    'name'              => 'use_native_controls',
-                    'label'             => __( 'Use Native Controls', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Enables native player controls on the selected source types. For example, uses YouTube Player for playing YouTube videos, Vimeo Player for playing Vimeo videos, and Bunny Stream\'s native player for videos uploaded to Bunny Stream. Note that none of our custom player features will work on the selected sources.', 'all-in-one-video-gallery' ),
-                    'type'              => 'multicheck',
-                    'options'           => array(
-                        'youtube'      => __( 'YouTube', 'all-in-one-video-gallery' ),
-                        'vimeo'        => __( 'Vimeo', 'all-in-one-video-gallery' ),
-                        'bunny_stream' => __( 'Bunny Stream', 'all-in-one-video-gallery' )
-                    ),
-                    'sanitize_callback' => 'aiovg_sanitize_array'
-                ),
-                array(
-                    'name'              => 'force_js_initialization',
-                    'label'             => __( 'Force JavaScript Based Initialization', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'By default, the plugin adds the player as an iframe to avoid conflicts with other javascript-based libraries on your website. Check this option to force the standard javascript-based player initialization if you are not a fan of the iframes.', 'all-in-one-video-gallery' ),
-                    'type'              => 'checkbox',
-					'sanitize_callback' => 'intval'
-                ),
-                array(
-                    'name'              => 'hide_youtube_logo',
-                    'label'             => __( 'Hide YouTube Logo', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'YouTube\'s logo cannot be officially hidden, but this experimental option reduces its visibility in our custom player. Use with caution, as it may cause scaling or layout issues, especially with YouTube Shorts. Disable this option if you experience display problems.', 'all-in-one-video-gallery' ),
-                    'type'              => 'checkbox',
-                    'sanitize_callback' => 'intval'
                 )
 			),
             'aiovg_images_settings' => array(
@@ -466,7 +475,7 @@ class AIOVG_Admin_Settings {
 				array(
                     'name'              => 'ratio',
                     'label'             => __( 'Image Height (Ratio)', 'all-in-one-video-gallery' ),
-                    'description'       => __( "In percentage. 1 to 100. Calculate images's height using the ratio value entered.", 'all-in-one-video-gallery' ),
+                    'description'       => __( "In percentage. Calculates the image’s height based on the entered ratio.", 'all-in-one-video-gallery' ),
                     'type'              => 'text',
                     'sanitize_callback' => 'floatval'
                 ),
@@ -1034,7 +1043,7 @@ class AIOVG_Admin_Settings {
                 array(
                     'name'              => 'maybe_flush_rewrite_rules',
                     'label'             => __( 'Auto Flush Rewrite Rules', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Check this box to automatically detect and insert the missing permalink rules. Rarely, this option can cause issues in some WordPress environments. Kindly disable this option If you find a frequent 404 or 500 error on your website.', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enable this option to let the plugin automatically detect and refresh missing permalink rules when necessary. This setting is usually not required, as rewrite rules are refreshed when relevant plugin settings or assigned pages change. Disable this option if you experience frequent 404, 500, or performance-related issues.', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
                 ),

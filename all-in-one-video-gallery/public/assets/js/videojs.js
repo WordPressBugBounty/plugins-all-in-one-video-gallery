@@ -615,18 +615,16 @@
 		}	
 
 		async _updateViewsCount() {
-			if ( this.settings.post_type != 'aiovg_videos' ) {
-				return false;
+			if ( this.settings.statistics && this.settings.post_type == 'aiovg_videos' ) {
+				const data = {
+					'action': 'aiovg_update_views_count',
+					'post_id': this.settings.post_id,
+					'duration': this.player.duration() || 0,
+					'security': this._ajaxNonce
+				};
+
+				this._fetch( data );
 			}
-
-			const data = {
-				'action': 'aiovg_update_views_count',
-				'post_id': this.settings.post_id,
-				'duration': this.player.duration() || 0,
-				'security': this._ajaxNonce
-			};
-
-			this._fetch( data );
 		}	
 
 		/**

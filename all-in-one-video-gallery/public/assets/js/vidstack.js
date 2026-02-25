@@ -466,7 +466,7 @@
 		 */
 
 		async _updateViewsCount() {
-			if ( this._params.post_type == 'aiovg_videos' ) {
+			if ( this._params.statistics && this._params.post_type == 'aiovg_videos' ) {
 				let formData = new FormData();
 				formData.append( 'action', 'aiovg_update_views_count' );
 				formData.append( 'post_id', parseInt( this._params.post_id ) );

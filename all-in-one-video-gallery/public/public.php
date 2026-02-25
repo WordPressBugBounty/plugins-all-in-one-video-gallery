@@ -484,6 +484,30 @@ class AIOVG_Public {
 	}
 
 	/**
+	 * Filters the allowed query variables.
+	 *
+	 * @since  4.7.2
+	 * @param  array $vars The array of allowed query variable names.
+	 * @return array       The filtered query variables.
+	 */
+	public function query_vars( $vars ) {
+		$vars[] = 'vi';
+		$vars[] = 'ca';
+		$vars[] = 'ta';
+		$vars[] = 'sort';
+		$vars[] = 'video';
+		$vars[] = 'aiovg_category';
+		$vars[] = 'aiovg_tag';
+		$vars[] = 'aiovg_user';
+		$vars[] = 'aiovg_type';
+		$vars[] = 'aiovg_video';
+		$vars[] = 'aiovg_action';
+		$vars[] = 'aiovg_playlist';
+
+		return $vars;
+	}
+
+	/**
 	 * Set MySQL's RAND function seed value in a cookie.
 	 *
 	 * @since 3.9.3
@@ -515,38 +539,54 @@ class AIOVG_Public {
 	 *
 	 * @since 1.0.0
 	 */
-	 public function maybe_flush_rules() {
+	public function maybe_flush_rules() {
+		// One-time delayed flush after activation/update/settings change
+		if ( ! get_option( 'aiovg_rewrite_rules_flushed' ) ) {
+
+			flush_rewrite_rules( false );
+			update_option( 'aiovg_rewrite_rules_flushed', 1 );
+
+			return;
+		}
+
 		$general_settings = aiovg_get_option( 'aiovg_general_settings' );
 
 		if ( empty( $general_settings['maybe_flush_rewrite_rules'] ) ) {
-			return false;
+			return;
 		}
 
-		$rewrite_rules = get_option( 'rewrite_rules' );
-				
-		if ( $rewrite_rules ) {		
-			global $wp_rewrite;
-			
-			foreach ( $rewrite_rules as $rule => $rewrite ) {
-				$rewrite_rules_array[ $rule ]['rewrite'] = $rewrite;
+		// Allow developers to restrict the check to admin only
+		$admin_only = apply_filters( 'aiovg_flush_rewrite_rules_admin_only', false );
+
+		if ( $admin_only && ! is_admin() ) {
+			return;
+		}
+
+		$stored_rules = get_option( 'rewrite_rules' );
+
+		if ( empty( $stored_rules ) || ! is_array( $stored_rules ) ) {
+			return;
+		}
+
+		global $wp_rewrite;
+
+		if ( empty( $wp_rewrite ) ) {
+			return;
+		}
+
+		$generated_rules = $wp_rewrite->rewrite_rules();
+
+		if ( empty( $generated_rules ) || ! is_array( $generated_rules ) ) {
+			return;
+		}
+
+		foreach ( $generated_rules as $rule => $rewrite ) {
+			if ( ! array_key_exists( $rule, $stored_rules ) ) {
+				flush_rewrite_rules( false );
+				return;
 			}
-			$rewrite_rules_array = array_reverse( $rewrite_rules_array, true );
-		
-			$maybe_missing = $wp_rewrite->rewrite_rules();
-			$missing_rules = false;		
-		
-			foreach ( $maybe_missing as $rule => $rewrite ) {
-				if ( ! array_key_exists( $rule, $rewrite_rules_array ) ) {
-					$missing_rules = true;
-					break;
-				}
-			}
-		
-			if ( true === $missing_rules ) {
-				flush_rewrite_rules();
-			}		
-		}	
-	}	
+		}
+	}
 	
 	/**		 
 	 * Override the default page/post title.

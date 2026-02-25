@@ -329,6 +329,10 @@
             return this.getAttribute( 'post_type' ) || '';
         }
 
+        get statistics() {
+            return this.hasAttribute( 'statistics' );
+        }
+
         get lazyLoading() {
             return this.hasAttribute( 'lazyloading' );
         }
@@ -448,6 +452,8 @@
 
             this.$root.append( iframeEl );
 
+            this._onIframeAdded( iframeEl );
+
             this._addClass( 'initialized' );
             this._updateViewsCount();        
         }
@@ -494,7 +500,7 @@
          */
 
         async _updateViewsCount() {
-            if ( this.postType == 'aiovg_videos' ) {
+            if ( this.statistics && this.postType == 'aiovg_videos' ) {
                 let formData = new FormData();
                 formData.append( 'action', 'aiovg_update_views_count' );
                 formData.append( 'post_id', this.postId );
@@ -517,6 +523,10 @@
          */
 
         _warmConnections() {
+            // Always overridden by the child classes
+        }
+
+        _onIframeAdded() {
             // Always overridden by the child classes
         }
 
@@ -557,12 +567,16 @@
             this._render();
         }
 
+        play() {
+            // Always overridden by the child classes
+        }
+
         pause() {
-            // TODO
+            // Always overridden by the child classes
         }
 
         seekTo( seconds ) {
-            // TODO
+            // Always overridden by the child classes
         }
 
     }
@@ -572,7 +586,30 @@
         constructor() {
             super();
             this._addClass( 'youtube' );
+
+            // Set references to the private properties used by the component
+            this._player = null;
         }
+
+        /**
+         * Browser calls this method when the element is removed from the document.
+         * (can be called many times if an element is repeatedly added/removed)
+         */
+        disconnectedCallback() {
+            if ( this._player && this._player.destroy ) {
+                this._player.destroy();
+            }
+
+            this._player = null;
+
+            if ( super.disconnectedCallback ) {
+                super.disconnectedCallback();
+            }
+        }
+
+        /**
+         * Define public methods.
+         */
 
         _warmConnections() {
             if ( window.AIOVGYouTubeIsPreconnected ) return false;
@@ -594,6 +631,84 @@
             window.AIOVGYouTubeIsPreconnected = true;
         }
 
+        _onIframeAdded( iframeEl ) {
+            this._loadApi().then(() => {
+                const player = new YT.Player( iframeEl, {
+                    events: {
+                        'onReady': () => {
+                            this._player = player;
+                        },
+                        'onStateChange': ( event ) => {
+                            if ( 1 == event.data ) { // Playing
+                                // Pause other players
+                                const videos = document.querySelectorAll( '.aiovg-player-element' );
+                                for ( let i = 0; i < videos.length; i++ ) {
+                                    if ( videos[ i ] != this ) {
+                                        videos[ i ].pause();
+                                    }
+                                }
+
+                                window.postMessage({					 				
+                                    message: 'aiovg-video-playing'
+                                }, window.location.origin );
+                            } 
+                        }
+                    }
+                });
+            });
+        }
+
+        /**
+         * Define private methods.
+         */
+
+        _loadApi() {
+            return new Promise(( resolve ) => { 
+                if ( typeof window.YT === 'undefined' && typeof AIOVGYouTubeElement.isApiLoaded === 'undefined' ) {
+                    AIOVGYouTubeElement.isApiLoaded = true;
+
+                    const tag = document.createElement( 'script' );
+                    tag.src = 'https://www.youtube.com/iframe_api';
+                    
+                    const firstScriptTag = document.getElementsByTagName( 'script' )[0];
+                    firstScriptTag.parentNode.insertBefore( tag, firstScriptTag );	
+                }		
+
+                if ( typeof window.YT !== 'undefined' && window.YT.Player )	{
+                    resolve();	
+                } else {		
+                    let intervalHandler = setInterval(function() {
+                        if ( typeof window.YT !== 'undefined' && window.YT.Player )	{
+                            clearInterval( intervalHandler );
+                            resolve();	
+                        }
+                    }, 100 );
+                }
+            });
+        }
+
+        /**
+         * Define API methods.
+         */
+
+        play() {
+            if ( this._player && this._player.playVideo ) {
+                this._player.playVideo();
+            }
+        }
+
+        pause() {
+            if ( this._player && this._player.pauseVideo ) {
+                this._player.pauseVideo();
+            }
+        }
+
+        seekTo( seconds ) {
+            if ( this._player && this._player.seekTo ) {
+                this._player.seekTo( seconds, true );
+            }
+        }
+
     }
 
     class AIOVGVimeoElement extends AIOVGBaseElement {
@@ -601,7 +716,30 @@
         constructor() {
             super();
             this._addClass( 'vimeo' );
+
+            // Set references to the private properties used by the component
+            this._player = null;
         }
+
+        /**
+         * Browser calls this method when the element is removed from the document.
+         * (can be called many times if an element is repeatedly added/removed)
+         */
+        disconnectedCallback() {
+            if ( this._player && this._player.destroy ) {
+                this._player.destroy();
+            }
+
+            this._player = null;
+            
+            if ( super.disconnectedCallback ) {
+                super.disconnectedCallback();
+            }
+        }
+
+        /**
+         * Define public methods.
+         */
 
         _warmConnections() {
             if ( window.AIOVGVimeoIsPreconnected ) return false;
@@ -610,6 +748,81 @@
             AIOVGBaseElement.addPrefetch( 'preconnect', 'https://player.vimeo.com' );
 
             window.AIOVGVimeoIsPreconnected = true;
+        }
+
+        _onIframeAdded( iframeEl ) {
+            this._loadApi().then(() => {
+                const player = new Vimeo.Player( iframeEl );
+
+                player.ready().then(() => {
+                    this._player = player;
+                });
+
+                player.on( 'play', ( data ) => {
+                    // Pause other players
+                    const videos = document.querySelectorAll( '.aiovg-player-element' );
+                    for ( let i = 0; i < videos.length; i++ ) {
+                        if ( videos[ i ] != this ) {
+                            videos[ i ].pause();
+                        }
+                    }
+
+                    window.postMessage({					 				
+                        message: 'aiovg-video-playing'
+                    }, window.location.origin );
+                });
+            });
+        }
+
+        /**
+         * Define private methods.
+         */
+
+        _loadApi() {
+            return new Promise(( resolve ) => { 
+                if ( typeof window.Vimeo === 'undefined' && typeof AIOVGVimeoElement.isApiLoaded === 'undefined' ) {
+                    AIOVGVimeoElement.isApiLoaded = true;
+
+                    const tag = document.createElement( 'script' );
+                    tag.src = 'https://player.vimeo.com/api/player.js';
+                    
+                    const firstScriptTag = document.getElementsByTagName( 'script' )[0];
+                    firstScriptTag.parentNode.insertBefore( tag, firstScriptTag );	
+                }		
+
+                if ( typeof window.Vimeo !== 'undefined' && window.Vimeo.Player )	{
+                    resolve();	
+                } else {		
+                    let intervalHandler = setInterval(function() {
+                        if ( typeof window.Vimeo !== 'undefined' && window.Vimeo.Player )	{
+                            clearInterval( intervalHandler );
+                            resolve();	
+                        }
+                    }, 100 );
+                }
+            });
+        }
+
+        /**
+         * Define API methods.
+         */
+
+        play() {
+            if ( this._player && this._player.play ) {
+                this._player.play();
+            }
+        }
+
+        pause() {
+            if ( this._player && this._player.pause ) {
+                this._player.pause();
+            }
+        }
+
+        seekTo( seconds ) {
+            if ( this._player && this._player.setCurrentTime ) {
+                this._player.setCurrentTime( seconds );
+            }
         }
 
     }
@@ -670,15 +883,18 @@
         // Update views count for the non-iframe embeds
         const videos = document.querySelectorAll( '.aiovg-player-raw' );
         for ( let i = 0; i < videos.length; i++ ) {
-            const elem    = videos[ i ];
-            const post_id = parseInt( elem.dataset.postId );
+            const elem       = videos[ i ];
+            const post_id    = parseInt( elem.dataset.post_id );
+            const statistics = parseInt( elem.dataset.statistics );
 
-            let formData = new FormData();
-            formData.append( 'action', 'aiovg_update_views_count' );
-            formData.append( 'post_id', post_id );
-            formData.append( 'security', aiovg_embed.ajax_nonce );
+            if ( statistics ) {
+                let formData = new FormData();
+                formData.append( 'action', 'aiovg_update_views_count' );
+                formData.append( 'post_id', post_id );
+                formData.append( 'security', aiovg_embed.ajax_nonce );
 
-            fetch( aiovg_embed.ajax_url, { method: 'POST', body: formData } );
+                fetch( aiovg_embed.ajax_url, { method: 'POST', body: formData } );
+            }
         }
 
         // Listen to the iframe player events
@@ -701,6 +917,13 @@
                     videos[ i ].removeCookieConsent();
                 }
             }
+
+            if ( event.data.message == 'aiovg-video-playing' ) {
+				const videos = document.querySelectorAll( '.aiovg-player-element' );
+				for ( let i = 0; i < videos.length; i++ ) {
+					videos[ i ].pause();
+				}
+			}
         });
     });
     

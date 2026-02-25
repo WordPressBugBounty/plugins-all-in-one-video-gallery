@@ -10,10 +10,11 @@
  */
 
 $settings = array(
-	'uid'       => isset( $_GET['uid'] ) ? sanitize_text_field( $_GET['uid'] ) : 0,
-	'post_id'   => $post_id,
-	'post_type' => $post_type,
-	'player'    => array(
+	'uid'        => isset( $_GET['uid'] ) ? sanitize_text_field( $_GET['uid'] ) : 0,
+	'post_id'    => $post_id,
+	'post_type'  => $post_type,
+	'statistics' => isset( $player_settings['statistics'] ) ? (int) $player_settings['statistics'] : 1,	
+	'player'     => array(
 		'iconUrl' => AIOVG_PLUGIN_URL . 'vendor/vidstack/plyr.svg',
 		'volume'  => 0.5
 	)
@@ -1239,7 +1240,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 
 				if ( ! hasVideoStarted ) {
 					hasVideoStarted = true;
-					if ( settings.post_type == 'aiovg_videos' ) {
+					if ( settings.statistics && settings.post_type == 'aiovg_videos' ) {
 						updateViewsCount( player );
 					}					
 				}

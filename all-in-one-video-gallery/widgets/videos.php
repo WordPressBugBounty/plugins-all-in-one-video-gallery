@@ -413,19 +413,19 @@ class AIOVG_Widget_Videos extends WP_Widget {
 			! empty( $attributes['filters_tag'] ) ||
 			! empty( $attributes['filters_sort'] )
 		) {
-			if ( isset( $_GET['vi'] ) ) {
-				$attributes['search_query'] = $_GET['vi'];
+			$search_query = isset( $_GET['vi'] ) ? sanitize_text_field( $_GET['vi'] ) : ''; 
+
+			if ( ! empty( $search_query ) ) {
+				$attributes['search_query'] = $search_query;
 			}
 			
-			if ( isset( $_GET['ca'] ) ) {
-				$attributes['category'] = $_GET['ca'];
-			}
-
 			$categories = isset( $_GET['ca'] ) ? (array) $_GET['ca'] : array();
 			$categories = array_map( 'intval', $categories );
 			$categories = array_filter( $categories );
 
-			if ( empty( $categories ) ) {
+			if ( ! empty( $categories ) ) {
+				$attributes['category'] = $categories;
+			} else {
 				$categories_excluded = get_terms( array(
 					'taxonomy'   => 'aiovg_categories',
 					'hide_empty' => false,
@@ -439,12 +439,18 @@ class AIOVG_Widget_Videos extends WP_Widget {
 				}
 			}
 	
-			if ( isset( $_GET['ta'] ) ) {
-				$attributes['tag'] = $_GET['ta'];
+			$tags = isset( $_GET['ta'] ) ? (array) $_GET['ta'] : array();
+			$tags = array_map( 'intval', $tags );
+			$tags = array_filter( $tags );
+
+			if ( ! empty( $tags ) ) {
+				$attributes['tag'] = $tags;
 			}
 			
-			if ( isset( $_GET['sort'] ) ) {
-				$sort = array_filter( array_map( 'trim', explode( '-', $_GET['sort'] ) ) );
+			$sort = isset( $_GET['sort'] ) ? sanitize_key( $_GET['sort'] ) : '';
+			
+			if ( ! empty( $sort ) ) {
+				$sort = array_filter( array_map( 'trim', explode( '-', $sort ) ) );
 	
 				if ( ! empty( $sort ) ) {
 					$attributes['orderby'] = $sort[0];

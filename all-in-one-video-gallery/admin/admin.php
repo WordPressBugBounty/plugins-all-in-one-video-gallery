@@ -76,6 +76,10 @@ class AIOVG_Admin {
 				$new_player_settings['hide_youtube_logo'] = $defaults['aiovg_player_settings']['hide_youtube_logo'];
 			}
 
+			if ( ! array_key_exists( 'statistics', $player_settings ) ) {
+				$new_player_settings['statistics'] = $defaults['aiovg_player_settings']['statistics'];
+			}
+
 			if ( count( $new_player_settings ) ) {
 				update_option( 'aiovg_player_settings', array_merge( $player_settings, $new_player_settings ) );
 			}						
@@ -360,6 +364,9 @@ class AIOVG_Admin {
 
 			// Remove the unfiltered_html capability from editors
 			aiovg_remove_unfiltered_html_capability_from_editors();
+
+			// Force rewrite rules flush on next load
+        	delete_option( 'aiovg_rewrite_rules_flushed' );
 		}
 	}		
 
@@ -1061,6 +1068,100 @@ class AIOVG_Admin {
 
 		return $file;
 	}
+
+	/**
+     * Flags rewrite rules for flushing on the next request when relevant options change.
+     *
+     * @since 4.7.3
+     * @param string $option Option name being updated.
+     * @param mixed  $old    Previous option value.
+     * @param mixed  $value  Updated option value.
+     */
+    public function force_rewrite_rules_on_settings_update( $option, $old, $value ) {
+        if ( in_array( $option, array( 'aiovg_page_settings', 'aiovg_permalink_settings' ), true ) ) {
+            // Force rewrite rules flush on next load
+            delete_option( 'aiovg_rewrite_rules_flushed' );
+        }
+    }
+
+	/**
+     * Flags rewrite rules for flushing when an assigned AIOVG page
+     * or its translation is updated.
+     *
+     * @since 4.7.3
+     * @param int     $post_id Post ID.
+     * @param WP_Post $post    Post object.
+     * @param bool    $update  Whether this is an existing post update.
+     */
+    public function force_rewrite_rules_on_page_update( $post_id, $post, $update ) {
+        // Avoid autosaves & revisions
+        if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
+            return;
+        }
+
+        // Only act on updates (not new pages)
+        if ( ! $update ) {
+            return;
+        }
+
+        // Defensive capability check
+        if ( ! current_user_can( 'edit_page', $post_id ) ) {
+            return;
+        }
+
+        $page_settings      = aiovg_get_option( 'aiovg_page_settings' );
+		$permalink_settings = aiovg_get_option( 'aiovg_permalink_settings' );
+
+		if ( ! empty( $permalink_settings['video_archive_page'] ) ) {
+			$page_settings['video_archive_page'] = (int) $permalink_settings['video_archive_page'];
+		}
+
+        if ( empty( $page_settings ) ) {
+            return;
+        }
+
+        // Normalize assigned page IDs
+        $assigned_pages = array_map( 'intval', $page_settings );
+
+        // Direct Match (Fast Path)
+        if ( in_array( (int) $post_id, $assigned_pages, true ) ) {
+            delete_option( 'aiovg_rewrite_rules_flushed' );
+            return;
+        }
+
+        // Check for Polylang translations
+        if ( function_exists( 'pll_get_post_translations' ) ) {
+            foreach ( $assigned_pages as $assigned_id ) {
+                $translations = pll_get_post_translations( $assigned_id );
+
+                if ( empty( $translations ) ) {
+                    continue;
+                }
+
+                if ( in_array( (int) $post_id, array_map( 'intval', $translations ), true ) ) {
+                    delete_option( 'aiovg_rewrite_rules_flushed' );
+                    return;
+                }
+            }
+        }
+
+        // Check for WPML translations (TRID-based)
+        if ( defined( 'ICL_SITEPRESS_VERSION' ) ) {
+            $element_type = apply_filters( 'wpml_element_type', 'page' );
+            $current_trid = apply_filters( 'wpml_element_trid', null, $post_id, $element_type );
+
+            if ( ! empty( $current_trid ) ) {
+                foreach ( $assigned_pages as $assigned_id ) {
+                    $assigned_trid = apply_filters( 'wpml_element_trid', null, $assigned_id, $element_type );
+
+                    if ( (int) $current_trid === (int) $assigned_trid ) {
+                        delete_option( 'aiovg_rewrite_rules_flushed' );
+                        return;
+                    }
+                }
+            }
+        }
+    }
 
 	/**
 	 * Store user meta.

@@ -116,7 +116,7 @@ class AIOVG_Blocks {
 				'width'                         => __( 'Width', 'all-in-one-video-gallery' ),
 				'width_help'                    => __( 'In pixels. Maximum width of the player. Leave this field empty to scale 100% of its enclosing container/html element.', 'all-in-one-video-gallery' ),
 				'ratio'                         => __( 'Height (Ratio)', 'all-in-one-video-gallery' ),
-				'ratio_help'                    => __( "In percentage. 1 to 100. Calculate player's height using the ratio value entered.", 'all-in-one-video-gallery' ),
+				'ratio_help'                    => __( "In percentage. Calculates the player’s height based on the entered ratio.", 'all-in-one-video-gallery' ),
 				'autoplay'                      => __( 'Autoplay', 'all-in-one-video-gallery' ),
 				'loop'                          => __( 'Loop', 'all-in-one-video-gallery' ),
 				'muted'                         => __( 'Muted', 'all-in-one-video-gallery' ),

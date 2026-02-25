@@ -181,6 +181,10 @@ class AIOVG_Player_Base {
 					if ( ! empty( $embedcode ) ) {
 						$iframe_src = aiovg_extract_iframe_src( $embedcode );
 						if ( $iframe_src ) {
+							if ( false !== strpos( $iframe_src, 'youtube.com' ) || false !== strpos( $iframe_src, 'youtu.be' ) ) {
+								$iframe_src = add_query_arg( 'enablejsapi', 1, $iframe_src );
+							}
+
 							$videos['iframe'] = $iframe_src;
 						} else {
 							$videos['embedcode'] = $embedcode;
@@ -377,9 +381,9 @@ class AIOVG_Player_Base {
 		$general_settings = aiovg_get_option( 'aiovg_general_settings' );			
 
 		$defaults = array(
+			'theme'               => ( isset( $player_settings['theme'] ) && 'custom' == $player_settings['theme'] ) ? 'custom' : 'default',
 			'width' 			  => $player_settings['width'],
 			'ratio' 			  => $player_settings['ratio'],
-			'theme'               => ( isset( $player_settings['theme'] ) && 'custom' == $player_settings['theme'] ) ? 'custom' : 'default',
 			'preload'             => $player_settings['preload'],
 			'playsinline'         => isset( $player_settings['playsinline'] ) ? $player_settings['playsinline'] : 0,
 			'autoplay'            => $player_settings['autoplay'],
@@ -400,10 +404,11 @@ class AIOVG_Player_Base {
 			'share'			      => isset( $player_settings['controls']['share'] ),
 			'embed'			      => isset( $player_settings['controls']['embed'] ),
 			'download'			  => isset( $player_settings['controls']['download'] ),
-			'hotkeys'             => isset( $player_settings['hotkeys'] ) ? $player_settings['hotkeys'] : 0,
-			'cc_load_policy'      => $player_settings['cc_load_policy'],
 			'use_native_controls' => $player_settings['use_native_controls'],
 			'hide_youtube_logo'   => isset( $player_settings['hide_youtube_logo'] ) ? $player_settings['hide_youtube_logo'] : 0,
+			'cc_load_policy'      => $player_settings['cc_load_policy'],
+			'statistics'          => isset( $player_settings['statistics'] ) ? $player_settings['statistics'] : 1,
+			'hotkeys'             => isset( $player_settings['hotkeys'] ) ? $player_settings['hotkeys'] : 0,
 			'lazyloading'         => isset( $general_settings['lazyloading'] ) ? $general_settings['lazyloading'] : 0
 		);
 
@@ -701,13 +706,16 @@ class AIOVG_Player_Base {
  	 * @return string $html Player HTML.
 	 */
 	public function get_player_raw_embed() {
+		$player_settings = $this->get_player_settings();
+
 		$videos = $this->get_videos();
 
 		wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-embed' );
 
 		$html = sprintf(
-			'<div class="aiovg-player-raw" data-post_id="%d">%s</div>',
+			'<div class="aiovg-player-raw" data-post_id="%d" data-statistics="%d">%s</div>',
 			(int) $this->post_id,
+			(int) $player_settings['statistics'],
 			do_shortcode( $videos['embedcode'] )		
 		);
 
@@ -732,9 +740,9 @@ class AIOVG_Player_Base {
 		
 		// Vars
 		$provider = 'embed';
-		if ( ! empty( $videos['youtube'] ) ) {					
+		if ( ! empty( $videos['youtube'] ) || false !== strpos( $videos['iframe'], 'youtube.com' ) || false !== strpos( $videos['iframe'], 'youtu.be' ) ) {					
 			$provider = 'youtube';
-		} elseif ( ! empty( $videos['vimeo'] ) ) {
+		} elseif ( ! empty( $videos['vimeo'] ) || false !== strpos( $videos['iframe'], 'vimeo.com' ) ) {
 			$provider = 'vimeo';
 		} elseif ( ! empty( $videos['dailymotion'] ) ) {
 			$provider = 'dailymotion';
@@ -750,6 +758,10 @@ class AIOVG_Player_Base {
 			'post_type'   => esc_attr( $this->post_type )
 		);
 		
+		if ( ! empty( $player_settings['statistics'] ) ) {
+			$attributes['statistics'] = '';
+		}
+
 		if ( ! empty( $player_settings['lazyloading'] ) ) {
 			$attributes['lazyloading'] = '';
 		}
@@ -794,7 +806,7 @@ class AIOVG_Player_Base {
 
 		parse_str( $url, $queries );
 
-		$url = 'https://www.youtube.com/embed/' . aiovg_get_youtube_id_from_url( $url ) . '?iv_load_policy=3&modestbranding=1&rel=0&showinfo=0';									
+		$url = 'https://www.youtube.com/embed/' . aiovg_get_youtube_id_from_url( $url ) . '?iv_load_policy=3&modestbranding=1&rel=0&showinfo=0&enablejsapi=1';									
 		
 		if ( isset( $queries['start'] ) ) {
 			$url = add_query_arg( 'start', (int) $queries['start'], $url );

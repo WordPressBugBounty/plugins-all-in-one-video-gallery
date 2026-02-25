@@ -94,8 +94,9 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 			'post_type'   => sanitize_text_field( $this->post_type ),
 			'ajax_url'    => sanitize_url( admin_url( 'admin-ajax.php' ) ),
 			'ajax_nonce'  => wp_create_nonce( 'aiovg_public_ajax_nonce' ),
+			'statistics'  => (int) $player_settings['statistics'],
 			'lazyloading' => (int) $player_settings['lazyloading'],
-			'player'  => array(
+			'player'      => array(
 				'iconUrl' => AIOVG_PLUGIN_URL . 'vendor/vidstack/plyr.svg',
 				'volume'  => 0.5				
 			)
@@ -486,8 +487,8 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 
 		aiovg_add_inline_script(
 			AIOVG_PLUGIN_SLUG . '-vidstack',
-			'var aiovg_player_' . (int) $this->reference_id . ' = ' . wp_json_encode( $settings ) . ';'
-		);		
+			'var aiovg_player_' . (int) $this->reference_id . ' = ' . wp_json_encode( $settings, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . ';'
+		);
 
 		// Output
 		$player_html = '';

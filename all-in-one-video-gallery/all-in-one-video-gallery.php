@@ -11,7 +11,7 @@
  * Plugin Name:     All-in-One Video Gallery
  * Plugin URI:      https://plugins360.com/all-in-one-video-gallery/
  * Description:     An ultimate video player and video gallery plugin – no coding required. Suitable for YouTubers, Video Bloggers, Course Creators, Podcasters, Sales & Marketing Professionals, and anyone using video on a website.
- * Version:         4.7.1
+ * Version:         4.7.5
  * Author:          Team Plugins360
  * Author URI:      https://plugins360.com
  * License:         GPL-2.0+
@@ -40,22 +40,23 @@ if ( !function_exists( 'aiovg_fs' ) ) {
             // Include Freemius SDK
             require_once dirname( __FILE__ ) . '/freemius/start.php';
             $aiovg_fs = fs_dynamic_init( array(
-                'id'             => '3213',
-                'slug'           => 'all-in-one-video-gallery',
-                'type'           => 'plugin',
-                'public_key'     => 'pk_e1bed9a9a8957abe8947bb2619ab7',
-                'is_premium'     => false,
-                'has_addons'     => false,
-                'has_paid_plans' => true,
-                'trial'          => array(
+                'id'               => '3213',
+                'slug'             => 'all-in-one-video-gallery',
+                'type'             => 'plugin',
+                'public_key'       => 'pk_e1bed9a9a8957abe8947bb2619ab7',
+                'is_premium'       => false,
+                'has_addons'       => false,
+                'has_paid_plans'   => true,
+                'trial'            => array(
                     'days'               => 7,
                     'is_require_payment' => false,
                 ),
-                'menu'           => array(
+                'menu'             => array(
                     'slug'       => 'all-in-one-video-gallery',
                     'first-path' => 'admin.php?page=all-in-one-video-gallery',
                 ),
-                'is_live'        => true,
+                'is_live'          => true,
+                'is_org_compliant' => true,
             ) );
         }
         return $aiovg_fs;
@@ -68,7 +69,7 @@ if ( !function_exists( 'aiovg_fs' ) ) {
 }
 // The current version of the plugin
 if ( !defined( 'AIOVG_PLUGIN_VERSION' ) ) {
-    define( 'AIOVG_PLUGIN_VERSION', '4.7.1' );
+    define( 'AIOVG_PLUGIN_VERSION', '4.7.5' );
 }
 // The unique identifier of the plugin
 if ( !defined( 'AIOVG_PLUGIN_SLUG' ) ) {

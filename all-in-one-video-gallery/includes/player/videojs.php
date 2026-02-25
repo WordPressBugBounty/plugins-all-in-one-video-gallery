@@ -93,7 +93,8 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 			'post_id'        => (int) $this->post_id,
 			'post_type'      => sanitize_text_field( $this->post_type ),
 			'cookie_consent' => 0,
-			'cc_load_policy' => (int) $player_settings['cc_load_policy'],			
+			'cc_load_policy' => (int) $player_settings['cc_load_policy'],		
+			'statistics'     => (int) $player_settings['statistics'],	
 			'hotkeys'        => (int) $player_settings['hotkeys'],
 			'player'         => array(
 				'controlBar'                => array(),
@@ -604,10 +605,10 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 		);
 
 		$html .= sprintf( 
-			'<aiovg-video class="aiovg-player aiovg-player-element aiovg-player-standard vjs-waiting" style="padding-bottom: %s%%;" data-id="%s" data-params=\'%s\'>',
+			'<aiovg-video class="aiovg-player aiovg-player-element aiovg-player-standard vjs-waiting" style="padding-bottom: %s%%;" data-id="%s" data-params="%s">',
 			(float) $player_settings['ratio'],
 			esc_attr( $attributes['id'] ),
-			wp_json_encode( $settings )
+			esc_attr( wp_json_encode( $settings ) )
 		);
 
 		$html .= $player_html;

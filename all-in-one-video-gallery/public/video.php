@@ -306,44 +306,68 @@ class AIOVG_Public_Video {
 			$attributes['title'] = get_the_title( $post_id );
 		}
 
+		$show_description = isset( $attributes['show_description'] ) ? (int) $attributes['show_description'] : 0;
+		if ( $show_description && $post_id > 0 ) {
+			$attributes['description'] = get_the_content( null, false, $post_id );
+		}
+
 		$attributes = apply_filters( 'shortcode_atts_aiovg_video', $attributes, $content );
 		
 		$player_html = aiovg_get_player_html( $post_id, $attributes );
 
 		$html = $player_html;
 
-		if ( isset( $attributes['title'] ) && ! empty( $attributes['title'] ) ) {
-			$title_position = isset( $attributes['title_position'] ) ? sanitize_text_field( $attributes['title_position'] ) : '';
+		if ( ! empty( $attributes['title'] ) || ! empty( $attributes['description'] ) ) {
+			// Title
+			if ( ! empty( $attributes['title'] ) ) {
+				$title_position = isset( $attributes['title_position'] ) ? sanitize_text_field( $attributes['title_position'] ) : '';
 
-			$allowed_title_tags = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'p' );
-			$title_tag = isset( $attributes['title_tag'] ) ? sanitize_key( $attributes['title_tag'] ) : 'div';
-			if ( ! in_array( $title_tag, $allowed_title_tags) ) {
-				$title_tag = 'div';
-			}			
+				$allowed_title_tags = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'p' );
+				$title_tag = isset( $attributes['title_tag'] ) ? sanitize_key( $attributes['title_tag'] ) : 'div';
+				if ( ! in_array( $title_tag, $allowed_title_tags) ) {
+					$title_tag = 'div';
+				}			
 
-			$html = '<div class="aiovg aiovg-video-shortcode">';
-			
-			switch ( $title_position ) {
-				case 'bottom':
-					$html .= sprintf( 
-						'%1$s<%2$s class="aiovg-player-title">%3$s</%2$s>', 
-						$player_html,
-						$title_tag,
-						esc_html( $attributes['title'] )						 
-					);
-					break;
+				switch ( $title_position ) {
+					case 'bottom':
+						$html = sprintf( 
+							'%1$s<%2$s class="aiovg-player-title">%3$s</%2$s>', 
+							$player_html,
+							$title_tag,
+							esc_html( $attributes['title'] )						 
+						);
+						break;
 
-				default: // top
-					$html .= sprintf( 
-						'<%1$s class="aiovg-player-title">%2$s</%1$s>%3$s',
-						$title_tag,
-						esc_html( $attributes['title'] ), 
-						$player_html
-					);
-					
+					default: // top
+						$html = sprintf( 
+							'<%1$s class="aiovg-player-title">%2$s</%1$s>%3$s',
+							$title_tag,
+							esc_html( $attributes['title'] ), 
+							$player_html
+						);
+						
+				}
 			}
 
-			$html .= '</div>';			
+			// Description
+			if ( ! empty( $attributes['description'] ) ) {
+				$player_settings = aiovg_get_option( 'aiovg_player_settings' );
+
+				if ( isset( $player_settings['controls']['chapters'] ) ) {
+					wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-chapters' );
+				}
+
+				$filtered_content = wpautop( $attributes['description'] );
+				$filtered_content = wp_kses_post( $filtered_content );
+				$filtered_content = do_shortcode( $filtered_content );
+				$filtered_content = apply_filters( 'aiovg_the_content', $filtered_content, $post_id );
+
+				$html .= '<div class="aiovg-player-description aiovg-margin-top">';                
+				$html .= $filtered_content;
+				$html .= '</div>';
+			}
+
+			$html = sprintf( '<div class="aiovg aiovg-single-video aiovg-video-shortcode">%s</div>', $html );
 		}
 
 		return $html;

@@ -106,7 +106,7 @@ class AIOVG_Player_Popup extends AIOVG_Player_Base {
 			'<a href="javascript: void(0);" class="%s" data-mfp-src="%s" data-player_ratio="%s">%s</a>',
 			implode( ' ', $classes ),
 			esc_url( $this->embed_url ),
-			(float) $player_settings['ratio'] . '%',
+			(float) $player_settings['ratio'],
 			$popup_content
 		);
 

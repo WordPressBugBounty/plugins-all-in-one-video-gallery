@@ -783,6 +783,10 @@ class AIOVG_Admin_Videos {
 	public function parse_query( $query ) {	
 		global $pagenow, $post_type;
 		
+		if ( ! $query->is_main_query() ) {
+			return;
+		}
+		
     	if ( 'edit.php' == $pagenow && 'aiovg_videos' == $post_type ) {			
 			// Convert category id to taxonomy term in query
 			if ( isset( $query->query_vars['aiovg_categories'] ) && ctype_digit( $query->query_vars['aiovg_categories'] ) && 0 != $query->query_vars['aiovg_categories'] ) {		

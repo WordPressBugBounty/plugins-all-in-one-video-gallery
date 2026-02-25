@@ -9,8 +9,10 @@
  * @package All_In_One_Video_Gallery
  */
  
-$player_html = '';
-$maybe_shortcode = false;
+$player_html            = '';
+$maybe_shortcode        = false;
+$is_youtube             = false;
+$is_vimeo               = false;
 $enable_referrer_policy = false;
 
 if ( ! empty( $post_meta ) ) {
@@ -25,7 +27,14 @@ if ( ! empty( $post_meta ) ) {
             $embed_url = $iframe_src; 
 
             if ( false !== strpos( $embed_url, 'youtube.com' ) || false !== strpos( $embed_url, 'youtu.be' ) ) {
+                $is_youtube             = true;
                 $enable_referrer_policy = true;
+
+                $embed_url = add_query_arg( 'enablejsapi', 1, $embed_url );
+            }
+
+            if ( false !== strpos( $embed_url, 'vimeo.com' ) ) {
+                $is_vimeo = true;
             }
         } else {
             $player_html     = $embedcode;
@@ -58,11 +67,12 @@ if ( ! empty( $embed_url ) ) {
 
     // YouTube
     if ( 'youtube' == $current_video_provider ) {
+        $is_youtube             = true;
         $enable_referrer_policy = true;
 
         parse_str( $embed_url, $queries );
                     
-        $embed_url = 'https://www.youtube.com/embed/' . aiovg_get_youtube_id_from_url( $embed_url ) . '?iv_load_policy=3&modestbranding=1&rel=0&showinfo=0';	                    
+        $embed_url = 'https://www.youtube.com/embed/' . aiovg_get_youtube_id_from_url( $embed_url ) . '?iv_load_policy=3&modestbranding=1&rel=0&showinfo=0&enablejsapi=1';	                    
         
         if ( isset( $queries['start'] ) ) {
             $embed_url = add_query_arg( 'start', (int) $queries['start'], $embed_url );
@@ -103,7 +113,8 @@ if ( ! empty( $embed_url ) ) {
 
     // Vimeo
     if ( 'vimeo' == $current_video_provider ) {
-        $oembed = aiovg_get_vimeo_oembed_data( $embed_url );
+        $is_vimeo = true;
+        $oembed   = aiovg_get_vimeo_oembed_data( $embed_url );
 
         $embed_url = 'https://player.vimeo.com/video/' . $oembed['video_id'] . '?byline=0&portrait=0&title=0&vimeo_logo=0';
 
@@ -221,7 +232,7 @@ if ( ! empty( $embed_url ) ) {
 
     // Build iframe code
     $player_html = sprintf(
-        '<iframe src="%s" title="%s" width="560" height="315" frameborder="0" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen%s></iframe>',
+        '<iframe id="aiovg-player-iframe" src="%s" title="%s" width="560" height="315" frameborder="0" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen%s></iframe>',
         esc_url( $embed_url ),
         esc_attr( $post_title ),
         ( $enable_referrer_policy ? ' referrerpolicy="strict-origin-when-cross-origin"' : '' )
@@ -263,36 +274,142 @@ if ( ! empty( $embed_url ) ) {
 </head>
 <body>    
     <?php echo $maybe_shortcode ? do_shortcode( $player_html ) : $player_html; ?>
+    <?php if ( $maybe_shortcode ) wp_footer(); ?>
+    <?php do_action( 'aiovg_player_iframe_footer' ); ?>
 
-    <?php if ( 'aiovg_videos' == $post_type ) : ?>
+    <?php if ( $is_youtube ) : ?>
+        <script src="https://www.youtube.com/iframe_api"></script>
         <script type="text/javascript">
-            /**
-             * Update video views count.
-             */
-            function ajaxSubmit() {
-                var xmlhttp;
+            let player     = null;
+            let isApiReady = false;
 
-                if ( window.XMLHttpRequest ) {
-                    xmlhttp = new XMLHttpRequest();
-                } else {
-                    xmlhttp = new ActiveXObject( 'Microsoft.XMLHTTP' );
+            function onYouTubeIframeAPIReady() {
+                player = new YT.Player( 'aiovg-player-iframe', {
+                    events: {
+                        'onReady': function() {
+                            isApiReady = true;
+                        },
+                        'onStateChange': ( event ) => {
+                            if ( 1 == event.data ) { // Playing
+                                // Pause other players
+                                window.parent.postMessage({ 				
+                                    message: 'aiovg-video-playing',
+                                    context: 'iframe'
+                                }, window.location.origin );
+                            } 
+                        }
+                    }
+                });            
+            } 
+
+            window.addEventListener( 'message', function( event ) {
+                if ( ! player || ! isApiReady ) {
+                    return false;
+                }
+
+                if ( event.origin !== window.location.origin ) {
+                    return false;
+                }
+
+                if ( typeof event.data !== 'object' ) {
+                    return false;
                 }
                 
-                xmlhttp.onreadystatechange = function() {				
-                    if ( xmlhttp.readyState == 4 && xmlhttp.status == 200 && xmlhttp.responseText ) {					
-                        // console.log( xmlhttp.responseText );						
-                    }					
+                if ( ! event.data.hasOwnProperty( 'message' ) ) {
+                    return false;
                 }
 
-                xmlhttp.open( 'GET', '<?php echo admin_url( 'admin-ajax.php' ); ?>?action=aiovg_update_views_count&post_id=<?php echo $post_id; ?>&security=<?php echo wp_create_nonce( 'aiovg_public_ajax_nonce' ); ?>', true );
-                xmlhttp.send();							
-            }
+                switch ( event.data.message ) {
+                    case 'aiovg-video-play':
+                        if ( player.playVideo ) {
+                            player.playVideo();
+                        }
+                        break;
 
-            ajaxSubmit();		
+                    case 'aiovg-video-pause':
+                        if ( player.pauseVideo ) {
+                            player.pauseVideo();
+                        }
+                        break;
+
+                    case 'aiovg-video-seek':
+                        if ( event.data.hasOwnProperty( 'seconds' ) ) {
+                            if ( player.seekTo ) {
+                                player.seekTo( event.data.seconds, true );
+                            }
+                        }
+                        break;
+                }
+            });          
         </script>
     <?php endif; ?>
 
-    <?php if ( $maybe_shortcode ) wp_footer(); ?>
-    <?php do_action( 'aiovg_player_iframe_footer' ); ?>
+    <?php if ( $is_vimeo ) : ?>
+        <script src="https://player.vimeo.com/api/player.js"></script>
+        <script type="text/javascript">
+            let iframe     = document.querySelector( '#aiovg-player-iframe' );
+            let player     = new Vimeo.Player( iframe );
+            let isApiReady = false;
+
+            player.ready().then(function() {
+                isApiReady = true;
+            });
+
+            player.on( 'play', ( data ) => {
+                // Pause other players
+                window.parent.postMessage({ 				
+                    message: 'aiovg-video-playing',
+                    context: 'iframe'
+                }, window.location.origin );
+            });
+
+            window.addEventListener( 'message', function( event ) {
+                if ( ! player || ! isApiReady ) {
+                    return false;
+                }
+
+                if ( event.origin !== window.location.origin ) {
+                    return false;
+                }
+
+                if ( typeof event.data !== 'object' ) {
+                    return false;
+                }
+
+                if ( ! event.data.hasOwnProperty( 'message' ) ) {
+                    return false;
+                }
+
+                switch ( event.data.message ) {
+                    case 'aiovg-video-play':
+                        if ( player.play ) {
+                            player.play();
+                        }
+                        break;
+
+                    case 'aiovg-video-pause':
+                        if ( player.pause ) {
+                            player.pause();
+                        }
+                        break;
+
+                    case 'aiovg-video-seek':
+                        if ( event.data.hasOwnProperty( 'seconds' ) ) {
+                            if ( player.setCurrentTime ) {
+                                player.setCurrentTime( event.data.seconds );
+                            }
+                        }
+                        break;
+                }
+            });          
+        </script>
+    <?php endif; ?>  
+    
+    <?php
+    // Update views count
+    if ( 'aiovg_videos' == $post_type ) {
+        aiovg_update_views_count( $post_id );
+    }
+    ?>
 </body>
 </html>
