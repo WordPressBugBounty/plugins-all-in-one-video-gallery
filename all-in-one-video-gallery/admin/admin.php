@@ -47,10 +47,6 @@ class AIOVG_Admin {
 				$new_player_settings['theme'] = $defaults['aiovg_player_settings']['theme'];				
 			}
 
-			if ( ! array_key_exists( 'theme_color', $player_settings ) ) {
-				$new_player_settings['theme_color'] = $defaults['aiovg_player_settings']['theme_color'];				
-			}
-
 			if ( ! array_key_exists( 'muted', $player_settings ) ) {
 				$new_player_settings['muted'] = $defaults['aiovg_player_settings']['muted'];				
 			}
@@ -76,13 +72,17 @@ class AIOVG_Admin {
 				$new_player_settings['hide_youtube_logo'] = $defaults['aiovg_player_settings']['hide_youtube_logo'];
 			}
 
-			if ( ! array_key_exists( 'statistics', $player_settings ) ) {
-				$new_player_settings['statistics'] = $defaults['aiovg_player_settings']['statistics'];
-			}
-
 			if ( count( $new_player_settings ) ) {
 				update_option( 'aiovg_player_settings', array_merge( $player_settings, $new_player_settings ) );
-			}						
+			}
+			
+			// Insert the email capture settings
+			$email_capture_settings = get_option( 'aiovg_email_capture_settings' );
+
+			if ( ! is_array( $email_capture_settings ) || empty( $email_capture_settings ) ) {
+				$email_capture_settings = $defaults['aiovg_email_capture_settings'];
+				update_option( 'aiovg_email_capture_settings', $email_capture_settings );
+			}
 
 			// Insert the missing videos settings
 			$videos_settings = get_option( 'aiovg_videos_settings' );
@@ -281,12 +281,28 @@ class AIOVG_Admin {
 
 			$new_general_settings = array();
 
+			if ( ! array_key_exists( 'primary_color', $general_settings ) ) {
+				if ( array_key_exists( 'theme_color', $player_settings ) && '#00b2ff' !== $player_settings['theme_color'] ) {
+					$new_general_settings['primary_color'] = $player_settings['theme_color'];
+				} else {
+					$new_general_settings['primary_color'] = $defaults['aiovg_general_settings']['primary_color'];
+				}
+			}
+
 			if ( ! array_key_exists( 'lazyloading', $general_settings ) ) {
 				if ( array_key_exists( 'lazyloading', $player_settings ) ) {
 					$new_general_settings['lazyloading'] = $player_settings['lazyloading'];
 				} else {
 					$new_general_settings['lazyloading'] = $defaults['aiovg_general_settings']['lazyloading'];
 				}				
+			}
+
+			if ( ! array_key_exists( 'statistics', $general_settings ) ) {
+				if ( array_key_exists( 'statistics', $player_settings ) ) {
+					$new_general_settings['statistics'] = $player_settings['statistics'];
+				} else {
+					$new_general_settings['statistics'] = $defaults['aiovg_general_settings']['statistics'];
+				}
 			}
 
 			if ( ! array_key_exists( 'maybe_flush_rewrite_rules', $general_settings ) ) {
@@ -343,6 +359,14 @@ class AIOVG_Admin {
 				update_option( 'aiovg_restrictions_settings', array_merge( $defaults['aiovg_restrictions_settings'], $restrictions_settings ) );
 			}
 
+			// Insert the trailer settings
+			$trailer_settings = get_option( 'aiovg_trailer_settings' );
+
+			if ( ! is_array( $trailer_settings ) || empty( $trailer_settings ) ) {
+				$trailer_settings = $defaults['aiovg_trailer_settings'];
+				update_option( 'aiovg_trailer_settings', $trailer_settings );
+			}
+
 			// Insert the privacy settings
 			$privacy_settings = get_option( 'aiovg_privacy_settings' );
 
@@ -351,7 +375,7 @@ class AIOVG_Admin {
 				update_option( 'aiovg_privacy_settings', $privacy_settings );
 			}	
 			
-			// Insert the bunny stream settings			
+			// Insert the bunny stream settings
 			$bunny_stream_settings = get_option( 'aiovg_bunny_stream_settings' );
 
 			if ( ! is_array( $bunny_stream_settings ) || empty( $bunny_stream_settings ) ) {
@@ -359,11 +383,14 @@ class AIOVG_Admin {
 				update_option( 'aiovg_bunny_stream_settings', $bunny_stream_settings );
 			}
 
-			// Delete the unwanted plugin options
-			delete_option( 'aiovg_image_settings' );
-
 			// Remove the unfiltered_html capability from editors
 			aiovg_remove_unfiltered_html_capability_from_editors();
+
+			// Create the email leads table (safe to call on every upgrade — dbDelta is idempotent)
+			aiovg_email_capture_create_table();
+			
+			// Delete the unwanted plugin options
+			delete_option( 'aiovg_image_settings' );
 
 			// Force rewrite rules flush on next load
         	delete_option( 'aiovg_rewrite_rules_flushed' );
@@ -379,23 +406,24 @@ class AIOVG_Admin {
 		if ( 'POST' == $_SERVER['REQUEST_METHOD'] && ! empty( $_POST['issues'] ) && isset( $_POST['aiovg_issues_nonce'] ) ) {
 			// Verify that the nonce is valid
     		if ( wp_verify_nonce( $_POST['aiovg_issues_nonce'], 'aiovg_fix_ignore_issues' ) ) {
+				$action_type  = isset( $_POST['action_type'] ) ? sanitize_text_field( wp_unslash( $_POST['action_type'] ) ) : '';
 				$redirect_url = admin_url( 'admin.php?page=all-in-one-video-gallery&tab=issues' );
 
 				// Fix Issues
-				if ( __( 'Apply Fix', 'all-in-one-video-gallery' ) == $_POST['action'] ) {
+				if ( 'apply_fix' === $action_type ) {
 					$this->fix_issues();
 
-					$redirect_url = add_query_arg( 
-						array( 
+					$redirect_url = add_query_arg(
+						array(
 							'section' => 'found',
 							'success' => 1
-						), 
-						$redirect_url 
+						),
+						$redirect_url
 					);
 				}
 
 				// Ignore Issues
-				if ( __( 'Ignore', 'all-in-one-video-gallery' ) == $_POST['action'] ) {
+				if ( 'ignore' === $action_type ) {
 					$this->ignore_issues();
 
 					$redirect_url = add_query_arg( 
@@ -742,6 +770,16 @@ class AIOVG_Admin {
 			}
 		}
 		
+		if ( isset( $_GET['page'] ) && 'aiovg_import_export' === $_GET['page'] ) {
+			wp_enqueue_style( 
+				AIOVG_PLUGIN_SLUG . '-flatpickr', 
+				AIOVG_PLUGIN_URL . 'vendor/flatpickr/flatpickr.min.css', 
+				array(), 
+				'4.6.13',
+				'all'
+			);
+		}
+
 		wp_enqueue_style( 
 			AIOVG_PLUGIN_SLUG . '-admin', 
 			AIOVG_PLUGIN_URL . 'admin/assets/css/admin.min.css', 
@@ -842,23 +880,34 @@ class AIOVG_Admin {
 					'preparing_upload'   => __( 'Preparing upload', 'all-in-one-video-gallery' ),
 					'cancel_upload'      => __( 'Cancel', 'all-in-one-video-gallery' ),
 					'upload_status'      => __( 'Uploaded %d%', 'all-in-one-video-gallery' ),
-					'upload_processing'  => __( '<strong>Processing:</strong> Your video is being processed. This usually happens quickly, but during busy times, it may take a little longer. You can safely continue and save the form — no need to wait. The video will automatically become playable once processing is complete.', 'all-in-one-video-gallery' )
+					'upload_processing'  => __( '<strong>Processing:</strong> Your video is being processed. This usually happens quickly, but during busy times, it may take a little longer. You can safely continue and save the form — no need to wait. The video will automatically become playable once processing is complete.', 'all-in-one-video-gallery' ),
+					'trailer'            => __( 'Trailer', 'all-in-one-video-gallery' )
 				)				
 			)
 		);
 
+		wp_register_script(
+			AIOVG_PLUGIN_SLUG . '-import-export',
+			AIOVG_PLUGIN_URL . 'admin/assets/js/import-export.min.js',
+			array( AIOVG_PLUGIN_SLUG . '-admin' ),
+			AIOVG_PLUGIN_VERSION,
+			array( 'strategy' => 'defer' )
+		);
+
 		if ( isset( $_GET['page'] ) && 'aiovg_import_export' === $_GET['page'] ) {
-			wp_enqueue_script( 
-				AIOVG_PLUGIN_SLUG . '-import-export', 
-				AIOVG_PLUGIN_URL . 'admin/assets/js/import-export.min.js', 
-				array( AIOVG_PLUGIN_SLUG . '-admin' ), 
-				AIOVG_PLUGIN_VERSION, 
-				array( 'strategy' => 'defer' ) 
+			wp_enqueue_script(
+				AIOVG_PLUGIN_SLUG . '-flatpickr',
+				AIOVG_PLUGIN_URL . 'vendor/flatpickr/flatpickr.min.js',
+				array( 'jquery' ),
+				'4.6.13',
+				array( 'strategy' => 'defer' )
 			);
 
-			wp_localize_script( 
-				AIOVG_PLUGIN_SLUG . '-import-export', 
-				'aiovg_import_export', 
+			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-import-export' );
+
+			wp_localize_script(
+				AIOVG_PLUGIN_SLUG . '-import-export',
+				'aiovg_import_export',
 				array(
 					'i18n' => array(
 						'fields_required'                     => __( 'Please fill in all required fields.', 'all-in-one-video-gallery' ),
@@ -866,8 +915,8 @@ class AIOVG_Admin {
 						'preparing_export'                    => __( 'Preparing export.', 'all-in-one-video-gallery' ),
 						'fetching_csv_columns'                => __( 'Please wait while we fetch the column headers from your CSV file.', 'all-in-one-video-gallery' ),
 						'csv_columns_loaded'                  => __( 'CSV columns loaded successfully. You can proceed with the import now.', 'all-in-one-video-gallery' ),
-						'import_folder_failed_status_heading' => __( 'Sorry, some videos could not be imported. Please try again later.', 'all-in-one-video-gallery' ),		
-						'import_csv_error_status_heading'     => __( 'Some items could not be imported from the CSV. Please review the details below.', 'all-in-one-video-gallery' ),		
+						'import_folder_failed_status_heading' => __( 'Sorry, some videos could not be imported. Please try again later.', 'all-in-one-video-gallery' ),
+						'import_csv_error_status_heading'     => __( 'Some items could not be imported from the CSV. Please review the details below.', 'all-in-one-video-gallery' ),
 						'export_zip_success_status_heading'   => __( 'Your export is ready. Download the ZIP files below.', 'all-in-one-video-gallery' ),
 						'export_zip_failed_status_heading'    => __( 'Sorry, the following videos could not be exported because their file size exceeds the maximum allowed ZIP size.', 'all-in-one-video-gallery' ),
 						'export_zip_empty_status'             => sprintf(
@@ -875,10 +924,24 @@ class AIOVG_Admin {
 							'%%exported%%',
 							'%%skipped%%'
 						),
-						'unexpected_error'                    => __( 'An unexpected error occurred. Please try again later.', 'all-in-one-video-gallery' )
-					)				
+						'request_failed'                      => __( 'Something went wrong. Please check your server or try again.', 'all-in-one-video-gallery' )
+					)
 				)
 			);
+		}
+
+		// Enqueue import-export.js on video pages when email capture is globally enabled
+		if ( current_user_can( 'manage_aiovg_options' ) ) {
+			$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
+
+			if ( ! empty( $email_capture_settings['enable_email_capture'] ) ) {
+				$is_videos_list = ( 'edit.php' === $hook && isset( $_GET['post_type'] ) && 'aiovg_videos' === $_GET['post_type'] );
+				$is_video_edit  = ( in_array( $hook, array( 'post-new.php', 'post.php' ) ) && 'aiovg_videos' === $post_type );
+
+				if ( $is_videos_list || $is_video_edit ) {
+					wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-import-export' );
+				}
+			}
 		}
 	}
 
@@ -1015,7 +1078,7 @@ class AIOVG_Admin {
 		$filename = strtolower( $file['name'] );
 
 		// Only handle VTT/SRT uploads
-		if ( ! str_ends_with( $filename, '.vtt' ) && ! str_ends_with( $filename, '.srt' ) ) {
+		if ( substr( $filename, -4 ) !== '.vtt' && substr( $filename, -4 ) !== '.srt' ) {
 			return $file;
 		}
 
@@ -1041,7 +1104,7 @@ class AIOVG_Admin {
 		}
 
 		// Fallback — Subtitle structure validation
-		if ( str_ends_with( $filename, '.vtt' ) ) {
+		if ( substr( $filename, -4 ) === '.vtt' ) {
 			$handle = fopen( $file['tmp_name'], 'r' );
 			$first_line = trim( fgets( $handle ) );
 			fclose( $handle );
@@ -1052,7 +1115,7 @@ class AIOVG_Admin {
 		}
 
 		// Fallback Validate SRT
-		if ( str_ends_with( $filename, '.srt' ) ) {
+		if ( substr( $filename, -4 ) === '.srt' ) {
 			$handle = fopen( $file['tmp_name'], 'r' );
 			$first_line  = trim( fgets( $handle ) );
 			$second_line = trim( fgets( $handle ) );

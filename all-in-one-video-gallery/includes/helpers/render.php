@@ -545,7 +545,11 @@ function the_aiovg_pagination( $numpages = '', $pagerange = '', $paged = '', $at
 		}
 
 		echo '<div class="aiovg-pagination-links">'; 		   	
-		foreach ( $paginate_links as $key => $page_link ) {		
+		foreach ( $paginate_links as $key => $page_link ) {
+			if ( $is_ajax ) {
+				$page_link = preg_replace( '/\bhref=["\'][^"\']*["\']/', 'href="javascript:void(0)"', $page_link );
+			}
+			
 			echo $page_link;
 		}
 		echo '</div>';	
@@ -625,12 +629,10 @@ function the_aiovg_socialshare_buttons() {
 	
 	// Get current page url
 	$url = get_permalink();
-	
+	$url_encoded = rawurlencode( $url );
+
 	// Get current page title
-	$title = get_the_title();
-	$title = str_replace( ' ', '%20', $title );
-	$title = str_replace( '|', '%7C', $title );
-	$title = str_replace( '@', '%40', $title );
+	$title = rawurlencode( get_the_title() );
 
 	// Get image
 	$image_data = aiovg_get_image( $post->ID, 'large' );
@@ -643,7 +645,7 @@ function the_aiovg_socialshare_buttons() {
 		$buttons['facebook'] = array(
 			'icon' => 'aiovg-icon-facebook',
 			'text' => __( 'Facebook', 'all-in-one-video-gallery' ),
-			'url'  => "https://www.facebook.com/sharer/sharer.php?u={$url}"				
+			'url'  => "https://www.facebook.com/sharer/sharer.php?u={$url_encoded}"
 		);
 	}
 
@@ -651,7 +653,7 @@ function the_aiovg_socialshare_buttons() {
 		$buttons['twitter'] = array(
 			'icon' => 'aiovg-icon-twitter',
 			'text' => __( 'Twitter', 'all-in-one-video-gallery' ),
-			'url'  => "https://twitter.com/intent/tweet?text={$title}&amp;url={$url}"				
+			'url'  => "https://twitter.com/intent/tweet?text={$title}&amp;url={$url_encoded}"
 		);
 	}		
 
@@ -659,7 +661,7 @@ function the_aiovg_socialshare_buttons() {
 		$buttons['linkedin'] = array(	
 			'icon' => 'aiovg-icon-linkedin',			
 			'text' => __( 'Linkedin', 'all-in-one-video-gallery' ),
-			'url'  => "https://www.linkedin.com/shareArticle?url={$url}&amp;title={$title}"
+			'url'  => "https://www.linkedin.com/shareArticle?url={$url_encoded}&amp;title={$title}"
 		);
 	}
 
@@ -667,18 +669,16 @@ function the_aiovg_socialshare_buttons() {
 		$buttons['pinterest'] = array(
 			'icon' => 'aiovg-icon-pinterest',		
 			'text' => __( 'Pin It', 'all-in-one-video-gallery' ),
-			'url'  => "https://pinterest.com/pin/create/button/?url={$url}&amp;media={$image}&amp;description={$title}"
+			'url'  => "https://pinterest.com/pin/create/button/?url={$url_encoded}&amp;media={$image}&amp;description={$title}"
 		);
 	}
 
 	if ( isset( $socialshare_settings['services']['tumblr'] ) ) {
-		$tumblr_url = "https://www.tumblr.com/share/link?url={$url}&amp;name={$title}";
+		$tumblr_url = "https://www.tumblr.com/share/link?url={$url_encoded}&amp;name={$title}";
 
 		$description = sanitize_text_field( aiovg_get_excerpt( $post->ID, 160, '', false ) ); 
 		if ( ! empty( $description ) ) {
-			$description = str_replace( ' ', '%20', $description );
-			$description = str_replace( '|', '%7C', $description );
-			$description = str_replace( '@', '%40', $description );	
+			$description = rawurlencode( $description );
 
 			$tumblr_url .= "&amp;description={$description}";
 		}
@@ -692,9 +692,9 @@ function the_aiovg_socialshare_buttons() {
 
 	if ( isset( $socialshare_settings['services']['whatsapp'] ) ) {
 		if ( wp_is_mobile() ) {
-			$whatsapp_url = "whatsapp://send?text={$title} " . rawurlencode( $url );
+			$whatsapp_url = "whatsapp://send?text={$title} {$url_encoded}";
 		} else {
-			$whatsapp_url = "https://api.whatsapp.com/send?text={$title}&nbsp;{$url}";
+			$whatsapp_url = "https://api.whatsapp.com/send?text={$title}%20{$url_encoded}";
 		}
 
 		$buttons['whatsapp'] = array(	

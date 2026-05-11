@@ -113,34 +113,73 @@ class AIOVG_Public_Bunny_Stream {
 				}
 			}
  		}
+
+		// Trailer Bunny Stream
+		if ( isset( $_POST['aiovg_video_trailer_nonce'] ) && wp_verify_nonce( $_POST['aiovg_video_trailer_nonce'], 'aiovg_save_video_trailer' ) ) {
+			$trailer_type = isset( $_POST['trailer_type'] ) ? sanitize_text_field( $_POST['trailer_type'] ) : '';
+			$trailer_src  = isset( $_POST['trailer_src'] ) ? aiovg_sanitize_url( $_POST['trailer_src'] ) : '';
+
+			$trailer_bunny_stream_video_id = isset( $_POST['trailer_bunny_stream_video_id'] ) ? sanitize_text_field( $_POST['trailer_bunny_stream_video_id'] ) : '';
+
+			if ( ! empty( $trailer_bunny_stream_video_id ) ) {
+				if ( 'embedcode' === $trailer_type ) {
+					$this->delete_bunny_stream_video( $trailer_bunny_stream_video_id );
+					$trailer_bunny_stream_video_id = '';
+				} elseif ( ! empty( $trailer_src ) ) {
+					if ( strpos( $trailer_src, '/' . $trailer_bunny_stream_video_id . '/' ) === false ) {
+						$this->delete_bunny_stream_video( $trailer_bunny_stream_video_id );
+						$trailer_bunny_stream_video_id = '';
+					}
+				}
+			}
+
+			update_post_meta( $post_id, 'trailer_bunny_stream_video_id', $trailer_bunny_stream_video_id );
+
+			if ( ! empty( $_POST['deletable_trailer_bunny_stream_video_ids'] ) ) {
+				$deletable_trailer_bunny_stream_video_ids = explode( ',', $_POST['deletable_trailer_bunny_stream_video_ids'] );
+				$deletable_trailer_bunny_stream_video_ids = array_filter( array_map( 'sanitize_text_field', $deletable_trailer_bunny_stream_video_ids ) );
+
+				if ( ! empty( $deletable_trailer_bunny_stream_video_ids ) ) {
+					foreach ( $deletable_trailer_bunny_stream_video_ids as $deletable_trailer_id ) {
+						$this->delete_bunny_stream_video( $deletable_trailer_id );
+					}
+				}
+			}
+		}
 	}
 
 	/**
-	 * Delete bunny stream video.
+	 * Delete Bunny Stream videos associated with a video post before it is deleted.
 	 *
 	 * @since 4.2.0
 	 * @param int   $post_id Video Post ID.
 	 */
-	public function before_delete_post( $post_id ) {		
+	public function before_delete_post( $post_id ) {
 		if ( 'aiovg_videos' != get_post_type( $post_id ) ) {
 			return false;
 		}
 
-		// Get Bunny Stream video ID stored in post meta
+		// Main video: delete Bunny Stream video if one is stored
 		$video_id = get_post_meta( $post_id, 'bunny_stream_video_id', true );
 
-		if ( empty( $video_id ) ) {
-			return false;
+		if ( ! empty( $video_id ) ) {
+			$video_url = get_post_meta( $post_id, 'mp4', true );
+
+			if ( strpos( $video_url, '/' . $video_id . '/' ) !== false ) {
+				$this->delete_bunny_stream_video( $video_id );
+			}
 		}
 
-		// Confirm the video URL contains the expected video ID
-		$video_url = get_post_meta( $post_id, 'mp4', true );
-		
-		if ( strpos( $video_url, '/' . $video_id . '/' ) === false ) {
-			return false;
+		// Trailer: delete Bunny Stream trailer video if one is stored
+		$trailer_video_id = get_post_meta( $post_id, 'trailer_bunny_stream_video_id', true );
+
+		if ( ! empty( $trailer_video_id ) ) {
+			$trailer_src = get_post_meta( $post_id, 'trailer_src', true );
+
+			if ( strpos( $trailer_src, '/' . $trailer_video_id . '/' ) !== false ) {
+				$this->delete_bunny_stream_video( $trailer_video_id );
+			}
 		}
-		  
-		$this->delete_bunny_stream_video( $video_id );	
 	}
 
 	/**
@@ -467,8 +506,9 @@ class AIOVG_Public_Bunny_Stream {
 			return $sources;
 		}
 
-		// Retrieve the Bunny Stream video ID
-		$video_id = get_post_meta( $post_id, 'bunny_stream_video_id', true );
+		// When playing a trailer, check against the trailer's Bunny Stream GUID instead.
+		$meta_key = ! empty( $settings['is_trailer'] ) ? 'trailer_bunny_stream_video_id' : 'bunny_stream_video_id';
+		$video_id = get_post_meta( $post_id, $meta_key, true );
 
 		if ( empty( $video_id ) ) {
 			return $sources;

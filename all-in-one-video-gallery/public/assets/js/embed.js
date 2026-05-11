@@ -21,7 +21,8 @@
                 cursor: pointer;
                 padding-bottom: calc(100% / (16 / 9));
                 width: 100%;
-                height: 0;           
+                height: 0;   
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;        
             }
         
             #posterimage, 
@@ -130,44 +131,20 @@
             }
 
             /* Cookie consent */
-            #cookieconsent-modal {  
-                box-sizing: border-box;
-                display: none;          
-                position: absolute; 
-                top: 50%;
-                left: 50%;
-                transform: translate3d(-50%, -50%, 0);
+            #cookieconsent-modal {
+                display: none;
+                position: absolute;
+                inset: 0;
                 z-index: 1;
-                border-radius: 3px; 
-                background: rgba(0, 0, 0, 0.7);
-                padding: 15px;
-                width: 90%;
-                max-width: 640px;
-                text-align: center;        
+                align-items: flex-start;
+                justify-content: center;
+                background-color: rgba(0, 0, 0, 0.85);
+                width: 100%;
+                height: 100%;
+                overflow-y: auto;
+                line-height: 1.5;
                 color: #fff;
-            }  
-            
-            @media only screen and (max-width: 320px) {
-                #cookieconsent-modal {
-                    width: 100%;
-                    height: 100%;
-                }
-            }
-
-            #cookieconsent-button {
-                display: inline-block;
-                margin-top: 10px;
-                border: 0;
-                border-radius: 3px;  
-                background: #e70808;
-                cursor: pointer; 
-                padding: 7px 15px;   
-                line-height: 1; 
-                color: #fff; 
-            }
-
-            #cookieconsent-button:hover {
-                opacity: 0.8;
+                font-size: 14px;
             }
 
             #root.cookieconsent {
@@ -179,7 +156,221 @@
             }
 
             #root.cookieconsent > #cookieconsent-modal {
+                display: flex;
+            }
+
+            .cookieconsent-block {
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin: auto;
+                padding: 16px 24px;
+                width: 100%;
+                max-width: 480px;
+                text-align: center;
+            }
+
+            .cookieconsent-button,
+            .cookieconsent-button:hover,
+            .cookieconsent-button:focus {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 0;
+                border-radius: 3px;
+                box-shadow: none;
+                background: none;
+                background-color: var(--aiovg-color-primary, #3b82f6);
+                background-image: none;
+                cursor: pointer;
+                padding: 0 20px;
+                min-height: 44px;
+                line-height: 1;
+                color: #fff;
+                font-family: inherit;
+                font-size: 1em;
+                font-weight: 600;
+            }
+
+            .cookieconsent-button:hover {
+                opacity: 0.85;
+            }
+
+            /* Email Capture */
+            #email-capture-modal {
+                display: none;
+                position: absolute;
+                inset: 0;
+                z-index: 2;
+                align-items: flex-start;
+                justify-content: center;
+                background-color: rgba(0, 0, 0, 0.85);
+                width: 100%;
+                height: 100%;
+                overflow-y: auto;
+                line-height: 1.5;
+                color: #fff;
+                font-size: 14px;
+            }
+
+            #root.email-capture {
+                cursor: unset;
+            }
+
+            #root.email-capture > #playbutton {
+                display: none;
+            }
+
+            #root.email-capture > #email-capture-modal {
+                display: flex;
+            }
+
+            .email-capture {
+                display: contents;
+            }
+
+            .email-capture-block {
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin: auto;
+                padding: 16px 24px;
+                width: 100%;
+                max-width: 480px;
+            }
+
+            .email-capture-header {
+                text-align: center;
+                text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+                font-size: 1.15em;
+            }
+
+            .email-capture-fields {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .email-capture-fields input {
+                box-sizing: border-box;
                 display: block;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 3px;
+                background: rgba(255, 255, 255, 0.12);
+                padding: 0 12px;
+                width: 100%;
+                min-height: 44px;
+                line-height: 1;
+                color: #fff;
+                font-family: inherit;
+                font-size: 1em;
+            }
+
+            .email-capture-fields input::placeholder {
+                color: rgba(255, 255, 255, 0.5);
+            }
+
+            .email-capture-fields input:focus {
+                outline: none;
+                border-color: rgba(255, 255, 255, 0.6);
+                background: rgba(255, 255, 255, 0.18);
+            }
+
+            .email-capture-email.is-invalid {
+                border-color: #ff7070;
+            }
+
+            .email-capture-error {
+                display: none;
+                margin-top: -4px;
+                color: #ff7070;
+                font-size: 0.875em;
+            }
+
+            .email-capture-error::before {
+                content: "⚠";
+                margin-right: 5px;
+            }
+
+            .email-capture-footer {
+                margin-top: -4px;
+                line-height: 1.4;
+                color: rgba(255, 255, 255, 0.55);
+                font-size: 0.875em;
+            }
+
+            .email-capture-footer a {
+                color: rgba(255, 255, 255, 0.75);
+                text-decoration: underline;
+            }
+
+            .email-capture-actions {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+            }
+
+            .email-capture-submit,
+            .email-capture-submit:hover,
+            .email-capture-submit:focus {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 0;
+                border-radius: 3px;
+                box-shadow: none;
+                background: none;
+                background-color: var(--aiovg-color-primary, #3b82f6);
+                background-image: none;
+                cursor: pointer;
+                padding: 0 20px;
+                min-height: 44px;
+                line-height: 1;
+                color: #fff;
+                font-family: inherit;
+                font-size: 1em;
+                font-weight: 600;
+            }
+
+            .email-capture-submit:hover {
+                opacity: 0.85;
+            }
+
+            .email-capture-skip {
+                display: inline-flex;
+                align-items: center;
+                cursor: pointer;
+                text-decoration: underline;
+                color: rgba(255, 255, 255, 0.6);
+                font-size: 0.875em;
+            }
+
+            .email-capture-skip:hover {
+                color: #fff;
+            }
+
+            @keyframes spin {
+                to { transform: rotate( 360deg ); }
+            }
+
+            .is-loading .email-capture-block * {
+                display: none !important;
+            }
+
+            .is-loading .email-capture-block {
+                pointer-events: none;
+                margin: auto;
+                border: 3px solid rgba( 255, 255, 255, 0.25 );
+                border-radius: 50%;
+                border-top-color: #fff;    
+                padding: 0;        
+                width: 36px;
+                height: 36px;
+                animation: spin 0.7s linear infinite;            
             }
 
             /* Post-click styles */
@@ -197,11 +388,16 @@
             <img id="posterimage" src="data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=" alt="" referrerpolicy="origin" />
             <button type="button" id="playbutton" aria-label="Play Video"></button>
             <div id="cookieconsent-modal">
-                <slot name="cookieconsent-message"></slot>
-                <button type="button" id="cookieconsent-button">
-                    <slot name="cookieconsent-button-label">I Agree</slot>
-                </button>
+                <div class="cookieconsent-block">
+                    <div><slot name="cookieconsent-message"></slot></div>
+                    <div>
+                        <button type="button" id="cookieconsent-button" class="cookieconsent-button">
+                            <slot name="cookieconsent-button-label">I Agree</slot>
+                        </button>
+                    </div>
+                </div>
             </div>
+            <div id="email-capture-modal"></div>
         </div>
     `;
 
@@ -220,14 +416,16 @@
             // Set references to the DOM elements from the component's template
             this.$root = shadowDom.querySelector( '#root' );
             this.$posterImage = shadowDom.querySelector( '#posterimage' );
-            this.$playButton = shadowDom.querySelector( '#playbutton' );    
+            this.$playButton = shadowDom.querySelector( '#playbutton' );
             this.$cookieConsentButton = shadowDom.querySelector( '#cookieconsent-button' );
-            
+            this.$emailCaptureModal = shadowDom.querySelector( '#email-capture-modal' );
+
             // Set references to the private properties used by the component
             this._isRendered = false;
             this._ajaxUrl = aiovg_embed.ajax_url;
             this._ajaxNonce = aiovg_embed.ajax_nonce;
             this._isCookieConsentLoaded = false;
+            this._isEmailCaptureLoaded = false;
             this._isPosterImageLoaded = false;
             this._isIframeLoaded = false;             
             this._forceIframeElement = navigator.vendor.includes( 'Apple' ) || navigator.userAgent.includes( 'Mobi' ); 
@@ -329,12 +527,12 @@
             return this.getAttribute( 'post_type' ) || '';
         }
 
-        get statistics() {
-            return this.hasAttribute( 'statistics' );
-        }
-
         get lazyLoading() {
             return this.hasAttribute( 'lazyloading' );
+        }
+
+        get statistics() {
+            return this.hasAttribute( 'statistics' );
         }
 
         get cookieConsent() {
@@ -349,7 +547,21 @@
             } else {
                 this.removeAttribute( 'cookieconsent' );
             }
-        } 
+        }
+
+        get emailCapture() {
+            return this.hasAttribute( 'email-capture' );
+        }
+
+        set emailCapture( value ) {
+            const isEnabled = Boolean( value );
+
+            if ( isEnabled ) {
+                this.setAttribute( 'email-capture', '' );
+            } else {
+                this.removeAttribute( 'email-capture' );
+            }
+        }
 
         /**
          * Define private methods.
@@ -363,12 +575,17 @@
                 return false;
             }
             
-            if ( this.cookieConsent ) {      
-                this._addCookieConsent();           
+            if ( this.emailCapture ) {
+                this._addEmailCapture();
                 return false;
-            }  
+            }
 
-            this._isRendered = true; 
+            if ( this.cookieConsent ) {
+                this._addCookieConsent();
+                return false;
+            }
+
+            this._isRendered = true;
 
             if ( this._forceIframeElement ) {
                 this._warmConnections();
@@ -410,17 +627,182 @@
             }, window.location.origin );
         }
 
+        _addEmailCapture() {
+            if ( this._isEmailCaptureLoaded ) return false;
+            this._isEmailCaptureLoaded = true;
+
+            // Read template from light DOM child placed by PHP
+            const templateEl = this.querySelector( 'template.aiovg-player-template' );
+            if ( ! templateEl ) return false;
+
+            // Clone HTML from template into shadow DOM
+            const emailCaptureEl = templateEl.content.querySelector( '.email-capture' );
+            if ( ! emailCaptureEl ) return false;
+            
+            // Move all children of email capture block into the email capture modal container in the shadow DOM
+            this.$emailCaptureModal.appendChild( emailCaptureEl.cloneNode( true ) );
+
+            // Add poster image if available and enable the email capture modal by adding the corresponding class to the root element
+            this._addPosterImage();         
+            this._addClass( 'email-capture' );
+
+            // Focus the first input for better accessibility
+            const firstInput = this.$emailCaptureModal.querySelector( 'input' );
+            if ( firstInput ) {
+                firstInput.focus();
+            }
+
+            // Submit handler
+            const submitBtn = this.$emailCaptureModal.querySelector( '.email-capture-submit' );
+
+            if ( submitBtn ) {
+                submitBtn.addEventListener( 'click', () => {
+                    const emailField = this.$emailCaptureModal.querySelector( '.email-capture-email' );
+                    const errorSpan  = this.$emailCaptureModal.querySelector( '.email-capture-error' );
+
+                    const email = emailField ? emailField.value.trim() : '';
+                    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                    if ( ! email || ! regex.test( email ) ) {
+                        if ( errorSpan ) {
+                            const errorMessage = errorSpan.getAttribute( 'data-invalid_email' ) || 'Please enter a valid email address.';
+                            
+                            errorSpan.textContent = errorMessage;
+                            errorSpan.style.display = 'block';
+                        }
+
+                        if ( emailField ) {
+                            emailField.classList.add( 'is-invalid' );
+                            emailField.setAttribute( 'aria-invalid', 'true' );
+                        }
+
+                        return false;
+                    }
+
+                    if ( errorSpan ) {
+                        errorSpan.style.display = 'none';
+                    }
+
+                    if ( emailField ) {
+                        emailField.classList.remove( 'is-invalid' );
+                        emailField.removeAttribute( 'aria-invalid' );
+                    }
+
+                    let params = 'email=' + encodeURIComponent( email );
+
+                    const nameField = this.$emailCaptureModal.querySelector( '.email-capture-name' );
+                    if ( nameField && nameField.value.trim() ) {
+                        params += '&name=' + encodeURIComponent( nameField.value.trim() );
+                    }
+
+                    const phoneField = this.$emailCaptureModal.querySelector( '.email-capture-phone' );
+                    if ( phoneField && phoneField.value.trim() ) {
+                        params += '&phone=' + encodeURIComponent( phoneField.value.trim() );
+                    }
+
+                    if ( 'aiovg_videos' === this.postType && this.postId ) {
+                        params += '&video_id=' + encodeURIComponent( this.postId );                   
+                    } else {
+                        params += '&video_id=0';
+                        
+                        if ( this.src ) {
+                            params += '&video_url=' + encodeURIComponent( this.src );
+                        }
+
+                    }
+
+                    params += '&page_url=' + encodeURIComponent( window.location.href );
+
+                    this._onEmailCapture( params );
+                } );
+            }
+
+            // Skip handler
+            const skipLink = this.$emailCaptureModal.querySelector( '.email-capture-skip' );
+
+            if ( skipLink ) {
+                const doSkip = () => {
+                    this._onEmailCapture( 'skipped=1' );
+                };
+
+                skipLink.addEventListener( 'click', doSkip );
+
+                skipLink.addEventListener( 'keydown', ( event ) => {
+                    if ( 13 === event.keyCode || 32 === event.keyCode ) {
+                        event.preventDefault();
+                        doSkip();
+                    }
+                } );
+            }
+        }
+
+        _onEmailCapture( data ) {
+            if ( this.$emailCaptureModal.classList.contains( 'is-loading' ) ) return false; // Prevent multiple submissions
+            this.$emailCaptureModal.classList.add( 'is-loading' );
+
+            const xmlhttp = new XMLHttpRequest();
+
+            xmlhttp.onreadystatechange = () => {
+                if ( 4 == xmlhttp.readyState ) {
+                    let response = null;
+
+                    if ( 200 == xmlhttp.status && xmlhttp.responseText ) {
+                        try {
+                            response = JSON.parse( xmlhttp.responseText );
+                        } catch ( e ) {}
+                    }
+
+                    if ( response && response.success ) {
+                        // Email captured successfully, proceed to load the video and remove the email capture gate
+                        this._isRendered = true;
+                
+                        this._removeClass( 'email-capture' );
+                        this.emailCapture = false;        
+
+                        this._warmConnections();
+                        this._addIframe( true ); 
+
+                        // Email submission implies consent — remove both gates from other players
+                        const videos = document.querySelectorAll( '.aiovg-player-element' );
+                        for ( let i = 0; i < videos.length; i++ ) {
+                            videos[ i ].removeCookieConsent();
+                            videos[ i ].removeEmailCapture();
+                        }
+
+                        window.postMessage({ 
+                            message: 'aiovg-email-captured' 
+                        }, window.location.origin );
+                    } else {
+                        // Show error message
+                        const errorSpan = this.$emailCaptureModal.querySelector( '.email-capture-error' );
+
+                        if ( errorSpan ) {
+                            errorSpan.textContent   = ( response && response.data && typeof response.data === 'string' ) ? response.data : errorSpan.getAttribute( 'data-error_generic' );
+                            errorSpan.style.display = 'block';
+                        }
+
+                        // Restore the form so the user can retry.
+                        this.$emailCaptureModal.classList.remove( 'is-loading' );
+                    }
+                }
+            };
+
+            xmlhttp.open( 'POST', this._ajaxUrl + '?action=aiovg_save_email_lead&security=' + this._ajaxNonce, true );
+            xmlhttp.setRequestHeader( 'Content-type', 'application/x-www-form-urlencoded' );
+            xmlhttp.send( data );                      
+        }
+
         _addPosterImage() {
-            if ( this._isPosterImageLoaded ) return false; 
+            if ( this._isPosterImageLoaded ) return false;
             this._isPosterImageLoaded = true;
 
             if ( this.poster ) {
-                this.$posterImage.src = this.poster; 
-            }        
+                this.$posterImage.src = this.poster;
+            }
         }
 
         _addIframe( autoplayRequested = false ) {
-            if ( this._isIframeLoaded ) return false;  
+            if ( this._isIframeLoaded || this.emailCapture || this.cookieConsent ) return false;  
             this._isIframeLoaded = true;  
 
             const iframeEl = document.createElement( 'iframe' );
@@ -562,8 +944,17 @@
             if ( this._isRendered ) return false;
 
             this._removeClass( 'cookieconsent' );
-            this.cookieConsent = false; 
-                                
+            this.cookieConsent = false;
+
+            this._render();
+        }
+
+        removeEmailCapture() {
+            if ( this._isRendered ) return false;
+
+            this._removeClass( 'email-capture' );
+            this.emailCapture = false;
+
             this._render();
         }
 
@@ -915,6 +1306,13 @@
                 const videos = document.querySelectorAll( '.aiovg-player-element' );
                 for ( let i = 0; i < videos.length; i++ ) {
                     videos[ i ].removeCookieConsent();
+                }
+            }
+
+            if ( event.data.message == 'aiovg-email-captured' ) {
+                const videos = document.querySelectorAll( '.aiovg-player-element' );
+                for ( let i = 0; i < videos.length; i++ ) {
+                    videos[ i ].removeEmailCapture();
                 }
             }
 

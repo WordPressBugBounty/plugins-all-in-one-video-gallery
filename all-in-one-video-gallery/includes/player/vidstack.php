@@ -34,12 +34,12 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 	 * Get things started.
 	 *
 	 * @since 3.5.0
-	 * @param int   $post_id      Post ID.
- 	 * @param array $args         Player options.
-	 * @param int   $reference_id Player reference ID.
+	 * @param int   $post_id    Post ID.
+ 	 * @param array $args       Player options.
+	 * @param int   $player_uid Player unique ID.
 	 */
-	public function __construct( $post_id, $args, $reference_id ) {	
-		parent::__construct( $post_id, $args, $reference_id );			
+	public function __construct( $post_id, $args, $player_uid ) {	
+		parent::__construct( $post_id, $args, $player_uid, 'vidstack' );			
 	}
 
 	/**
@@ -51,7 +51,7 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 	public function get_player() {
 		// Check if the current user has access to this video
 		if ( $this->post_id > 0 && 'aiovg_videos' == $this->post_type ) {
-			if ( ! aiovg_current_user_can( 'play_aiovg_video', $this->post_id ) ) {
+			if ( ! $this->has_access && ! $this->is_trailer ) {
 				return $this->get_player_restricted_message();
 			}
 		}
@@ -80,9 +80,11 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
  	 * @return string  Player HTML.
 	 */
 	public function get_player_vidstack() {
-		$player_settings = $this->get_player_settings();
-		$privacy_settings = $this->get_privacy_settings();
-		$logo_settings = $this->get_logo_settings();
+		$player_settings        = $this->get_player_settings();
+		$privacy_settings       = $this->get_privacy_settings();
+		$logo_settings          = $this->get_logo_settings();
+		$trailer_settings       = $this->get_trailer_settings();
+		$email_capture_settings = $this->get_email_capture_settings();
 
 		$videos = $this->get_videos();
 		$poster = $this->get_poster();	
@@ -94,8 +96,8 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 			'post_type'   => sanitize_text_field( $this->post_type ),
 			'ajax_url'    => sanitize_url( admin_url( 'admin-ajax.php' ) ),
 			'ajax_nonce'  => wp_create_nonce( 'aiovg_public_ajax_nonce' ),
-			'statistics'  => (int) $player_settings['statistics'],
 			'lazyloading' => (int) $player_settings['lazyloading'],
+			'statistics'  => (int) $player_settings['statistics'],
 			'player'      => array(
 				'iconUrl' => AIOVG_PLUGIN_URL . 'vendor/vidstack/plyr.svg',
 				'volume'  => 0.5				
@@ -103,9 +105,8 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 		);		
 
 		// Video Sources	
+		$formats = array( 'mp4', 'webm', 'ogv', 'hls', 'dash', 'youtube', 'vimeo' );
 		$sources = array();
-
-		$formats = array( 'mp4', 'webm', 'ogv', 'hls', 'dash', 'youtube', 'vimeo' );		
 
 		foreach ( $formats as $format ) {
 			if ( empty( $videos[ $format ] ) ) {
@@ -200,7 +201,7 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 
 		// Video Attributes
 		$attributes = array(
-			'id'       => 'aiovg-player-' . $this->reference_id,
+			'id'       => 'aiovg-player-' . $this->player_uid,
 			'style'    => 'width: 100%; height: 100%',
 			'controls' => '',
 			'preload'  => esc_attr( $player_settings['preload'] )
@@ -354,16 +355,27 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 
 		if ( ! empty( $logo_settings['copyright_text'] ) ) {
 			$settings['contextmenu'] = array(
-				'content' => esc_attr( $logo_settings['copyright_text'] )
+				'content' => wp_strip_all_tags( $logo_settings['copyright_text'] )
 			);
-		}	
-		
+		}
+
+		if ( $this->is_trailer ) {
+			$settings['trailer'] = array(
+				'label' => wp_strip_all_tags( $trailer_settings['label'] ),
+				'url'   => esc_url( $trailer_settings['url'] )
+			);
+		}
+
 		if ( ! empty( $privacy_settings['show_consent'] ) ) {
 			if ( isset( $sources['youtube'] ) || isset( $sources['vimeo'] ) ) {
 				$settings['cookie_consent'] = 1;
 			}
 		}
-		
+
+		if ( ! empty( $email_capture_settings['enable_email_capture'] ) ) {
+			$settings['email_capture'] = 1;
+		}
+
 		if ( isset( $sources['youtube'] ) ) { // YouTube
 			$settings['player']['youtube'] = array(
 				'noCookie'       => false,
@@ -418,12 +430,25 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 					'active'   => ! empty( $player_settings['cc_load_policy'] ) ? true : false,
 					'language' => 'auto',
 					'update'   => true
-				); 
+				);
 			}
-		}			
+		}
 
 		$settings = apply_filters( 'aiovg_vidstack_player_settings', $settings, $params );
 
+		// Trailers should not send statistics and should have limited controls to encourage users to watch the full video.
+		if ( $this->is_trailer ) {
+			$tracks = array();
+
+			$settings['statistics'] = 0;
+
+			unset( $settings['player']['captions'] );
+			unset( $settings['player']['markers'] );
+			if ( ! empty( $settings['player']['controls'] ) ) {
+				$settings['player']['controls'] = array_values( array_diff( $settings['player']['controls'], array( 'download' ) ) );
+			}
+		}
+		
 		// Include Dependencies
 		wp_enqueue_style( 
 			AIOVG_PLUGIN_SLUG . '-plyr', 
@@ -477,17 +502,12 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 		
 		do_action( 'aiovg_vidstack_player_scripts', $settings, $attributes, $sources, $tracks );
 
-		wp_enqueue_script( 
-			AIOVG_PLUGIN_SLUG . '-vidstack', 
-			AIOVG_PLUGIN_URL . 'public/assets/js/vidstack.min.js', 
-			array(), 
-			AIOVG_PLUGIN_VERSION, 
-			array( 'strategy' => 'defer' ) 
-		);
-
-		aiovg_add_inline_script(
+		wp_enqueue_script(
 			AIOVG_PLUGIN_SLUG . '-vidstack',
-			'var aiovg_player_' . (int) $this->reference_id . ' = ' . wp_json_encode( $settings, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . ';'
+			AIOVG_PLUGIN_URL . 'public/assets/js/vidstack.min.js',
+			array( AIOVG_PLUGIN_SLUG . '-plyr' ),
+			AIOVG_PLUGIN_VERSION,
+			array( 'strategy' => 'defer' )
 		);
 
 		// Output
@@ -569,8 +589,8 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 				$embedcode = $this->get_embedcode();
 
 				$player_html .= '<div class="plyr__embed">';
-				$player_html .= '<label for="plyr__embed-code-input-' . $this->reference_id . '">' . esc_html__( 'Paste this code in your HTML page', 'all-in-one-video-gallery' ) . '</label>';
-				$player_html .= '<input type="text" id="plyr__embed-code-input-' . $this->reference_id . '" class="plyr__embed-code-input" value="' . htmlspecialchars( $embedcode ) . '" readonly />';
+				$player_html .= '<label for="plyr__embed-code-input-' . $this->player_uid . '">' . esc_html__( 'Paste this code in your HTML page', 'all-in-one-video-gallery' ) . '</label>';
+				$player_html .= '<input type="text" id="plyr__embed-code-input-' . $this->player_uid . '" class="plyr__embed-code-input" value="' . esc_attr( $embedcode ) . '" readonly />';
 				$player_html .= '</div>';
 			}
 
@@ -580,13 +600,17 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 			$player_html .= '</div>';
 		}
 		
-		if ( isset( $settings['cookie_consent'] ) ) { // Cookie Consent
-			$player_html .= sprintf(
-				'<div class="aiovg-privacy-wrapper" data-poster="%s"><div class="aiovg-privacy-consent-block"><div class="aiovg-privacy-consent-message">%s</div><button type="button" class="aiovg-privacy-consent-button">%s</button></div></div>',
-				( isset( $attributes['data-poster'] ) ? esc_url( $attributes['data-poster'] ) : '' ),
-				wp_kses_post( trim( $privacy_settings['consent_message'] ) ),
-				esc_html( $privacy_settings['consent_button_label'] )
-			);
+		if ( isset( $settings['cookie_consent'] ) && empty( $email_capture_settings['pre_roll'] ) ) { // Cookie Consent
+			$player_html .= $this->get_cookie_consent_html();
+		}
+
+		if ( ! empty( $settings['email_capture'] ) ) { // Email Capture
+			$video_url = '';
+			if ( 'aiovg_videos' != $this->post_type && empty( $this->post_id ) && ! empty( $sources ) ) {
+				$video_url = reset( $sources )['src'];
+			}
+
+			$player_html .= $this->get_email_capture_html( $video_url );
 		}
 
 		// Return			
@@ -597,9 +621,12 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 
 		$attributes = array(			
 			'class' => 'aiovg-player aiovg-player-element aiovg-player-theme-' . sanitize_text_field( $player_settings['theme'] ),
-			'style' => 'padding-bottom: ' . (float) $player_settings['ratio'] . '%;',
-			'reference_id' => $this->reference_id
+			'style' => 'padding-bottom: ' . (float) $player_settings['ratio'] . '%;'
 		);		
+
+		if ( $this->is_trailer ) {
+			$attributes['class'] .= ' aiovg-is-trailer';
+		}
 
 		if ( ! empty( $player_settings['hide_youtube_logo'] ) ) { // Hide YouTube Logo
 			$attributes['class'] .= ' aiovg-hide-youtube-logo';
@@ -608,6 +635,13 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 		if ( isset( $settings['cookie_consent'] ) ) {
 			$attributes['cookieconsent'] = '';
 		}
+
+		if ( isset( $settings['email_capture'] ) ) {
+			$attributes['emailcapture'] = '';
+		}
+
+		$attributes['data-id']     = 'aiovg-player-' . $this->player_uid;
+		$attributes['data-params'] = esc_attr( wp_json_encode( $settings ) );
 
 		$html .= sprintf( 
 			'<aiovg-video %s>%s</aiovg-video>',
@@ -631,56 +665,7 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 			return $this->videos;
 		}
 
-		$player_settings = $this->get_player_settings();
-		$videos = parent::get_videos();
-
-		// Force native embed when applicable
-		if ( ! empty( $videos['mp4'] ) ) {
-			$use_native_controls = apply_filters( 'aiovg_use_native_controls', isset( $player_settings['use_native_controls']['bunny_stream'] ), 'bunny_stream' );
-			if ( $use_native_controls ) {
-				$video_id = get_post_meta( $this->post_id, 'bunny_stream_video_id', true );
-				if ( ! empty( $video_id ) && strpos( $videos['mp4'], '/' . $video_id . '/' ) !== false ) {
-					$embed_url = aiovg_get_bunny_stream_embed_url( $videos['mp4'], $video_id );
-					if ( ! empty( $embed_url ) ) {
-						$videos['iframe'] = $this->filter_bunny_stream_embed_url( $embed_url );
-					}
-				}
-			}
-		}
-
-		if ( ! empty( $videos['youtube'] ) ) {
-			$use_native_controls = apply_filters( 'aiovg_use_native_controls', isset( $player_settings['use_native_controls']['youtube'] ), 'youtube' );
-			if ( $use_native_controls ) {
-				$videos['iframe'] = $this->get_youtube_embed_url( $videos['youtube'] );
-			}
-		}
-
-		if ( ! empty( $videos['vimeo'] ) ) {
-			$use_native_controls = apply_filters( 'aiovg_use_native_controls', isset( $player_settings['use_native_controls']['vimeo'] ), 'vimeo' );
-			if ( $use_native_controls ) {
-				$videos['iframe'] = $this->get_vimeo_embed_url( $videos['vimeo'] );
-			}
-		}
-
-		if ( ! empty( $videos['dailymotion'] ) ) {
-			$videos['iframe'] = $this->get_dailymotion_embed_url( $videos['dailymotion'] );
-		}
-
-		if ( ! empty( $videos['rumble'] ) ) {
-			$videos['iframe'] = $this->get_rumble_embed_url( $videos['rumble'] );
-		}
-
-		if ( ! empty( $videos['facebook'] ) ) {
-			$videos['iframe'] = $this->get_facebook_embed_url( $videos['facebook'] );
-		}
-
-		// Set embed URL if available
-		if ( isset( $videos['iframe'] ) ) {
-			$this->embed_url = $videos['iframe'];
-		}
-
-		// Output
-		$this->videos = $videos;
+		$this->videos = $this->resolve_provider_iframes( parent::get_videos() );
 		return $this->videos;
 	}
 		

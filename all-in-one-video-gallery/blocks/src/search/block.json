@@ -1,8 +1,8 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "aiovg/search",
-	"version": "4.3.7",
+	"version": "4.7.6",
 	"title": "AIOVG - Search Form",
 	"category": "all-in-one-video-gallery",
 	"attributes": {
@@ -37,11 +37,18 @@
 		"target": {
 			"type": "string",
 			"default": "default"
+		},
+		"style": {
+			"type": "object"
 		}
 	},
 	"keywords": [ "search", "videos", "all-in-one-video-gallery", "aiovg" ],
 	"icon": "search",
 	"description": "A videos search form for your site.",
 	"textdomain": "all-in-one-video-gallery",
-	"editorScript": "file:./index.js"
+	"editorScript": "file:./index.js",
+	"supports": {
+		"customClassName": true,
+		"css": true
+	}
 }

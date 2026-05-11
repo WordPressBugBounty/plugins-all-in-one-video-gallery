@@ -21,13 +21,24 @@
         <custom-field action="copy-once">embedcode</custom-field>
         <custom-field action="copy-once">image</custom-field>
         <custom-field action="copy-once">image_id</custom-field>
+        <custom-field action="translate">image_alt</custom-field>
         <custom-field action="copy-once">set_featured_image</custom-field>
         <custom-field action="copy-once">duration</custom-field>
         <custom-field action="copy-once">views</custom-field>
+        <custom-field action="copy-once">likes</custom-field>
+        <custom-field action="copy-once">dislikes</custom-field>
         <custom-field action="copy-once">download</custom-field>
         <custom-field action="copy-once">track</custom-field>
         <custom-field action="copy-once">chapter</custom-field>
-        <custom-field action="copy-once">featured</custom-field>         
+        <custom-field action="copy-once">featured</custom-field>
+        <custom-field action="copy-once">email_capture</custom-field>
+        <custom-field action="copy-once">access_control</custom-field>
+        <custom-field action="copy-once">restricted_roles</custom-field>
+        <custom-field action="copy-once">trailer_type</custom-field>
+        <custom-field action="copy-once">trailer_src</custom-field>
+        <custom-field action="copy-once">trailer_src_id</custom-field>
+        <custom-field action="copy-once">bunny_stream_video_id</custom-field>
+        <custom-field action="copy-once">trailer_bunny_stream_video_id</custom-field>
     </custom-fields>
     <custom-term-fields>
         <custom-term-field action="copy-once">image</custom-term-field>
@@ -43,9 +54,20 @@
             <key name="logo_link"/>
             <key name="copyright_text"/>
         </key>
+        <key name="aiovg_email_capture_settings">
+            <key name="header_text"/>
+            <key name="button_label"/>
+            <key name="skip_text"/>
+            <key name="footer_text"/>
+        </key>
         <key name="aiovg_restrictions_settings">
             <key name="restricted_message"/>
             <key name="restricted_label_text"/>
+        </key>
+        <key name="aiovg_trailer_settings">
+            <key name="player_overlay_text"/>
+            <key name="player_overlay_link"/>
+            <key name="trailer_label_text"/>
         </key>
         <key name="aiovg_privacy_settings">
             <key name="consent_message"/>
@@ -58,7 +80,7 @@
             <key name="subject"/>
             <key name="body"/>
         </key>
-        <key name="aiovg_email_video_published_settings">            
+        <key name="aiovg_email_video_published_settings">
             <key name="subject"/>
             <key name="body"/>
         </key>

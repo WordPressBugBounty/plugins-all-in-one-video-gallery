@@ -94,6 +94,10 @@ registerBlockType( metadata.name, {
 		download: {
 			type: 'boolean',
 			default: aiovg_blocks.video.download
+		},
+		email_capture: {
+			type: 'boolean',
+			default: aiovg_blocks.video.email_capture
 		}
 	},
 

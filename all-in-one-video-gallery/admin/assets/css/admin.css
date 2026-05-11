@@ -79,50 +79,46 @@
 }
 
 /* Block Editor */
-.aiovg-block-panel .components-panel__row .aiovg-no-margin {
+.block-editor .aiovg-block-panel .components-panel__row .aiovg-no-margin {
 	margin: 0;
 }
 
-.aiovg-block-panel .components-panel__row .components-base-control {
+.block-editor .aiovg-block-panel .components-panel__row label {
+	text-transform: capitalize;
+	line-height: 1.6;
+	font-size: 13px;
+    font-weight: normal;    
+}
+
+.block-editor .aiovg-block-panel .components-panel__row .components-base-control {
 	width: 100%;
 }
 
-.aiovg-block-panel .components-panel__row .components-range-control__wrapper {
+.block-editor .aiovg-block-panel .components-panel__row .components-range-control__wrapper {
     flex: 1 1 100%;
 }
 
-.aiovg-block-panel .components-panel__row .block-editor-panel-color-gradient-settings {	
+.block-editor .aiovg-block-panel .components-panel__row .block-editor-panel-color-gradient-settings {	
 	padding-left: 0;
 	padding-right: 0;
 	width: 100%;
 }
 
-.aiovg-block-panel .aiovg-block-multiselect:empty {
+.block-editor .aiovg-block-panel .components-panel__row .block-editor-tools-panel-color-gradient-settings__item {	
+	margin-top: 18px;
+}
+
+.block-editor .aiovg-block-panel .aiovg-block-multiselect:empty {
 	display: none;
 }
 
-.aiovg-block-panel .aiovg-block-multiselect select.components-select-control__input {	
+.block-editor .aiovg-block-panel .aiovg-block-multiselect select.components-select-control__input {	
 	padding-right: 8px;
 	height: 75px;
 	overflow-y: auto;
 }
 
-.aiovg-block-panel .aiovg-block-multiselect .components-input-control__suffix {
-	display: none;
-}
-
-.wp-block-aiovg-categories .components-spinner,
-.wp-block-aiovg-search .components-spinner,
-.wp-block-aiovg-videos .components-spinner,
-.wp-block-aiovg-video .components-spinner {
-	display: flex;
-	align-items: center;
-	width: 100%;
-}
-
-.wp-block-aiovg-categories .components-placeholder,
-.wp-block-aiovg-search .components-placeholder,
-.wp-block-aiovg-videos .components-placeholder {
+.block-editor .aiovg-block-panel .aiovg-block-multiselect .components-input-control__suffix {
 	display: none;
 }
 
@@ -245,6 +241,10 @@
 	border: none;
 }
 
+.aiovg .aiovg-align-top {
+	vertical-align: top;
+}
+
 .aiovg .aiovg-text-left {
 	text-align: left;
 }
@@ -342,8 +342,8 @@
 }
 
 .aiovg-metabox-ui .aiovg-tab.aiovg-active {	
-	border-color: #2271b1;
-	color: #2271b1;
+	border-color: var(--wp-admin-theme-color, #2271b1);
+	color: var(--wp-admin-theme-color, #2271b1);
 }
 
 .aiovg-metabox-ui .aiovg-accordion {
@@ -364,7 +364,7 @@
 	cursor: pointer;
 	padding: 1em;
 	width: 100%;
-	color: #2271b1;
+	color: var(--wp-admin-theme-color, #2271b1);
 	font-size: 1.1em;
 	font-weight: 500;	
 }
@@ -710,7 +710,7 @@
 .aiovg .aiovg-sort-handle {
 	cursor: move;
 	text-align: center;
-	color: #2271b1;
+	color: var(--wp-admin-theme-color, #2271b1);
 }
 
 @media screen and (max-width: 782px) {
@@ -786,9 +786,9 @@
 }
 
 .driver-popover.driverjs-theme .driver-popover-navigation-btns button {	
-	border: 1px solid #2271b1;
+	border: 1px solid var(--wp-admin-theme-color, #2271b1);
 	background-color: #f6f7f7;
-	color: #2271b1;	
+	color: var(--wp-admin-theme-color, #2271b1);	
 	text-shadow: none;
 }
 
@@ -818,6 +818,10 @@
 	align-items: center;
 	justify-content: center;
 	gap: 8px;
+}
+
+#aiovg-dashboard .button-hero .dashicons {
+	line-height: 1;
 }
 
 #aiovg-dashboard .aiovg-right-col .about-description {
@@ -1017,6 +1021,18 @@
 	background-color: #f0f0f0;
 }
 
+.post-type-aiovg_videos .wp-list-table .column-post_meta ul {
+	margin: 0;
+}
+
+.post-type-aiovg_videos .wp-list-table .column-post_meta li {
+	margin-bottom: 4px;
+}
+
+.post-type-aiovg_videos .wp-list-table .column-post_meta li .aiovg-meta-value {
+	color: var(--wp-admin-theme-color, #2271b1);
+}
+
 .post-type-aiovg_videos .wp-list-table .column-posts,
 .post-type-aiovg_videos .wp-list-table .column-tax_id {
 	width: 100px;
@@ -1068,7 +1084,7 @@
 	pointer-events: none;
 }
 
-#aiovg-bunny-stream-upload-button {
+.aiovg-media-uploader .aiovg-bunny-stream-upload-button {
 	display: flex;
 	align-items: center;
 	gap: 0.25em;
@@ -1078,30 +1094,34 @@
 	color: #fff;
 }
 
-#aiovg-bunny-stream-upload-button:hover {
+.aiovg-media-uploader .aiovg-bunny-stream-upload-button:hover,
+.aiovg-media-uploader .aiovg-bunny-stream-upload-button:focus {
 	background: linear-gradient( 53.28deg,#ffaf48 35.53%,#ff7854 79.13% );
+	color: #fff;
 }
 
-#aiovg-bunny-stream-upload-button:focus {
-	box-shadow: none;
+.aiovg-media-uploader .aiovg-bunny-stream-upload-button:focus {
+	border-color: #ff7854;
+	box-shadow: 0 0 0 1px #ff7854;
 }
 
-.aiovg-uploading #aiovg-bunny-stream-upload-button .dashicons,
-.aiovg-uploading #aiovg-bunny-stream-upload-button .dashicons:before {
+.aiovg-uploading .aiovg-bunny-stream-upload-button .dashicons,
+.aiovg-uploading .aiovg-bunny-stream-upload-button .dashicons:before {
 	width: 16px;
 	height: 16px;
 	font-size: 16px;
 }
 
-.aiovg-uploading #aiovg-bunny-stream-upload-button .dashicons {
-	animation: aiovg-rotate 1s linear infinite;	
+.aiovg-uploading .aiovg-bunny-stream-upload-button .dashicons {
+	animation: aiovg-rotate 1s linear infinite;
 }
 
-.aiovg-uploading #aiovg-bunny-stream-upload-button .dashicons:before {
+.aiovg-uploading .aiovg-bunny-stream-upload-button .dashicons:before {
 	content: "\f531";
 }
 
 #aiovg-field-mp4:not(.aiovg-is-bunny-stream) .aiovg-upload-status,
+#aiovg-field-trailer-src:not(.aiovg-is-bunny-stream) .aiovg-upload-status,
 .aiovg-is-bunny-stream .aiovg-upload-status:empty {
 	display: none;
 }
@@ -1181,10 +1201,6 @@
 
 #aiovg-settings .submit {
 	margin-top: 0;
-}
-
-#aiovg-player-settings.aiovg-player-videojs tr.theme_color {
-	display: none;
 }
 
 #aiovg-categories-settings.aiovg-template-grid tr.hierarchical {
@@ -1371,17 +1387,25 @@
 	}
 }
 
+/* Flatpickr */
+.video-gallery_page_aiovg_import_export .flatpickr-current-month {
+	padding-top: 0;
+}
+
 /*----------------------------------------------------------------------------------------------
  *
  *	Widgets
  *
  *--------------------------------------------------------------------------------------------*/
 .aiovg-widget-form details {
-	border-radius: 0;
+	outline: 1px solid #bbb;
+	border: 0;
+	border-radius: 2px;
 }
 
 .aiovg-widget-form details summary {
 	background-color: #f0f0f0;
+	font-size: 14px;
 }
 
 .aiovg-widget-section-header {
@@ -1402,6 +1426,12 @@
 	display: flex;
 	flex-direction: column;
 	gap: 0.25em;
+}
+
+.aiovg-widget-field-header {
+	border-radius: 3px;
+    background: #f0f0f0;
+    padding: 1em;
 }
 
 .aiovg-widget-form label {
@@ -1453,5 +1483,5 @@
 }
 
 .aiovg-widget-form-video .aiovg-autocomplete-result .dashicons-yes-alt {
-	color: green;
+	color: var(--wp-admin-theme-color, green);
 }

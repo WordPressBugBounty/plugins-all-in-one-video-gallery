@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Video Metabox: "Restrictions" tab.
+ * Video Metabox: [Tab: Access Control] "Restrictions" accordion.
  *
  * @link    https://plugins360.com
  * @since   3.9.6
@@ -10,12 +10,12 @@
  */
 
 $access_control   = isset( $post_meta['access_control'] ) ? $post_meta['access_control'][0] : -1;
-$restricted_roles = isset( $post_meta['restricted_roles'] ) ? $post_meta['restricted_roles'][0] : array();
+$restricted_roles = isset( $post_meta['restricted_roles'] ) ? maybe_unserialize( $post_meta['restricted_roles'][0] ) : array();
 ?>
 
 <div class="aiovg-form-controls">
 	<div id="aiovg-field-access_control" class="aiovg-form-control">
-		<label for="aiovg-access_control" class="aiovg-form-label"><?php esc_html_e( 'Who Can Access this Video?', 'all-in-one-video-gallery' ); ?></label>
+		<label for="aiovg-access_control" class="aiovg-form-label"><?php esc_html_e( 'Access Control', 'all-in-one-video-gallery' ); ?></label>
 		
 		<select name="access_control" id="aiovg-access_control" class="widefat">
 			<?php 
@@ -36,10 +36,14 @@ $restricted_roles = isset( $post_meta['restricted_roles'] ) ? $post_meta['restri
 			}
 			?>
 		</select>
+
+		<p class="description">
+			<?php esc_html_e( 'Select who can access this video.', 'all-in-one-video-gallery' ); ?>
+		</p>
 	</div>
 
 	<div id="aiovg-field-restricted_roles" class="aiovg-form-control"<?php if ( $access_control != 2 ) { echo ' style="display: none";'; } ?>>
-		<label class="aiovg-form-label"><?php esc_html_e( 'Select User Roles Allowed to Access this Video', 'all-in-one-video-gallery' ); ?></label>
+		<label class="aiovg-form-label"><?php esc_html_e( 'Allowed User Roles', 'all-in-one-video-gallery' ); ?></label>
 	
 		<ul class="aiovg-checklist widefat">
 			<?php

@@ -117,6 +117,7 @@ function aiovg_get_player_page_url( $post_id = 0, $atts = array() ) {
 				case 'embed':
 				case 'download':
 				case 'cc_load_policy':
+				case 'email_capture':
 					$query_args[ $key ] = (int) $atts[ $key ];
 					break;
 			}

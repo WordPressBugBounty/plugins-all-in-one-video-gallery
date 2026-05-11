@@ -9,14 +9,14 @@
  * @package All_In_One_Video_Gallery
  */
 
-$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
+$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
+$restrictions_settings  = aiovg_get_option( 'aiovg_restrictions_settings' );
 ?>
-
 <div id="aiovg-import-export" class="aiovg aiovg-import-export">
     <div class="aiovg-container">
         <div class="aiovg-header">
             <h1><?php esc_html_e( 'Bulk Import / Export', 'all-in-one-video-gallery' ); ?></h1>
-            <p><?php esc_html_e( 'Quickly import videos in bulk from folders, CSV files, YouTube, or Vimeo—and export your existing videos to a CSV file.', 'all-in-one-video-gallery' ); ?></p>
+            <p><?php esc_html_e( 'Quickly import videos in bulk from folders, CSV files, YouTube, or Vimeo—and export your existing videos or email leads to a CSV file.', 'all-in-one-video-gallery' ); ?></p>
         </div>
 
         <div class="aiovg-body">
@@ -220,11 +220,42 @@ $restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
                                 </p>
                             </div>
                             
+                            <?php if ( ! empty( $email_capture_settings['enable_email_capture'] ) ) : ?>
+                                <!-- Field: Email Capture -->
+                                <div id="aiovg-field-email_capture" class="aiovg-form-control">
+                                    <label for="aiovg-email_capture" class="aiovg-form-label">
+                                        <?php esc_html_e( 'Email & Lead Capture', 'all-in-one-video-gallery' ); ?>
+                                    </label>
+
+                                    <select name="email_capture" id="aiovg-email_capture" class="widefat">
+                                        <?php
+                                        $options = array(
+                                            -1 => '— ' . __( 'Global', 'all-in-one-video-gallery' ) . ' —',
+                                            1  => __( 'Enable', 'all-in-one-video-gallery' ),
+                                            0  => __( 'Disable', 'all-in-one-video-gallery' ),
+                                        );
+
+                                        foreach ( $options as $key => $label ) {
+                                            printf(
+                                                '<option value="%s">%s</option>',
+                                                esc_attr( $key ),
+                                                esc_html( $label )
+                                            );
+                                        }
+                                        ?>
+                                    </select>
+
+                                    <p class="description">
+                                        <?php esc_html_e( 'Show an email collection form on the imported videos to capture leads.', 'all-in-one-video-gallery' ); ?>
+                                    </p>
+                                </div>
+                            <?php endif; ?>
+
                             <?php if ( ! empty( $restrictions_settings['enable_restrictions'] ) ) : ?>
-                                <!-- Field: Restrict Video Access -->
+                                <!-- Field: Access Control -->
                                 <div id="aiovg-field-access_control" class="aiovg-form-control">
                                     <label for="aiovg-access_control" class="aiovg-form-label">
-                                        <?php esc_html_e( 'Restrict Video Access', 'all-in-one-video-gallery' ); ?>
+                                        <?php esc_html_e( 'Access Control', 'all-in-one-video-gallery' ); ?>
                                     </label>
 
                                     <select name="access_control" id="aiovg-access_control" class="widefat">
@@ -272,7 +303,7 @@ $restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
                                     </ul>
 
                                     <p class="description">
-                                        <?php esc_html_e( 'Select the user roles allowed to access the imported videos. Users with editing permissions always have access.', 'all-in-one-video-gallery' ); ?>
+                                        <?php esc_html_e( 'If no roles are selected, the global setting will be used. Users with editing permissions will always have access, regardless of role selection.', 'all-in-one-video-gallery' ); ?>
                                     </p>
                                 </div>
                             <?php endif; ?>
@@ -463,7 +494,7 @@ $restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
 
             <!-- Export Videos to a CSV or Zip file -->
             <details id="aiovg-export-videos">
-                <summary>
+				<summary>
 					<span class="dashicons dashicons-external"></span>
                     <span class="aiovg-summary-text">
 					    <?php esc_html_e( 'Export Videos', 'all-in-one-video-gallery' ); ?>
@@ -495,6 +526,60 @@ $restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
                     </div>
                 </div>
             </details>
+
+            <?php if ( ! empty( $email_capture_settings['enable_email_capture'] ) ) : ?>
+                <!-- Export email leads to a CSV file -->
+                <details id="aiovg-export-email-leads">
+                    <summary>
+                        <span class="dashicons dashicons-email"></span>
+                        <span class="aiovg-summary-text">
+                            <?php esc_html_e( 'Export Email Leads', 'all-in-one-video-gallery' ); ?>
+                        </span>
+                    </summary>
+
+                    <div class="aiovg-details-content">
+                        <form id="aiovg-form-export-email-leads" novalidate>
+                            <div class="aiovg-form-controls">
+                                <p class="description">
+                                    <?php esc_html_e( 'Download a CSV file of the email leads captured from your videos. Use the date range filter to narrow the export.', 'all-in-one-video-gallery' ); ?>
+                                </p>
+
+                                <div class="aiovg-form-grid">
+                                    <!-- Field: Date From -->
+                                    <div class="aiovg-form-control">
+                                        <label for="aiovg-email-date-from" class="aiovg-form-label">
+                                            <?php esc_html_e( 'Start Date', 'all-in-one-video-gallery' ); ?>
+                                        </label>
+                                        <input type="text" name="date_from" id="aiovg-email-date-from" class="aiovg-date-picker widefat" placeholder="YYYY-MM-DD" />
+                                    </div>
+
+                                    <!-- Field: Date To -->
+                                    <div class="aiovg-form-control">
+                                        <label for="aiovg-email-date-to" class="aiovg-form-label">
+                                            <?php esc_html_e( 'End Date', 'all-in-one-video-gallery' ); ?>
+                                        </label>
+                                        <input type="text" name="date_to" id="aiovg-email-date-to" class="aiovg-date-picker widefat" placeholder="YYYY-MM-DD" />
+                                    </div>
+                                </div>
+
+                                <!-- Form Actions -->
+                                <div class="aiovg-form-action">
+                                    <button type="button" class="aiovg-export-email-leads button button-primary button-hero">
+                                        <?php esc_html_e( 'Export CSV', 'all-in-one-video-gallery' ); ?>
+                                    </button>
+
+                                    <p class="description">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="20" height="20" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="aiovg-align-top">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                                        </svg>
+                                        <?php esc_html_e( 'We recommend validating your exported emails with a verification service before importing them into your email marketing platform.', 'all-in-one-video-gallery' ); ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </details>
+            <?php endif; ?>
         </div>
     </div>
 </div>

@@ -9,9 +9,13 @@
  * @package All_In_One_Video_Gallery
  */
 
-$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
+$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
+$restrictions_settings  = aiovg_get_option( 'aiovg_restrictions_settings' );
+$trailer_settings       = aiovg_get_option( 'aiovg_trailer_settings' );
 
 $type = isset( $post_meta['type'] ) ? $post_meta['type'][0] : 'default';
+
+$show_access_control_tab = ! empty( $restrictions_settings['enable_restrictions'] ) || ! empty( $trailer_settings['enable_trailers'] );
 ?>
 
 <div class="aiovg aiovg-metabox-ui">
@@ -36,12 +40,22 @@ $type = isset( $post_meta['type'] ) ? $post_meta['type'][0] : 'default';
 			</svg>
 			<?php esc_html_e( 'Chapters', 'all-in-one-video-gallery' ); ?>
 		</button>
-		<?php if ( ! empty( $restrictions_settings['enable_restrictions'] ) ) : ?>
-			<button type="button" class="aiovg-tab" data-target="#aiovg-tab-content-restrictions">
+
+		<?php if ( ! empty( $email_capture_settings['enable_email_capture'] ) ) : ?>
+			<button type="button" class="aiovg-tab" data-target="#aiovg-tab-content-email-capture">
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="20" height="20" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+				</svg>
+				<?php esc_html_e( 'Email & Lead Capture', 'all-in-one-video-gallery' ); ?>
+			</button>
+		<?php endif; ?>
+
+		<?php if ( $show_access_control_tab ) : ?>
+			<button type="button" class="aiovg-tab" data-target="#aiovg-tab-content-access-control">
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="20" height="20" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
 				</svg>
-				<?php esc_html_e( 'Restrictions', 'all-in-one-video-gallery' ); ?>
+				<?php esc_html_e( 'Access Control', 'all-in-one-video-gallery' ); ?>
 			</button>
 		<?php endif; ?>
 	</div>
@@ -54,14 +68,14 @@ $type = isset( $post_meta['type'] ) ? $post_meta['type'][0] : 'default';
 				<div id="aiovg-field-type" class="aiovg-form-control">
 					<label for="aiovg-video-type" class="aiovg-form-label"><?php esc_html_e( 'Source Type', 'all-in-one-video-gallery' ); ?></label>
 					<select name="type" id="aiovg-video-type" class="widefat">
-						<?php 
+						<?php
 						$options = aiovg_get_video_source_types( true );
 
 						foreach ( $options as $key => $label ) {
-							printf( 
-								'<option value="%s"%s>%s</option>', 
-								esc_attr( $key ), 
-								selected( $key, $type, false ), 
+							printf(
+								'<option value="%s"%s>%s</option>',
+								esc_attr( $key ),
+								selected( $key, $type, false ),
 								esc_html( $label )
 							);
 						}
@@ -118,15 +132,48 @@ $type = isset( $post_meta['type'] ) ? $post_meta['type'][0] : 'default';
 		</div>
 	</div>
 
-	<?php if ( ! empty( $restrictions_settings['enable_restrictions'] ) ) : ?>
-		<!-- Tab Content: Restrictions -->
-		<div id="aiovg-tab-content-restrictions" class="aiovg-tab-content" style="display: none;">
+	<?php if ( ! empty( $email_capture_settings['enable_email_capture'] ) ) : ?>
+		<!-- Tab Content: Email Capture -->
+		<div id="aiovg-tab-content-email-capture" class="aiovg-tab-content" style="display: none;">
 			<div class="aiovg-accordion" data-collapsible="false">
 				<div class="aiovg-accordion-body">
-					<?php wp_nonce_field( 'aiovg_save_video_restrictions', 'aiovg_video_restrictions_nonce' ); // Nonce ?>
-					<?php require_once AIOVG_PLUGIN_DIR . 'admin/partials/video-restrictions.php'; ?>
+					<?php wp_nonce_field( 'aiovg_save_video_email_capture', 'aiovg_video_email_capture_nonce' ); // Nonce ?>
+					<?php require_once AIOVG_PLUGIN_DIR . 'admin/partials/video-email-capture.php'; ?>
 				</div>
 			</div>
+		</div>
+	<?php endif; ?>
+
+	<?php if ( $show_access_control_tab ) : ?>
+		<!-- Tab Content: Access Control -->
+		<div id="aiovg-tab-content-access-control" class="aiovg-tab-content" style="display: none;">
+			<?php if ( ! empty( $restrictions_settings['enable_restrictions'] ) ) : ?>
+				<!-- Accordion: Restrictions -->
+				<div class="aiovg-accordion" data-collapsible="false">
+					<div class="aiovg-accordion-body">
+						<?php wp_nonce_field( 'aiovg_save_video_restrictions', 'aiovg_video_restrictions_nonce' ); // Nonce ?>
+						<?php require_once AIOVG_PLUGIN_DIR . 'admin/partials/video-restrictions.php'; ?>
+					</div>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $trailer_settings['enable_trailers'] ) ) : ?>
+				<!-- Accordion: Trailer / Teaser -->
+				<div class="aiovg-accordion" data-collapsible="true">
+					<button type="button" class="aiovg-accordion-header aiovg-open">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="20" height="20" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+							<path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" />
+						</svg>
+						<?php esc_html_e( 'Trailer / Teaser', 'all-in-one-video-gallery' ); ?>
+						<span class="dashicons dashicons-arrow-down-alt2"></span>
+					</button>
+					<div class="aiovg-accordion-body" style="display: block;">
+						<?php wp_nonce_field( 'aiovg_save_video_trailer', 'aiovg_video_trailer_nonce' ); // Nonce ?>
+						<?php require_once AIOVG_PLUGIN_DIR . 'admin/partials/video-trailer.php'; ?>
+					</div>
+				</div>
+			<?php endif; ?>
 		</div>
 	<?php endif; ?>
 

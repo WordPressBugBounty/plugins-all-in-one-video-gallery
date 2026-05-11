@@ -9,10 +9,12 @@
  * @package All_In_One_Video_Gallery
  */
  
-$player_settings  = aiovg_get_option( 'aiovg_player_settings' );
-$privacy_settings = aiovg_get_option( 'aiovg_privacy_settings' );
-$brand_settings   = aiovg_get_option( 'aiovg_brand_settings' );
-$general_settings = aiovg_get_option( 'aiovg_general_settings' );
+$player_settings        = aiovg_get_option( 'aiovg_player_settings' );
+$brand_settings         = aiovg_get_option( 'aiovg_brand_settings' );
+$trailer_settings       = aiovg_get_option( 'aiovg_trailer_settings' );
+$privacy_settings       = aiovg_get_option( 'aiovg_privacy_settings' );
+$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
+$general_settings       = aiovg_get_option( 'aiovg_general_settings' );
 
 $post_id    = (int) get_query_var( 'aiovg_video', 0 );
 $post_type  = 'page';
@@ -20,8 +22,10 @@ $post_title = '';
 $post_url   = '';
 $post_meta  = array();
 $embed_url  = '';
+$is_trailer = false;
 
 $player_template = ( 'vidstack' == $player_settings['player'] ) ? 'vidstack' : 'videojs';
+$primary_color   = ! empty( $general_settings['primary_color'] ) ? $general_settings['primary_color'] : '#3b82f6';
 
 $thirdparty_providers_with_api    = array( 'youtube', 'vimeo' );
 $thirdparty_providers_without_api = array( 'dailymotion', 'rumble', 'facebook' );
@@ -36,17 +40,89 @@ if ( $post_id > 0 ) {
 	if ( 'aiovg_videos' == $post_type ) {
 		$post_meta = get_post_meta( $post_id );		
 		
-		// Check if the current user has access to this video
-		if ( ! aiovg_current_user_can( 'play_aiovg_video', $post_id ) ) {
+		// Determine the video provider based on the post meta.
+		$current_video_provider = $post_meta['type'][0];
+
+		// Check if the user has access to this video.
+		$has_access = aiovg_current_user_can( 'play_aiovg_video', $post_id );
+
+		// If the user doesn't have access, check if there's a trailer configured and use that 
+		// for the player instead.
+		if ( ! $has_access && ! empty( $trailer_settings['enable_trailers'] ) ) {
+			$trailer_type = isset( $post_meta['trailer_type'] ) ? $post_meta['trailer_type'][0] : '';
+			$trailer_src  = isset( $post_meta['trailer_src'] ) ? $post_meta['trailer_src'][0] : '';
+
+			if ( ! empty( $trailer_src ) ) {
+				$is_trailer = true;
+				
+				if ( 'embedcode' == $trailer_type ) {
+					$post_meta['embedcode'] = array( $trailer_src );
+					$current_video_provider = 'embedcode';
+				} else {
+					// URL auto-detect: mirror the run_shortcode_video() detection chain.
+					if ( false !== strpos( $trailer_src, 'youtube.com' ) || false !== strpos( $trailer_src, 'youtu.be' ) ) {
+						$post_meta['youtube'] = array( aiovg_resolve_youtube_url( $trailer_src ) );
+						$current_video_provider = 'youtube';
+					} elseif ( false !== strpos( $trailer_src, 'vimeo.com' ) ) {
+						$post_meta['vimeo'] = array( $trailer_src );
+						$current_video_provider = 'vimeo';
+					} elseif ( false !== strpos( $trailer_src, 'dailymotion.com' ) ) {
+						$post_meta['dailymotion'] = array( $trailer_src );
+						$current_video_provider = 'dailymotion';
+					} elseif ( false !== strpos( $trailer_src, 'rumble.com' ) ) {
+						$post_meta['rumble'] = array( $trailer_src );
+						$current_video_provider = 'rumble';
+					} elseif ( false !== strpos( $trailer_src, 'facebook.com' ) ) {
+						$post_meta['facebook'] = array( $trailer_src );
+						$current_video_provider = 'facebook';
+					} else {
+						$current_video_provider = 'default';
+
+						$filetype = wp_check_filetype( $trailer_src );
+						
+						if ( 'webm' == $filetype['ext'] ) {
+							$post_meta['webm'] = array( $trailer_src );
+						} elseif ( 'ogv' == $filetype['ext'] ) {
+							$post_meta['ogv'] = array( $trailer_src );
+						} elseif ( 'm3u8' == $filetype['ext'] ) {
+							$post_meta['hls'] = array( $trailer_src );
+							$current_video_provider = 'adaptive';
+						} elseif ( 'mpd' == $filetype['ext'] ) {							
+							$post_meta['dash'] = array( $trailer_src );
+							$current_video_provider = 'adaptive';
+						} else {
+							$post_meta['mp4'] = array( $trailer_src );
+						}						
+
+						// Additionally check for Bunny Stream: inject GUID and force URL into mp4 so
+						// the native-controls detection block below activates correctly.
+						$trailer_video_id = isset( $post_meta['trailer_bunny_stream_video_id'] ) ? $post_meta['trailer_bunny_stream_video_id'][0] : '';
+						
+						if ( ! empty( $trailer_video_id ) ) {
+							// GUID stored when the trailer was uploaded via Bunny Stream.
+							$post_meta['bunny_stream_video_id'] = array( $trailer_video_id );
+							$post_meta['mp4'] = array( $trailer_src );
+							
+							$current_video_provider = 'default';
+						}
+					}
+				}
+
+				$post_meta['type'] = array( $current_video_provider );
+				$post_meta['sources'] = array();
+			}
+		}
+
+		// If the user doesn't have access and there's no trailer, load the restricted template and exit.
+		if ( ! $has_access && ! $is_trailer ) {
 			include apply_filters( 'aiovg_load_template', AIOVG_PLUGIN_DIR . 'public/templates/player-restricted.php' );
 			return false;
 		}
 	}
 }
 
+// Determine the player template to use based on the video provider and settings.
 if ( ! empty( $post_meta ) ) {
-	$current_video_provider = $post_meta['type'][0];
-
 	if ( in_array( $current_video_provider, $thirdparty_providers_with_api ) ) {
 		$use_native_controls = isset( $player_settings['use_native_controls'][ $current_video_provider ] );
 		$use_native_controls = apply_filters( 'aiovg_use_native_controls', $use_native_controls, $current_video_provider );
@@ -101,10 +177,34 @@ if ( ! empty( $post_meta ) ) {
 	}
 }
 
+// GDPR consent handling
 if ( ! isset( $_GET['nocookie'] ) ) {
-	if ( ! isset( $_COOKIE['aiovg_gdpr_consent'] ) && ! empty( $privacy_settings['show_consent'] ) && ! empty( $privacy_settings['consent_message'] ) && ! empty( $privacy_settings['consent_button_label'] ) ) {		
+	if ( ! isset( $_COOKIE['aiovg_gdpr_consent'] ) && ! isset( $_COOKIE['aiovg_email_captured'] ) && ! empty( $privacy_settings['show_consent'] ) && ! empty( $privacy_settings['consent_message'] ) && ! empty( $privacy_settings['consent_button_label'] ) ) {
 		if ( in_array( $current_video_provider, $thirdparty_providers_all ) || 'iframe' == $player_template ) {
 			$player_template = 'gdpr';
+		}
+	}
+}
+
+// Email capture handling
+if ( ! isset( $_GET['nocapture'] ) ) {
+	if ( ! empty( $email_capture_settings['enable_email_capture'] ) && ! empty( $email_capture_settings['pre_roll'] ) && ! is_user_logged_in() && ! isset( $_COOKIE['aiovg_email_captured'] ) ) {
+		$show_email_capture = 1;
+
+		if ( 'aiovg_videos' == $post_type && isset( $post_meta['email_capture'] ) ) {
+			$show_email_capture = (int) $post_meta['email_capture'][0];
+		}
+
+		if ( isset( $_GET['email_capture'] ) ) {
+			$show_email_capture = (int) $_GET['email_capture'];
+		}
+
+		if ( $show_email_capture === -1 ) { // Global
+			$show_email_capture = 1;
+		}
+
+		if ( ! empty( $show_email_capture ) ) {
+			$player_template = 'email-capture';
 		}
 	}
 }

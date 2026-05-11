@@ -77,7 +77,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 		playpause,
 		current,
 		progress,
-		duration,		
+		duration,
 		speed,
 		quality,
 		volume,
@@ -85,7 +85,8 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 		fullscreen,
 		share,
 		embed,
-		download
+		download,
+		email_capture
 	} = attributes;	
 
 	const [ temporaryURL, setTemporaryURL ] = useState( attributes.blob );
@@ -225,8 +226,8 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							help={ aiovg_blocks.i18n.width_help }
 							value={ width > 0 ? width : '' }
 							onChange={ ( value ) => setAttributes( { width: isNaN( value ) ? 0 : value } ) }
-							__nextHasNoMarginBottom
-            				__next40pxDefaultSize
+							__nextHasNoMarginBottom={ true }
+            				__next40pxDefaultSize={ true }
 						/>
 					</PanelRow>
 					
@@ -236,8 +237,8 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							help={ aiovg_blocks.i18n.ratio_help }
 							value={ ratio > 0 ? ratio : '' }
 							onChange={ ( value ) => setAttributes( { ratio: isNaN( value ) ? 0 : value } ) }
-							__nextHasNoMarginBottom
-            				__next40pxDefaultSize
+							__nextHasNoMarginBottom={ true }
+            				__next40pxDefaultSize={ true }
 						/>
 					</PanelRow>					
 
@@ -246,7 +247,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							label={ aiovg_blocks.i18n.autoplay }							
 							checked={ autoplay }
 							onChange={ () => setAttributes( { autoplay: ! autoplay } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -255,7 +256,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							label={ aiovg_blocks.i18n.loop }							
 							checked={ loop }
 							onChange={ () => setAttributes( { loop: ! loop } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -264,7 +265,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							label={ aiovg_blocks.i18n.muted }							
 							checked={ muted }
 							onChange={ () => setAttributes( { muted: ! muted } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -284,7 +285,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 											onClick={ open }
 											ref={ posterImageButton }
 											aria-describedby={ videoPosterDescription }
-            								__next40pxDefaultSize
+            								__next40pxDefaultSize={ true }
 										>
 											{ ! poster ? aiovg_blocks.i18n.select_image : aiovg_blocks.i18n.replace_image }
 										</Button>
@@ -297,7 +298,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 									<Button
 										variant="tertiary"
 										onClick={ onRemovePoster }
-           								__next40pxDefaultSize										
+           								__next40pxDefaultSize={ true }										
 									>
 										{ aiovg_blocks.i18n.remove_image }
 									</Button>
@@ -313,7 +314,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							label={ aiovg_blocks.i18n.play_pause }							
 							checked={ playpause }
 							onChange={ () => setAttributes( { playpause: ! playpause } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -322,7 +323,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							label={ aiovg_blocks.i18n.current_time }							
 							checked={ current }
 							onChange={ () => setAttributes( { current: ! current } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -331,7 +332,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							label={ aiovg_blocks.i18n.progressbar }							
 							checked={ progress }
 							onChange={ () => setAttributes( { progress: ! progress } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -340,7 +341,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							label={ aiovg_blocks.i18n.duration }							
 							checked={ duration }
 							onChange={ () => setAttributes( { duration: ! duration } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>					
 
@@ -349,7 +350,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							label={ aiovg_blocks.i18n.speed }							
 							checked={ speed }
 							onChange={ () => setAttributes( { speed: ! speed } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -358,7 +359,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							label={ aiovg_blocks.i18n.quality }							
 							checked={ quality }
 							onChange={ () => setAttributes( { quality: ! quality } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -367,7 +368,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							label={ aiovg_blocks.i18n.volume }							
 							checked={ volume }
 							onChange={ () => setAttributes( { volume: ! volume } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -376,7 +377,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							label={ aiovg_blocks.i18n.pip }							
 							checked={ pip }
 							onChange={ () => setAttributes( { pip: ! pip } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>	
 					</PanelRow>
 
@@ -385,7 +386,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							label={ aiovg_blocks.i18n.fullscreen }							
 							checked={ fullscreen }
 							onChange={ () => setAttributes( { fullscreen: ! fullscreen } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>	
 					</PanelRow>
 
@@ -394,7 +395,7 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							label={ aiovg_blocks.i18n.share }							
 							checked={ share }
 							onChange={ () => setAttributes( { share: ! share } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -403,19 +404,32 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 							label={ aiovg_blocks.i18n.embed }							
 							checked={ embed }
 							onChange={ () => setAttributes( { embed: ! embed } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
 					<PanelRow>
 						<ToggleControl
-							label={ aiovg_blocks.i18n.download }							
+							label={ aiovg_blocks.i18n.download }
 							checked={ download }
 							onChange={ () => setAttributes( { download: ! download } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
-					</PanelRow>	
-				</PanelBody>		
+					</PanelRow>
+				</PanelBody>
+
+				{ aiovg_blocks.video.email_capture_enabled && (
+					<PanelBody title={ aiovg_blocks.i18n.email_capture } className="aiovg-block-panel">
+						<PanelRow>
+							<ToggleControl
+								label={ aiovg_blocks.i18n.email_capture }
+								checked={ email_capture }
+								onChange={ () => setAttributes( { email_capture: ! email_capture } ) }
+								__nextHasNoMarginBottom={ true }
+							/>
+						</PanelRow>
+					</PanelBody>
+				) }
 			</InspectorControls>
 
 			<div { ...blockProps }>

@@ -58,7 +58,7 @@ class AIOVG_Public {
 					$current_url = ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
 					if ( untrailingslashit( $current_url ) !== untrailingslashit( $page_url ) ) {
-						wp_redirect( $page_url, 301 );
+						wp_safe_redirect( $page_url, 301 );
 						exit;
 					}
 				}
@@ -467,11 +467,35 @@ class AIOVG_Public {
 	}
 
 	/**
-	 * Enqueue Gutenberg block assets for backend editor.
+	 * Enqueue block assets inside the block editor (iframe).
 	 *
-	 * @since 3.6.1
+	 * Hooked to enqueue_block_assets with an is_admin() guard so styles and scripts
+	 * are injected inside the iframed block editor (WP 6.3+ / WP 7.0 always) only,
+	 * and not duplicated on the front end where wp_enqueue_scripts already handles them.
+	 *
+	 * @since 4.7.6
 	 */
-	public function enqueue_block_editor_assets() {
+	public function enqueue_block_assets() {
+		if ( ! is_admin() ) {
+			return;
+		}
+
+		$this->enqueue_editor_assets();
+		wp_add_inline_style( AIOVG_PLUGIN_SLUG . '-public', $this->get_inline_css() );
+	}
+
+	/**
+	 * Enqueue the plugin's public styles and scripts in any editor context.
+	 *
+	 * Called by enqueue_block_assets() (WordPress block editor, guarded by is_admin())
+	 * and hooked directly to Elementor actions so assets are also available in the
+	 * Elementor editor panel and its frontend live-preview iframe:
+	 *   - elementor/editor/after_enqueue_scripts  (admin context)
+	 *   - elementor/preview/enqueue_scripts       (frontend context, is_admin() = false)
+	 *
+	 * @since 4.7.6
+	 */
+	public function enqueue_editor_assets() {
 		// Styles
 		$this->register_styles();
 
@@ -480,6 +504,7 @@ class AIOVG_Public {
 		// Scripts
 		$this->register_scripts();
 		
+		wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-public' );
 		wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-likes' );
 	}
 
@@ -759,40 +784,53 @@ class AIOVG_Public {
 		}
 		
 		// Custom common CSS code
-		$player_settings  = aiovg_get_option( 'aiovg_player_settings' );
+		echo '<style type="text/css">' . $this->get_inline_css() . '</style>';
+	}
+
+	/**
+	 * Builds the common inline CSS string used in both wp_head and the block editor iframe.
+	 *
+	 * @since  4.7.6
+	 * @return string Unescaped CSS string.
+	 */
+	private function get_inline_css() {
 		$general_settings = aiovg_get_option( 'aiovg_general_settings' );
 
-		$player_theme_color = ! empty( $player_settings['theme_color'] ) ? $player_settings['theme_color'] : '#00b2ff';
+		$primary_color = ! empty( $general_settings['primary_color'] ) ? $general_settings['primary_color'] : '#3b82f6';
 
-		echo '<style type="text/css">
+		$css = '
+			body {
+				--aiovg-color-primary: ' . esc_attr( $primary_color ) . ';
+			}
+
 			.aiovg-player {
 				display: block;
 				position: relative;
 				border-radius: 3px;
 				padding-bottom: 56.25%;
 				width: 100%;
-				height: 0;	
+				height: 0;
 				overflow: hidden;
 			}
-			
+
 			.aiovg-player iframe,
 			.aiovg-player .video-js,
 			.aiovg-player .plyr {
-				--plyr-color-main: ' . esc_attr( $player_theme_color ) . ';
+				--plyr-color-main: ' . esc_attr( $primary_color ) . ';
 				position: absolute;
-				inset: 0;	
+				inset: 0;
 				margin: 0;
 				padding: 0;
 				width: 100%;
 				height: 100%;
 			}
-		</style>';
-		
+		';
+
 		if ( isset( $general_settings['custom_css'] ) && ! empty( $general_settings['custom_css'] ) ) {
-			echo '<style type="text/css">';
-			echo esc_html( $general_settings['custom_css'] );
-			echo '</style>';
+			$css .= wp_strip_all_tags( $general_settings['custom_css'] );
 		}
+
+		return $css;
 	}
 
 	/**
@@ -828,23 +866,20 @@ class AIOVG_Public {
 						}
 
 						if ( event.data.message == 'aiovg-cookie-consent' ) {
-							const src = iframe.src;
+							iframe.contentWindow.postMessage({
+								message: 'aiovg-cookie-consent'
+							}, window.location.origin );
+						}
 
-							if ( src.indexOf( 'nocookie=1' ) == -1 ) {
-								const url = new URL( src );
-
-								const searchParams = url.searchParams;
-								searchParams.set( 'nocookie', 1 );
-
-                    			url.search = searchParams.toString();
-
-								iframe.src = url.toString();
-							}
+						if ( event.data.message == 'aiovg-email-captured' ) {
+							iframe.contentWindow.postMessage({
+								message: 'aiovg-email-captured'
+							}, window.location.origin );
 						}
 
 						if ( event.data.message == 'aiovg-video-playing' ) {
 							iframe.contentWindow.postMessage({
-								message: 'aiovg-video-pause' 
+								message: 'aiovg-video-pause'
 							}, window.location.origin );
 						}
 					}
@@ -1090,10 +1125,124 @@ class AIOVG_Public {
 	 *
 	 * @since 1.0.0
 	 */
-	public function set_gdpr_cookie() {	
-		check_ajax_referer( 'aiovg_public_ajax_nonce', 'security' );	
-		setcookie( 'aiovg_gdpr_consent', 1, time() + ( 86400 * 30 ), COOKIEPATH, COOKIE_DOMAIN );		
-		wp_send_json_success();			
+	public function set_gdpr_cookie() {
+		check_ajax_referer( 'aiovg_public_ajax_nonce', 'security' );
+		setcookie( 'aiovg_gdpr_consent', 1, time() + ( 86400 * 30 ), COOKIEPATH, COOKIE_DOMAIN );
+		wp_send_json_success();
+	}
+
+	/**
+	 * Save the email lead and set the capture cookie.
+	 *
+	 * Handles the aiovg_save_email_lead AJAX action for both logged-out visitors
+	 * (wp_ajax_nopriv_) and logged-in users (wp_ajax_). Logged-in users are
+	 * rejected immediately so the form never fires for them.
+	 *
+	 * @since 4.7.6
+	 */
+	public function save_email_lead() {
+		check_ajax_referer( 'aiovg_public_ajax_nonce', 'security' );
+
+		// Logged-in users never see the form; reject any direct AJAX calls too.
+		if ( is_user_logged_in() ) {
+			wp_send_json_error();
+			return;
+		}
+
+		// Skip — only set the cookie; do not store a lead row.
+		if ( ! empty( $_POST['skipped'] ) ) {
+			setcookie( 'aiovg_email_captured', 1, time() + ( 86400 * 30 ), COOKIEPATH, COOKIE_DOMAIN );
+
+			if ( ! isset( $_COOKIE['aiovg_gdpr_consent'] ) ) {
+				setcookie( 'aiovg_gdpr_consent', 1, time() + ( 86400 * 30 ), COOKIEPATH, COOKIE_DOMAIN );
+			}
+
+			wp_send_json_success();
+			return;
+		}
+
+		// IP-based rate limiting — submission attempts only; skips are not counted.
+		// Filter: set to false to bypass entirely (e.g. for trusted environments or testing).
+		$rate_limit_enabled = apply_filters( 'aiovg_email_capture_rate_limit_enabled', true );
+
+		if ( $rate_limit_enabled ) {
+			$ip_hash          = wp_hash( isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : '' );
+			$rate_limit_key   = 'aiovg_email_capture_rate_limit_' . $ip_hash;
+			$rate_limit_count = (int) get_transient( $rate_limit_key );
+
+			// Filter: raise or lower the per-IP hourly submission limit.
+			$rate_limit = (int) apply_filters( 'aiovg_email_capture_rate_limit', 10 );
+
+			if ( $rate_limit_count >= $rate_limit ) {
+				wp_send_json_error( __( 'Too many attempts. Please try again in an hour.', 'all-in-one-video-gallery' ) );
+				return;
+			}
+
+			// Increment before further validation so probing attempts count against the limit.
+			set_transient( $rate_limit_key, $rate_limit_count + 1, HOUR_IN_SECONDS );
+		}
+
+		// Sanitize and validate email.
+		$email = isset( $_POST['email'] ) ? sanitize_email( $_POST['email'] ) : '';
+
+		if ( ! is_email( $email ) ) {
+			wp_send_json_error( __( 'Please enter a valid email address.', 'all-in-one-video-gallery' ) );
+			return;
+		}
+
+		// Sanitize optional fields.
+		$name      = isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : '';
+		$phone     = isset( $_POST['phone'] ) ? sanitize_text_field( $_POST['phone'] ) : '';
+		$video_id  = isset( $_POST['video_id'] ) ? absint( $_POST['video_id'] ) : 0;
+		$video_url = isset( $_POST['video_url'] ) ? esc_url_raw( $_POST['video_url'] ) : '';
+		$page_url  = isset( $_POST['page_url'] ) ? esc_url_raw( $_POST['page_url'] ) : '';
+
+		// Server-side blocked domain check.
+		$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
+
+		$blocked_domains = isset( $email_capture_settings['blocked_email_domains'] ) ? $email_capture_settings['blocked_email_domains'] : '';
+
+		if ( ! empty( $blocked_domains ) ) {
+			$parts        = explode( '@', $email );
+			$email_domain = strtolower( trim( end( $parts ) ) );
+			$lines        = explode( "\n", $blocked_domains );
+
+			foreach ( $lines as $line ) {
+				$line = strtolower( trim( $line ) );
+
+				if ( '' !== $line && $email_domain === $line ) {
+					// Reject silently — same response as any other server-side failure.
+					wp_send_json_error();
+					return;
+				}
+			}
+		}
+
+		// Insert the lead row.
+		$inserted = aiovg_email_capture_insert_lead(
+			array(
+				'email'     => $email,
+				'name'      => $name,
+				'phone'     => $phone,
+				'video_id'  => $video_id,
+				'video_url' => $video_url,
+				'page_url'  => $page_url
+			)
+		);
+
+		if ( false === $inserted ) {
+			wp_send_json_error();
+			return;
+		}
+
+		// Set cookies.
+		setcookie( 'aiovg_email_captured', 1, time() + ( 86400 * 30 ), COOKIEPATH, COOKIE_DOMAIN );
+
+		if ( ! isset( $_COOKIE['aiovg_gdpr_consent'] ) ) {
+			setcookie( 'aiovg_gdpr_consent', 1, time() + ( 86400 * 30 ), COOKIEPATH, COOKIE_DOMAIN );
+		}
+
+		wp_send_json_success();
 	}
 
 }

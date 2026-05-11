@@ -100,6 +100,8 @@ class AIOVG_Widget_Video extends WP_Widget {
 	 * @param array $old_instance The previous instance of values before the update.
 	 */
 	public function update( $new_instance, $old_instance ) {
+		$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
+
 		$instance = $old_instance;
 		
 		$instance['title']      = isset( $new_instance['title'] ) ? strip_tags( $new_instance['title'] ) : '';
@@ -123,7 +125,11 @@ class AIOVG_Widget_Video extends WP_Widget {
 		$instance['share']      = isset( $new_instance['share'] ) ? (int) $new_instance['share'] : 0;
 		$instance['embed']      = isset( $new_instance['embed'] ) ? (int) $new_instance['embed'] : 0;
 		$instance['download']   = isset( $new_instance['download'] ) ? (int) $new_instance['download'] : 0;
-		
+
+		if ( ! empty( $email_capture_settings['enable_email_capture'] ) ) {
+			$instance['email_capture'] = isset( $new_instance['email_capture'] ) ? (int) $new_instance['email_capture'] : 0;
+		}
+
 		return $instance;
 	}
 	
@@ -134,31 +140,33 @@ class AIOVG_Widget_Video extends WP_Widget {
 	 * @param array $instance The array of keys and values for the widget.
 	 */
 	public function form( $instance ) {
-		$player_settings = aiovg_get_option( 'aiovg_player_settings' );
-		
+		$player_settings        = aiovg_get_option( 'aiovg_player_settings' );
+		$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
+
 		// Define the array of defaults
 		$defaults = array(
-			'title'      => '',
-			'id'         => 0,
-			'width'      => $player_settings['width'],
-			'ratio'      => $player_settings['ratio'],
-			'autoplay'   => $player_settings['autoplay'],
-			'loop'       => $player_settings['loop'],
-			'muted'      => $player_settings['muted'],
-			'playpause'  => isset( $player_settings['controls']['playpause'] ) ? 1 : 0,
-			'current'    => isset( $player_settings['controls']['current'] ) ? 1 : 0,
-			'progress'   => isset( $player_settings['controls']['progress'] ) ? 1 : 0,
-			'duration'   => isset( $player_settings['controls']['duration'] ) ? 1 : 0,
-			'tracks'     => isset( $player_settings['controls']['tracks'] ) ? 1 : 0,
-			'chapters'   => isset( $player_settings['controls']['chapters'] ) ? 1 : 0,			
-			'speed'      => isset( $player_settings['controls']['speed'] ) ? 1 : 0,
-			'quality'    => isset( $player_settings['controls']['quality'] ) ? 1 : 0,
-			'volume'     => isset( $player_settings['controls']['volume'] ) ? 1 : 0,
-			'pip'        => isset( $player_settings['controls']['pip'] ) ? 1 : 0,
-			'fullscreen' => isset( $player_settings['controls']['fullscreen'] ) ? 1 : 0,
-			'share'      => isset( $player_settings['controls']['share'] ) ? 1 : 0,
-			'embed'      => isset( $player_settings['controls']['embed'] ) ? 1 : 0,
-			'download'   => isset( $player_settings['controls']['download'] ) ? 1 : 0
+			'title'         => '',
+			'id'            => 0,
+			'width'         => $player_settings['width'],
+			'ratio'         => $player_settings['ratio'],
+			'autoplay'      => $player_settings['autoplay'],
+			'loop'          => $player_settings['loop'],
+			'muted'         => $player_settings['muted'],
+			'playpause'     => isset( $player_settings['controls']['playpause'] ) ? 1 : 0,
+			'current'       => isset( $player_settings['controls']['current'] ) ? 1 : 0,
+			'progress'      => isset( $player_settings['controls']['progress'] ) ? 1 : 0,
+			'duration'      => isset( $player_settings['controls']['duration'] ) ? 1 : 0,
+			'tracks'        => isset( $player_settings['controls']['tracks'] ) ? 1 : 0,
+			'chapters'      => isset( $player_settings['controls']['chapters'] ) ? 1 : 0,
+			'speed'         => isset( $player_settings['controls']['speed'] ) ? 1 : 0,
+			'quality'       => isset( $player_settings['controls']['quality'] ) ? 1 : 0,
+			'volume'        => isset( $player_settings['controls']['volume'] ) ? 1 : 0,
+			'pip'           => isset( $player_settings['controls']['pip'] ) ? 1 : 0,
+			'fullscreen'    => isset( $player_settings['controls']['fullscreen'] ) ? 1 : 0,
+			'share'         => isset( $player_settings['controls']['share'] ) ? 1 : 0,
+			'embed'         => isset( $player_settings['controls']['embed'] ) ? 1 : 0,
+			'download'      => isset( $player_settings['controls']['download'] ) ? 1 : 0,
+			'email_capture' => ! empty( $email_capture_settings['enable_email_capture'] ) ? 1 : 0
 		);
 		
 		// Parse incoming $instance into an array and merge it with $defaults
@@ -180,7 +188,12 @@ class AIOVG_Widget_Video extends WP_Widget {
 		// Security check
 		check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
 
-		// Proceed safe		
+		if ( ! current_user_can( 'manage_aiovg_options' ) ) {
+			echo wp_json_encode( array() );
+			wp_die();
+		}
+
+		// Proceed safe
 		$args = array(
 			'post_type'              => 'aiovg_videos',
 			'post_status'            => 'publish',

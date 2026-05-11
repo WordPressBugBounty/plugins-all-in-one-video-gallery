@@ -46,9 +46,10 @@ class AIOVG_Blocks {
 	 * @since 1.5.6
 	 */
 	public function enqueue_block_editor_assets() {	
-		$categories_settings = aiovg_get_option( 'aiovg_categories_settings' );
-		$videos_settings     = aiovg_get_option( 'aiovg_videos_settings' );
-		$player_settings     = aiovg_get_option( 'aiovg_player_settings' );
+		$categories_settings    = aiovg_get_option( 'aiovg_categories_settings' );
+		$videos_settings        = aiovg_get_option( 'aiovg_videos_settings' );
+		$player_settings        = aiovg_get_option( 'aiovg_player_settings' );
+		$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
 
 		$fields = aiovg_get_shortcode_fields();
 		$videos = $fields['videos']['sections'];
@@ -136,7 +137,8 @@ class AIOVG_Blocks {
 				'fullscreen'                    => __( 'Fullscreen Button', 'all-in-one-video-gallery' ),
 				'share'                         => __( 'Share Buttons', 'all-in-one-video-gallery' ),
 				'embed'                         => __( 'Embed Button', 'all-in-one-video-gallery' ),
-				'download'                      => __( 'Download Button', 'all-in-one-video-gallery' )
+				'download'                      => __( 'Download Button', 'all-in-one-video-gallery' ),
+				'email_capture'                 => __( 'Email & Lead Capture', 'all-in-one-video-gallery' )
 			),
 			'categories' => array(
 				'template'         => $categories_settings['template'],
@@ -152,26 +154,28 @@ class AIOVG_Blocks {
 				'show_pagination'  => 1
 			),			
 			'video'	=> array(
-				'src'              => '',
-				'id'               => 0,
-				'poster'           => '',
-				'width'            => 0,
-				'ratio'            => $player_settings['ratio'],
-				'autoplay'         => $player_settings['autoplay'] ? true : false,
-				'loop'             => $player_settings['loop'] ? true : false,
-				'muted'            => $player_settings['muted'] ? true : false,
-				'playpause'        => isset( $player_settings['controls']['playpause'] ),
-				'current'          => isset( $player_settings['controls']['current'] ),
-				'progress'         => isset( $player_settings['controls']['progress'] ),
-				'duration'         => isset( $player_settings['controls']['duration'] ),				
-				'speed'            => isset( $player_settings['controls']['speed'] ),
-				'quality'          => isset( $player_settings['controls']['quality'] ),					
-				'volume'           => isset( $player_settings['controls']['volume'] ),
-				'pip'              => isset( $player_settings['controls']['pip'] ),
-				'fullscreen'       => isset( $player_settings['controls']['fullscreen'] ),
-				'share'            => isset( $player_settings['controls']['share'] ),
-				'embed'            => isset( $player_settings['controls']['embed'] ),
-				'download'         => isset( $player_settings['controls']['download'] )
+				'src'                  => '',
+				'id'                   => 0,
+				'poster'               => '',
+				'width'                => 0,
+				'ratio'                => $player_settings['ratio'],
+				'autoplay'             => $player_settings['autoplay'] ? true : false,
+				'loop'                 => $player_settings['loop'] ? true : false,
+				'muted'                => $player_settings['muted'] ? true : false,
+				'playpause'            => isset( $player_settings['controls']['playpause'] ),
+				'current'              => isset( $player_settings['controls']['current'] ),
+				'progress'             => isset( $player_settings['controls']['progress'] ),
+				'duration'             => isset( $player_settings['controls']['duration'] ),				
+				'speed'                => isset( $player_settings['controls']['speed'] ),
+				'quality'              => isset( $player_settings['controls']['quality'] ),					
+				'volume'               => isset( $player_settings['controls']['volume'] ),
+				'pip'                  => isset( $player_settings['controls']['pip'] ),
+				'fullscreen'           => isset( $player_settings['controls']['fullscreen'] ),
+				'share'                => isset( $player_settings['controls']['share'] ),
+				'embed'                => isset( $player_settings['controls']['embed'] ),
+				'download'             => isset( $player_settings['controls']['download'] ),
+				'email_capture'        => ! empty( $email_capture_settings['enable_email_capture'] ),
+				'email_capture_enabled'=> ! empty( $email_capture_settings['enable_email_capture'] )
 			),
 			'videos' => $videos
 		);
@@ -236,6 +240,9 @@ class AIOVG_Blocks {
 			),
 			'show_pagination' => array(
 				'type' => 'boolean'
+			),
+			'style' => array(
+				'type' => 'object'
 			)
 		);
 
@@ -325,6 +332,12 @@ class AIOVG_Blocks {
 			),
 			'download' => array(
 				'type' => 'boolean'
+			),
+			'email_capture' => array(
+				'type' => 'boolean'
+			),
+			'style' => array(
+				'type' => 'object'
 			)
 		);
 
@@ -372,6 +385,10 @@ class AIOVG_Blocks {
 			}
 		}
 
+		$attributes['style'] = array(
+			'type' => 'object'
+		);
+
 		register_block_type( __DIR__ . '/build/videos', array(
 			'attributes' => $attributes,
 			'render_callback' => array( $this, 'render_videos_block' ),
@@ -386,7 +403,19 @@ class AIOVG_Blocks {
 	 * @return string       HTML output.
 	 */
 	public function render_categories_block( $atts ) {
-		$output  = '<div ' . get_block_wrapper_attributes() . '>';
+		$style = '';
+
+		if ( ! empty( $atts['style']['css'] ) ) {
+			$css = wp_strip_all_tags( $atts['style']['css'] );
+			if ( '' !== trim( $css ) ) {
+				$style = '<style>' . $css . '</style>';
+			}
+		}
+
+		unset( $atts['style'] );
+
+		$output  = $style;
+		$output .= '<div ' . get_block_wrapper_attributes() . '>';
 		$output .= do_shortcode( '[aiovg_categories ' . $this->build_shortcode_attributes( $atts ) . ']' );
 		$output .= '</div>';
 
@@ -401,7 +430,19 @@ class AIOVG_Blocks {
 	 * @return string       HTML output.
 	 */
 	public function render_search_block( $atts ) {
-		$output  = '<div ' . get_block_wrapper_attributes() . '>';
+		$style = '';
+
+		if ( ! empty( $atts['style']['css'] ) ) {
+			$css = wp_strip_all_tags( $atts['style']['css'] );
+			if ( '' !== trim( $css ) ) {
+				$style = '<style>' . $css . '</style>';
+			}
+		}
+
+		unset( $atts['style'] );
+
+		$output  = $style;
+		$output .= '<div ' . get_block_wrapper_attributes() . '>';
 		$output .= do_shortcode( '[aiovg_search_form ' . $this->build_shortcode_attributes( $atts ) . ']' );
 		$output .= '</div>';
 
@@ -419,12 +460,22 @@ class AIOVG_Blocks {
 		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 			$atts['player'] = 'iframe';
 		}
-		
+
+		$style = '';
+
+		if ( ! empty( $atts['style']['css'] ) ) {
+			$css = wp_strip_all_tags( $atts['style']['css'] );
+			if ( '' !== trim( $css ) ) {
+				$style = '<style>' . $css . '</style>';
+			}
+		}
+
 		unset( $atts['blob'] );
 		unset( $atts['id'] );
+		unset( $atts['style'] );
 
-		// Output
-		$output  = '<div ' . get_block_wrapper_attributes() . '>';
+		$output  = $style;
+		$output .= '<div ' . get_block_wrapper_attributes() . '>';
 		$output .= do_shortcode( '[aiovg_video ' . $this->build_shortcode_attributes( $atts ) . ']' );
 		$output .= '</div>';
 
@@ -438,14 +489,25 @@ class AIOVG_Blocks {
 	 * @param  array  $atts An associative array of attributes.
 	 * @return string       HTML output.
 	 */
-	public function render_videos_block( $atts ) {	
-		// Always get ratio from the global settings	
+	public function render_videos_block( $atts ) {
+		$style = '';
+
+		if ( ! empty( $atts['style']['css'] ) ) {
+			$css = wp_strip_all_tags( $atts['style']['css'] );
+			if ( '' !== trim( $css ) ) {
+				$style = '<style>' . $css . '</style>';
+			}
+		}
+
+		// Always get ratio from the global settings
 		if ( isset( $atts['ratio'] ) ) {
 			unset( $atts['ratio'] );
-		}	
+		}
 
-		// Output
-		$output  = '<div ' . get_block_wrapper_attributes() . '>';
+		unset( $atts['style'] );
+
+		$output  = $style;
+		$output .= '<div ' . get_block_wrapper_attributes() . '>';
 		$output .= do_shortcode( '[aiovg_videos ' . $this->build_shortcode_attributes( $atts ) . ']' );
 		$output .= '</div>';
 

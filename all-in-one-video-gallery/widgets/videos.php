@@ -113,9 +113,9 @@ class AIOVG_Widget_Videos extends WP_Widget {
 		}
 
 		// Define the query
-		global $post;	
+		global $post;
 
-		$query = array(				
+		$query = array(
 			'post_type'      => 'aiovg_videos',
 			'posts_per_page' => ! empty( $attributes['limit'] ) ? (int) $attributes['limit'] : -1,
 			'post_status'    => array( 'publish' )
@@ -203,12 +203,26 @@ class AIOVG_Widget_Videos extends WP_Widget {
 			);				
 		}
 
-		if ( 'dislikes' == $orderby ) { // Dislikes			
+		if ( 'dislikes' == $orderby ) { // Dislikes
 			$meta_queries['dislikes'] = array(
 				'key'     => 'dislikes',
 				'value'   => 0,
 				'compare' => '>'
-			);				
+			);
+		}
+
+		if ( 'views' == $orderby ) { // Views
+			$meta_queries['views'] = array(
+				'relation' => 'OR',
+				array(
+					'key'     => 'views',
+					'compare' => 'NOT EXISTS'
+				),
+				array(
+					'key'     => 'views',
+					'compare' => 'EXISTS'
+				)
+			);
 		}
 
 		if ( ! empty( $attributes['featured'] ) ) {			
@@ -238,9 +252,8 @@ class AIOVG_Widget_Videos extends WP_Widget {
 				break;
 
 			case 'views':
-				$query['meta_key'] = $orderby;
-				$query['orderby']  = 'meta_value_num';				
-				$query['order']    = $order;
+				$query['orderby'] = 'meta_value_num';
+				$query['order']   = $order;
 				break;
 
 			case 'rand':

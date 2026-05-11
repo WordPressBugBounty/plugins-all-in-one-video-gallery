@@ -96,6 +96,7 @@ class AIOVG_Init {
 		require_once AIOVG_PLUGIN_DIR . 'includes/helpers/providers.php';
 		require_once AIOVG_PLUGIN_DIR . 'includes/helpers/render.php';
 		require_once AIOVG_PLUGIN_DIR . 'includes/helpers/urls.php';
+		require_once AIOVG_PLUGIN_DIR . 'includes/helpers/email-capture.php';
 
 		/**
 		 * The classes responsible for defining all actions that occur in the admin area.
@@ -184,7 +185,7 @@ class AIOVG_Init {
 		$this->loader->add_action( 'admin_menu', $videos, 'admin_menu' );
 		$this->loader->add_action( 'init', $videos, 'register_post_type' );
 		$this->loader->add_action( 'before_delete_post', $videos, 'before_delete_post' );
-		
+
 		if ( is_admin() ) {		
 			$this->loader->add_action( 'post_submitbox_misc_actions', $videos, 'post_submitbox_misc_actions' );
 			$this->loader->add_action( 'add_meta_boxes', $videos, 'add_meta_boxes' );
@@ -244,6 +245,7 @@ class AIOVG_Init {
 		$this->loader->add_action( 'wp_ajax_aiovg_get_csv_columns', $import_export, 'ajax_callback_get_csv_columns' );
 		$this->loader->add_action( 'wp_ajax_aiovg_export_csv', $import_export, 'ajax_callback_export_csv' );
 		$this->loader->add_action( 'wp_ajax_aiovg_export_zip', $import_export, 'ajax_callback_export_zip' );
+		$this->loader->add_action( 'wp_ajax_aiovg_export_email_leads_csv', $import_export, 'ajax_callback_export_email_leads_csv' );
 		$this->loader->add_action( 'aiovg_cleanup_export_directory', $import_export, 'cleanup_export_directory' );
 	}
 
@@ -263,9 +265,9 @@ class AIOVG_Init {
 		$this->loader->add_action( 'init', $public, 'register_styles' );
 		$this->loader->add_action( 'init', $public, 'register_scripts' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $public, 'enqueue_assets', 99 );
-		$this->loader->add_action( 'aiovg_enqueue_block_editor_assets', $public, 'enqueue_block_editor_assets' );	
-		$this->loader->add_action( 'elementor/editor/after_enqueue_scripts', $public, 'enqueue_block_editor_assets' );
-		$this->loader->add_action( 'elementor/preview/enqueue_scripts', $public, 'enqueue_block_editor_assets' );
+		$this->loader->add_action( 'enqueue_block_assets', $public, 'enqueue_block_assets', 99 );	
+		$this->loader->add_action( 'elementor/editor/after_enqueue_scripts', $public, 'enqueue_editor_assets', 99 );
+		$this->loader->add_action( 'elementor/preview/enqueue_scripts', $public, 'enqueue_editor_assets', 99 );
 		$this->loader->add_action( 'query_vars', $public, 'query_vars' );	
 		$this->loader->add_action( 'wp', $public, 'set_mysql_rand_seed_value' );	
 		$this->loader->add_action( 'wp_loaded', $public, 'maybe_flush_rules', 11 );				
@@ -273,6 +275,8 @@ class AIOVG_Init {
 		$this->loader->add_action( 'wp_print_footer_scripts', $public, 'wp_print_footer_scripts', 99 );
 		$this->loader->add_action( 'wp_ajax_aiovg_set_cookie', $public, 'set_gdpr_cookie' );
 		$this->loader->add_action( 'wp_ajax_nopriv_aiovg_set_cookie', $public, 'set_gdpr_cookie' );
+		$this->loader->add_action( 'wp_ajax_aiovg_save_email_lead', $public, 'save_email_lead' );
+		$this->loader->add_action( 'wp_ajax_nopriv_aiovg_save_email_lead', $public, 'save_email_lead' );
 		
 		if ( ! aiovg_is_yoast_or_rank_math_active() ) {
 			$this->loader->add_filter( 'wp_title', $public, 'wp_title', 99, 3 );

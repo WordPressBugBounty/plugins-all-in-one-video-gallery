@@ -31,8 +31,9 @@ if ( ! function_exists( 'str_contains' ) ) {
 
 /**
  * Adds extra code to a registered script.
- * 
- * @since 3.0.0
+ *
+ * @since        3.0.0
+ * @deprecated   4.7.6     Pass player settings via the data-params HTML attribute on the <aiovg-video> element instead.
  * @param string $handle   Name of the script to add the inline script to.
  * @param string $data     String containing the JavaScript to be added.
  * @param string $position Whether to add the inline script before the handle or after.
@@ -480,6 +481,9 @@ function aiovg_delete_video_attachments( $post_id ) {
 				}
 			}
 		}
+
+		$trailer_src_id = get_post_meta( $post_id, 'trailer_src_id', true );
+		if ( ! empty( $trailer_src_id ) ) wp_delete_attachment( $trailer_src_id, true );
 	}
 }
 
@@ -773,7 +777,6 @@ function aiovg_get_default_settings() {
 		'aiovg_player_settings' => array(
 			'player'                  => 'videojs',
 			'theme'                   => 'default',
-			'theme_color'             => '#00b2ff',
 			'force_js_initialization' => 0,
 			'width'                   => '',
 			'ratio'                   => 56.25,
@@ -798,8 +801,21 @@ function aiovg_get_default_settings() {
 			'use_native_controls'     => array(),
 			'hide_youtube_logo'       => 0,
 			'cc_load_policy'          => 0,
-			'statistics'              => 1,
 			'hotkeys'                 => 0
+		),
+		'aiovg_email_capture_settings' => array(
+			'enable_email_capture'  => 0,
+			'pre_roll'              => 1,
+			'mid_roll'              => '',
+			'post_roll'             => 0,
+			'collect_name'          => 0,
+			'collect_phone'         => 0,
+			'allow_skip'            => 0,
+			'header_text'           => __( 'Enter your email to continue watching', 'all-in-one-video-gallery' ),
+			'footer_text'           => '',
+			'button_label'          => __( 'Submit', 'all-in-one-video-gallery' ),
+			'skip_text'             => __( 'Skip', 'all-in-one-video-gallery' ),				
+			'blocked_email_domains' => '',
 		),
 		'aiovg_socialshare_settings' => array(				
 			'services' => array( 
@@ -893,9 +909,18 @@ function aiovg_get_default_settings() {
 			'restricted_roles'            => array(),
 			'restricted_message'          => __( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' ),
 			'show_restricted_label'       => 1,
-			'restricted_label_text'       => __( 'restricted', 'all-in-one-video-gallery' ),
+			'restricted_label_text'       => __( 'Restricted', 'all-in-one-video-gallery' ),
 			'restricted_label_bg_color'   => '#999',
 			'restricted_label_text_color' => '#fff'
+		),
+		'aiovg_trailer_settings' => array(
+			'enable_trailers'          => 0,
+			'player_overlay_text'      => '',
+			'player_overlay_link'      => '',
+			'show_trailer_label'       => 1,
+			'trailer_label_text'       => __( 'Trailer', 'all-in-one-video-gallery' ),
+			'trailer_label_bg_color'   => '#999',
+			'trailer_label_text_color' => '#fff'			
 		),
 		'aiovg_privacy_settings' => array(
 			'show_consent'         => 0,
@@ -906,10 +931,12 @@ function aiovg_get_default_settings() {
 			)
 		),
 		'aiovg_general_settings' => array(
+			'primary_color'             => '#3b82f6',
 			'force_load_assets'         => array(
 				'css' => 'css'
 			),
 			'lazyloading'               => 0,
+			'statistics'                => 1,
 			'datetime_format'           => '',
 			'number_format'             => 'full',
 			'maybe_flush_rewrite_rules' => 0,
@@ -1182,7 +1209,7 @@ function aiovg_get_message( $msg_id ) {
  *
  * @since  4.5.2
  * @param  string $option The option name to retrieve.
- * @return mixed           The option value from the database or the default setting.
+ * @return array          The option value from the database or the default value.
  */
 function aiovg_get_option( $option ) {
 	$settings = get_option( $option );
@@ -2106,6 +2133,24 @@ function aiovg_get_shortcode_fields() {
 		)
 	);
 
+	// Email Capture: only expose the field in the shortcode builder when globally enabled
+	$email_capture_settings = array_merge( $defaults['aiovg_email_capture_settings'], aiovg_get_option( 'aiovg_email_capture_settings' ) );
+
+	if ( ! empty( $email_capture_settings['enable_email_capture'] ) ) {
+		$fields['video']['sections']['email_capture'] = array(
+			'title'  => __( 'Email & Lead Capture', 'all-in-one-video-gallery' ),
+			'fields' => array(
+				array(
+					'name'        => 'email_capture',
+					'label'       => __( 'Email Capture', 'all-in-one-video-gallery' ),
+					'description' => __( 'Show an email collection form on this video to capture leads.', 'all-in-one-video-gallery' ),
+					'type'        => 'checkbox',
+					'value'       => 1
+				)
+			)
+		);
+	}
+
 	return apply_filters( 'aiovg_shortcode_fields', $fields );
 }
 
@@ -2534,11 +2579,11 @@ function aiovg_truncate( $text, $char_length = 55, $append = '...' ) {
  * @param int   $post_id Post ID
  */
 function aiovg_update_views_count( $post_id ) {	
-	$player_settings = aiovg_get_option( 'aiovg_player_settings' );
+	$general_settings = aiovg_get_option( 'aiovg_general_settings' );
 
 	$can_update_views_count = apply_filters(
 		'aiovg_can_update_views_count',
-		isset( $player_settings['statistics'] ) ? (int) $player_settings['statistics'] : 1,
+		isset( $general_settings['statistics'] ) ? (int) $general_settings['statistics'] : 1,
 		$post_id
 	);
 

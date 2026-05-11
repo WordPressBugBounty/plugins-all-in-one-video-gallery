@@ -361,7 +361,7 @@ class AIOVG_Admin_Videos {
 				}
 
 				add_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
-				$embedcode = ! empty( $embedcode ) ? wp_kses_post( str_replace( "'", '"', $embedcode ) ) : '';
+				$embedcode = ! empty( $embedcode ) ? wp_kses_post( $embedcode ) : '';
 				update_post_meta( $post_id, 'embedcode', $embedcode );
 				remove_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
 				
@@ -426,13 +426,13 @@ class AIOVG_Admin_Videos {
 					if ( 'youtube' == $type && ! empty( $youtube ) ) {
 						$image = aiovg_get_youtube_image_url( $youtube );
 					} elseif ( 'vimeo' == $type && ! empty( $vimeo ) ) {
-						$image = aiovg_get_vimeo_image_url( $vimeo );
+						$image = aiovg_get_vimeo_image_url( $vimeo, true );
 					} elseif ( 'dailymotion' == $type && ! empty( $dailymotion ) ) {
-						$image = aiovg_get_dailymotion_image_url( $dailymotion );
+						$image = aiovg_get_dailymotion_image_url( $dailymotion, true );
 					} elseif ( 'rumble' == $type && ! empty( $rumble ) ) {
-						$image = aiovg_get_rumble_image_url( $rumble );
+						$image = aiovg_get_rumble_image_url( $rumble, true );
 					} elseif ( 'embedcode' == $type && ! empty( $embedcode ) ) {
-						$image = aiovg_get_embedcode_image_url( $embedcode );
+						$image = aiovg_get_embedcode_image_url( $embedcode, true );
 					}
 				}
 
@@ -511,22 +511,71 @@ class AIOVG_Admin_Videos {
 					}
 				}
 
+				// Email Capture: Check if "aiovg_video_email_capture_nonce" nonce is set
+				if ( isset( $_POST['aiovg_video_email_capture_nonce'] ) ) {
+					// Verify that the nonce is valid
+					if ( wp_verify_nonce( $_POST['aiovg_video_email_capture_nonce'], 'aiovg_save_video_email_capture' ) ) {
+						// OK to save meta data
+						$email_capture = isset( $_POST['email_capture'] ) ? (int) $_POST['email_capture'] : -1;
+						update_post_meta( $post_id, 'email_capture', $email_capture );
+					}
+				}
+				
 				// Restrictions: Check if "aiovg_video_restrictions_nonce" nonce is set
 				if ( isset( $_POST['aiovg_video_restrictions_nonce'] ) ) {
 					// Verify that the nonce is valid
-					if ( wp_verify_nonce( $_POST['aiovg_video_restrictions_nonce'], 'aiovg_save_video_restrictions' ) ) {			
+					if ( wp_verify_nonce( $_POST['aiovg_video_restrictions_nonce'], 'aiovg_save_video_restrictions' ) ) {
 						// OK to save meta data
 						$access_control = isset( $_POST['access_control'] ) ? (int) $_POST['access_control'] : -1;
 						update_post_meta( $post_id, 'access_control', $access_control );
-		
+
 						$restricted_roles = isset( $_POST['restricted_roles'] ) ? array_map( 'sanitize_text_field', $_POST['restricted_roles'] ) : array();
 						update_post_meta( $post_id, 'restricted_roles', $restricted_roles );
 					}
 				}
+
+				// Trailer: Check if "aiovg_video_trailer_nonce" nonce is set
+				if ( isset( $_POST['aiovg_video_trailer_nonce'] ) ) {
+					// Verify that the nonce is valid
+					if ( wp_verify_nonce( $_POST['aiovg_video_trailer_nonce'], 'aiovg_save_video_trailer' ) ) {
+						// OK to save meta data
+						$trailer_type = isset( $_POST['trailer_type'] ) ? sanitize_text_field( $_POST['trailer_type'] ) : '';
+						update_post_meta( $post_id, 'trailer_type', $trailer_type );
+
+						if ( 'embedcode' === $trailer_type ) {
+							$trailer_src = isset( $_POST['trailer_embedcode'] ) ? trim( wp_unslash( $_POST['trailer_embedcode'] ) ) : '';
+							
+							if ( $trailer_src && filter_var( $trailer_src, FILTER_VALIDATE_URL ) ) {
+								$parsed = wp_parse_url( $trailer_src );
+
+								// Allow only http / https URLs
+								if ( isset( $parsed['scheme'] ) && in_array( $parsed['scheme'], array( 'http', 'https' ) ) ) {
+									$trailer_src = sprintf(
+										'<iframe src="%s" width="560" height="315" frameborder="0" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>',
+										esc_url( $trailer_src )
+									);
+								}
+							}
+
+							add_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
+							$trailer_src = ! empty( $trailer_src ) ? wp_kses_post( $trailer_src ) : '';
+							remove_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
+
+							$trailer_src_id = 0;
+						} else {
+							$trailer_src = isset( $_POST['trailer_src'] ) ? aiovg_sanitize_url( $_POST['trailer_src'] ) : '';
+							$trailer_src_id = attachment_url_to_postid( $trailer_src );
+						}
+
+						update_post_meta( $post_id, 'trailer_src', $trailer_src );
+						update_post_meta( $post_id, 'trailer_src_id', $trailer_src_id );
+					}
+				}
+
 			}
 		}
-		
-		return $post_id;	
+
+		return $post_id;
 	}
 	
 	/**
@@ -535,16 +584,41 @@ class AIOVG_Admin_Videos {
 	 * @since 4.0.1
 	 */
 	public function print_footer_scripts() {
-		if ( defined( 'AIOVG_DISABLE_TOUR' ) && AIOVG_DISABLE_TOUR ) {
-			return false;
-		}
-
 		if ( ! current_user_can( 'manage_aiovg_options' ) ) {
 			return false;
 		}
 
-		global $pagenow, $typenow;		
+		global $pagenow, $typenow;
 		if ( ! in_array( $pagenow, array( 'post-new.php', 'post.php' ) ) || 'aiovg_videos' != $typenow ) {
+			return false;
+		}
+
+		// Export Emails button — edit screen only, when email capture is globally enabled
+		if ( 'post.php' == $pagenow ) {
+			$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
+
+			if ( ! empty( $email_capture_settings['enable_email_capture'] ) ) {
+				global $post;
+				$post_id = isset( $post ) ? (int) $post->ID : 0;
+
+				if ( $post_id > 0 ) {
+					?>
+					<script type="text/javascript">
+						(function( $ ) {
+							'use strict';
+
+							$(function() {
+								const button = '<a href="javascript: void(0);" class="page-title-action aiovg-export-email-leads" data-video-id="<?php echo (int) $post_id; ?>"><?php echo esc_js( __( 'Export Emails', 'all-in-one-video-gallery' ) ); ?></a>';
+								$( button ).insertBefore( '.wp-header-end' );
+							});
+						})( jQuery );
+					</script>
+					<?php
+				}
+			}
+		}
+
+		if ( defined( 'AIOVG_DISABLE_TOUR' ) && AIOVG_DISABLE_TOUR ) {
 			return false;
 		}
 
@@ -787,7 +861,16 @@ class AIOVG_Admin_Videos {
 			return;
 		}
 		
-    	if ( 'edit.php' == $pagenow && 'aiovg_videos' == $post_type ) {			
+    	if ( 'edit.php' == $pagenow && 'aiovg_videos' == $post_type ) {		
+			// Search by ID using "id:123" prefix
+			if ( isset( $query->query_vars['s'] ) ) {
+				$s = trim( $query->query_vars['s'] );
+				if ( preg_match( '/^id:\s*(\d+)$/i', $s, $matches ) ) {
+					$query->query_vars['p'] = (int) $matches[1];
+					$query->query_vars['s'] = '';
+				}
+			}
+
 			// Convert category id to taxonomy term in query
 			if ( isset( $query->query_vars['aiovg_categories'] ) && ctype_digit( $query->query_vars['aiovg_categories'] ) && 0 != $query->query_vars['aiovg_categories'] ) {		
         		$term = get_term_by( 'id', $query->query_vars['aiovg_categories'], 'aiovg_categories' );
@@ -815,8 +898,15 @@ class AIOVG_Admin_Videos {
 			// Sort by views
 			if ( isset( $_GET['orderby'] ) && 'views' == $_GET['orderby'] ) {
 				$query->query_vars['meta_query']['views'] = array(
-					'key'     => 'views',
-					'compare' => 'EXISTS'
+					'relation' => 'OR',
+					array(
+						'key'     => 'views',
+						'compare' => 'NOT EXISTS'
+					),
+					array(
+						'key'     => 'views',
+						'compare' => 'EXISTS'
+					)
 				);
 
 				$query->query_vars['orderby'] = 'views';
@@ -835,7 +925,7 @@ class AIOVG_Admin_Videos {
 	public function row_actions( $actions, $post ) {
 		if ( $post->post_type == 'aiovg_videos' ) {
 			// Copy URL
-			$copy_shortcode = sprintf( 
+			$copy_shortcode = sprintf(
 				'<a class="aiovg-copy-url" href="javascript: void(0);" data-url="%s">%s</a>',
 				get_permalink( $post->ID ),
 				esc_html__( 'Copy URL', 'all-in-one-video-gallery' )
@@ -844,13 +934,26 @@ class AIOVG_Admin_Videos {
 			$actions['copy-url'] = $copy_shortcode;
 
 			// Copy Shortcode
-			$copy_shortcode = sprintf( 
+			$copy_shortcode = sprintf(
 				'<a class="aiovg-copy-shortcode" href="javascript: void(0);" data-id="%d">%s</a>',
 				$post->ID,
 				esc_html__( 'Copy Shortcode', 'all-in-one-video-gallery' )
 			);
 
 			$actions['copy-shortcode'] = $copy_shortcode;
+
+			// Export Emails
+			if ( current_user_can( 'manage_aiovg_options' ) ) {
+				$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
+
+				if ( ! empty( $email_capture_settings['enable_email_capture'] ) ) {
+					$actions['export-emails'] = sprintf(
+						'<a class="aiovg-export-email-leads" href="javascript: void(0);" data-video-id="%d">%s</a>',
+						$post->ID,
+						esc_html__( 'Export Emails', 'all-in-one-video-gallery' )
+					);
+				}
+			}
 		}
 
 		return $actions;
@@ -869,7 +972,7 @@ class AIOVG_Admin_Videos {
 		));
 
 		$columns = aiovg_insert_array_after( 'taxonomy-aiovg_tags', $columns, array(
-			'post_meta' => __( 'Stats', 'all-in-one-video-gallery' ),
+			'post_meta' => __( 'Metadata', 'all-in-one-video-gallery' ),
 			'post_id'   => __( 'ID', 'all-in-one-video-gallery' )
 		));
 
@@ -915,7 +1018,7 @@ class AIOVG_Admin_Videos {
 				$views = (int) get_post_meta( $post_id, 'views', true );
 
 				$meta[] = sprintf( 
-					'<span class="aiovg-views-meta">%s: %d</span>', 
+					'<span class="aiovg-meta-label">%s:</span> <span class="aiovg-meta-value">%d</span>', 
 					esc_html__( 'Views', 'all-in-one-video-gallery' ),
 					$views
 				);
@@ -924,7 +1027,7 @@ class AIOVG_Admin_Videos {
 				$likes = (int) get_post_meta( $post_id, 'likes', true );
 
 				$meta[] = sprintf( 
-					'<span class="aiovg-likes-meta">%s: %d</span>', 
+					'<span class="aiovg-meta-label">%s:</span> <span class="aiovg-meta-value">%d</span>', 
 					esc_html__( 'Likes', 'all-in-one-video-gallery' ),
 					$likes
 				);
@@ -933,7 +1036,7 @@ class AIOVG_Admin_Videos {
 				$dislikes = (int) get_post_meta( $post_id, 'dislikes', true );
 
 				$meta[] = sprintf( 
-					'<span class="aiovg-dislikes-meta">%s: %d</span>', 
+					'<span class="aiovg-meta-label">%s:</span> <span class="aiovg-meta-value">%d</span>', 
 					esc_html__( 'Dislikes', 'all-in-one-video-gallery' ),
 					$dislikes
 				);
@@ -943,13 +1046,13 @@ class AIOVG_Admin_Videos {
 					$value = get_post_meta( $post_id, 'featured', true );
 
 					$meta[] = sprintf( 
-						'<span class="aiovg-featured-meta">%s: %s</span>', 
+						'<span class="aiovg-meta-label">%s:</span> <span class="aiovg-meta-value">%s</span>', 
 						esc_html__( 'Featured', 'all-in-one-video-gallery' ),
 						( 1 == $value ? '&#x2713;' : '&#x2717;' ) 
 					);
 				}
 				
-				echo implode( '<br />', $meta );
+				echo '<ul class="aiovg-unstyled-list"><li>' . implode( '</li><li>', $meta ) . '</li></ul>';
 				break;
 			case 'post_id':
 				echo $post_id;
@@ -976,12 +1079,12 @@ class AIOVG_Admin_Videos {
 	 * @since 1.0.0
 	 * @param int   $post_id Post ID.
 	 */
-	public function before_delete_post( $post_id ) {		
+	public function before_delete_post( $post_id ) {
 		if ( 'aiovg_videos' != get_post_type( $post_id ) ) {
 			return;
 		}
-		  
-		aiovg_delete_video_attachments( $post_id );	
+
+		aiovg_delete_video_attachments( $post_id );
 	}
 
 }

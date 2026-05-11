@@ -11,17 +11,23 @@
 
 $general_settings = aiovg_get_option( 'aiovg_general_settings' );
 $images_settings  = aiovg_get_option( 'aiovg_images_settings' );
+$trailer_settings = aiovg_get_option( 'aiovg_trailer_settings' );
 
-$post_meta  = get_post_meta( $post->ID );
+$post_meta   = get_post_meta( $post->ID );
 
-$image_size = ! empty( $images_settings['size'] ) ? $images_settings['size'] : 'large';
-$image_data = aiovg_get_image( $post->ID, $image_size, 'post', true );
-$image      = $image_data['src'];
-$image_alt  = ! empty( $image_data['alt'] ) ? $image_data['alt'] : $post->post_title;
+$image_size  = ! empty( $images_settings['size'] ) ? $images_settings['size'] : 'large';
+$image_data  = aiovg_get_image( $post->ID, $image_size, 'post', true );
+$image       = $image_data['src'];
+$image_alt   = ! empty( $image_data['alt'] ) ? $image_data['alt'] : $post->post_title;
 
-$has_access = aiovg_current_user_can( 'play_aiovg_video', $post->ID );
+$has_access  = aiovg_current_user_can( 'play_aiovg_video', $post->ID );
+$has_trailer = false;
+
+if ( ! $has_access && ! empty( $trailer_settings['enable_trailers'] ) ) {
+	$trailer_src = get_post_meta( $post->ID, 'trailer_src', true );
+	$has_trailer = ! empty( $trailer_src );
+}
 ?>
-
 <div class="aiovg-thumbnail aiovg-thumbnail-style-image-top">
     <?php
     echo sprintf( 
@@ -47,7 +53,7 @@ $has_access = aiovg_current_user_can( 'play_aiovg_video', $post->ID );
     }
 
     // Play Icon
-    if ( $has_access ) {
+    if ( $has_access || $has_trailer ) {
         echo '<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="40" height="40" viewBox="0 0 24 24" class="aiovg-svg-icon-play aiovg-flex-shrink-0">
             <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
         </svg>';
@@ -80,24 +86,42 @@ $has_access = aiovg_current_user_can( 'play_aiovg_video', $post->ID );
         <?php
         // Labels
         if ( ! $has_access ) {
-            $restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
+			if ( $has_trailer && ! empty( $trailer_settings['show_trailer_label'] ) && ! empty( $trailer_settings['trailer_label_text'] ) ) {
+				$styles = array();
 
-			if ( ! empty( $restrictions_settings['show_restricted_label'] ) && ! empty( $restrictions_settings['restricted_label_text'] ) ) {
-				$styles = array();				
+                if ( $trailer_label_bg_color = $trailer_settings['trailer_label_bg_color'] ) {
+                    $styles[] = sprintf( 'background-color: %s', $trailer_label_bg_color );
+                }
 
-				if ( $restricted_label_bg_color = $restrictions_settings['restricted_label_bg_color'] ) {
-					$styles[] = sprintf( 'background-color: %s', $restricted_label_bg_color );
+                if ( $trailer_label_text_color = $trailer_settings['trailer_label_text_color'] ) {
+                    $styles[] = sprintf( 'color: %s', $trailer_label_text_color );
+                }
+
+                printf(
+                    '<div class="aiovg-labels"><span class="aiovg-trailer-label" style="%s">%s</span></div>',
+                    esc_attr( implode( '; ', $styles ) ),
+                    esc_html( $trailer_settings['trailer_label_text'] )
+                );
+			} else {
+				$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
+
+				if ( ! empty( $restrictions_settings['show_restricted_label'] ) && ! empty( $restrictions_settings['restricted_label_text'] ) ) {
+					$styles = array();
+
+					if ( $restricted_label_bg_color = $restrictions_settings['restricted_label_bg_color'] ) {
+						$styles[] = sprintf( 'background-color: %s', $restricted_label_bg_color );
+					}
+
+					if ( $restricted_label_text_color = $restrictions_settings['restricted_label_text_color'] ) {
+						$styles[] = sprintf( 'color: %s', $restricted_label_text_color );
+					}
+
+					printf(
+						'<div class="aiovg-labels"><span class="aiovg-restricted-label" style="%s">%s</span></div>',
+						esc_attr( implode( '; ', $styles ) ),
+						esc_html( $restrictions_settings['restricted_label_text'] )
+					);
 				}
-
-				if ( $restricted_label_text_color = $restrictions_settings['restricted_label_text_color'] ) {
-                    $styles[] = sprintf( 'color: %s', $restricted_label_text_color );
-				}
-
-				printf( 
-					'<div class="aiovg-labels"><span class="aiovg-restricted-label" style="%s">%s</span></div>',
-					esc_attr( implode( '; ', $styles ) ),
-					esc_html( $restrictions_settings['restricted_label_text'] )
-				);
 			}
 		}
         ?>

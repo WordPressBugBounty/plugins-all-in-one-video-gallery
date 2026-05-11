@@ -231,7 +231,7 @@ class AIOVG_Public_Video {
 						);				
 					}
 
-					if ( 'dislikes' == $orderby ) { // Dislikes			
+					if ( 'dislikes' == $orderby ) { // Dislikes
 						$meta_queries['dislikes'] = array(
 							'relation' => 'OR',
 							array(
@@ -243,7 +243,22 @@ class AIOVG_Public_Video {
 								'type'    => 'NUMERIC',
 								'compare' => 'EXISTS'
 							)
-						);				
+						);
+					}
+
+					if ( 'views' == $orderby ) { // Views
+						$meta_queries['views'] = array(
+							'relation' => 'OR',
+							array(
+								'key'     => 'views',
+								'compare' => 'NOT EXISTS'
+							),
+							array(
+								'key'     => 'views',
+								'type'    => 'NUMERIC',
+								'compare' => 'EXISTS'
+							)
+						);
 					}
 
 					if ( ! empty( $featured ) ) { // Featured			
@@ -263,17 +278,11 @@ class AIOVG_Public_Video {
 					switch ( $orderby ) {
 						case 'likes':
 						case 'dislikes':
+						case 'views':
 							$args['orderby'] = array(
 								$orderby => $order,
 								'date'   => 'DESC'
-							);			
-							break;
-
-						case 'views':
-							$args['meta_key'] = $orderby;
-							$args['orderby']  = 'meta_value_num';
-						
-							$args['order']    = $order;
+							);
 							break;
 
 						case 'rand':
@@ -411,8 +420,12 @@ class AIOVG_Public_Video {
 				$has_hls = 1;
 			}
 
-			if ( $post_id > 0 && 'default' === get_post_meta( $post_id, 'type', true ) ) {
-				update_post_meta( $post_id, 'mp4', aiovg_sanitize_url( add_query_arg( 'isnew', $has_hls, $mp4_src ) ) );
+			if ( $post_id > 0 ) {
+				if ( ! empty( $settings['is_trailer'] ) ) {
+					update_post_meta( $post_id, 'trailer_src', aiovg_sanitize_url( add_query_arg( 'isnew', $has_hls, $mp4_src ) ) );
+				} elseif ( 'default' === get_post_meta( $post_id, 'type', true ) ) {
+					update_post_meta( $post_id, 'mp4', aiovg_sanitize_url( add_query_arg( 'isnew', $has_hls, $mp4_src ) ) );
+				}				
 			}
 		}
 
@@ -480,15 +493,27 @@ class AIOVG_Public_Video {
 			}
 
 			if ( ! aiovg_current_user_can( 'play_aiovg_video', $post->ID ) ) {
-				$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
+				$trailer_settings = aiovg_get_option( 'aiovg_trailer_settings' );
 
-				$restricted_message = $restrictions_settings['restricted_message'];
-				if ( empty( $restricted_message ) ) {
-					$restricted_message = __( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' );
+				$has_trailer = false;
+				if ( ! empty( $trailer_settings['enable_trailers'] ) ) {
+					$trailer_src = get_post_meta( $post->ID, 'trailer_src', true );
+					if ( ! empty( $trailer_src ) ) {
+						$has_trailer = true;
+					}	
 				}
 
-				$content = '<p>' . wp_kses_post( $restricted_message ) . '</p>';
-				return $content;
+				if ( ! $has_trailer ) {
+					$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
+
+					$restricted_message = $restrictions_settings['restricted_message'];
+					if ( empty( $restricted_message ) ) {
+						$restricted_message = __( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' );
+					}
+
+					$content = '<p>' . wp_kses_post( $restricted_message ) . '</p>';
+					return $content;
+				}
 			}
 			
 			// Vars
@@ -628,7 +653,32 @@ class AIOVG_Public_Video {
 		}	
 		
 		if ( is_numeric( $_GET['vdl'] ) ) {
-			$file = get_post_meta( (int) $_GET['vdl'], 'mp4', true );
+			$post_id     = (int) $_GET['vdl'];
+			$post_status = get_post_status( $post_id );
+
+			$has_permission = true;
+
+			if ( 'publish' != $post_status ) {
+				$has_permission = false;
+
+				if ( 'private' == $post_status ) {
+					if ( current_user_can( 'read_private_aiovg_videos' ) ) {
+						$has_permission = true;
+					}
+				}
+			}
+
+			$has_permission = apply_filters( 'aiovg_read_private_videos', $has_permission, array( 'id' => $post_id ), null );
+
+			if ( ! $has_permission ) {
+				die( esc_html__( 'File is not readable or not found.', 'all-in-one-video-gallery' ) );
+			}
+
+			if ( ! aiovg_current_user_can( 'play_aiovg_video', $post_id ) ) {
+				die( esc_html__( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' ) );
+			}
+
+			$file = get_post_meta( $post_id, 'mp4', true );
 			$file = aiovg_make_url_absolute( $file );
 		} else {
 			$file = get_transient( sanitize_text_field( $_GET['vdl'] ) );

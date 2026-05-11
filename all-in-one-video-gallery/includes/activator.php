@@ -26,7 +26,11 @@ class AIOVG_Activator {
 	 *
 	 * @since 1.0.0
 	 */
-	public static function activate() {	
+	public static function activate() {
+		// Load helpers not yet available during activation
+		require_once AIOVG_PLUGIN_DIR . 'includes/helpers/functions.php';
+		require_once AIOVG_PLUGIN_DIR . 'includes/helpers/email-capture.php';
+
 		// Insert the plugin settings and default values for the first time
 		$defaults = aiovg_get_default_settings();
 
@@ -45,6 +49,9 @@ class AIOVG_Activator {
 		// Remove the unfiltered_html capability from editors
 		aiovg_remove_unfiltered_html_capability_from_editors();
 
+		// Create the email leads table
+		aiovg_email_capture_create_table();
+		
 		// Insert the plugin version
 		add_option( 'aiovg_version', AIOVG_PLUGIN_VERSION );
 	}

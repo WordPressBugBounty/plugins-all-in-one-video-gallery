@@ -79,6 +79,7 @@ class AIOVG_Uninstall {
         // Delete all the plugin options
         $aiovg_settings = array(
             'aiovg_player_settings',
+            'aiovg_email_capture_settings',
             'aiovg_socialshare_settings',
             'aiovg_videos_settings',
             'aiovg_categories_settings',
@@ -91,6 +92,7 @@ class AIOVG_Uninstall {
             'aiovg_brand_settings',
             'aiovg_permalink_settings',
             'aiovg_restrictions_settings',
+            'aiovg_trailer_settings',
             'aiovg_privacy_settings',
             'aiovg_general_settings',
             'aiovg_api_settings',

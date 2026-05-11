@@ -77,6 +77,21 @@
 	 */
 	$(function() {
 		
+		// Initialize date pickers
+		$( '.aiovg-date-picker' ).each(function() {
+			if ( typeof flatpickr === 'undefined' ) {
+				return;
+			}
+
+			const config = {
+				dateFormat: 'Y-m-d',
+				allowInput: true,
+				disableMobile: true
+			};
+
+			flatpickr( this, config );
+		} );
+
 		// Validate required fields
 		$( '#aiovg-import-export' ).find( '[required]' ).each(function() { 		 
 			$( this ).on( 'blur keyup', function() { 
@@ -186,45 +201,56 @@
 					return ( field.name === 'offset' ) ? { name: 'offset', value: offset } : field;
 				});
 
-				$.post( ajaxurl, formArray, function( response ) {
-					if ( ! response.success ) {
-						$status.html( '<span class="aiovg-text-error"><span class="dashicons dashicons-dismiss"></span> ' + response.data.error + '</span>' );
-						$button.prop( 'disabled', false );
-						return;
-					}
-
-					offset   = parseInt( response.data.offset );							
-					imported = imported.concat( response.data.imported );
-					skipped  = skipped.concat( response.data.skipped );
-					failed   = failed.concat( response.data.failed );						
-
-					let message = response.data.message;
-					message = message.replace( '%%imported%%', imported.length );
-					message = message.replace( '%%skipped%%', skipped.length );
-					message = message.replace( '%%failed%%', failed.length );
-
-					if ( response.data.step === 'process' ) {
-						$status.html( '<span class="spinner"></span> <span class="aiovg-text-success">' + removeEndingDot( message ) + '</span><span class="aiovg-animate-dots"></span>' );
-						setTimeout( importBatch, 100 ); // Import next batch
-					} else if ( response.data.step === 'done' ) {
-						let html = '<span class="aiovg-text-success"><span class="dashicons dashicons-yes-alt"></span> ' + message + '</span>';
-
-						if ( failed.length > 0 ) {
-							html += '<div class="aiovg-form-fieldset">';
-							html += '<h3 class="aiovg-text-error">' + aiovg_import_export.i18n.import_folder_failed_status_heading + '</h3>';
-
-							failed.forEach(( item ) => {
-								const fileName = item.split( '/' ).pop(); // Extract just the file name
-								html += '<a class="aiovg-status-item" href="' + encodeURI( item ) + '" target="_blank">' + fileName + '</a>';
-							});
-
-							html += '</div>';
+				$.ajax({
+					url: ajaxurl,
+					type: 'POST',
+					data: formArray,
+					dataType: 'json',
+					timeout: 60000,
+					success: function( response ) {
+						if ( ! response.success ) {
+							$status.html( '<span class="aiovg-text-error"><span class="dashicons dashicons-dismiss"></span> ' + response.data.error + '</span>' );
+							$button.prop( 'disabled', false );
+							return;
 						}
 
-						$status.html( html );
+						offset   = parseInt( response.data.offset );
+						imported = imported.concat( response.data.imported );
+						skipped  = skipped.concat( response.data.skipped );
+						failed   = failed.concat( response.data.failed );
+
+						let message = response.data.message;
+						message = message.replace( '%%imported%%', imported.length );
+						message = message.replace( '%%skipped%%', skipped.length );
+						message = message.replace( '%%failed%%', failed.length );
+
+						if ( response.data.step === 'process' ) {
+							$status.html( '<span class="spinner"></span> <span class="aiovg-text-success">' + removeEndingDot( message ) + '</span><span class="aiovg-animate-dots"></span>' );
+							setTimeout( importBatch, 100 ); // Import next batch
+						} else if ( response.data.step === 'done' ) {
+							let html = '<span class="aiovg-text-success"><span class="dashicons dashicons-yes-alt"></span> ' + message + '</span>';
+
+							if ( failed.length > 0 ) {
+								html += '<div class="aiovg-form-fieldset">';
+								html += '<h3 class="aiovg-text-error">' + aiovg_import_export.i18n.import_folder_failed_status_heading + '</h3>';
+
+								failed.forEach(( item ) => {
+									const fileName = $( '<span>' ).text( item.split( '/' ).pop() ).html();
+									html += '<a class="aiovg-status-item" href="' + encodeURI( item ) + '" target="_blank">' + fileName + '</a>';
+								});
+
+								html += '</div>';
+							}
+
+							$status.html( html );
+							$button.prop( 'disabled', false );
+						}
+					},
+					error: function() {
+						$status.html( '<span class="aiovg-text-error"><span class="dashicons dashicons-dismiss"></span> ' + aiovg_import_export.i18n.request_failed + '</span>' );
 						$button.prop( 'disabled', false );
 					}
-				}, 'json' );
+				});
 			};
 
 			// Start first batch
@@ -278,49 +304,60 @@
 					return ( field.name === 'offset' ) ? { name: 'offset', value: offset } : field;
 				});
 
-				$.post( ajaxurl, formArray, function( response ) {
-					if ( ! response.success ) {
-						$status.html( '<span class="aiovg-text-error"><span class="dashicons dashicons-dismiss"></span> ' + response.data.error + '</span>' );
-						$button.prop( 'disabled', false );
-						return;
-					}
-
-					offset   = parseInt( response.data.offset );							
-					imported = imported.concat( response.data.imported );
-					updated  = updated.concat( response.data.updated );
-					skipped  = skipped.concat( response.data.skipped );
-					failed   = failed.concat( response.data.failed );
-					errors   = errors.concat( response.data.errors );							
-
-					let message = response.data.message;
-					message = message.replace( '%%imported%%', imported.length );
-					message = message.replace( '%%updated%%', updated.length );
-					message = message.replace( '%%skipped%%', skipped.length );
-					message = message.replace( '%%failed%%', failed.length );
-
-					if ( response.data.step === 'process' ) {
-						$status.html( '<span class="spinner"></span> <span class="aiovg-text-success">' + removeEndingDot( message ) + '</span><span class="aiovg-animate-dots"></span>' );
-						setTimeout( importBatch, 100 ); // Import next batch
-					} else if ( response.data.step === 'done' ) {
-						$( '#aiovg-csv_file, #aiovg-zip_file' ).val( '' );
-						
-						let html = '<span class="aiovg-text-success"><span class="dashicons dashicons-yes-alt"></span> ' + message + '</span>';
-
-						if ( errors.length > 0 ) {
-							html += '<div class="aiovg-form-fieldset">';
-							html += '<h3 class="aiovg-text-error">' + aiovg_import_export.i18n.import_csv_error_status_heading + '</h3>';
-
-							errors.forEach(( error ) => {
-								html += '<span class="aiovg-status-item">' + error + '</span>';
-							});
-
-							html += '</div>';
+				$.ajax({
+					url: ajaxurl,
+					type: 'POST',
+					data: formArray,
+					dataType: 'json',
+					timeout: 60000,
+					success: function( response ) {
+						if ( ! response.success ) {
+							$status.html( '<span class="aiovg-text-error"><span class="dashicons dashicons-dismiss"></span> ' + response.data.error + '</span>' );
+							$button.prop( 'disabled', false );
+							return;
 						}
 
-						$status.html( html );
+						offset   = parseInt( response.data.offset );
+						imported = imported.concat( response.data.imported );
+						updated  = updated.concat( response.data.updated );
+						skipped  = skipped.concat( response.data.skipped );
+						failed   = failed.concat( response.data.failed );
+						errors   = errors.concat( response.data.errors );
+
+						let message = response.data.message;
+						message = message.replace( '%%imported%%', imported.length );
+						message = message.replace( '%%updated%%', updated.length );
+						message = message.replace( '%%skipped%%', skipped.length );
+						message = message.replace( '%%failed%%', failed.length );
+
+						if ( response.data.step === 'process' ) {
+							$status.html( '<span class="spinner"></span> <span class="aiovg-text-success">' + removeEndingDot( message ) + '</span><span class="aiovg-animate-dots"></span>' );
+							setTimeout( importBatch, 100 ); // Import next batch
+						} else if ( response.data.step === 'done' ) {
+							$( '#aiovg-csv_file, #aiovg-zip_file' ).val( '' );
+
+							let html = '<span class="aiovg-text-success"><span class="dashicons dashicons-yes-alt"></span> ' + message + '</span>';
+
+							if ( errors.length > 0 ) {
+								html += '<div class="aiovg-form-fieldset">';
+								html += '<h3 class="aiovg-text-error">' + aiovg_import_export.i18n.import_csv_error_status_heading + '</h3>';
+
+								errors.forEach(( error ) => {
+									html += '<span class="aiovg-status-item">' + error + '</span>';
+								});
+
+								html += '</div>';
+							}
+
+							$status.html( html );
+							$button.prop( 'disabled', false );
+						}
+					},
+					error: function() {
+						$status.html( '<span class="aiovg-text-error"><span class="dashicons dashicons-dismiss"></span> ' + aiovg_import_export.i18n.request_failed + '</span>' );
 						$button.prop( 'disabled', false );
 					}
-				}, 'json' );
+				});
 			};
 
 			// Start first batch
@@ -350,25 +387,36 @@
 
 			// Recursive export function
 			const exportBatch = function() {
-				$.post( ajaxurl, formData, function( response ) {
-					if ( ! response.success ) {
-						$status.html( '<span class="aiovg-text-error"><span class="dashicons dashicons-dismiss"></span> ' + response.data.error + '</span>' );
-						$button.prop( 'disabled', false );
-						return;
-					}					
+				$.ajax({
+					url: ajaxurl,
+					type: 'POST',
+					data: formData,
+					dataType: 'json',
+					timeout: 60000,
+					success: function( response ) {
+						if ( ! response.success ) {
+							$status.html( '<span class="aiovg-text-error"><span class="dashicons dashicons-dismiss"></span> ' + response.data.error + '</span>' );
+							$button.prop( 'disabled', false );
+							return;
+						}
 
-					formData.offset    = parseInt( response.data.offset );
-					formData.total     = parseInt( response.data.total );
-					formData.file_name = response.data.file_name;
+						formData.offset    = parseInt( response.data.offset );
+						formData.total     = parseInt( response.data.total );
+						formData.file_name = response.data.file_name;
 
-					if ( response.data.step === 'process' ) {
-						$status.html( '<span class="spinner"></span> <span class="aiovg-text-success">' + removeEndingDot( response.data.message ) + '</span><span class="aiovg-animate-dots"></span>' );
-						setTimeout( exportBatch, 100 ); // Export next batch
-					} else if ( response.data.step === 'done' ) {
-						$status.html( '<span class="aiovg-text-success"><span class="dashicons dashicons-yes-alt"></span> ' + response.data.message + '</span>' );
+						if ( response.data.step === 'process' ) {
+							$status.html( '<span class="spinner"></span> <span class="aiovg-text-success">' + removeEndingDot( response.data.message ) + '</span><span class="aiovg-animate-dots"></span>' );
+							setTimeout( exportBatch, 100 ); // Export next batch
+						} else if ( response.data.step === 'done' ) {
+							$status.html( '<span class="aiovg-text-success"><span class="dashicons dashicons-yes-alt"></span> ' + response.data.message + '</span>' );
+							$button.prop( 'disabled', false );
+						}
+					},
+					error: function() {
+						$status.html( '<span class="aiovg-text-error"><span class="dashicons dashicons-dismiss"></span> ' + aiovg_import_export.i18n.request_failed + '</span>' );
 						$button.prop( 'disabled', false );
 					}
-				}, 'json' );
+				});
 			};
 
 			// Start first batch
@@ -402,31 +450,37 @@
 
 			// Recursive export function
 			const exportBatch = function() {
-				$.post( ajaxurl, formData, function( response ) {
-					if ( ! response.success ) {
-						$status.html( '<span class="aiovg-text-error"><span class="dashicons dashicons-dismiss"></span> ' + response.data.error + '</span>' );
-						$button.prop( 'disabled', false );
-						return;
-					}
+				$.ajax({
+					url: ajaxurl,
+					type: 'POST',
+					data: formData,
+					dataType: 'json',
+					timeout: 60000,
+					success: function( response ) {
+						if ( ! response.success ) {
+							$status.html( '<span class="aiovg-text-error"><span class="dashicons dashicons-dismiss"></span> ' + response.data.error + '</span>' );
+							$button.prop( 'disabled', false );
+							return;
+						}
 
-					if ( Array.isArray( response.data.zip_files ) ) {
-						response.data.zip_files.forEach( function( file ) {
-							if ( zip_files.indexOf( file ) === -1 ) {
-								zip_files.push( file );
-							}
-						} );
-					}
+						if ( Array.isArray( response.data.zip_files ) ) {
+							response.data.zip_files.forEach( function( file ) {
+								if ( zip_files.indexOf( file ) === -1 ) {
+									zip_files.push( file );
+								}
+							} );
+						}
 
-					skipped = skipped.concat( response.data.skipped );
-					total   = parseInt( response.data.total );
+						skipped = skipped.concat( response.data.skipped );
+						total   = parseInt( response.data.total );
 
-					formData.offset = parseInt( response.data.offset );
-					formData.total  = total;
+						formData.offset = parseInt( response.data.offset );
+						formData.total  = total;
 
-					if ( response.data.step === 'process' ) {
-						$status.html( '<span class="spinner"></span> <span class="aiovg-text-success">' + removeEndingDot( response.data.message ) + '</span><span class="aiovg-animate-dots"></span>' );
-						setTimeout( exportBatch, 100 ); // Export next batch
-					} else if ( response.data.step === 'done' ) {
+						if ( response.data.step === 'process' ) {
+							$status.html( '<span class="spinner"></span> <span class="aiovg-text-success">' + removeEndingDot( response.data.message ) + '</span><span class="aiovg-animate-dots"></span>' );
+							setTimeout( exportBatch, 100 ); // Export next batch
+						} else if ( response.data.step === 'done' ) {
 						let message = response.data.message;
 						if ( zip_files.length === 0 ) {
 							message = aiovg_import_export.i18n.export_zip_empty_status;
@@ -442,7 +496,7 @@
 							html += '<h3>' + aiovg_import_export.i18n.export_zip_success_status_heading + '</h3>';
 
 							zip_files.forEach(( item ) => {
-								const fileName = item.split( '/' ).pop(); // Extract just the file name
+								const fileName = $( '<span>' ).text( item.split( '/' ).pop() ).html();
 								html += '<a class="aiovg-status-item" href="' + encodeURI( item ) + '" target="_blank">' + fileName + '</a>';
 							});
 
@@ -454,7 +508,7 @@
 							html += '<h3 class="aiovg-text-error">' + aiovg_import_export.i18n.export_zip_failed_status_heading + '</h3>';
 
 							skipped.forEach(( item ) => {
-								const fileName = item.split( '/' ).pop(); // Extract just the file name
+								const fileName = $( '<span>' ).text( item.split( '/' ).pop() ).html();
 								html += '<a class="aiovg-status-item" href="' + encodeURI( item ) + '" target="_blank">' + fileName + '</a>';
 							});
 
@@ -462,13 +516,43 @@
 						}
 
 						$status.html( html );
-						$button.prop( 'disabled', false );						
+						$button.prop( 'disabled', false );
 					}
-				}, 'json' );
+					},
+					error: function() {
+						$status.html( '<span class="aiovg-text-error"><span class="dashicons dashicons-dismiss"></span> ' + aiovg_import_export.i18n.request_failed + '</span>' );
+						$button.prop( 'disabled', false );
+					}
+				});
 			};
 
 			// Start first batch
 			exportBatch();
+		});
+
+		// Export email leads to CSV		
+		$( document ).on( 'click', '.aiovg-export-email-leads', function( event ) {
+			event.preventDefault();
+
+			const $btn    = $( this );
+			const videoId = parseInt( $btn.data( 'video-id' ) ) || 0;
+
+			let dateFrom = '';
+			let dateTo   = '';
+
+			const $form = $btn.closest( '#aiovg-form-export-email-leads' );
+			if ( $form.length ) {
+				dateFrom = $form.find( '[name="date_from"]' ).val() || '';
+				dateTo   = $form.find( '[name="date_to"]' ).val() || '';
+			}
+
+			let params = 'action=aiovg_export_email_leads_csv';
+			params += '&security=' + encodeURIComponent( aiovg_admin.ajax_nonce );
+			params += '&video_id=' + videoId;
+			params += '&date_from=' + encodeURIComponent( dateFrom );
+			params += '&date_to=' + encodeURIComponent( dateTo );			
+
+			window.location.href = ajaxurl + '?' + params;
 		});
 
 	});	

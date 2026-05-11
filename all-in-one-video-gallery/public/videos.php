@@ -524,7 +524,7 @@ class AIOVG_Public_Videos {
 		wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-public' );
 		
 		// Define the query
-		$args = array(				
+		$args = array(
 			'post_type'      => 'aiovg_videos',
 			'posts_per_page' => ! empty( $attributes['limit'] ) ? (int) $attributes['limit'] : -1,
 			'post_status'    => array( 'publish' )
@@ -636,12 +636,26 @@ class AIOVG_Public_Videos {
 			);				
 		}
 
-		if ( 'dislikes' == $orderby ) { // Dislikes			
+		if ( 'dislikes' == $orderby ) { // Dislikes
 			$meta_queries['dislikes'] = array(
 				'key'     => 'dislikes',
 				'value'   => 0,
 				'compare' => '>'
-			);				
+			);
+		}
+
+		if ( 'views' == $orderby ) { // Views
+			$meta_queries['views'] = array(
+				'relation' => 'OR',
+				array(
+					'key'     => 'views',
+					'compare' => 'NOT EXISTS'
+				),
+				array(
+					'key'     => 'views',
+					'compare' => 'EXISTS'
+				)
+			);
 		}
 
 		if ( ! empty( $attributes['featured'] ) ) { // Featured			
@@ -671,9 +685,8 @@ class AIOVG_Public_Videos {
 				break;
 
 			case 'views':
-				$args['meta_key'] = $orderby;
-				$args['orderby']  = 'meta_value_num';			
-				$args['order']    = $order;
+				$args['orderby'] = 'meta_value_num';
+				$args['order']   = $order;
 				break;
 
 			case 'rand':
@@ -691,7 +704,7 @@ class AIOVG_Public_Videos {
 			if ( $query->get('post_type') !== 'aiovg_videos' ) {
 				return $orderby_sql;
 			}
-			
+
 			global $wpdb;
 			return "CASE {$wpdb->posts}.ID WHEN {$deeplink_video_id} THEN 0 ELSE 1 END, " . $orderby_sql;
 		};
@@ -789,8 +802,12 @@ class AIOVG_Public_Videos {
 					'taxonomy'   => 'aiovg_categories',
 					'hide_empty' => false,
 					'fields'     => 'ids',
-					'meta_key'   => 'exclude_search_form',
-					'meta_value' => 1
+					'meta_query' => array(
+						array(
+							'key'   => 'exclude_search_form',
+							'value' => 1
+						)
+					),
 				) );
 	
 				if ( ! empty( $categories_excluded ) && ! is_wp_error( $categories_excluded ) ) {
@@ -879,7 +896,7 @@ class AIOVG_Public_Videos {
 			$this->defaults['pagination_ajax'] = isset( $pagination_settings['ajax'] ) && ! empty( $pagination_settings['ajax'] ) ? 1 : 0;
 			$this->defaults['deeplink_video'] = aiovg_get_deeplink_video_id();	
 			$this->defaults['show_player_category'] = 0;
-			$this->defaults['show_player_tag'] = 0;	
+			$this->defaults['show_player_tag'] = 0;
 		}
 
 		$this->defaults['uid'] = aiovg_get_uniqid();

@@ -34,12 +34,12 @@ class AIOVG_Player_AMP extends AIOVG_Player_Base {
 	 * Get things started.
 	 *
 	 * @since 3.5.0
-	 * @param int   $post_id      Post ID.
- 	 * @param array $args         Player options.
-	 * @param int   $reference_id Player reference ID.
+	 * @param int   $post_id    Post ID.
+ 	 * @param array $args       Player options.
+	 * @param int   $player_uid Player unique ID.
 	 */
-	public function __construct( $post_id, $args, $reference_id ) {	
-		parent::__construct( $post_id, $args, $reference_id );	
+	public function __construct( $post_id, $args, $player_uid ) {	
+		parent::__construct( $post_id, $args, $player_uid, 'amp' );	
 	}
 
 	/**
@@ -51,7 +51,7 @@ class AIOVG_Player_AMP extends AIOVG_Player_Base {
 	public function get_player() {
 		// Check if the current user has access to this video
 		if ( $this->post_id > 0 && 'aiovg_videos' == $this->post_type ) {
-			if ( ! aiovg_current_user_can( 'play_aiovg_video', $this->post_id ) ) {
+			if ( ! $this->has_access && ! $this->is_trailer ) {
 				return $this->get_player_restricted_message();
 			}
 		}

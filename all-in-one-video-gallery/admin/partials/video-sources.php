@@ -70,7 +70,10 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 					);
 
 					echo sprintf(
-						'<div class="aiovg-flex aiovg-items-center aiovg-gap-1 aiovg-text-muted"><span class="dashicons dashicons-video-alt3"></span> %s (%s)</div>',
+						'<div class="aiovg-flex aiovg-items-center aiovg-gap-1 aiovg-text-muted">%s %s (%s)</div>',
+						'<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="20" height="20" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59" />
+						</svg>',
 						esc_html__( 'Select a Quality Level', 'all-in-one-video-gallery' ),
 						esc_html__( 'Default quality', 'all-in-one-video-gallery' )
 					);
@@ -105,7 +108,7 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 						<input type="hidden" name="bunny_stream_video_id" id="aiovg-bunny_stream_video_id" value="<?php echo esc_attr( $bunny_stream_video_id ); ?>" />
 						<input type="hidden" name="deletable_bunny_stream_video_ids" id="aiovg-deletable_bunny_stream_video_ids" value="" />								
 						<input type="file" accept="video/*" style="display: none;" />
-						<button type="button" id="aiovg-bunny-stream-upload-button" class="button">
+						<button type="button" id="aiovg-bunny-stream-upload-button" class="button aiovg-bunny-stream-upload-button">
 							<span class="dashicons dashicons-cloud-upload"></span>
 							<?php esc_html_e( 'Bunny Stream', 'all-in-one-video-gallery' ); ?>
 						</button>
@@ -122,7 +125,10 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 							echo '<div class="aiovg-quality-selector aiovg-flex aiovg-flex-col aiovg-gap-3">';
 
 							echo sprintf(
-								'<div class="aiovg-flex aiovg-items-center aiovg-gap-1 aiovg-text-muted"><span class="dashicons dashicons-video-alt3"></span> %s</div>',
+								'<div class="aiovg-flex aiovg-items-center aiovg-gap-1 aiovg-text-muted">%s %s</div>',
+								'<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="20" height="20" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59" />
+								</svg>',
 								esc_html__( 'Select a Quality Level', 'all-in-one-video-gallery' )
 							);
 
@@ -149,7 +155,7 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 							echo '</div>';
 							?>
 							<div class="aiovg-media-uploader">
-								<input type="text" name="sources[<?php echo $index; ?>]" class="widefat" placeholder="<?php esc_attr_e( 'Enter your direct file URL (OR) upload your file using the button here', 'all-in-one-video-gallery' ); ?> &rarr;" value="<?php echo esc_attr( $source['src'] ); ?>" />
+								<input type="text" name="sources[<?php echo absint( $index ); ?>]" class="widefat" placeholder="<?php esc_attr_e( 'Enter your direct file URL (OR) upload your file using the button here', 'all-in-one-video-gallery' ); ?> &rarr;" value="<?php echo esc_attr( $source['src'] ); ?>" />
 								<button type="button" class="aiovg-upload-media button" data-format="mp4">
 									<?php esc_html_e( 'Upload File', 'all-in-one-video-gallery' ); ?>
 								</button>
@@ -261,7 +267,10 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 			echo '<div class="aiovg-quality-selector aiovg-flex aiovg-flex-col aiovg-gap-3">';
 
 			echo sprintf(
-				'<div class="aiovg-flex aiovg-items-center aiovg-gap-1 aiovg-text-muted"><span class="dashicons dashicons-video-alt3"></span> %s</div>',
+				'<div class="aiovg-flex aiovg-items-center aiovg-gap-1 aiovg-text-muted">%s %s</div>',
+				'<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="20" height="20" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59" />
+				</svg>',
 				esc_html__( 'Select a Quality Level', 'all-in-one-video-gallery' )
 			);
 

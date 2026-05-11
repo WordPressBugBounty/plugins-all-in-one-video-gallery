@@ -31,13 +31,13 @@ class AIOVG_Player {
 	public static $instance;
 
 	/**
-	 * Current player reference ID.
+	 * Current player unique ID.
 	 *
 	 * @since  3.5.0
 	 * @access private
 	 * @var    int	 
 	 */
-	private $reference_id;
+	private $player_uid;
 
 	/**
 	 * Create a new instance of the main class.
@@ -60,7 +60,7 @@ class AIOVG_Player {
 	 * @since 2.4.0
 	 */
 	public function __construct() {
-		$this->reference_id = 0;
+		$this->player_uid = 0;
 	}
 
 	/**
@@ -72,7 +72,7 @@ class AIOVG_Player {
  	 * @return string $html    Player HTML.
 	 */
 	public function create( $post_id, $args ) {	
-		++$this->reference_id;
+		++$this->player_uid;
 		$post_id = (int) $post_id;			
 		
 		$player_type = $this->get_player_type( $args );
@@ -83,35 +83,35 @@ class AIOVG_Player {
 			case 'videojs':
 				require_once AIOVG_PLUGIN_DIR . 'includes/player/videojs.php';
 
-				$player = new AIOVG_Player_VideoJS( $post_id, $args, $this->reference_id );
+				$player = new AIOVG_Player_VideoJS( $post_id, $args, $this->player_uid );
 				$html = $player->get_player();
 				break;
 
 			case 'vidstack':
 				require_once AIOVG_PLUGIN_DIR . 'includes/player/vidstack.php';
 
-				$player = new AIOVG_Player_Vidstack( $post_id, $args, $this->reference_id );
+				$player = new AIOVG_Player_Vidstack( $post_id, $args, $this->player_uid );
 				$html = $player->get_player();
 				break;
 
 			case 'amp':
 				require_once AIOVG_PLUGIN_DIR . 'includes/player/amp.php';
 
-				$player = new AIOVG_Player_AMP( $post_id, $args, $this->reference_id );
+				$player = new AIOVG_Player_AMP( $post_id, $args, $this->player_uid );
 				$html = $player->get_player();
 				break;
 
 			case 'popup':
 				require_once AIOVG_PLUGIN_DIR . 'includes/player/popup.php';
 
-				$player = new AIOVG_Player_Popup( $post_id, $args, $this->reference_id );
+				$player = new AIOVG_Player_Popup( $post_id, $args, $this->player_uid );
 				$html = $player->get_player();
 				break;
 
 			default:
 				require_once AIOVG_PLUGIN_DIR . 'includes/player/iframe.php';
 
-				$player = new AIOVG_Player_Iframe( $post_id, $args, $this->reference_id );
+				$player = new AIOVG_Player_Iframe( $post_id, $args, $this->player_uid );
 				$html = $player->get_player();
 		}
 

@@ -1,13 +1,17 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "aiovg/video",
-	"version": "4.3.7",
+	"version": "4.7.6",
 	"title": "AIOVG - Video Player",
 	"category": "all-in-one-video-gallery",
 	"keywords": [ "video", "player", "all-in-one-video-gallery", "aiovg" ],
 	"icon": "format-video",
 	"description": "Display a video player.",
 	"textdomain": "all-in-one-video-gallery",
-	"editorScript": "file:./index.js"
+	"editorScript": "file:./index.js",
+	"supports": {
+		"customClassName": true,
+		"css": true
+	}
 }

@@ -16,7 +16,7 @@ import {
 
 import { InspectorControls,	PanelColorSettings,	useBlockProps } from '@wordpress/block-editor';
 
-import { useEffect,	useRef } from '@wordpress/element';
+import { useEffect,	useMemo, useRef } from '@wordpress/element';
 
 import { applyFilters } from '@wordpress/hooks';
 
@@ -37,41 +37,45 @@ function Edit( { attributes, setAttributes } ) {
 
 	const videos = aiovg_blocks.videos;	
 
-	const categoriesList = useSelect( ( select ) => {
-		const terms = select( 'core' ).getEntityRecords( 'taxonomy', 'aiovg_categories', {
+	const categoryTerms = useSelect( ( select ) => {
+		return select( 'core' ).getEntityRecords( 'taxonomy', 'aiovg_categories', {
 			'per_page': -1
 		});
+	});
 
+	const tagTerms = useSelect( ( select ) => {
+		return select( 'core' ).getEntityRecords( 'taxonomy', 'aiovg_tags', {
+			'per_page': -1
+		});
+	});
+
+	const categoriesList = useMemo( () => {
 		let options = [];
 
-		if ( terms && terms.length > 0 ) {		
-			let grouped = GroupByParent( terms );
+		if ( categoryTerms && categoryTerms.length > 0 ) {		
+			let grouped = GroupByParent( categoryTerms );
 			let tree = BuildTree( grouped );
 			
 			options = [ ...options, ...tree ];
 		}
 
 		return options;
-	});
+	}, [ categoryTerms ] );
 
-	const tagsList = useSelect( ( select ) => {
-		const terms = select( 'core' ).getEntityRecords( 'taxonomy', 'aiovg_tags', {
-			'per_page': -1
-		});		
-
+	const tagsList = useMemo( () => {
 		let options = [];
 
-		if ( terms ) {
-			for ( let i = 0; i < terms.length; i += 1 ) {
+		if ( tagTerms && tagTerms.length > 0 ) {
+			for ( let i = 0; i < tagTerms.length; i += 1 ) {
 				options.push({
-					label: terms[ i ].name,
-					value: terms[ i ].id,
+					label: tagTerms[ i ].name,
+					value: tagTerms[ i ].id,
 				});	
 			}			
 		}
 
 		return options;
-	});
+	}, [ tagTerms ] );
 
 	const getControl = ( field, index ) => {
 		if ( ! canShowControl( field.name ) ) {
@@ -95,8 +99,8 @@ function Edit( { attributes, setAttributes } ) {
 						options={ categoriesList }
 						value={ attributes[ field.name ] }
 						onChange={ onChange( field.name ) }
-						__nextHasNoMarginBottom
-            			__next40pxDefaultSize
+						__nextHasNoMarginBottom={ true }
+            			__next40pxDefaultSize={ true }
 					/>
 				</PanelRow>
 			case 'tags':
@@ -108,8 +112,8 @@ function Edit( { attributes, setAttributes } ) {
 						options={ tagsList }
 						value={ attributes[ field.name ] }
 						onChange={ onChange( field.name ) }
-						__nextHasNoMarginBottom
-            			__next40pxDefaultSize
+						__nextHasNoMarginBottom={ true }
+            			__next40pxDefaultSize={ true }
 					/>
 				</PanelRow>		
 			case 'number':
@@ -122,8 +126,8 @@ function Edit( { attributes, setAttributes } ) {
 						min={ field.min }
 						max={ field.max }
 						onChange={ onChange( field.name ) }
-						__nextHasNoMarginBottom
-            			__next40pxDefaultSize
+						__nextHasNoMarginBottom={ true }
+            			__next40pxDefaultSize={ true }
 					/>
 				</PanelRow>
 			case 'textarea':
@@ -134,7 +138,7 @@ function Edit( { attributes, setAttributes } ) {
 						placeholder={ placeholder }
 						value={ attributes[ field.name ] }
 						onChange={ onChange( field.name ) }
-						__nextHasNoMarginBottom
+						__nextHasNoMarginBottom={ true }
 					/>
 				</PanelRow>
 			case 'select':
@@ -155,8 +159,8 @@ function Edit( { attributes, setAttributes } ) {
 						options={ options }
 						value={ attributes[ field.name ] }
 						onChange={ onChange( field.name ) }
-						__nextHasNoMarginBottom
-            			__next40pxDefaultSize
+						__nextHasNoMarginBottom={ true }
+            			__next40pxDefaultSize={ true }
 					/>
 				</PanelRow>
 			case 'checkbox':
@@ -166,7 +170,7 @@ function Edit( { attributes, setAttributes } ) {
 						help={ description }
 						checked={ attributes[ field.name ] }
 						onChange={ toggleAttribute( field.name ) }
-						__nextHasNoMarginBottom
+						__nextHasNoMarginBottom={ true }
 					/>
 				</PanelRow>
 			case 'color':
@@ -191,8 +195,8 @@ function Edit( { attributes, setAttributes } ) {
 						placeholder={ placeholder }
 						value={ attributes[ field.name ] }
 						onChange={ onChange( field.name ) }
-						__nextHasNoMarginBottom
-            			__next40pxDefaultSize
+						__nextHasNoMarginBottom={ true }
+            			__next40pxDefaultSize={ true }
 					/>
 				</PanelRow>
 		}		

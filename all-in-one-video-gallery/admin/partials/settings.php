@@ -9,7 +9,7 @@
  * @package All_In_One_Video_Gallery
  */
 
-$active_tab     = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'general';
+$active_tab     = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'display';
 $active_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : '';
 
 $sections = array();

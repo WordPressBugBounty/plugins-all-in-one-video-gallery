@@ -567,7 +567,8 @@ img.aiovg-responsive-element {
 	font-size: 1.1em;
 }
 
-.aiovg-caption .aiovg-restricted-label {
+.aiovg-caption .aiovg-restricted-label,
+.aiovg-caption .aiovg-trailer-label {
 	display: inline-flex;
 	border-radius: 2px;
 	background-color: #999;
@@ -613,15 +614,11 @@ img.aiovg-responsive-element {
 	line-height: 1;
 }
   
+.aiovg-pagination-links a:hover,
 .aiovg-pagination-links .current {	
-	border: 1px solid #1e90ff;
-	background-color: #1e90ff;
-	color: white;	
-}
-  
-.aiovg-pagination-links a:hover {
-	background-color: #f0f0f0;
-	color: #1e90ff;
+	border: 1px solid var(--aiovg-color-primary, #3b82f6);
+	background-color: var(--aiovg-color-primary, #3b82f6);
+	color: #fff;	
 }
 
 .aiovg-pagination .aiovg-pagination-info {
@@ -706,6 +703,12 @@ img.aiovg-responsive-element {
     background-color: #25d366;
 }
 
+.aiovg-social-email,
+.aiovg-social-email:hover,
+.aiovg-social-email:active {
+    background-color: #6E6E6E;
+}
+
 /*----------------------------------------------------------------------------------------------
  *
  *	Custom Select
@@ -733,7 +736,7 @@ img.aiovg-responsive-element {
 	right: 0;
 	z-index: 99999;	
 	margin-top: 1px;	
-	border: 1px solid #9ca3af;
+	outline: 1px solid #9ca3af;
 	border-radius: 3px;	
 	box-shadow: 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 	background-color: #fff;
@@ -794,14 +797,10 @@ img.aiovg-responsive-element {
 	border-bottom: none;
 }
 
+.aiovg-dropdown-list .aiovg-dropdown-item:hover,
 .aiovg-dropdown-list .aiovg-dropdown-item.aiovg-item-active,
 .aiovg-dropdown-list .aiovg-dropdown-item.aiovg-item-selected {
-	background-color: #1e90ff;
-	color: #fff;
-}
-
-.aiovg-dropdown-list .aiovg-dropdown-item:hover {
-	background-color: #1c86ee;
+	background-color: var(--aiovg-color-primary, #3b82f6);
 	color: #fff;
 }
 
@@ -904,13 +903,9 @@ img.aiovg-responsive-element {
 	border-bottom: none;
 }
 
-.aiovg-autocomplete-items div:hover {
-	background-color: #1e90ff;
-	color: #fff;
-}
-
+.aiovg-autocomplete-items div:hover,
 .aiovg-autocomplete-items div.aiovg-autocomplete-active {
-	background-color: #1e90ff;
+	background-color: var(--aiovg-color-primary, #3b82f6);
 	color: #fff;
 }
 
@@ -1179,12 +1174,32 @@ aiovg-comment-button button {
 
 /* Inner bar (actual progress) */
 .aiovg-filters-progress-bar-inner {
-	background-color: #1e90ff;    
+	background-color: var(--aiovg-color-primary, #3b82f6);    
     width: 0;
     height: 100%;
     transition: width 0.2s ease, background-color 0.2s ease;
     animation: aiovg-pulse-bar 1.5s infinite;
     will-change: width, background-color;
+}
+
+/*----------------------------------------------------------------------------------------------
+ *
+ *	Block Editor
+ *
+ *--------------------------------------------------------------------------------------------*/
+.wp-block-aiovg-categories .components-spinner,
+.wp-block-aiovg-search .components-spinner,
+.wp-block-aiovg-videos .components-spinner,
+.wp-block-aiovg-video .components-spinner {
+	display: flex;
+	align-items: center;
+	width: 100%;
+}
+
+.wp-block-aiovg-categories .components-placeholder,
+.wp-block-aiovg-search .components-placeholder,
+.wp-block-aiovg-videos .components-placeholder {
+	display: none;
 }
 
 /*----------------------------------------------------------------------------------------------

@@ -14,6 +14,8 @@ import {
 
 import { InspectorControls,	useBlockProps } from '@wordpress/block-editor';
 
+import { useMemo } from '@wordpress/element';
+
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -43,25 +45,27 @@ function Edit( { attributes, setAttributes } ) {
 		show_pagination 
 	} = attributes;
 
-	const categories = useSelect( ( select ) => {
-		const categoriesList = select( 'core' ).getEntityRecords( 'taxonomy', 'aiovg_categories', {
+	const terms = useSelect( ( select ) => {
+		return select( 'core' ).getEntityRecords( 'taxonomy', 'aiovg_categories', {
 			'per_page': -1
 		});
+	});
 
+	const categories = useMemo( () => {
 		let options = [{ 
 			label: '— ' + aiovg_blocks.i18n.select_parent + ' —', 
 			value: 0
 		}];
 
-		if ( categoriesList && categoriesList.length > 0 ) {		
-			let grouped = GroupByParent( categoriesList );
+		if ( terms && terms.length > 0 ) {		
+			let grouped = GroupByParent( terms );
 			let tree = BuildTree( grouped );
 			
 			options = [ ...options, ...tree ];
 		}
 
 		return options;
-	});
+	}, [ terms ] );
 
 	return (
 		<>
@@ -77,8 +81,8 @@ function Edit( { attributes, setAttributes } ) {
 								{ label: aiovg_blocks.i18n.dropdown, value: 'dropdown' }
 							] }
 							onChange={ ( value ) => setAttributes( { template: value } ) }
-							__nextHasNoMarginBottom
-            				__next40pxDefaultSize
+							__nextHasNoMarginBottom={ true }
+            				__next40pxDefaultSize={ true }
 						/>
 					</PanelRow>
 
@@ -88,8 +92,8 @@ function Edit( { attributes, setAttributes } ) {
 							value={ id }
 							options={ categories }
 							onChange={ ( value ) => setAttributes( { id: Number( value ) } ) }
-							__nextHasNoMarginBottom
-           		 			__next40pxDefaultSize
+							__nextHasNoMarginBottom={ true }
+           		 			__next40pxDefaultSize={ true }
 						/>	
 					</PanelRow>
 
@@ -101,8 +105,8 @@ function Edit( { attributes, setAttributes } ) {
 								min={ 1 }
 								max={ 12 }
 								onChange={ ( value ) => setAttributes( { columns: value } ) }
-								__nextHasNoMarginBottom
-            					__next40pxDefaultSize
+								__nextHasNoMarginBottom={ true }
+            					__next40pxDefaultSize={ true }
 							/>
 						</PanelRow>
 					) }
@@ -115,8 +119,8 @@ function Edit( { attributes, setAttributes } ) {
 								min={ 0 }
 								max={ 500 }
 								onChange={ ( value ) => setAttributes( { limit: value } ) }
-								__nextHasNoMarginBottom
-            					__next40pxDefaultSize
+								__nextHasNoMarginBottom={ true }
+            					__next40pxDefaultSize={ true }
 							/>
 						</PanelRow>
 					) }
@@ -133,8 +137,8 @@ function Edit( { attributes, setAttributes } ) {
 								{ label: aiovg_blocks.i18n.menu_order, value: 'menu_order' }
 							] }
 							onChange={ ( value ) => setAttributes( { orderby: value } ) }
-							__nextHasNoMarginBottom
-            				__next40pxDefaultSize
+							__nextHasNoMarginBottom={ true }
+            				__next40pxDefaultSize={ true }
 						/>
 					</PanelRow>
 
@@ -147,8 +151,8 @@ function Edit( { attributes, setAttributes } ) {
 								{ label: aiovg_blocks.i18n.desc, value: 'desc' }
 							] }
 							onChange={ ( value ) => setAttributes( { order: value } ) }
-							__nextHasNoMarginBottom
-            				__next40pxDefaultSize
+							__nextHasNoMarginBottom={ true }
+            				__next40pxDefaultSize={ true }
 						/>
 					</PanelRow>
 
@@ -158,7 +162,7 @@ function Edit( { attributes, setAttributes } ) {
 								label={ aiovg_blocks.i18n.show_hierarchy }
 								checked={ hierarchical }
 								onChange={ () => setAttributes( { hierarchical: ! hierarchical } ) }
-								__nextHasNoMarginBottom
+								__nextHasNoMarginBottom={ true }
 							/>
 						</PanelRow>
 					) }
@@ -169,7 +173,7 @@ function Edit( { attributes, setAttributes } ) {
 								label={ aiovg_blocks.i18n.show_description }
 								checked={ show_description }
 								onChange={ () => setAttributes( { show_description: ! show_description } ) }
-								__nextHasNoMarginBottom
+								__nextHasNoMarginBottom={ true }
 							/>
 						</PanelRow>
 					) }
@@ -179,7 +183,7 @@ function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.show_videos_count }
 							checked={ show_count }
 							onChange={ () => setAttributes( { show_count: ! show_count } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -188,7 +192,7 @@ function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.hide_empty_categories }
 							checked={ hide_empty }
 							onChange={ () => setAttributes( { hide_empty: ! hide_empty } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -198,7 +202,7 @@ function Edit( { attributes, setAttributes } ) {
 								label={ aiovg_blocks.i18n.show_pagination }
 								checked={ show_pagination }
 								onChange={ () => setAttributes( { show_pagination: ! show_pagination } )  }
-								__nextHasNoMarginBottom
+								__nextHasNoMarginBottom={ true }
 							/>
 						</PanelRow>
 					) }

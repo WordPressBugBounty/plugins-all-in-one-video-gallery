@@ -25,12 +25,12 @@ class AIOVG_Player_Iframe extends AIOVG_Player_Base {
 	 * Get things started.
 	 *
 	 * @since 3.5.0
-	 * @param int   $post_id      Post ID.
- 	 * @param array $args         Player options.
-	 * @param int   $reference_id Player reference ID.
+	 * @param int   $post_id    Post ID.
+ 	 * @param array $args       Player options.
+	 * @param int   $player_uid Player unique ID.
 	 */
-	public function __construct( $post_id, $args, $reference_id ) {	
-		parent::__construct( $post_id, $args, $reference_id );	
+	public function __construct( $post_id, $args, $player_uid ) {	
+		parent::__construct( $post_id, $args, $player_uid, 'iframe' );	
 	}	
 
 	/**

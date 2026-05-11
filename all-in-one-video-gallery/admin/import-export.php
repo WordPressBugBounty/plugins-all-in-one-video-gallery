@@ -63,8 +63,13 @@ class AIOVG_Admin_Import_Export {
 	 * @since 4.5.2
 	 */
 	public function ajax_callback_import_folder() {
-		@set_time_limit( 1200 );
-		ignore_user_abort( true );
+		if ( function_exists( 'set_time_limit' ) ) {
+			set_time_limit( 1200 );
+		}
+
+		if ( function_exists( 'ignore_user_abort' ) ) {
+			ignore_user_abort( true );
+		}
 
 		check_ajax_referer( 'aiovg_ajax_nonce', 'security' ); // Verify the nonce for security
 
@@ -90,6 +95,7 @@ class AIOVG_Admin_Import_Export {
 		$set_featured_image = isset( $_POST['set_featured_image'] ) ? (int) $_POST['set_featured_image'] : 0;
 		$enable_downloads   = isset( $_POST['enable_downloads'] ) ? (int) $_POST['enable_downloads'] : 0;
 		$enable_comments    = isset( $_POST['enable_comments'] ) ? (int) $_POST['enable_comments'] : 0;
+		$email_capture      = isset( $_POST['email_capture'] ) ? (int) $_POST['email_capture'] : -1;
 		$access_control     = isset( $_POST['access_control'] ) ? (int) $_POST['access_control'] : -1;
 		$restricted_roles   = isset( $_POST['restricted_roles'] ) ? array_map( 'sanitize_text_field', $_POST['restricted_roles'] ) : array();
 		$offset             = isset( $_POST['offset'] ) ? (int) $_POST['offset'] : 0;
@@ -167,7 +173,7 @@ class AIOVG_Admin_Import_Export {
 				foreach ( $image_extensions as $image_extension ) {
 					$image_path = $current_folder_path. '/' . $file_name . '.' . $image_extension;
 
-					if ( @file_exists( $image_path ) ) {
+					if ( file_exists( $image_path ) ) {
 						$matches[ $file_name ]['image']      = $this->make_absolute_url( $image_path );
 						$matches[ $file_name ]['image_path'] = $image_path; // Already normalized
 						break;
@@ -202,6 +208,7 @@ class AIOVG_Admin_Import_Export {
 			'comment_status'     => ( ! empty( $enable_comments ) ? 'open' : 'closed' ),
 			'set_featured_image' => $set_featured_image,
 			'enable_downloads'   => $enable_downloads,
+			'email_capture'      => $email_capture,
 			'access_control'     => $access_control,
 			'restricted_roles'   => $restricted_roles,
 			'import_id'          => $import_id
@@ -263,8 +270,13 @@ class AIOVG_Admin_Import_Export {
 	 * @since 4.5.2
 	 */
 	public function ajax_callback_import_csv() {
-		@set_time_limit( 1200 );
-		ignore_user_abort( true );
+		if ( function_exists( 'set_time_limit' ) ) {
+			set_time_limit( 1200 );
+		}
+
+		if ( function_exists( 'ignore_user_abort' ) ) {
+			ignore_user_abort( true );
+		}
 
 		check_ajax_referer( 'aiovg_ajax_nonce', 'security' ); // Verify the nonce for security
 
@@ -498,8 +510,13 @@ class AIOVG_Admin_Import_Export {
 	 * @since 4.5.2
 	 */
 	public function ajax_callback_export_csv() {
-		@set_time_limit( 1200 );
-		ignore_user_abort( true );
+		if ( function_exists( 'set_time_limit' ) ) {
+			set_time_limit( 1200 );
+		}
+
+		if ( function_exists( 'ignore_user_abort' ) ) {
+			ignore_user_abort( true );
+		}
 
 		check_ajax_referer( 'aiovg_ajax_nonce', 'security' ); // Verify the nonce for security
 
@@ -708,6 +725,9 @@ class AIOVG_Admin_Import_Export {
 					case 'featured':
 						$row[] = isset( $post_meta[ $field ] ) ? (int) $post_meta[ $field ][0] : 0;
 						break;
+					case 'email_capture':
+						$row[] = isset( $post_meta['email_capture'] ) ? (int) $post_meta['email_capture'][0] : -1;
+						break;
 					case 'access_control':
 						$row[] = isset( $post_meta['access_control'] ) ? (int) $post_meta['access_control'][0] : -1;
 						break;
@@ -813,8 +833,13 @@ class AIOVG_Admin_Import_Export {
 	 * @since 4.5.2
 	 */
 	public function ajax_callback_export_zip() {
-		@set_time_limit( 1200 );
-		ignore_user_abort( true );
+		if ( function_exists( 'set_time_limit' ) ) {
+			set_time_limit( 1200 );
+		}
+
+		if ( function_exists( 'ignore_user_abort' ) ) {
+			ignore_user_abort( true );
+		}
 
 		check_ajax_referer( 'aiovg_ajax_nonce', 'security' ); // Verify the nonce for security
 
@@ -1048,6 +1073,47 @@ class AIOVG_Admin_Import_Export {
 	}
 
 	/**
+	 * AJAX callback to export email leads as a downloadable CSV file.
+	 *
+	 * @since 4.7.6
+	 */
+	public function ajax_callback_export_email_leads_csv() {
+		if ( function_exists( 'set_time_limit' ) ) {
+			set_time_limit( 1200 );
+		}
+		
+		if ( function_exists( 'ignore_user_abort' ) ) {
+			ignore_user_abort( true );
+		}
+
+		check_ajax_referer( 'aiovg_ajax_nonce', 'security' );
+
+		if ( ! current_user_can( 'manage_aiovg_options' ) ) {
+			wp_send_json_error( array( 'error' => esc_html__( 'You do not have sufficient permissions to do this action.', 'all-in-one-video-gallery' ) ) );
+		}
+
+		$video_id  = isset( $_GET['video_id'] ) ? absint( $_GET['video_id'] ) : 0;
+		$date_from = isset( $_GET['date_from'] ) ? sanitize_text_field( wp_unslash( $_GET['date_from'] ) ) : '';
+		$date_to   = isset( $_GET['date_to'] ) ? sanitize_text_field( wp_unslash( $_GET['date_to'] ) ) : '';
+
+		$leads = aiovg_email_capture_get_leads( array(
+			'video_id'  => $video_id,
+			'date_from' => $date_from,
+			'date_to'   => $date_to
+		) );
+
+		if ( $video_id > 0 ) {
+			$post      = get_post( $video_id );
+			$slug      = ( $post && ! empty( $post->post_name ) ) ? $post->post_name : 'video-' . $video_id;
+			$file_name = 'aiovg-emails-' . $slug . '-' . date( 'Y-m-d' ) . '.csv';
+		} else {
+			$file_name = 'aiovg-emails-' . date( 'Y-m-d' ) . '.csv';
+		}
+
+		aiovg_email_capture_generate_csv( $leads, $file_name );
+	}
+
+	/**
 	 * Hooked cleanup function to delete all files inside the export directory.
 	 *
 	 * @since 4.5.2
@@ -1118,7 +1184,7 @@ class AIOVG_Admin_Import_Export {
 		}
 
 		if ( ! is_readable( $csv_file_path ) ) {
-			@chmod( $csv_file_path, 0744 );
+			chmod( $csv_file_path, 0744 );
 			if ( ! is_readable( $csv_file_path ) ) {
 				return new WP_Error( 'csv_not_readable', __( 'Sorry, we could not read the selected CSV file. Please check the file and try again.', 'all-in-one-video-gallery' ) );
 			}
@@ -1294,11 +1360,11 @@ class AIOVG_Admin_Import_Export {
 			. "\t</system.webServer>\n"
 			. "</configuration>";
 
-		if ( false === @file_put_contents( $htaccess_file, $htaccess_rules ) ) {
+		if ( false === file_put_contents( $htaccess_file, $htaccess_rules ) ) {
 			return new WP_Error( 'file_write_failed', __( 'We were unable to complete a required file operation. Please make sure your server allows writing files.', 'all-in-one-video-gallery' ) );
 		}
 
-		if ( false === @file_put_contents( $webconfig_file, $webconfig_rules ) ) {
+		if ( false === file_put_contents( $webconfig_file, $webconfig_rules ) ) {
 			return new WP_Error( 'file_write_failed', __( 'We were unable to complete a required file operation. Please make sure your server allows writing files.', 'all-in-one-video-gallery' ) );
 		}
 
@@ -1307,8 +1373,8 @@ class AIOVG_Admin_Import_Export {
 		
 		if ( is_wp_error( $unzip_result ) ) {
 			// Remove protection files before returning
-			@unlink( $htaccess_file );
-			@unlink( $webconfig_file );
+			unlink( $htaccess_file );
+			unlink( $webconfig_file );
 
 			return $unzip_result;
 		}
@@ -1323,14 +1389,14 @@ class AIOVG_Admin_Import_Export {
 			if ( $file->isFile() ) {
 				$filetype = wp_check_filetype( $file->getFilename() );
 				if ( empty( $filetype['type'] ) ) {
-					@unlink( $file->getPathname() );
+					unlink( $file->getPathname() );
 				}
 			}
 		}
 
 		// Security cleanup
-		@unlink( $htaccess_file );
-		@unlink( $webconfig_file );
+		unlink( $htaccess_file );
+		unlink( $webconfig_file );
 
 		return untrailingslashit( $extract_path );
 	}
@@ -1417,7 +1483,7 @@ class AIOVG_Admin_Import_Export {
 			$post_id = wp_insert_post( $args );
 
 			// Insert post meta
-			if ( ! is_wp_error( $post_id ) ) {
+			if ( ! is_wp_error( $post_id ) && ! empty( $post_id ) ) {
 				// Categories
 				if ( ! empty( $attributes['categories'] ) ) {
 					wp_set_object_terms( $post_id, $attributes['categories'], 'aiovg_categories' );
@@ -1438,6 +1504,7 @@ class AIOVG_Admin_Import_Export {
 					'likes'			   => 0,
 					'dislikes'         => 0,
 					'download'         => $attributes['enable_downloads'],
+					'email_capture'    => $attributes['email_capture'],
 					'access_control'   => $attributes['access_control'],
 					'restricted_roles' => $attributes['restricted_roles'],
 					'import_id'        => $attributes['import_id']
@@ -1560,7 +1627,7 @@ class AIOVG_Admin_Import_Export {
 			// $video['src'] is a simple filename (e.g. video.mp4)
 			if ( ! empty( $attributes['folder'] ) && preg_match( '/^[a-zA-Z0-9_\-]+\.[a-zA-Z0-9]+$/i', $video['src'] ) ) {				
 				$local_file_path = $attributes['folder'] . '/' . sanitize_file_name( $video['src'] );
-				if ( @file_exists( $local_file_path ) ) {
+				if ( file_exists( $local_file_path ) ) {
 					$video['src'] = $this->make_absolute_url( $local_file_path );
 				}
 			}
@@ -1611,7 +1678,10 @@ class AIOVG_Admin_Import_Export {
 			}
 
 			if ( isset( $row['post_date'] ) && ! empty( $row['post_date'] ) ) {
-				$args['post_date'] = get_date_from_gmt( gmdate( 'Y-m-d H:i:s', strtotime( $row['post_date'] ) ) );
+				$timestamp = strtotime( $row['post_date'] );
+				if ( false !== $timestamp ) {
+					$args['post_date'] = gmdate( 'Y-m-d H:i:s', $timestamp );
+				}
 			}
 
 			if ( isset( $row['post_status'] ) && ! empty( $row['post_status'] ) ) {
@@ -1658,7 +1728,7 @@ class AIOVG_Admin_Import_Export {
 			}
 
 			// Insert post meta
-			if ( ! is_wp_error( $post_id ) ) {
+			if ( ! is_wp_error( $post_id ) && ! empty( $post_id ) ) {
 				// Categories
 				if ( isset( $row['aiovg_categories'] ) ) {
 					wp_set_object_terms( $post_id, null, 'aiovg_categories' );
@@ -1715,14 +1785,14 @@ class AIOVG_Admin_Import_Export {
 								if ( ! empty( $attributes['folder'] ) && preg_match( '/^[a-zA-Z0-9_\-]+\.[a-zA-Z0-9]+$/i', $src ) ) {
 									// $src is a simple filename (e.g. captions.vtt)
 									$local_file_path = $attributes['folder'] . '/' . sanitize_file_name( $src );
-									if ( @file_exists( $local_file_path ) ) {
+									if ( file_exists( $local_file_path ) ) {
 										$src = $this->make_absolute_url( $local_file_path );
 									}
 								}
 
 								if ( ! empty( $attributes['folder'] ) && isset( $source['file'] ) && ! empty( $source['file'] ) ) {
 									$local_file_path = $attributes['folder'] . '/' . sanitize_file_name( $source['file'] );
-									if ( @file_exists( $local_file_path ) ) {
+									if ( file_exists( $local_file_path ) ) {
 										$src = $this->make_absolute_url( $local_file_path );
 									}
 								}
@@ -1803,7 +1873,7 @@ class AIOVG_Admin_Import_Export {
 
 					if ( ! empty( $attributes['folder'] ) && isset( $video['file'] ) && ! empty( $video['file'] ) ) {
 						$local_file_path = $attributes['folder'] . '/' . sanitize_file_name( $video['file'] );
-						if ( @file_exists( $local_file_path ) ) {
+						if ( file_exists( $local_file_path ) ) {
 							$src = $this->make_absolute_url( $local_file_path );
 						}
 					}
@@ -1826,14 +1896,14 @@ class AIOVG_Admin_Import_Export {
 						if ( ! empty( $attributes['folder'] ) && preg_match( '/^[a-zA-Z0-9_\-]+\.[a-zA-Z0-9]+$/i', $src ) ) {
 							// $src is a simple filename (e.g. video.mp4)
 							$local_file_path = $attributes['folder'] . '/' . sanitize_file_name( $src );
-							if ( @file_exists( $local_file_path ) ) {
+							if ( file_exists( $local_file_path ) ) {
 								$src = $this->make_absolute_url( $local_file_path );
 							}
 						}
 
 						if ( ! empty( $attributes['folder'] ) && isset( $source['file'] ) && ! empty( $source['file'] ) ) {
 							$local_file_path = $attributes['folder'] . '/' . sanitize_file_name( $source['file'] );
-							if ( @file_exists( $local_file_path ) ) {
+							if ( file_exists( $local_file_path ) ) {
 								$src = $this->make_absolute_url( $local_file_path );
 							}
 						}
@@ -1861,7 +1931,7 @@ class AIOVG_Admin_Import_Export {
 
 						if ( ! empty( $attributes['folder'] ) && isset( $row['image']['file'] ) && ! empty( $row['image']['file'] ) ) {
 							$local_file_path = $attributes['folder'] . '/' . sanitize_file_name( $row['image']['file'] );
-							if ( @file_exists( $local_file_path ) ) {
+							if ( file_exists( $local_file_path ) ) {
 								$image      = $this->make_absolute_url( $local_file_path );
 								$image_path = $local_file_path;
 							}
@@ -1877,7 +1947,7 @@ class AIOVG_Admin_Import_Export {
 					// $image is a simple filename (e.g. image.jpg)
 					if ( ! empty( $image ) && ! empty( $attributes['folder'] ) && preg_match( '/^[a-zA-Z0-9_\-]+\.[a-zA-Z0-9]+$/i', $image ) ) {
 						$local_file_path = $attributes['folder'] . '/' . sanitize_file_name( $image );
-						if ( @file_exists( $local_file_path ) ) {
+						if ( file_exists( $local_file_path ) ) {
 							$image      = $this->make_absolute_url( $local_file_path );
 							$image_path = $local_file_path;
 						}
@@ -1954,6 +2024,15 @@ class AIOVG_Admin_Import_Export {
 
 					if ( ! empty( $row['featured'] ) ) {
 						$meta['featured'] = (int) $row['featured'];
+					}
+				}
+
+				// Email Capture
+				if ( isset( $row['email_capture'] ) ) {
+					$meta['email_capture'] = -1;
+
+					if ( '' !== (string) $row['email_capture'] ) {
+						$meta['email_capture'] = (int) $row['email_capture'];
 					}
 				}
 
@@ -2498,8 +2577,9 @@ class AIOVG_Admin_Import_Export {
 			'dislikes'         => __( 'Dislikes Count', 'all-in-one-video-gallery' ),
 			'download'         => __( 'Enable Download', 'all-in-one-video-gallery' ),
 			'featured'         => __( 'Featured', 'all-in-one-video-gallery' ),
-			'access_control'   => __( 'Restrict Access', 'all-in-one-video-gallery' ),
-			'restricted_roles' => __( 'Restricted User Roles', 'all-in-one-video-gallery' ),
+			'email_capture'    => __( 'Email & Lead Capture', 'all-in-one-video-gallery' ),
+			'access_control'   => __( 'Access Control', 'all-in-one-video-gallery' ),
+			'restricted_roles' => __( 'Allowed User Roles', 'all-in-one-video-gallery' ),
 			'comment_status'   => __( 'Comment Status', 'all-in-one-video-gallery' ),
 			'post_status'      => __( 'Video Status', 'all-in-one-video-gallery' ),
 			'post_author'      => __( 'Video Author', 'all-in-one-video-gallery' ),
@@ -2592,5 +2672,5 @@ class AIOVG_Admin_Import_Export {
 		$cleanup_after = apply_filters( 'aiovg_cleanup_export_directory_time', DAY_IN_SECONDS );
 		wp_schedule_single_event( time() + $cleanup_after, 'aiovg_cleanup_export_directory' );
 	}
-	
+
 }

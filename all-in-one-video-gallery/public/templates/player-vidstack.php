@@ -13,7 +13,8 @@ $settings = array(
 	'uid'        => isset( $_GET['uid'] ) ? sanitize_text_field( $_GET['uid'] ) : 0,
 	'post_id'    => $post_id,
 	'post_type'  => $post_type,
-	'statistics' => isset( $player_settings['statistics'] ) ? (int) $player_settings['statistics'] : 1,	
+	'is_trailer' => $is_trailer,
+	'statistics' => isset( $general_settings['statistics'] ) ? (int) $general_settings['statistics'] : 1,	
 	'player'     => array(
 		'iconUrl' => AIOVG_PLUGIN_URL . 'vendor/vidstack/plyr.svg',
 		'volume'  => 0.5
@@ -187,11 +188,10 @@ if ( $has_chapters && 'aiovg_videos' == $post_type ) {
 
 // Video Attributes
 $player_theme = ( isset( $player_settings['theme'] ) && 'custom' == $player_settings['theme'] ) ? 'custom' : 'default';
-$player_theme_color = ! empty( $player_settings['theme_color'] ) ? $player_settings['theme_color'] : '#00b2ff';
 
 $attributes = array(
 	'id'       => 'player',
-	'style'    => 'width: 100%; height: 100%; --plyr-color-main: ' . esc_attr( $player_theme_color ) . ';',
+	'style'    => 'width: 100%; height: 100%; --plyr-color-main: ' . esc_attr( $primary_color ) . ';',
 	'controls' => '',
 	'preload'  => esc_attr( $player_settings['preload'] )
 );
@@ -438,11 +438,9 @@ if ( $has_share ) {
 	$socialshare_settings = aiovg_get_option( 'aiovg_socialshare_settings' );
 
 	$share_url = $post_url;
+	$share_url_encoded = rawurlencode( $share_url );
 
-	$share_title = $post_title;
-	$share_title = str_replace( ' ', '%20', $share_title );
-	$share_title = str_replace( '|', '%7C', $share_title );
-	$share_title = str_replace( '@', '%40', $share_title );
+	$share_title = rawurlencode( $post_title );
 
 	$share_image = isset( $attributes['data-poster'] ) ? $attributes['data-poster'] : '';
 
@@ -451,7 +449,7 @@ if ( $has_share ) {
 	if ( isset( $socialshare_settings['services']['facebook'] ) ) {
 		$share_buttons[] = array(
 			'service' => 'facebook',
-			'url'     => "https://www.facebook.com/sharer/sharer.php?u={$share_url}",
+			'url'     => "https://www.facebook.com/sharer/sharer.php?u={$share_url_encoded}",
 			'icon'    => 'aiovg-icon-facebook',
 			'text'    => __( 'Facebook', 'all-in-one-video-gallery' )				
 		);
@@ -460,7 +458,7 @@ if ( $has_share ) {
 	if ( isset( $socialshare_settings['services']['twitter'] ) ) {
 		$share_buttons[] = array(
 			'service' => 'twitter',			
-			'url'     => "https://twitter.com/intent/tweet?text={$share_title}&amp;url={$share_url}",
+			'url'     => "https://twitter.com/intent/tweet?text={$share_title}&amp;url={$share_url_encoded}",
 			'icon'    => 'aiovg-icon-twitter',
 			'text'    => __( 'Twitter', 'all-in-one-video-gallery' )
 		);
@@ -469,14 +467,14 @@ if ( $has_share ) {
 	if ( isset( $socialshare_settings['services']['linkedin'] ) ) {
 		$share_buttons[] = array(	
 			'service' => 'linkedin',		
-			'url'     => "https://www.linkedin.com/shareArticle?url={$share_url}&amp;title={$share_title}",
+			'url'     => "https://www.linkedin.com/shareArticle?url={$share_url_encoded}&amp;title={$share_title}",
 			'icon'    => 'aiovg-icon-linkedin',
 			'text'    => __( 'Linkedin', 'all-in-one-video-gallery' )
 		);
 	}
 
 	if ( isset( $socialshare_settings['services']['pinterest'] ) ) {
-		$pinterest_url = "https://pinterest.com/pin/create/button/?url={$share_url}&amp;description={$share_title}";
+		$pinterest_url = "https://pinterest.com/pin/create/button/?url={$share_url_encoded}&amp;description={$share_title}";
 
 		if ( ! empty( $share_image ) ) {
 			$pinterest_url .= "&amp;media={$share_image}";
@@ -491,13 +489,11 @@ if ( $has_share ) {
 	}
 
 	if ( isset( $socialshare_settings['services']['tumblr'] ) ) {
-		$tumblr_url = "https://www.tumblr.com/share/link?url={$share_url}&amp;name={$share_title}";
+		$tumblr_url = "https://www.tumblr.com/share/link?url={$share_url_encoded}&amp;name={$share_title}";
 
 		$share_description = aiovg_get_excerpt( $post_id, 160, '', false ); 
 		if ( ! empty( $share_description ) ) {
-			$share_description = str_replace( ' ', '%20', $share_description );
-			$share_description = str_replace( '|', '%7C', $share_description );	
-			$share_description = str_replace( '@', '%40', $share_description );
+			$share_description = rawurlencode( $share_description );
 
 			$tumblr_url .= "&amp;description={$share_description}";
 		}
@@ -512,9 +508,9 @@ if ( $has_share ) {
 
 	if ( isset( $socialshare_settings['services']['whatsapp'] ) ) {
 		if ( wp_is_mobile() ) {
-			$whatsapp_url = "whatsapp://send?text={$share_title} " . rawurlencode( $share_url );
+			$whatsapp_url = "whatsapp://send?text={$share_title} {$share_url_encoded}";
 		} else {
-			$whatsapp_url = "https://api.whatsapp.com/send?text={$share_title}&nbsp;{$share_url}";
+			$whatsapp_url = "https://api.whatsapp.com/send?text={$share_title}%20{$share_url_encoded}";
 		}
 
 		$share_buttons[] = array(	
@@ -575,14 +571,85 @@ if ( ! empty( $brand_settings ) ) {
 
 	$has_contextmenu = ! empty( $brand_settings['copyright_text'] ) ? 1 : 0;
 	if ( $has_contextmenu ) {
-		$copyright_text = apply_filters( 'aiovg_translate_strings', $brand_settings['copyright_text'], 'copyright_text' );
 		$settings['contextmenu'] = array(
-			'content' => esc_attr( $copyright_text )
+			'content' => wp_strip_all_tags( apply_filters( 'aiovg_translate_strings', $brand_settings['copyright_text'], 'copyright_text' ) )
 		);
 	}
 }
 
+// Trailer
+if ( ! empty( $is_trailer ) ) {
+	$player_overlay_link = isset( $trailer_settings['player_overlay_link'] ) ? $trailer_settings['player_overlay_link'] : '';
+	$player_overlay_link = apply_filters( 'aiovg_player_overlay_link', $player_overlay_link, $post_id );
+
+	$player_overlay_text = isset( $trailer_settings['player_overlay_text'] ) ? $trailer_settings['player_overlay_text'] : '';
+	if ( empty( $player_overlay_text ) ) {
+		$player_overlay_text = ! empty( $player_overlay_link ) ? __( 'Watch Full Video', 'all-in-one-video-gallery' ) : __( 'Trailer', 'all-in-one-video-gallery' );
+	}
+	$player_overlay_text = apply_filters( 'aiovg_player_overlay_text', $player_overlay_text, $post_id );
+
+	$settings['trailer'] = array(
+		'label' => wp_strip_all_tags( $player_overlay_text ),
+		'url'   => esc_url( $player_overlay_link )
+	);
+}
+
+// Email Capture.
+if ( ! isset( $_GET['nocapture'] ) ) {
+	if ( ! empty( $email_capture_settings['enable_email_capture'] ) && ! is_user_logged_in() && ! isset( $_COOKIE['aiovg_email_captured'] ) ) {
+		$show_email_capture = 1;
+
+		if ( 'aiovg_videos' == $post_type && isset( $post_meta['email_capture'] ) ) {
+			$show_email_capture = (int) $post_meta['email_capture'][0];
+		}
+
+		if ( isset( $_GET['email_capture'] ) ) {
+			$show_email_capture = (int) $_GET['email_capture'];
+		}
+
+		if ( $show_email_capture === -1 ) { // Global
+			$show_email_capture = 1;
+		}
+
+		if ( ! empty( $show_email_capture ) ) {
+			$mid_roll     = ! empty( $email_capture_settings['mid_roll'] ) ? (int) $email_capture_settings['mid_roll'] : 0;
+			$post_roll    = ! empty( $email_capture_settings['post_roll'] ) ? 1 : 0;
+			$header_text  = ! empty( $email_capture_settings['header_text'] ) ? $email_capture_settings['header_text'] : __( 'Enter your email to continue watching', 'all-in-one-video-gallery' );
+			$footer_text  = ! empty( $email_capture_settings['footer_text'] ) ? $email_capture_settings['footer_text'] : '';
+			$button_label = ! empty( $email_capture_settings['button_label'] ) ? $email_capture_settings['button_label'] : __( 'Submit', 'all-in-one-video-gallery' );
+			$skip_text    = ! empty( $email_capture_settings['skip_text'] ) ? $email_capture_settings['skip_text'] : __( 'Skip', 'all-in-one-video-gallery' );
+			
+			if ( ! empty( $mid_roll ) || ! empty( $post_roll ) ) {
+				$settings['email_capture'] = array(
+					'mid_roll'      => $mid_roll,
+					'post_roll'     => $post_roll,
+					'collect_name'  => ! empty( $email_capture_settings['collect_name'] ) ? 1 : 0,
+					'collect_phone' => ! empty( $email_capture_settings['collect_phone'] ) ? 1 : 0,
+					'allow_skip'    => ! empty( $email_capture_settings['allow_skip'] ) ? 1 : 0,
+					'header_text'   => apply_filters( 'aiovg_translate_strings', $header_text, 'header_text' ),
+					'footer_text'   => apply_filters( 'aiovg_translate_strings', $footer_text, 'footer_text' ),
+					'button_label'  => apply_filters( 'aiovg_translate_strings', $button_label, 'button_label' ),
+					'skip_text'     => apply_filters( 'aiovg_translate_strings', $skip_text, 'skip_text' )
+				);
+			}
+		}
+	}
+}
+
 $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
+
+// Trailers should not send statistics and should have limited controls to encourage users to watch the full video.
+if ( ! empty( $is_trailer ) ) {
+	$tracks = array();
+	
+	$settings['statistics'] = 0;
+
+	unset( $settings['player']['captions'] );
+	unset( $settings['player']['markers'] );
+	if ( ! empty( $settings['player']['controls'] ) ) {
+		$settings['player']['controls'] = array_values( array_diff( $settings['player']['controls'], array( 'download' ) ) );
+	}
+}
 ?>
 <!DOCTYPE html>
 <html translate="no">
@@ -599,18 +666,18 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 	<link rel="stylesheet" href="<?php echo AIOVG_PLUGIN_URL; ?>vendor/vidstack/plyr.css?v=3.7.8" />
 
 	<style type="text/css">
-		* {
-            font-family: Verdana, sans-serif;
-        }
-
-        html, 
+		html,
         body {
-			margin: 0; 
-            padding: 0;
-            width: 100%;
-            height: 100%;             
+            margin: 0 !important;
+			padding: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
             overflow: hidden;
-        }			
+        }	
+		
+		body * {
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+		}
 
 		/* Icons */
 		@font-face {
@@ -693,7 +760,11 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 
 		.aiovg-player .plyr__control--overlaid svg {
 			--plyr-control-icon-size: 27px;
-		}		
+		}	
+
+		.aiovg-show-email-capture:not(.aiovg-ads-playing) .plyr__control--overlaid {
+			display: none !important;
+		}
 
 		/* Custom Theme */
 		.aiovg-player-theme-custom .plyr__controls {
@@ -728,6 +799,13 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 			}
 		}
 
+		/* Tech: YouTube */
+		.aiovg-hide-youtube-logo .plyr--youtube .plyr__video-wrapper iframe {
+			pointer-events: none;
+			top: -50% !important;
+			height: 200% !important;			
+		}
+
 		/* Ads */
 		.aiovg-player .plyr--playing .plyr__ads {
 			display: none;
@@ -747,7 +825,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 		}
 
 		.aiovg-player .plyr__progress .plyr__progress__marker {	
-			border: 2px solid var( --plyr-video-control-color, #ffffff );	
+			border: 2px solid var(--plyr-video-control-color, #ffffff);	
 			border-radius: 50%;
 			background: transparent;
 			width: 10px;
@@ -914,7 +992,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
             border: 1px solid #fff;
         }
 
-		/* Custom Logo & Branding */
+		/* Logo Overlay */
 		.aiovg-player .plyr__logo {			
             -webkit-transition: opacity .5s;
                -moz-transition: opacity .5s;
@@ -942,35 +1020,218 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 
 		.aiovg-player .plyr__logo img {
 			max-width: 150px;
-		}		
-
-		/* Tech: YouTube */
-		.aiovg-hide-youtube-logo .plyr--youtube .plyr__video-wrapper iframe {
-			pointer-events: none;
-			top: -50% !important;
-			height: 200% !important;			
 		}
 
+		/* Trailer Badge */
+		.aiovg-is-trailer .plyr__logo a {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: center;
+			gap: 6px;
+			border-radius: 3px;
+			background: rgba( 0, 0, 0, 0.5 );
+			padding: 6px 10px;
+			max-width: 160px;
+		}
+
+		.aiovg-is-trailer .plyr__logo img {			
+			flex-shrink: 0;
+			border-radius: 3px;
+			max-width: 40px;
+			max-height: 24px;
+			object-fit: contain;
+		}
+
+		.aiovg-is-trailer .plyr__logo .plyr__logo-label {
+			text-align: center;			
+			line-height: 1.3;
+			white-space: normal;
+			color: #fff;
+			font-size: 11px;
+		}
+
+		/* Email Capture */
+		#aiovg-email-capture {
+            position: absolute;
+            inset: 0;
+			z-index: 9999999999; /* match contextmenu — ensures visibility in fullscreen */
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            background-color: rgba( 0, 0, 0, 0.85 );
+            overflow-y: auto;
+			line-height: 1.5;
+			color: #fff;
+			font-size: 14px;
+        }
+
+		.aiovg-show-email-capture:not(.aiovg-ads-playing) #aiovg-email-capture {
+			display: flex !important;
+		}
+
+        #aiovg-email-capture-block {
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: auto;
+            padding: 16px 24px;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        #aiovg-email-capture-header {
+			text-align: center;
+            text-shadow: 0 1px 4px rgba( 0, 0, 0, 0.8 );
+            font-size: 1.15em;
+        }
+
+        #aiovg-email-capture-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        #aiovg-email-capture-fields input {
+            box-sizing: border-box;
+            display: block;
+            border: 1px solid rgba( 255, 255, 255, 0.3 );
+            border-radius: 3px;
+            background: rgba( 255, 255, 255, 0.12 );
+            padding: 0 12px;
+            width: 100%;
+            min-height: 44px;
+            line-height: 1;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1em;
+        }
+
+        #aiovg-email-capture-fields input::placeholder {
+            color: rgba( 255, 255, 255, 0.5 );
+        }
+
+        #aiovg-email-capture-fields input:focus {
+            outline: none;
+            border-color: rgba( 255, 255, 255, 0.6 );
+            background: rgba( 255, 255, 255, 0.18 );
+        }
+
+        #aiovg-email-capture-email.aiovg-is-invalid {
+            border-color: #ff7070;
+        }
+
+        #aiovg-email-capture-error {
+            display: none;
+            margin-top: -4px;
+            color: #ff7070;
+            font-size: 0.875em;
+        }
+
+		#aiovg-email-capture-error::before {
+            content: "⚠";
+            margin-right: 5px;
+        }
+
+        #aiovg-email-capture-footer {
+            margin-top: -4px;
+            line-height: 1.4;
+            color: rgba( 255, 255, 255, 0.55 );
+            font-size: 0.875em;            
+        }
+
+        #aiovg-email-capture-footer a {
+            color: rgba( 255, 255, 255, 0.75 );
+        }
+
+        #aiovg-email-capture-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;            
+        }
+
+        #aiovg-email-capture-submit,
+        #aiovg-email-capture-submit:hover,
+        #aiovg-email-capture-submit:focus {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            border-radius: 3px;
+            box-shadow: none;
+            background: none;
+            background-color: <?php echo esc_attr( $primary_color ); ?>;
+	        background-image: none;
+            cursor: pointer;
+            padding: 0 20px;
+            min-height: 44px;
+            line-height: 1;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1em;
+            font-weight: 600;
+        }
+
+        #aiovg-email-capture-submit:hover {
+            opacity: 0.85;
+        }
+
+        #aiovg-email-capture-skip {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            text-decoration: underline;
+            color: rgba( 255, 255, 255, 0.6 );
+            font-size: 0.875em;     
+        }
+
+        #aiovg-email-capture-skip:hover {
+            color: #fff;
+        }
+
+		@keyframes aiovg-spin {
+            to { transform: rotate( 360deg ); }
+        }
+
+        .aiovg-is-loading #aiovg-email-capture-block * {
+            display: none !important;
+        }
+
+        .aiovg-is-loading #aiovg-email-capture-block {
+            pointer-events: none;
+            margin: auto;
+            border: 3px solid rgba( 255, 255, 255, 0.25 );
+            border-radius: 50%;
+            border-top-color: #fff;    
+            padding: 0;        
+            width: 36px;
+            height: 36px;
+            animation: aiovg-spin 0.7s linear infinite;            
+        }
+
 		/* Custom ContextMenu */
-		.aiovg-player .plyr__contextmenu {
+		#aiovg-contextmenu {
             position: absolute;
             top: 0;
             left: 0;
 			z-index: 9999999999; /* make sure it shows on fullscreen */
-            margin: 0;           
+            margin: 0;
 			border-radius: 2px;
-			background: rgba( 0, 0, 0, 0.5 );
-			padding: 0;
+  			background-color: rgba( 0, 0, 0, 0.5 );
+            padding: 0;
         }
-        
-        .aiovg-player .plyr__contextmenu-content {
+
+        #aiovg-contextmenu .aiovg-contextmenu-content {
             margin: 0;
 			cursor: pointer;
             padding: 8px 12px;
-			line-height: 1;	
 			white-space: nowrap;
-			color: #fff;	
-			font-size: 11px;            
+			color: #fff;
+            font-size: 11px;
         }
     </style>
 	
@@ -982,7 +1243,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 	
 	<?php do_action( 'aiovg_iframe_vidstack_player_head', $settings, $attributes, $sources, $tracks ); ?>
 </head>
-<body class="aiovg-player aiovg-player-theme-<?php echo esc_attr( $player_theme ); ?><?php if ( ! empty( $player_settings['hide_youtube_logo'] ) ) : ?> aiovg-hide-youtube-logo<?php endif; ?>">
+<body class="aiovg-player aiovg-player-theme-<?php echo esc_attr( $player_theme ); ?><?php if ( ! empty( $player_settings['hide_youtube_logo'] ) ) : ?> aiovg-hide-youtube-logo<?php endif; ?><?php if ( ! empty( $is_trailer ) ) : ?> aiovg-is-trailer<?php endif; ?>">
 	<?php
 	// YouTube
 	if ( isset( $sources['youtube'] ) ) {
@@ -1067,7 +1328,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 					<!-- Embed Code -->
 					<div class="plyr__embed">
 						<label for="plyr__embed-code-input"><?php esc_html_e( 'Paste this code in your HTML page', 'all-in-one-video-gallery' ); ?></label>
-						<input type="text" id="plyr__embed-code-input" value="<?php echo htmlspecialchars( $embed_code ); ?>" readonly />
+						<input type="text" id="plyr__embed-code-input" value="<?php echo esc_attr( $embed_code ); ?>" readonly />
 					</div>
 				<?php endif; ?>
 
@@ -1076,7 +1337,47 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 			</div>
 		</div>
 	<?php endif; ?>
-    
+
+	<?php if ( isset( $settings['email_capture'] ) ) : ?>
+		<div id="aiovg-email-capture" style="display: none;">
+			<div id="aiovg-email-capture-block">
+				<div id="aiovg-email-capture-header"><?php echo esc_html( $settings['email_capture']['header_text'] ); ?></div>
+
+				<div id="aiovg-email-capture-fields">
+					<?php if ( ! empty( $settings['email_capture']['collect_name'] ) ) : ?>
+						<input type="text" id="aiovg-email-capture-name" name="name" placeholder="<?php esc_attr_e( 'Your name', 'all-in-one-video-gallery' ); ?>" autocomplete="name" />
+					<?php endif; ?>
+
+					<input type="email" id="aiovg-email-capture-email" name="email" placeholder="<?php esc_attr_e( 'Your email address *', 'all-in-one-video-gallery' ); ?>" required autocomplete="email" aria-describedby="aiovg-email-capture-error" />
+
+					<?php if ( ! empty( $settings['email_capture']['collect_phone'] ) ) : ?>
+						<input type="tel" id="aiovg-email-capture-phone" name="phone" placeholder="<?php esc_attr_e( 'Your phone number', 'all-in-one-video-gallery' ); ?>" autocomplete="tel" />
+					<?php endif; ?>
+				</div>
+			
+				<?php if ( ! empty( $settings['email_capture']['footer_text'] ) ) : ?>
+					<div id="aiovg-email-capture-footer"><?php echo wp_kses_post( $settings['email_capture']['footer_text'] ); ?></div>
+				<?php endif; ?>
+
+				<div id="aiovg-email-capture-error" role="alert" aria-live="assertive" tabindex="-1" data-invalid_email="<?php esc_attr_e( 'Please enter a valid email address.', 'all-in-one-video-gallery' ); ?>" data-error_generic="<?php esc_attr_e( 'Something went wrong. Please try again.', 'all-in-one-video-gallery' ); ?>"></div>
+
+				<div id="aiovg-email-capture-actions">
+					<button type="button" id="aiovg-email-capture-submit"><?php echo esc_html( $settings['email_capture']['button_label'] ); ?></button>
+
+					<?php if ( ! empty( $settings['email_capture']['allow_skip'] ) ) : ?>
+						<a id="aiovg-email-capture-skip" role="button" tabindex="0"><?php echo esc_html( $settings['email_capture']['skip_text'] ); ?></a>
+					<?php endif; ?>
+				</div>
+			</div>
+		</div>
+	<?php endif; ?>
+
+	<?php if ( isset( $settings['contextmenu'] ) ) : ?>
+		<div id="aiovg-contextmenu" style="display: none;">
+            <div class="aiovg-contextmenu-content"><?php echo esc_html( $settings['contextmenu']['content'] ); ?></div>
+        </div>
+	<?php endif; ?>
+
 	<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/vidstack/plyr.polyfilled.js?v=3.7.8" type="text/javascript" defer></script>
 
 	<?php if ( isset( $sources['hls'] ) ) : ?>
@@ -1096,12 +1397,231 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 		 * Vars
 		 */ 
 
-		var settings = <?php echo json_encode( $settings ); ?>;		
+		var settings = <?php echo json_encode( $settings ); ?>;	
+		var emailCaptureEl = null;
 
 		/**
-		 * Helper Functions.
-		 */ 
+		 * Email capture implementation.
+		 * Mid-roll: Show when currentTime reaches the configured percentage.
+		 */
+		function initEmailCapture( player ) {
+			emailCaptureEl = document.getElementById( 'aiovg-email-capture' );
+			player.elements.container.appendChild( emailCaptureEl );
 
+			let isModalOpen = false;
+			let wasPlaying  = false;
+
+			// Show the overlay and pause the player (mid-roll only).
+			const showEmailCapture = () => {
+				if ( ! emailCaptureEl || isModalOpen ) return false;
+				isModalOpen = true;
+
+				if ( ! player.ended ) {
+					wasPlaying = ! player.paused || player.seeking;
+					player.pause();
+				}
+
+				document.body.classList.add( 'aiovg-show-email-capture' );
+
+				const firstInput = emailCaptureEl.querySelector( 'input' );
+				if ( firstInput ) {
+					firstInput.focus();
+				}
+			}
+
+			// Hide the overlay and resume playback for mid-roll.
+			const hideEmailCapture = () => {
+				if ( ! emailCaptureEl || ! isModalOpen ) return false;
+				isModalOpen = false; // Clear before player.play() so the guard above does not block it.
+
+				document.body.classList.remove( 'aiovg-show-email-capture' );
+
+				emailCaptureEl.remove();
+				emailCaptureEl = null;
+
+				if ( wasPlaying ) {
+					player.play();
+				}
+			}
+
+			// Hide the overlay; POST to the AJAX handler.
+			const ajaxEmailCapture = ( data ) => {
+				if ( ! emailCaptureEl ) return false;
+
+				if ( emailCaptureEl.classList.contains( 'aiovg-is-loading' ) ) return false; // Prevent multiple submissions
+                emailCaptureEl.classList.add( 'aiovg-is-loading' );
+
+				const xmlhttp = new XMLHttpRequest();
+
+				xmlhttp.onreadystatechange = function() {
+					if ( 4 == xmlhttp.readyState ) {
+						let response = null;
+
+						if ( 200 == xmlhttp.status && xmlhttp.responseText ) {
+							try {
+								response = JSON.parse( xmlhttp.responseText );
+							} catch ( e ) {}
+						}
+
+						if ( response && response.success ) {
+							// Hide the form and resume playback if mid-roll.
+							hideEmailCapture();
+
+							// Remove email capture form from other players
+							window.parent.postMessage( {
+								message: 'aiovg-email-captured',
+								context: 'iframe'
+							}, window.location.origin );
+						} else {
+							// Show error message
+                            const errorSpan = document.getElementById( 'aiovg-email-capture-error' );
+							errorSpan.textContent   = ( response && response.data && typeof response.data === 'string' ) ? response.data : errorSpan.getAttribute( 'data-error_generic' );
+							errorSpan.style.display = 'block';
+
+							// Restore the form so the user can retry.
+							emailCaptureEl.classList.remove( 'aiovg-is-loading' );
+						}
+					}
+				};
+
+				xmlhttp.open( 'POST', '<?php echo esc_js( admin_url( 'admin-ajax.php' ) ); ?>?action=aiovg_save_email_lead&security=<?php echo esc_js( wp_create_nonce( 'aiovg_public_ajax_nonce' ) ); ?>', true );
+				xmlhttp.setRequestHeader( 'Content-type', 'application/x-www-form-urlencoded' );
+				xmlhttp.send( data );
+			}
+
+			// Mid-roll — show when currentTime reaches the configured percentage.
+			if ( settings.email_capture.mid_roll ) {
+				let midRollFired = false;
+
+				const onMidRollTimeUpdate = function() {
+					if ( ! emailCaptureEl ) {
+						player.off( 'timeupdate', onMidRollTimeUpdate );
+						return false;
+					}
+
+					if ( midRollFired ) return false;
+
+					const duration = player.duration;
+					const current  = player.currentTime;
+
+					if ( duration && current >= ( parseInt( settings.email_capture.mid_roll ) / 100 ) * duration ) {
+						midRollFired = true;
+						player.off( 'timeupdate', onMidRollTimeUpdate );
+						showEmailCapture();
+					}
+				};
+
+				player.on( 'timeupdate', onMidRollTimeUpdate );
+			}				
+
+			// Post-roll — show after the video ends.
+			// Skipped when autoadvance is active to avoid conflicting with next-video navigation.
+			if ( settings.email_capture.post_roll && ! settings.hasOwnProperty( 'autoadvance' ) ) {
+				player.on( 'ended', function() {
+					showEmailCapture();
+				});
+			}
+
+			// Re-pause on any play event while the overlay is open.
+			// Handles post-seek auto-resume (Plyr resumes after seek if it was playing).
+			player.on( 'play', function() {
+				if ( ! emailCaptureEl || ! isModalOpen ) return false;
+
+				wasPlaying = true;
+				player.pause();
+			});
+
+			player.on( 'playing', function() {
+				if ( ! emailCaptureEl || ! isModalOpen ) return false;
+
+				wasPlaying = true;
+				player.pause();
+			});
+
+			// Submit handler.
+			const submitBtn = document.getElementById( 'aiovg-email-capture-submit' );
+
+			if ( submitBtn ) {
+				submitBtn.addEventListener( 'click', function() {
+					const emailField = document.getElementById( 'aiovg-email-capture-email' );
+					const errorSpan  = document.getElementById( 'aiovg-email-capture-error' );
+
+					const email = emailField.value.trim();
+					const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+					if ( ! email || ! regex.test( email ) ) {
+						const errorMessage = errorSpan.getAttribute( 'data-invalid_email' ) || 'Please enter a valid email address.';
+						
+						errorSpan.textContent = errorMessage;
+						errorSpan.style.display = 'block';
+
+						emailField.classList.add( 'aiovg-is-invalid' );
+						emailField.setAttribute( 'aria-invalid', 'true' );
+						return false;
+					}
+
+					errorSpan.style.display = 'none';
+
+					emailField.classList.remove( 'aiovg-is-invalid' );
+					emailField.removeAttribute( 'aria-invalid' );
+
+					let params = 'email=' + encodeURIComponent( email );
+
+					if ( settings.email_capture.collect_name ) {
+						const nameField = document.getElementById( 'aiovg-email-capture-name' );							
+						if ( nameField && nameField.value.trim() ) {
+							params += '&name=' + encodeURIComponent( nameField.value.trim() );
+						}
+					}
+
+					if ( settings.email_capture.collect_phone ) {
+						const phoneField = document.getElementById( 'aiovg-email-capture-phone' );
+						if ( phoneField && phoneField.value.trim() ) {
+							params += '&phone=' + encodeURIComponent( phoneField.value.trim() );
+						}
+					}
+
+					if ( 'aiovg_videos' == settings.post_type && settings.post_id ) {
+						params += '&video_id=' + encodeURIComponent( settings.post_id );
+					} else {
+						params += '&video_id=0';
+						params += '&video_url=' + encodeURIComponent( player.source );
+					}
+
+					let pageUrl = document.referrer;
+					if ( ! pageUrl ) {
+						try {
+							pageUrl = window.parent.location.href;
+						} catch ( e ) {}
+					}
+					params += '&page_url=' + encodeURIComponent( pageUrl );
+
+					ajaxEmailCapture( params );
+				});
+			}
+
+			// Skip handler.
+			if ( settings.email_capture.allow_skip ) {
+				const skipLink = document.getElementById( 'aiovg-email-capture-skip' );
+
+				if ( skipLink ) {
+					skipLink.addEventListener( 'click', function() {
+						ajaxEmailCapture( 'skipped=1' );
+					});
+
+					skipLink.addEventListener( 'keydown', function( event ) {
+						if ( 13 === event.keyCode || 32 === event.keyCode ) {
+							event.preventDefault();
+							ajaxEmailCapture( 'skipped=1' );
+						}
+					});
+				}
+			}
+		}
+
+		/**
+		 * Update the views count.
+		 */
 		function updateViewsCount( player ) {
 			var xmlhttp;
 
@@ -1119,7 +1639,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 
 			var duration = player.duration || 0;
 
-			xmlhttp.open( 'GET', '<?php echo admin_url( 'admin-ajax.php' ); ?>?action=aiovg_update_views_count&post_id=<?php echo $post_id; ?>&duration=' + duration + '&security=<?php echo wp_create_nonce( 'aiovg_public_ajax_nonce' ); ?>', true );
+			xmlhttp.open( 'GET', '<?php echo esc_js( admin_url( 'admin-ajax.php' ) ); ?>?action=aiovg_update_views_count&post_id=<?php echo $post_id; ?>&duration=' + duration + '&security=<?php echo esc_js( wp_create_nonce( 'aiovg_public_ajax_nonce' ) ); ?>', true );
 			xmlhttp.send();							
 		}
 
@@ -1166,8 +1686,9 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 					var closeButton = document.getElementById( 'plyr__share-embed-modal-close-button' );
 
 					var modal = document.getElementById( 'plyr__share-embed-modal' );
-					plyr.appendChild( modal );	
-					modal.style.display = '';
+					modal.style.display = 'flex';
+
+					plyr.appendChild( modal );						
 
 					// Show Modal.
 					var wasPlaying = false;
@@ -1200,35 +1721,71 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 					// Copy Embedcode.
 					if ( settings.hasOwnProperty( 'embed' ) ) {
 						document.getElementById( 'plyr__embed-code-input' ).addEventListener( 'focus', function() {
-							this.select();	
-							document.execCommand( 'copy' );					
+							this.select();
+							
+							if ( navigator.clipboard && navigator.clipboard.writeText ) {
+								navigator.clipboard.writeText( this.value ).catch( () => {} );
+							} else {
+								document.execCommand( 'copy' );
+							}
 						});
 					}
 				}
 
-				// Logo
-				if ( settings.hasOwnProperty( 'logo' ) ) {
-					var style = 'bottom:50px; left:' +  settings.logo.margin +'px;';
+				// Logo / Trailer Badge
+				var hasLogo    = settings.hasOwnProperty( 'logo' );
+				var hasTrailer = settings.hasOwnProperty( 'trailer' );
 
-					switch ( settings.logo.position ) {
-						case 'topleft':
-							style = 'top:' +  settings.logo.margin +'px; left:' +  settings.logo.margin +'px;';
-							break;
+				if ( hasLogo || hasTrailer ) {
+					var style = 'bottom:50px; left:15px;';
 
-						case 'topright':
-							style = 'top:' + settings.logo.margin +'px; right:' + settings.logo.margin +'px;';
-							break;
+					if ( hasLogo ) {
+						var style = 'bottom:50px; left:' + settings.logo.margin + 'px;';
 
-						case 'bottomright':
-							style = 'bottom:50px; right:' +  settings.logo.margin +'px;';
-							break;		
+						switch ( settings.logo.position ) {
+							case 'topleft':
+								style = 'top:' + settings.logo.margin + 'px; left:' + settings.logo.margin + 'px;';
+								break;
+
+							case 'topright':
+								style = 'top:' + settings.logo.margin + 'px; right:' + settings.logo.margin + 'px;';
+								break;
+
+							case 'bottomright':
+								style = 'bottom:50px; right:' + settings.logo.margin + 'px;';
+								break;
+						}
 					}
+
+					// Determine the href: trailer URL takes precedence when active.
+					var logoHref = hasLogo ? settings.logo.link : 'javascript:void(0)';
+
+					if ( hasTrailer && settings.trailer.url ) {
+						logoHref = settings.trailer.url;
+					}
+
+					// Icon: logo image > external-link SVG (only when URL set) > nothing.
+					var iconHtml = '';
+					
+					if ( hasLogo ) {
+						iconHtml = '<img src="' + settings.logo.image + '" alt="" />';
+					} else if ( hasTrailer && settings.trailer.url ) {
+						iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>';
+					}
+
+					// Label: visible trailer label or sr-only text for logo-only mode.
+					var labelHtml = hasTrailer ? '<span class="plyr__logo-label">' + settings.trailer.label + '</span>' : '<span class="plyr__sr-only">Logo</span>';
 
 					var logo = document.createElement( 'div' );
 					logo.className = 'plyr__logo';
-					logo.innerHTML = '<a href="' + settings.logo.link + '" target="_top" style="' + style + '"><img src="' + settings.logo.image + '" alt="" /><span class="plyr__sr-only">Logo</span></a>';
+					logo.innerHTML = '<a href="' + logoHref + '" target="_top" style="' + style + '">' + iconHtml + labelHtml	+ '</a>';
 
 					plyr.appendChild( logo );
+				}
+
+				// Email Capture.
+				if ( settings.hasOwnProperty( 'email_capture' ) ) {
+					initEmailCapture( player );
 				}
 			});
 
@@ -1242,7 +1799,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 					hasVideoStarted = true;
 					if ( settings.statistics && settings.post_type == 'aiovg_videos' ) {
 						updateViewsCount( player );
-					}					
+					}
 				}
 
 				// Pause other players.
@@ -1275,8 +1832,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 				const hls = new Hls();
 				hls.loadSource( settings.hls );
 				hls.attachMedia( video );
-				window.hls = hls;
-				
+
 				// Handle changing captions.
 				player.on( 'languagechange', () => {
 					setTimeout( () => hls.subtitleTrack = player.currentTrack, 50 );
@@ -1287,18 +1843,11 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 			if ( settings.hasOwnProperty( 'dash' ) ) {
 				const dash = dashjs.MediaPlayer().create();
 				dash.initialize( video, settings.dash, settings.player.autoplay || false );
-				window.dash = dash;
 			}		
 
-			// Custom ContextMenu.
+			// Custom contextmenu.
 			if ( settings.hasOwnProperty( 'contextmenu' ) ) {
-				var contextmenu = document.createElement( 'div' );
-				contextmenu.className = 'plyr__contextmenu';
-				contextmenu.innerHTML = '<div class="plyr__contextmenu-content">' +  settings.contextmenu.content +' </div>';
-				contextmenu.style.display = 'none';
-
-				plyr.appendChild( contextmenu );
-
+				var contextmenu    = document.getElementById( 'aiovg-contextmenu' );
 				var timeoutHandler = '';
 				
 				document.addEventListener( 'contextmenu', function( event ) {						
@@ -1332,7 +1881,7 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 					contextmenu.style.display = 'none';								 
 				});	
 			}
-
+			
 			// Api methods
 			window.addEventListener( 'message', function( event ) {
 				if ( event.origin !== window.location.origin ) {
@@ -1344,6 +1893,11 @@ $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
 				}
 
 				switch ( event.data.message ) {
+					case 'aiovg-email-captured':
+						emailCaptureEl = null;
+						document.body.classList.remove( 'aiovg-show-email-capture' );						
+						break;
+
 					case 'aiovg-video-play':
 						player.play();
 						break;

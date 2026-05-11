@@ -95,13 +95,12 @@ class AIOVG_Admin_Settings {
      */
     public function get_tabs() {	
 		$tabs = array(
-			'general'      => __( 'General', 'all-in-one-video-gallery' ),
-            'player'       => __( 'Player', 'all-in-one-video-gallery' ),
-            'hosting'      => __( 'Hosting', 'all-in-one-video-gallery' ),
-            'seo'          => __( 'SEO', 'all-in-one-video-gallery' ),
-            'restrictions' => __( 'Restrictions', 'all-in-one-video-gallery' ),
-            'privacy'      => __( 'Privacy', 'all-in-one-video-gallery' ),
-			'advanced'     => __( 'Advanced', 'all-in-one-video-gallery' )
+			'display'    => __( 'Display', 'all-in-one-video-gallery' ),
+            'player'     => __( 'Player', 'all-in-one-video-gallery' ),
+            'engagement' => __( 'Engagement', 'all-in-one-video-gallery' ),
+            'access'     => __( 'Access Control', 'all-in-one-video-gallery' ),
+            'seo'        => __( 'SEO', 'all-in-one-video-gallery' ),
+			'advanced'   => __( 'Advanced', 'all-in-one-video-gallery' )
 		);
 		
 		return apply_filters( 'aiovg_settings_tabs', $tabs );	
@@ -116,102 +115,105 @@ class AIOVG_Admin_Settings {
     public function get_sections() {		
 		$sections = array(			
             array(
-                'id'          => 'aiovg_player_settings',
-                'title'       => __( 'Player Settings', 'all-in-one-video-gallery' ),
-                'description' => '',
-                'tab'         => 'player',
-                'page'        => 'aiovg_player_settings'
-            ),             		
-            array(
                 'id'          => 'aiovg_videos_settings',
                 'title'       => __( 'Videos Layout', 'all-in-one-video-gallery' ),
                 'description' => '',
-                'tab'         => 'general',
+                'tab'         => 'display',
                 'page'        => 'aiovg_videos_settings'
             ),
 			array(
                 'id'          => 'aiovg_video_settings',
                 'title'       => __( 'Single Video Page', 'all-in-one-video-gallery' ),
                 'description' => '',
-                'tab'         => 'general',
+                'tab'         => 'display',
                 'page'        => 'aiovg_video_settings'
             ),            
             array(
                 'id'          => 'aiovg_related_videos_settings',
                 'title'       => __( 'Related Videos', 'all-in-one-video-gallery' ),
                 'description' => '',
-                'tab'         => 'general',
+                'tab'         => 'display',
                 'page'        => 'aiovg_video_settings'
             ),
             array(
                 'id'          => 'aiovg_categories_settings',
                 'title'       => __( 'Categories Layout', 'all-in-one-video-gallery' ),
                 'description' => '',
-                'tab'         => 'general',
+                'tab'         => 'display',
                 'page'        => 'aiovg_categories_settings'
             ),
             array(
                 'id'          => 'aiovg_images_settings',
-                'title'       => __( 'Images Settings', 'all-in-one-video-gallery' ),
+                'title'       => __( 'Thumbnail Display', 'all-in-one-video-gallery' ),
+                'menu_title'  => __( 'Images', 'all-in-one-video-gallery' ),
 				'description' => '',
-                'tab'         => 'general',
+                'tab'         => 'display',
                 'page'        => 'aiovg_images_settings'
             ),
             array(
                 'id'          => 'aiovg_featured_images_settings',
                 'title'       => __( 'Featured Images', 'all-in-one-video-gallery' ),
 				'description' => '',
-                'tab'         => 'general',
+                'tab'         => 'display',
                 'page'        => 'aiovg_images_settings'
             ),
             array(
                 'id'          => 'aiovg_pagination_settings',
-                'title'       => __( 'Pagination Settings', 'all-in-one-video-gallery' ),
+                'title'       => __( 'Pagination', 'all-in-one-video-gallery' ),
                 'description' => '',
-                'tab'         => 'general',
+                'tab'         => 'display',
                 'page'        => 'aiovg_pagination_settings'
             ),
             array(
-                'id'          => 'aiovg_socialshare_settings',
-                'title'       => __( 'Share Buttons', 'all-in-one-video-gallery' ),
-				'description' => '',
-                'tab'         => 'general',
-                'page'        => 'aiovg_socialshare_settings'
+                'id'          => 'aiovg_player_settings',
+                'title'       => __( 'Player Settings', 'all-in-one-video-gallery' ),
+                'description' => '',
+                'tab'         => 'player',
+                'page'        => 'aiovg_player_settings'
             ),
             array(
                 'id'          => 'aiovg_likes_settings',
-                'title'       => __( 'Likes / Dislikes', 'all-in-one-video-gallery' ),
+                'title'       => __( 'Likes & Votes', 'all-in-one-video-gallery' ),
                 'description' => '',
-                'tab'         => 'general',
+                'tab'         => 'engagement',
                 'page'        => 'aiovg_likes_settings'
-            ),                       
-			array(
-                'id'          => 'aiovg_permalink_settings',
-                'title'       => __( 'Permalinks & Archive Settings', 'all-in-one-video-gallery' ),
-				'description' => sprintf(
-                    __( 'NOTE: After updating the fields in this section, please visit <a href="%s">Settings / Permalinks</a> and simply save the page without making any changes to flush rewrite rules. Otherwise, you might still see old links.', 'all-in-one-video-gallery' ),
-                    esc_url( admin_url( 'options-permalink.php' ) )
+            ),     
+            array(
+                'id'          => 'aiovg_email_capture_settings',
+                'title'       => __( 'Email & Lead Capture', 'all-in-one-video-gallery' ),
+                'description' => sprintf(
+                    '<div class="aiovg-margin-bottom">%s</div><div class="aiovg-notice aiovg-notice-info"><strong>%s:</strong> %s</div>',
+                    __( 'Show an email collection form over your videos to capture leads. The form is not displayed for logged-in WordPress users. Once a viewer submits the email form or skips it, a browser cookie is stored to prevent the form from appearing again. If the viewer clears their cookies, the form will reappear.', 'all-in-one-video-gallery' ),
+                    __( 'Coming Soon', 'all-in-one-video-gallery' ),
+                    __( 'We are working on third-party email provider integrations (Mailchimp, FluentCRM, ActiveCampaign, MailerLite, Webhooks, etc.) as a part of our PRO version. These will allow automatic syncing of captured leads to your email marketing platform.', 'all-in-one-video-gallery' )
                 ),
-                'tab'         => 'seo',
-                'page'        => 'aiovg_permalink_settings'
+                'tab'         => 'engagement',
+                'page'        => 'aiovg_email_capture_settings'
             ),
             array(
                 'id'          => 'aiovg_restrictions_settings',
-                'title'       => __( 'Video Restrictions Settings', 'all-in-one-video-gallery' ),
+                'title'       => __( 'Restrictions', 'all-in-one-video-gallery' ),
                 'description' => '',
-                'tab'         => 'restrictions',
+                'tab'         => 'access',
                 'page'        => 'aiovg_restrictions_settings'
             ),
             array(
-                'id'          => 'aiovg_privacy_settings',
-                'title'       => __( 'GDPR - Privacy', 'all-in-one-video-gallery' ),
-				'description' => __( 'These options will help with privacy restrictions such as GDPR and the EU Cookie Law.', 'all-in-one-video-gallery' ),
-                'tab'         => 'privacy',
-                'page'        => 'aiovg_privacy_settings'
-            ),			
+                'id'          => 'aiovg_trailer_settings',
+                'title'       => __( 'Trailer / Teaser', 'all-in-one-video-gallery' ),
+                'description' => '',
+                'tab'         => 'access',
+                'page'        => 'aiovg_trailer_settings'
+            ),
+            array(
+                'id'          => 'aiovg_socialshare_settings',
+                'title'       => __( 'Social Sharing', 'all-in-one-video-gallery' ),
+				'description' => '',
+                'tab'         => 'seo',
+                'page'        => 'aiovg_socialshare_settings'
+            ),
             array(
                 'id'          => 'aiovg_general_settings',
-                'title'       => __( 'Misc Settings', 'all-in-one-video-gallery' ),
+                'title'       => __( 'General', 'all-in-one-video-gallery' ),
                 'description' => '',
                 'tab'         => 'advanced',
                 'page'        => 'aiovg_general_settings'
@@ -219,7 +221,18 @@ class AIOVG_Admin_Settings {
             array(
                 'id'          => 'aiovg_page_settings',
                 'title'       => __( 'Page Settings', 'all-in-one-video-gallery' ),
+                'menu_title'  => __( 'Pages & Permalinks', 'all-in-one-video-gallery' ),
                 'description' => '',
+                'tab'         => 'advanced',
+                'page'        => 'aiovg_page_settings'
+            ),
+            array(
+                'id'          => 'aiovg_permalink_settings',
+                'title'       => __( 'Permalinks & Archive Settings', 'all-in-one-video-gallery' ),
+				'description' => sprintf(
+                    __( 'NOTE: After updating the fields in this section, please visit <a href="%s">Settings → Permalinks</a> and simply save the page without making any changes to flush rewrite rules. Otherwise, you might still see old links.', 'all-in-one-video-gallery' ),
+                    esc_url( admin_url( 'options-permalink.php' ) )
+                ),
                 'tab'         => 'advanced',
                 'page'        => 'aiovg_page_settings'
             ),
@@ -232,10 +245,9 @@ class AIOVG_Admin_Settings {
             ),
             array(
                 'id'          => 'aiovg_bunny_stream_settings',
-                'title'       => __( 'Bunny Stream (Optional)', 'all-in-one-video-gallery' ),
-                'menu_title'  => __( 'Bunny Stream', 'all-in-one-video-gallery' ),
+                'title'       => __( 'Bunny Stream', 'all-in-one-video-gallery' ),
                 'description' => sprintf(
-                    '<div class="aiovg-notice aiovg-notice-success aiovg-margin-bottom"><strong>%s:</strong> %s</div>%s <a href="%s" target="_blank" rel="noopener noreferrer"><strong>%s</strong></a>',
+                    '<div class="aiovg-notice aiovg-notice-info aiovg-margin-bottom"><strong>%s:</strong> %s</div>%s <a href="%s" target="_blank" rel="noopener noreferrer"><strong>%s</strong></a>',
                     __( 'Important', 'all-in-one-video-gallery' ),
                     sprintf(
                         __( 'Modifying your Bunny Stream settings (API Key, Library ID, or CDN Hostname) after your site is live may cause videos to stop functioning or result in data loss. <a href="%s">Contact us</a> if you want to make any changes after your site is live.', 'all-in-one-video-gallery' ),
@@ -245,8 +257,15 @@ class AIOVG_Admin_Settings {
                     'https://plugins360.com/all-in-one-video-gallery/configure-bunny-stream/',
                     __( 'View Setup Guide →', 'all-in-one-video-gallery' )                                       
                 ),
-                'tab'         => 'hosting',
+                'tab'         => 'advanced',
                 'page'        => 'aiovg_bunny_stream_settings'
+            ),
+            array(
+                'id'          => 'aiovg_privacy_settings',
+                'title'       => __( 'GDPR & Cookie Consent', 'all-in-one-video-gallery' ),
+				'description' => __( 'These options will help with privacy restrictions such as GDPR and the EU Cookie Law.', 'all-in-one-video-gallery' ),
+                'tab'         => 'advanced',
+                'page'        => 'aiovg_privacy_settings'
             )
         );
 
@@ -259,7 +278,7 @@ class AIOVG_Admin_Settings {
                 'page'        => 'aiovg_brand_settings'
             );
         }
-		
+
 		return apply_filters( 'aiovg_settings_sections', $sections );		
 	}
 	
@@ -279,33 +298,30 @@ class AIOVG_Admin_Settings {
                     'type'              => 'radio',
                     'options'           => array(
                         'videojs'  => __( 'Video.js', 'all-in-one-video-gallery' ),
-                        'vidstack' => __( 'Vidstack (Plyr)', 'all-in-one-video-gallery' )
+                        'vidstack' => __( 'Plyr.js', 'all-in-one-video-gallery' )
                     ),
                     'sanitize_callback' => 'sanitize_key'
                 ),
                 array(
                     'name'              => 'theme',
                     'label'             => __( 'Player Theme', 'all-in-one-video-gallery' ),
-                    'description'       => '',
+                    'description'       => __( "Player's Built-in Theme uses the default styling from the selected player library (Video.js or Plyr.js). Plugin Theme replaces it with the plugin's own custom design.", 'all-in-one-video-gallery' ),
                     'type'              => 'radio',
                     'options'           => array(
-                        'default' => __( 'Default', 'all-in-one-video-gallery' ),
-                        'custom'  => __( 'Custom (Recommended)', 'all-in-one-video-gallery' )
+                        'default' => __( "Player's Built-in Theme", 'all-in-one-video-gallery' ),
+                        'custom'  => __( 'Plugin Theme', 'all-in-one-video-gallery' )
                     ),
                     'sanitize_callback' => 'sanitize_key'
                 ),
                 array(
-					'name'              => 'theme_color',
-					'label'             => __( 'Player Theme Color', 'all-in-one-video-gallery' ),
-					'description'       => __( 'Select a primary color that will be used to style various elements of the player, such as buttons, controls, and highlights. This color will help define the overall appearance of the player.', 'all-in-one-video-gallery' ),
-					'type'              => 'color',
-					'sanitize_callback' => 'sanitize_text_field'
-				),
-                array(
                     'name'              => 'force_js_initialization',
-                    'label'             => __( 'Force JavaScript Based Initialization', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'By default, the plugin adds the player as an iframe to avoid conflicts with other javascript-based libraries on your website. Check this option to force the standard javascript-based player initialization if you are not a fan of the iframes.', 'all-in-one-video-gallery' ),
-                    'type'              => 'checkbox',
+                    'label'             => __( 'Player Initialization', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Controls how the player is embedded on the page. "Iframe" (recommended) loads the player in an isolated frame, preventing conflicts with other JavaScript libraries on your site. "JavaScript" initializes the player directly on the page — use this if your theme or page builder requires direct access to the player element.', 'all-in-one-video-gallery' ),
+                    'type'              => 'radio',
+                    'options'           => array(
+                        0  => __( 'Iframe', 'all-in-one-video-gallery' ),
+                        1  => __( 'JavaScript', 'all-in-one-video-gallery' ),
+                    ),
 					'sanitize_callback' => 'intval'
                 ),
 				array(
@@ -375,7 +391,7 @@ class AIOVG_Admin_Settings {
                 ),
                 array(
                     'name'              => 'playsinline',
-                    'label'             => __( 'Playsinline', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Inline Playback on Mobile', 'all-in-one-video-gallery' ),
                     'description'       => __( 'Check this to play videos inline on mobile devices instead of automatically going into fullscreen mode', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
@@ -392,7 +408,7 @@ class AIOVG_Admin_Settings {
                     'label'             => __( 'Player Controls', 'all-in-one-video-gallery' ),
                     'description'       => sprintf( 
                         __( '<a href="%s">Click here</a> to configure your share buttons.', 'all-in-one-video-gallery' ), 
-                        esc_url( admin_url( 'admin.php?page=aiovg_settings&tab=general&section=aiovg_socialshare_settings' ) ) 
+                        esc_url( admin_url( 'admin.php?page=aiovg_settings&tab=seo&section=aiovg_socialshare_settings' ) ) 
                     ),
                     'type'              => 'multicheck',
 					'options'           => array(
@@ -440,13 +456,6 @@ class AIOVG_Admin_Settings {
 					'sanitize_callback' => 'intval'
                 ),
                 array(
-                    'name'              => 'statistics',
-                    'label'             => __( 'Enable Views Counting', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Counts how many times visitors play your videos. Turn this off if you do not need view statistics.', 'all-in-one-video-gallery' ),
-                    'type'              => 'checkbox',
-                    'sanitize_callback' => 'intval'
-                ),
-                array(
                     'name'              => 'hotkeys',
                     'label'             => __( 'Keyboard Hotkeys', 'all-in-one-video-gallery' ),
                     'description'       => sprintf(
@@ -464,6 +473,96 @@ class AIOVG_Admin_Settings {
 					'sanitize_callback' => 'intval'
                 )
 			),
+            'aiovg_email_capture_settings' => array(
+                array(
+                    'name'              => 'enable_email_capture',
+                    'label'             => __( 'Email Capture', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Show an email collection form over your videos to capture leads.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'pre_roll',
+                    'label'             => __( 'Before the Video', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Show the email form before the video starts playing.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'mid_roll',
+                    'label'             => __( 'During the Video (Percentage)', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enter the percentage of video progress at which to show the email form (e.g. 50 for midway). Leave empty to disable. This works only on videos played using our custom player. Does not work with Dailymotion, Rumble, Facebook, or any third-party player embeds.', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'sanitize_callback' => 'aiovg_sanitize_mid_roll_percentage'
+                ),
+                array(
+                    'name'              => 'post_roll',
+                    'label'             => __( 'After the Video', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Show the email form after the video finishes playing. This works only on videos played using our custom player. Does not work with Dailymotion, Rumble, Facebook, or any third-party player embeds.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'collect_name',
+                    'label'             => __( 'Collect Name', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Add a "Name" field to the form.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'collect_phone',
+                    'label'             => __( 'Collect Phone Number', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Add a "Phone Number" field to the form.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'allow_skip',
+                    'label'             => __( 'Allow Skipping', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Allow viewers to skip the email form and continue watching.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'header_text',
+                    'label'             => __( 'Header Text', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'The header text displayed above the form fields.', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'placeholder'       => __( 'Enter your email to continue watching', 'all-in-one-video-gallery' ),
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                array(
+                    'name'              => 'footer_text',
+                    'label'             => __( 'Footer Text', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Optional small text displayed below the form (e.g. consent notice, privacy info). HTML links are allowed. Example: By submitting, you agree to receive marketing emails. See our &lt;a href=\'#\'&gt;Privacy Policy&lt;/a&gt;.', 'all-in-one-video-gallery' ),
+                    'type'              => 'textarea',
+                    'sanitize_callback' => 'wp_kses_post'
+                ),
+                array(
+                    'name'              => 'button_label',
+                    'label'             => __( 'Button Label', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'The text on the submit button.', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'placeholder'       => __( 'Submit', 'all-in-one-video-gallery' ),
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                array(
+                    'name'              => 'skip_text',
+                    'label'             => __( 'Skip Text', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'The text for the skip link. Displayed only when "Allow Skipping" is enabled.', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'placeholder'       => __( 'Skip', 'all-in-one-video-gallery' ),
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                array(
+                    'name'              => 'blocked_email_domains',
+                    'label'             => __( 'Blocked Email Domains', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enter disposable or unwanted email domains to block, one per line (e.g. mailinator.com, guerrillamail.com). Submissions from these domains will be silently rejected.', 'all-in-one-video-gallery' ),
+                    'type'              => 'textarea',
+                    'placeholder'       => "mailinator.com\nguerrillamail.com\nthrowaway.email",
+                    'sanitize_callback' => 'aiovg_sanitize_email_domains'
+                ),
+            ),
             'aiovg_images_settings' => array(
                 array(
                     'name'              => 'width',
@@ -481,8 +580,8 @@ class AIOVG_Admin_Settings {
                 ),
                 array(
                     'name'              => 'size',
-                    'label'             => __( 'Image File Size', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Those previous options control how the images are displayed on the front-end gallery pages. Whereas this option controls which image file size to load.', 'all-in-one-video-gallery' ) . '<br /><br />' . 
+                    'label'             => __( 'Image Size', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Those previous options control how the images are displayed on the front-end gallery pages. Whereas this option controls which image size to load.', 'all-in-one-video-gallery' ) . '<br /><br />' . 
                         __( 'Whenever you upload an image, WordPress automatically creates 4 different image sizes. WordPress does this, so you don\'t have to keep resizing images manually and to ensure the best image size is selected for different locations on your website. Select "Thumbnail" for the small file size, so your gallery loads fast. Select "Large" if the image quality is important to your website.', 'all-in-one-video-gallery' ),
                     'type'              => 'select',
 					'options'           => array(
@@ -497,7 +596,7 @@ class AIOVG_Admin_Settings {
             'aiovg_featured_images_settings' => array(
                 array(
                     'name'              => 'enabled',
-                    'label'             => __( 'Enable / Disable', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Enable Featured Images', 'all-in-one-video-gallery' ),
                     'description'       => __( 'Check this option to enable featured images.', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
@@ -543,12 +642,12 @@ class AIOVG_Admin_Settings {
             'aiovg_socialshare_settings' => array(
 				array(
                     'name'              => 'services',
-                    'label'             => __( 'Enable / Disable', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Sharing Platforms', 'all-in-one-video-gallery' ),
                     'description'       => '',
                     'type'              => 'multicheck',
 					'options'           => array(
 						'facebook'  => __( 'Facebook', 'all-in-one-video-gallery' ),
-						'twitter'   => __( 'Twitter', 'all-in-one-video-gallery' ),						
+						'twitter'   => __( 'X (Twitter)', 'all-in-one-video-gallery' ),						
 						'linkedin'  => __( 'Linkedin', 'all-in-one-video-gallery' ),
                         'pinterest' => __( 'Pinterest', 'all-in-one-video-gallery' ),
                         'tumblr'    => __( 'Tumblr', 'all-in-one-video-gallery' ),
@@ -560,14 +659,14 @@ class AIOVG_Admin_Settings {
                 array(
                     'name'              => 'open_graph_tags',
                     'label'             => __( 'Open Graph Tags', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Check this option to enable Facebook Open Graph meta tags and Twitter cards on the single video pages', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Check this option to enable Facebook Open Graph meta tags and X (Twitter) cards on the single video pages', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
                 ),
                 array(
                     'name'              => 'twitter_username',
-                    'label'             => __( 'Twitter Username', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'The Twitter @username the player card should be attributed to. Required for sharing videos in Twitter.', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'X (Twitter) Username', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'The X (Twitter) @username the player card should be attributed to. Required for sharing videos on X (Twitter).', 'all-in-one-video-gallery' ),
                     'placeholder'       => '@username',
                     'type'              => 'text',
                     'sanitize_callback' => 'sanitize_text_field'
@@ -767,7 +866,7 @@ class AIOVG_Admin_Settings {
             'aiovg_pagination_settings' => array(
 				array(
                     'name'              => 'ajax',
-                    'label'             => __( 'Ajax', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Ajax Pagination', 'all-in-one-video-gallery' ),
                     'description'       => __( 'Check this to enable Pagination with Ajax', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
@@ -786,7 +885,7 @@ class AIOVG_Admin_Settings {
                     'label'             => __( 'Show / Hide', 'all-in-one-video-gallery' ),
                     'description'       => sprintf( 
                         __( '<a href="%s">Click here</a> to configure your share buttons.', 'all-in-one-video-gallery' ), 
-                        esc_url( admin_url( 'admin.php?page=aiovg_settings&tab=general&section=aiovg_socialshare_settings' ) ) 
+                        esc_url( admin_url( 'admin.php?page=aiovg_settings&tab=seo&section=aiovg_socialshare_settings' ) ) 
                     ),
                     'type'              => 'multicheck',
 					'options'           => array(
@@ -869,11 +968,11 @@ class AIOVG_Admin_Settings {
                 ),
 				array(
                     'name'              => 'display',
-                    'label'             => __( 'Show / Hide', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Pagination', 'all-in-one-video-gallery' ),
                     'description'       => '',
                     'type'              => 'multicheck',
 					'options'           => array(
-						'pagination' => __( 'Pagination', 'all-in-one-video-gallery' )
+						'pagination' => __( 'Show pagination in related videos', 'all-in-one-video-gallery' )
 					),
 					'sanitize_callback' => 'aiovg_sanitize_array'
                 ),
@@ -901,14 +1000,17 @@ class AIOVG_Admin_Settings {
             'aiovg_restrictions_settings' => array(
                 array(
                     'name'              => 'enable_restrictions',
-                    'label'             => __( 'Enable Video Access Restrictions', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Check this option to restrict access to videos listed under the plugin\'s "All Videos" menu.', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Enable Restrictions', 'all-in-one-video-gallery' ),
+                    'description'       => sprintf(
+                        __( 'Enable restrictions to control who can access your videos. Adds a "Restrictions" accordion under the "Access Control" tab in the video form (<a href="%s" target="_blank" rel="noopener noreferrer">Video Gallery → All Videos</a>).', 'all-in-one-video-gallery' ),
+                        esc_url( admin_url( 'edit.php?post_type=aiovg_videos' ) )
+                    ),
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
                 ),
                 array(
                     'name'              => 'access_control',
-                    'label'             => __( 'Who Can Access the Videos?', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Access Control', 'all-in-one-video-gallery' ),
                     'description'       => __( 'Users with editing permissions (e.g., administrators, editors) will always have access. This is a global setting but can be overridden for individual videos.', 'all-in-one-video-gallery' ),
                     'type'              => 'select',
 					'options'           => array(
@@ -920,7 +1022,7 @@ class AIOVG_Admin_Settings {
                 ),
                 array(
                     'name'              => 'restricted_roles',
-                    'label'             => __( 'Select User Roles Allowed to Access Videos', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Allowed User Roles', 'all-in-one-video-gallery' ),
                     'description'       => __( 'If no roles are selected, all users will have access. Users with editing permissions will always have access. This is a global setting but can be overridden for individual videos.', 'all-in-one-video-gallery' ),
                     'type'              => 'multicheck',
 					'options'           => aiovg_get_user_roles(),
@@ -928,39 +1030,96 @@ class AIOVG_Admin_Settings {
                 ),
                 array(
                     'name'              => 'restricted_message',
-                    'label'             => __( 'Restricted Access Message', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Customize the message displayed to users who do not have permission to view restricted videos.', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Restricted Message', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enter the message displayed in place of the video player to users who do not have permission to view restricted videos.', 'all-in-one-video-gallery' ),
                     'type'              => 'wysiwyg',
                     'sanitize_callback' => 'wp_kses_post'
                	),
                 array(
                     'name'              => 'show_restricted_label',
-                    'label'             => __( 'Show Restricted Access Label', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Enable this option to display a "Restricted Access" label next to the video title on the gallery thumbnails for restricted content.', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Show Restricted Badge on Thumbnails', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Display a badge on gallery thumbnails when a video is restricted.', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
                     'sanitize_callback' => 'intval'
                	),
                 array(
                     'name'              => 'restricted_label_text',
-                    'label'             => __( 'Restricted Access Label Text', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Enter custom text for the restricted access label. Example: "members only".', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Thumbnail Badge Text', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enter the text displayed on the restricted badge in gallery thumbnails.', 'all-in-one-video-gallery' ),
                     'type'              => 'text',
+                    'placeholder'       => __( 'Restricted', 'all-in-one-video-gallery' ),
                     'sanitize_callback' => 'sanitize_text_field'
                 ),
                 array(
 					'name'              => 'restricted_label_bg_color',
-					'label'             => __( 'Restricted Access Label Background Color', 'all-in-one-video-gallery' ),
-					'description'       => __( 'Choose a background color for the restricted access label.', 'all-in-one-video-gallery' ),
+					'label'             => __( 'Thumbnail Badge Background Color', 'all-in-one-video-gallery' ),
+					'description'       => __( 'Choose a background color for the thumbnail badge on gallery thumbnails.', 'all-in-one-video-gallery' ),
 					'type'              => 'color',
 					'sanitize_callback' => 'sanitize_text_field'
 				),
                 array(
 					'name'              => 'restricted_label_text_color',
-					'label'             => __( 'Restricted Access Label Text Color', 'all-in-one-video-gallery' ),
-					'description'       => __( 'Choose a text color for the restricted access label.', 'all-in-one-video-gallery' ),
+					'label'             => __( 'Thumbnail Badge Text Color', 'all-in-one-video-gallery' ),
+					'description'       => __( 'Choose a text color for the thumbnail badge on gallery thumbnails.', 'all-in-one-video-gallery' ),
 					'type'              => 'color',
 					'sanitize_callback' => 'sanitize_text_field'
 				)
+            ),
+            'aiovg_trailer_settings' => array(
+                array(
+                    'name'              => 'enable_trailers',
+                    'label'             => __( 'Enable Trailers', 'all-in-one-video-gallery' ),
+                    'description'       => sprintf(
+                        __( 'Enable trailers for restricted videos. Adds a "Trailer / Teaser" accordion under the "Access Control" tab in the video form (<a href="%s" target="_blank" rel="noopener noreferrer">Video Gallery → All Videos</a>).', 'all-in-one-video-gallery' ),
+                        esc_url( admin_url( 'edit.php?post_type=aiovg_videos' ) )
+                    ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'player_overlay_text',
+                    'label'             => __( 'Player Overlay Text', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enter the text shown on the trailer player overlay. Defaults to "Watch Full Video" if a link URL is set, or "Trailer" if not.', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'placeholder'       => __( 'Watch Full Video', 'all-in-one-video-gallery' ),
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                array(
+                    'name'              => 'player_overlay_link',
+                    'label'             => __( 'Player Overlay Link URL', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enter a URL for the player overlay (e.g. membership or login page). Leave empty to display text only.', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'sanitize_callback' => 'aiovg_sanitize_url'
+                ),
+                array(
+                    'name'              => 'show_trailer_label',
+                    'label'             => __( 'Show Trailer Badge on Thumbnails', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Display a badge on gallery thumbnails when a restricted video has a trailer.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'trailer_label_text',
+                    'label'             => __( 'Thumbnail Badge Text', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enter the text displayed on the trailer badge in gallery thumbnails.', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'placeholder'       => __( 'Trailer', 'all-in-one-video-gallery' ),
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                array(
+					'name'              => 'trailer_label_bg_color',
+					'label'             => __( 'Thumbnail Badge Background Color', 'all-in-one-video-gallery' ),
+					'description'       => __( 'Choose a background color for the thumbnail badge on gallery thumbnails.', 'all-in-one-video-gallery' ),
+					'type'              => 'color',
+					'sanitize_callback' => 'sanitize_text_field'
+				),
+                array(
+					'name'              => 'trailer_label_text_color',
+					'label'             => __( 'Thumbnail Badge Text Color', 'all-in-one-video-gallery' ),
+					'description'       => __( 'Choose a text color for the thumbnail badge on gallery thumbnails.', 'all-in-one-video-gallery' ),
+					'type'              => 'color',
+					'sanitize_callback' => 'sanitize_text_field'
+				)        
             ),
             'aiovg_privacy_settings' => array(
 				array(
@@ -997,6 +1156,13 @@ class AIOVG_Admin_Settings {
                 ),
 			),			
             'aiovg_general_settings' => array(
+                array(
+					'name'              => 'primary_color',
+					'label'             => __( 'Primary Color', 'all-in-one-video-gallery' ),
+					'description'       => __( 'Select a primary color used to style elements across the plugin — player controls, buttons, highlights, and other accent elements. This applies site-wide to all plugin output.', 'all-in-one-video-gallery' ),
+					'type'              => 'color',
+					'sanitize_callback' => 'sanitize_text_field'
+				),
                 array( 
                     'name'              => 'force_load_assets', 
                     'label'             => __( 'Force Load Plugin Assets', 'all-in-one-video-gallery' ), 
@@ -1016,8 +1182,15 @@ class AIOVG_Admin_Settings {
 					'sanitize_callback' => 'intval'
                 ),
                 array(
+                    'name'              => 'statistics',
+                    'label'             => __( 'Track Video Views', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Track how many times visitors play your videos. View counts are displayed on gallery thumbnails and single video pages when enabled. Disable this if you do not need view statistics.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
+                ),
+                array(
                     'name'              => 'datetime_format',
-                    'label'             => __( 'DateTime Format', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Date & Time Format', 'all-in-one-video-gallery' ),
                     'description'       => sprintf(
 						'%s <a href="https://wordpress.org/documentation/article/customize-date-and-time-format/" target="_blank" rel="noopener noreferrer">%s</a><br />%s', 
 						__( "Enter the PHP DateTime format that the plugin should use when displaying the dates on the site's front end.", 'all-in-one-video-gallery' ),
@@ -1049,14 +1222,14 @@ class AIOVG_Admin_Settings {
                 ),
 				array(
                     'name'              => 'delete_plugin_data',
-                    'label'             => __( 'Remove data on uninstall?', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Remove Data on Uninstall', 'all-in-one-video-gallery' ),
                     'description'       => __( 'Check this box to delete all of the plugin data (database stored content) when uninstalled', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
                 ),
                 array(
                     'name'              => 'delete_media_files',
-                    'label'             => __( 'Delete media files?', 'all-in-one-video-gallery' ),
+                    'label'             => __( 'Delete Media Files on Delete', 'all-in-one-video-gallery' ),
                     'description'       => __( 'Check this box to delete the associated media files when a video post or video category is deleted, including any files stored on Bunny Stream (if enabled).', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
@@ -1305,7 +1478,7 @@ class AIOVG_Admin_Settings {
 	public function settings_section_callback( $args ) {
         foreach ( $this->sections as $section ) {
             if ( $section['id'] == $args['id'] ) {
-                printf( '<div class="inside">%s</div>', $section['description'] ); 
+                printf( '<div class="inside"><em>%s</em></div>', $section['description'] ); 
                 break;
             }
         }
@@ -1319,11 +1492,11 @@ class AIOVG_Admin_Settings {
      */
     public function callback_text( $args ) {	
         $value       = esc_attr( $this->get_option( $args['id'], $args['section'], '' ) );
-        $size        = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular';
+        $size        = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular-text';
         $type        = isset( $args['type'] ) ? $args['type'] : 'text';
         $placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . $args['placeholder'] . '"';
 		
-        $html        = sprintf( '<input type="%1$s" class="%2$s-text widefat" id="%3$s[%4$s]" name="%3$s[%4$s]" value="%5$s"%6$s/>', $type, $size, $args['section'], $args['id'], $value, $placeholder );
+        $html        = sprintf( '<input type="%1$s" class="%2$s widefat" id="%3$s[%4$s]" name="%3$s[%4$s]" value="%5$s"%6$s/>', $type, $size, $args['section'], $args['id'], $value, $placeholder );
         $html       .= $this->get_field_description( $args );
 		
         echo $html;		
@@ -1347,14 +1520,14 @@ class AIOVG_Admin_Settings {
      */
     public function callback_number( $args ) {	
         $value       = esc_attr( $this->get_option( $args['id'], $args['section'], 0 ) );
-        $size        = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular';
+        $size        = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular-text';
         $type        = isset( $args['type'] ) ? $args['type'] : 'number';
         $placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . $args['placeholder'] . '"';
         $min         = empty( $args['min'] ) ? '' : ' min="' . $args['min'] . '"';
         $max         = empty( $args['max'] ) ? '' : ' max="' . $args['max'] . '"';
         $step        = empty( $args['max'] ) ? '' : ' step="' . $args['step'] . '"';
 		
-        $html        = sprintf( '<input type="%1$s" class="%2$s-number widefat" id="%3$s[%4$s]" name="%3$s[%4$s]" value="%5$s"%6$s%7$s%8$s%9$s/>', $type, $size, $args['section'], $args['id'], $value, $placeholder, $min, $max, $step );
+        $html        = sprintf( '<input type="%1$s" class="%2$s widefat" id="%3$s[%4$s]" name="%3$s[%4$s]" value="%5$s"%6$s%7$s%8$s%9$s/>', $type, $size, $args['section'], $args['id'], $value, $placeholder, $min, $max, $step );
         $html       .= $this->get_field_description( $args );
 		
         echo $html;		
@@ -1431,7 +1604,7 @@ class AIOVG_Admin_Settings {
      */
     public function callback_select( $args ) {	
         $value = esc_attr( $this->get_option( $args['id'], $args['section'], '' ) );
-        $size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular';
+        $size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular-text';
 		
         $html  = sprintf( '<select class="%1$s" name="%2$s[%3$s]" id="%2$s[%3$s]">', $size, $args['section'], $args['id'] );
         foreach ( $args['options'] as $key => $label ) {
@@ -1451,10 +1624,10 @@ class AIOVG_Admin_Settings {
      */
     public function callback_textarea( $args ) {	
         $value       = esc_textarea( $this->get_option( $args['id'], $args['section'], '' ) );
-        $size        = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular';
+        $size        = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular-text';
         $placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="'.$args['placeholder'].'"';
 		
-        $html        = sprintf( '<textarea rows="5" cols="55" class="%1$s-text" id="%2$s[%3$s]" name="%2$s[%3$s]"%4$s>%5$s</textarea>', $size, $args['section'], $args['id'], $placeholder, $value );
+        $html        = sprintf( '<textarea rows="5" cols="55" class="%1$s" id="%2$s[%3$s]" name="%2$s[%3$s]"%4$s>%5$s</textarea>', $size, $args['section'], $args['id'], $placeholder, $value );
         $html       .= $this->get_field_description( $args );
 		
         echo $html;		
@@ -1502,12 +1675,12 @@ class AIOVG_Admin_Settings {
      */
     public function callback_file( $args ) {	
         $value = esc_attr( $this->get_option( $args['id'], $args['section'], '' ) );
-        $size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular';
+        $size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular-text';
         $id    = $args['section'] . '[' . $args['id'] . ']';
         $label = isset( $args['options']['button_label'] ) ? $args['options']['button_label'] : __( 'Choose File', 'all-in-one-video-gallery' );
 		
         $html  = '<div class="aiovg-media-uploader"> ';
-        $html .= sprintf( '<input type="text" class="%1$s-text" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s"/>', $size, $args['section'], $args['id'], $value );
+        $html .= sprintf( '<input type="text" class="%1$s" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s"/>', $size, $args['section'], $args['id'], $value );
         $html .= '<input type="button" class="aiovg-upload-media button" value="' . $label . '" />';
         $html .= '</div> ';
         $html .= $this->get_field_description( $args );
@@ -1523,9 +1696,9 @@ class AIOVG_Admin_Settings {
      */
     public function callback_password( $args ) {	
         $value = esc_attr( $this->get_option( $args['id'], $args['section'], '' ) );
-        $size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular';
+        $size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular-text';
 		
-        $html  = sprintf( '<input type="password" class="%1$s-text" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s"/>', $size, $args['section'], $args['id'], $value );
+        $html  = sprintf( '<input type="password" class="%1$s" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s"/>', $size, $args['section'], $args['id'], $value );
         $html .= $this->get_field_description( $args );
 		
         echo $html;		
@@ -1539,9 +1712,9 @@ class AIOVG_Admin_Settings {
      */
     public function callback_color( $args ) {	
         $value = esc_attr( $this->get_option( $args['id'], $args['section'], '#ffffff' ) );
-        $size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular';
+        $size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular-text';
 		
-        $html  = sprintf( '<input type="text" class="%1$s-text aiovg-color-picker" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s" data-default-color="%5$s" />', $size, $args['section'], $args['id'], $value, '#ffffff' );
+        $html  = sprintf( '<input type="text" class="%1$s aiovg-color-picker" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s" data-default-color="%5$s" />', $size, $args['section'], $args['id'], $value, '#ffffff' );
         $html .= $this->get_field_description( $args );
 		
         echo $html;		
@@ -1577,11 +1750,7 @@ class AIOVG_Admin_Settings {
      */
     public function get_field_description( $args ) {	
         if ( ! empty( $args['description'] ) ) {
-            if ( 'wysiwyg' == $args['type'] ) {
-                $description = sprintf( '<pre>%s</pre>', $args['description'] );
-            } else {
-                $description = sprintf( '<p class="description">%s</p>', $args['description'] );
-            }
+            $description = sprintf( '<p class="description">%s</p>', $args['description'] );
         } else {
             $description = '';
         }
@@ -1653,7 +1822,7 @@ class AIOVG_Admin_Settings {
     public function get_option( $option, $section, $default = '' ) {	
         $options = get_option( $section );
 		
-        if ( ! empty( $options[ $option ] ) ) {
+        if ( isset( $options[ $option ] ) ) {
             return $options[ $option ];
         }
 		

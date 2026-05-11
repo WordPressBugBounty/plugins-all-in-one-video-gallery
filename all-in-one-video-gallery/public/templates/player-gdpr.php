@@ -46,7 +46,7 @@ if ( ! empty( $image ) ) {
     }
 }
 
-$consent_message = apply_filters( 'aiovg_translate_strings', $privacy_settings['consent_message'], 'consent_message' );
+$consent_message      = apply_filters( 'aiovg_translate_strings', $privacy_settings['consent_message'], 'consent_message' );
 $consent_button_label = apply_filters( 'aiovg_translate_strings', $privacy_settings['consent_button_label'], 'consent_button_label' );
 ?>
 <!DOCTYPE html>
@@ -62,68 +62,97 @@ $consent_button_label = apply_filters( 'aiovg_translate_strings', $privacy_setti
     <?php endif; ?>
 
 	<style type="text/css">
-        html, 
-        body {            
-            margin: 0 !important; 
-			padding: 0 !important; 
+        html,
+        body {
+            margin: 0 !important;
+			padding: 0 !important;
             width: 100% !important;
             height: 100% !important;
-            overflow: hidden;			
+            overflow: hidden;
             line-height: 1.5;
-            font-family: Verdana, Geneva, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 			font-size: 14px;
         }
 
-        #privacy-wrapper {            
+        #aiovg-privacy-wrapper {
+            position: relative;
             margin: 0;
-            background-color: #222;            
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #222;
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
-            padding: 0;
-            width: 100%;
-            height: 100%;            
         }
 
-        #privacy-consent-block {
+        #aiovg-privacy-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            background-color: rgba( 0, 0, 0, 0.85 );
+            overflow-y: auto;
+        }
+
+        #aiovg-privacy-consent-block {
             box-sizing: border-box;
-            position: relative;
-            top: 50%;
-            left: 50%;
-            transform: translate3d( -50%, -50%, 0 );
-            margin: 0;
-            border-radius: 3px; 
-            background-color: rgba( 0, 0, 0, 0.7 );
-            padding: 15px;
-            width: 90%;
-            max-width: 640px;
-            height: auto;            
-            text-align: center;        
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: auto;
+            padding: 16px 24px;
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
             color: #fff;
         }
 
-        @media only screen and (max-width: 320px) {
-            #privacy-consent-block {
-                width: 100%;
-                height: 100%;
-            }
-        }
-
-        #privacy-consent-button {
-            display: inline-block;
-            margin-top: 10px;
+        #aiovg-privacy-consent-button,
+        #aiovg-privacy-consent-button:hover,
+        #aiovg-privacy-consent-button:focus {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             border: 0;
-            border-radius: 3px;   
-            box-shadow: none; 
-            background: #e70808;
-            cursor: pointer;  
-            padding: 7px 15px;   
-            line-height: 1; 
-            color: #fff; 
+            border-radius: 3px;
+            box-shadow: none;
+            background: none;
+            background-color: <?php echo esc_attr( $primary_color ); ?>;
+            background-image: none;
+            cursor: pointer;
+            padding: 0 20px;
+            min-height: 44px;
+            line-height: 1;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1em;
+            font-weight: 600;
         }
 
-        #privacy-consent-button:hover {
-            opacity: 0.8;
+        #aiovg-privacy-consent-button:hover {
+            opacity: 0.85;
+        }
+
+        @keyframes aiovg-spin {
+            to { transform: rotate( 360deg ); }
+        }
+
+        .aiovg-is-loading #aiovg-privacy-consent-block * {
+            display: none !important;
+        }
+
+        .aiovg-is-loading #aiovg-privacy-consent-block {
+            pointer-events: none;
+            margin: auto;
+            border: 3px solid rgba( 255, 255, 255, 0.25 );
+            border-radius: 50%;
+            border-top-color: #fff;
+            padding: 0;
+            width: 36px;
+            height: 36px;
+            animation: aiovg-spin 0.7s linear infinite;
         }
     </style>
 
@@ -134,19 +163,39 @@ $consent_button_label = apply_filters( 'aiovg_translate_strings', $privacy_setti
 	<?php endif; ?>
 </head>
 <body>    
-	<div id="privacy-wrapper" style="background-image: url(<?php echo esc_url( $image ); ?>);">
-		<div id="privacy-consent-block" >
-			<div id="privacy-consent-message"><?php echo wp_kses_post( trim( $consent_message ) ); ?></div>
-			<button type="button" id="privacy-consent-button"><?php echo esc_html( $consent_button_label ); ?></button>
+	<div id="aiovg-privacy-wrapper"<?php if ( ! empty( $image ) ) : ?> style="background-image: url('<?php echo esc_url( $image ); ?>')"<?php endif; ?>>
+		<div id="aiovg-privacy-overlay">
+			<div id="aiovg-privacy-consent-block">
+				<div id="aiovg-privacy-consent-message"><?php echo wp_kses_post( trim( $consent_message ) ); ?></div>
+				<div>
+					<button type="button" id="aiovg-privacy-consent-button"><?php echo esc_html( $consent_button_label ); ?></button>
+				</div>
+			</div>
 		</div>
 	</div>
 				
 	<script type="text/javascript">
+        /**
+         * Reload the page with query parameters to bypass cookies and prevent showing the consent message again.
+         *
+         * @param {number} autoplay 1 to enable autoplay after reload, 0 to keep it unchanged.
+         */
+        function reloadPlayer( autoplay ) {
+            const url          = new URL( window.location.href );
+            const searchParams = url.searchParams;
+
+            searchParams.set( 'autoplay', autoplay );
+            searchParams.set( 'nocookie', 1 );
+
+            url.search           = searchParams.toString();
+            window.location.href = url.toString();
+        }
+        
 		/**
 		 * Set cookie for accepting the privacy consent.
 		 */
-		function ajaxSubmit() {	
-            document.getElementById( 'privacy-consent-button' ).innerHTML = '...';
+		function ajaxSubmit() {
+            document.getElementById( 'aiovg-privacy-wrapper' ).classList.add( 'aiovg-is-loading' );
 
 			var xmlhttp;
 
@@ -165,24 +214,37 @@ $consent_button_label = apply_filters( 'aiovg_translate_strings', $privacy_setti
                     }, window.location.origin );
 
                     // Reload document
-                    var url = new URL( window.location.href );
-
-                    var searchParams = url.searchParams;
-                    searchParams.set( 'autoplay', 1 );
-                    searchParams.set( 'nocookie', 1 );
-
-                    url.search = searchParams.toString();
-
-                    window.location.href = url.toString();
+                    reloadPlayer(1);
 				}					
 			}
 
-			xmlhttp.open( 'POST', '<?php echo admin_url( 'admin-ajax.php' ); ?>?action=aiovg_set_cookie&security=<?php echo wp_create_nonce( 'aiovg_public_ajax_nonce' ); ?>', true );
+			xmlhttp.open( 'POST', '<?php echo esc_js( admin_url( 'admin-ajax.php' ) ); ?>?action=aiovg_set_cookie&security=<?php echo esc_js( wp_create_nonce( 'aiovg_public_ajax_nonce' ) ); ?>', true );
 			xmlhttp.setRequestHeader( 'Content-type', 'application/x-www-form-urlencoded' );
 			xmlhttp.send( 'action=aiovg_set_cookie' );							
 		}
 		
-		document.getElementById( 'privacy-consent-button' ).addEventListener( 'click', ajaxSubmit );
+		document.getElementById( 'aiovg-privacy-consent-button' ).addEventListener( 'click', ajaxSubmit );
+
+        // Api methods
+        window.addEventListener( 'message', function( event ) {
+            if ( event.origin !== window.location.origin ) {
+                return false;
+            }
+
+            if ( ! event.data.hasOwnProperty( 'message' ) ) {
+                return false;
+            }
+
+            switch ( event.data.message ) {
+                case 'aiovg-cookie-consent':
+                    reloadPlayer(0);
+                    break;
+
+                case 'aiovg-email-captured':
+                    reloadPlayer(0);
+                    break;
+            }
+        });
 	</script>
 </body>
 </html>

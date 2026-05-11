@@ -406,8 +406,9 @@ if ( ! empty( $embed_url ) ) {
     <?php endif; ?>  
     
     <?php
-    // Update views count
-    if ( 'aiovg_videos' == $post_type ) {
+    // Update views count.
+    $update_views = isset( $general_settings['statistics'] ) ? (int) $general_settings['statistics'] : 1;
+    if ( ! empty( $update_views ) && empty( $is_trailer ) && 'aiovg_videos' == $post_type ) {
         aiovg_update_views_count( $post_id );
     }
     ?>

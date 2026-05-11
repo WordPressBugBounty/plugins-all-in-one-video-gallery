@@ -71,10 +71,10 @@ $active_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['sectio
                     <tr>
                         <td class="aiovg-text-right" colspan="3">
                             <?php if ( 'found' == $active_section ) : ?>
-                                <input type="submit" name="action" class="button" value="<?php esc_attr_e( 'Ignore', 'all-in-one-video-gallery' ); ?>" />
+                                <button type="submit" name="action_type" value="ignore" class="button"><?php esc_html_e( 'Ignore', 'all-in-one-video-gallery' ); ?></button>
                             <?php endif; ?>
 
-                            <input type="submit" name="action" class="button button-primary" value="<?php esc_attr_e( 'Apply Fix', 'all-in-one-video-gallery' ); ?>" />
+                            <button type="submit" name="action_type" value="apply_fix" class="button button-primary"><?php esc_html_e( 'Apply Fix', 'all-in-one-video-gallery' ); ?></button>
                         </td>
                     </tr>
                 </tfoot>

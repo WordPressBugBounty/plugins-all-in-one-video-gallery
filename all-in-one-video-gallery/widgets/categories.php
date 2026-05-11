@@ -112,26 +112,52 @@ class AIOVG_Widget_Categories extends WP_Widget {
 		}			
 
 		if ( 'list' == $template ) {
-			$query = array(
-				'taxonomy'         => 'aiovg_categories',
-				'orderby'          => sanitize_text_field( $attributes['orderby'] ),
-				'order'            => sanitize_text_field( $attributes['order'] ),
-				'hide_empty'       => (int) $attributes['hide_empty'], 
-				'hierarchical'     => (int) $attributes['hierarchical'],                
-				'show_count'       => (int) $attributes['show_count'], 
-				'show_option_none' => '',   
-				'title_li'         => '',
-				'echo'             => 0
-			);
+			// Query terms directly
+			$query = array(	
+				'taxonomy'	   => 'aiovg_categories',
+				'parent'       => (int) $attributes['id'],
+				'orderby'      => sanitize_text_field( $attributes['orderby'] ), 
+				'order'        => sanitize_text_field( $attributes['order'] ),
+				'hide_empty'   => (int) $attributes['hide_empty'],
+				'hierarchical' => false
+			);	
 
-			if ( $query['hierarchical'] ) {
-				$query['child_of'] = (int) $attributes['id'];
-			} else {
-				$query['parent'] = (int) $attributes['id'];
-			}
-			
 			$query = apply_filters( 'aiovg_categories_args', $query, $attributes );
-			$categories_li = wp_list_categories( $query ); 
+			$terms = get_terms( $query );
+
+			// Build the HTML list
+			$categories_li = '';
+
+			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+				foreach ( $terms as $term ) {
+					$term_link  = get_term_link( $term, 'aiovg_categories' );
+					$count_html = ! empty( $attributes['show_count'] ) ? ' (' . $term->count . ')' : '';
+					
+					$categories_li .= '<li>';
+
+					$categories_li .= sprintf(
+						'<a href="%s">%s%s</a>',
+						esc_url( $term_link ),
+						esc_html( $term->name ),
+						$count_html
+					);
+					
+					// If hierarchical, recursively fetch and display children
+					if ( ! empty( $attributes['hierarchical'] ) ) {
+						$child_query           = $query;
+						$child_query['parent'] = $term->term_id;
+						$child_query           = apply_filters( 'aiovg_categories_args', $child_query, $attributes );
+						$children              = get_terms( $child_query );
+
+						if ( ! empty( $children ) && ! is_wp_error( $children ) ) {
+							$categories_li .= $this->build_hierarchy( $children, $attributes );
+						}
+					}
+					
+					$categories_li .= '</li>';
+				}
+				
+			}
 
 			if ( ! empty( $categories_li ) ) {
 				include apply_filters( 'aiovg_load_template', AIOVG_PLUGIN_DIR . "public/templates/categories-template-list.php" );
@@ -182,6 +208,58 @@ class AIOVG_Widget_Categories extends WP_Widget {
 		echo $args['after_widget'];
 	}
 	
+	/**
+	 * Recursively builds a nested HTML list of child terms.
+	 *
+	 * @since  4.7.6
+	 * @access private
+	 * @param  array $terms      Array of WP_Term objects to render.
+	 * @param  array $attributes Widget instance attributes used for query args and display options.
+	 * @return string            HTML string containing the nested `<ul>` list.
+	 */
+	private function build_hierarchy( $terms, $attributes ) {
+		$html = '<ul class="children">';
+		
+		foreach ( $terms as $term ) {
+			$term_link  = get_term_link( $term, 'aiovg_categories' );
+			$count_html = ! empty( $attributes['show_count'] ) ? ' (' . $term->count . ')' : '';
+			
+			$html .= '<li>';
+			
+			$html .= sprintf(
+				'<a href="%s">%s%s</a>',
+				esc_url( $term_link ),
+				esc_html( $term->name ),
+				$count_html
+			);
+			
+			// Recursively get children
+			if ( ! empty( $attributes['hierarchical'] ) ) {
+				$query = array(	
+					'taxonomy'	   => 'aiovg_categories',
+					'parent'       => $term->term_id,
+					'orderby'      => sanitize_text_field( $attributes['orderby'] ), 
+					'order'        => sanitize_text_field( $attributes['order'] ),
+					'hide_empty'   => (int) $attributes['hide_empty'],
+					'hierarchical' => false
+				);
+
+				$query    = apply_filters( 'aiovg_categories_args', $query, $attributes );
+				$children = get_terms( $query );
+
+				if ( ! empty( $children ) && ! is_wp_error( $children ) ) {
+					$html .= $this->build_hierarchy( $children, $attributes );
+				}
+			}
+			
+			$html .= '</li>';
+		}
+		
+		$html .= '</ul>';
+		
+		return $html;
+	}
+
 	/**
 	 * Processes the widget's options to be saved.
 	 *

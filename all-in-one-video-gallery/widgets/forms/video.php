@@ -10,8 +10,8 @@
  */
 
 global $pagenow; 
+$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
 ?>
-
 <div class="aiovg aiovg-widget-form aiovg-widget-form-video">
 	<div class="aiovg-widget-section">
 		<div class="aiovg-widget-field aiovg-widget-field-title">
@@ -199,11 +199,26 @@ global $pagenow;
 			</label>
 		</div>
 
-		<div class="aiovg-widget-field aiovg-widget-field-download">		
+		<div class="aiovg-widget-field aiovg-widget-field-download">
 			<label for="<?php echo esc_attr( $this->get_field_id( 'download' ) ); ?>">
 				<input type="checkbox" name="<?php echo esc_attr( $this->get_field_name( 'download' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'download' ) ); ?>" class="aiovg-widget-input-download" value="1" <?php checked( 1, $instance['download'] ); ?> />
 				<?php esc_html_e( 'Download Button', 'all-in-one-video-gallery' ); ?>
 			</label>
 		</div>
+
+		<?php if ( ! empty( $email_capture_settings['enable_email_capture'] ) ) : ?>
+			<div class="aiovg-widget-field aiovg-widget-field-header">
+				<label class="aiovg-widget-label aiovg-font-bold">
+					<?php esc_html_e( 'Email & Lead Capture', 'all-in-one-video-gallery' ); ?>
+				</label>
+			</div>
+
+			<div class="aiovg-widget-field aiovg-widget-field-email_capture">
+				<label for="<?php echo esc_attr( $this->get_field_id( 'email_capture' ) ); ?>">
+					<input type="checkbox" name="<?php echo esc_attr( $this->get_field_name( 'email_capture' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'email_capture' ) ); ?>" class="aiovg-widget-input-email_capture" value="1" <?php checked( 1, $instance['email_capture'] ); ?> />
+					<?php esc_html_e( 'Email & Lead Capture', 'all-in-one-video-gallery' ); ?>
+				</label>
+			</div>
+		<?php endif; ?>
 	</div>
 </div>

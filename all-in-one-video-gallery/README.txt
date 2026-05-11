@@ -2,36 +2,29 @@
 Plugin URI: https://plugins360.com/all-in-one-video-gallery/
 Contributors: plugins360, wpvideogallery, freemius
 Donate link: https://plugins360.com
-Tags: video player, video gallery, youtube gallery, vimeo gallery, live stream
+Tags: video gallery, video player, youtube, vimeo, html5 video
 Requires at least: 6.3
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 5.6.20
-Stable tag: 4.7.5
+Stable tag: 4.8.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-The ultimate video player & video gallery plugin for YouTubers, Video Bloggers, Course Creators, Podcasters, and anyone embedding videos on websites.
+Video gallery plugin for WordPress with a built-in HTML5 player. Embed YouTube, Vimeo, Dailymotion, Rumble, and self-hosted videos.
 
 == Description ==
 
+★★★★★ Trusted by 20,000+ WordPress sites
+
 >[View Demo](https://demo.plugins360.com/all-in-one-video-gallery/) | [Getting Started](https://plugins360.com/all-in-one-video-gallery/documentation/) | [Contact & Support](https://plugins360.com/support/) | [Home Page](https://plugins360.com)
 
-"Video is the future of content marketing". Start converting your blogs to video blogs and win the COMPETITION.
+**All-in-One Video Gallery** is a video posts plugin that lets you add videos as posts and build scalable, searchable, SEO-optimized video galleries in minutes — no coding required.
 
-**All-in-One Video Gallery** is a VIDEO POSTS plugin that helps you add videos as posts and build scalable, searchable, SEO-optimized video galleries in minutes. 
-
-No coding is required. Suitable for all kinds of websites that require a single video player to a large video-sharing website like YouTube/Vimeo. 
-
-### LATEST ADDITION
-
-* **Bulk Import & Export!** Effortlessly **import multiple videos at once** from a **folder or CSV file**, and **export all your videos** from your website in just a few clicks—making large-scale management faster than ever.
-* **Bunny Stream Integration!** Now, you can **host and deliver your videos securely through Bunny Stream**, with native player support and token authentication options!
-* **New Video Restriction Options!** Now, you can **restrict videos for logged-in users, logged-out users, or specific user roles—globally or per video!**
-* **New Gallery Filtering Options!** Now, you can **filter videos on the same page using AJAX** with keywords, categories, tags, and sort them by title, date, popularity, and more!
+Whether you need a single embedded video player or a full video-sharing website like YouTube or Vimeo, this plugin covers it. Suitable for course creators, video bloggers, podcasters, businesses, and anyone embedding video on WordPress.
 
 ### PLAYER FEATURES
 
-* A Custom HTML5 Video Player that supports **MP4**, **WebM**, **OGV**, **HLS**, **MPEG-DASH**, and embeddable players like **YouTube**, **Vimeo**, **Dailymotion**, **Rumble**, **Facebook** and more.
+* A Custom HTML5 Video Player that supports **MP4**, **WebM**, **OGV**, **HLS**, **MPEG-DASH**, and embeddable players like **YouTube**, **Vimeo**, **Dailymotion**, **Rumble**, **Facebook**, **Bunny Stream** and more.
 * **Player Controls:** play/pause buttons, timer, progress bar, duration, speed control, quality switcher, volume button, picture-in-picture button, fullscreen button, share buttons, embed button, download button, subtitles on/off, keyboard hotkeys
 * **Playback Options:** autoplay, loop, muted, preload, playsinline
 * Subtitles & Captions (WebVTT).
@@ -47,6 +40,8 @@ Back-End
 * Create unlimited categories/subcategories and tags.
 * Ability to group videos by categories and tags.
 * Create a featured videos group.
+* Bulk import videos from a CSV file or folder; export all your videos in one click.
+* Restrict video access globally or per video — allow all visitors, logged-in users only, logged-out users only, or specific user roles.
 * 100+ settings (STILL COUNTING) that help you customize the plugin to the maximum you will need.
 
 Front-End
@@ -58,12 +53,13 @@ Front-End
 * Filter videos by "categories", "tags" and "featured" meta key.
 * Sort videos by "video posted date", "title", "views count", "likes count", "dislikes count", "random" & "menu order (custom ordering)".
 * Ability to control the display of each HTML element in the gallery.
+* Filter videos on the same page using AJAX — search by keyword, category, or tag and sort by title, date, or popularity without a page reload.
 * Numeric Pagination for the large galleries.
 * Likes / Dislikes.
 * Social Sharing (Facebook, Twitter, Linkedin, Pinterest, Tumblr & WhatsApp).
 * Comments System.
 * Dedicated search form & layout.
-* Shortcode Builder to build the gallery shortcodes. 
+* Shortcode Builder to build the gallery shortcodes.
 * Gutenberg Blocks to build the gallery if your website uses the modern WordPress editor.
 * Widgets to list categories, list videos, display a single video player, and search videos.
 
@@ -72,7 +68,7 @@ Front-End
 The videos (aiovg_videos) belong to a WordPress Custom Post Type. Similarly, the categories (aiovg_categories) and tags (aiovg_tags) belong to the WordPress Custom Taxonomy. The plugin doesn't use any custom tables and the settings are stored in the WP_Options table using the WordPress SETTINGS API. In short, the plugin has been developed completely using the WordPress CORE features. So, if you're a WordPress developer, you can customize/extend the plugin as you like using the WordPress hooks system easily.
 
 Similarly, the front-end gallery layouts added by our plugin can be customized by developing or overriding our existing templates. Please [check for a detailed documentation](https://plugins360.com/all-in-one-video-gallery/child-themes-and-templates/) on this.
- 
+
 ### [+] PREMIUM FEATURES
 
 * Gallery Templates: [Popup](https://demo.plugins360.com/popup/), [Inline](https://demo.plugins360.com/inline/), [Slider](https://demo.plugins360.com/slider/), [Playlist](https://demo.plugins360.com/playlist/), [Compact (Modern)](https://demo.plugins360.com/compact/)
@@ -91,9 +87,14 @@ Do you speak another language? Want to contribute in a meaningful way to All-in-
 
 Spanish translation partner - [Blarlo](https://www.blarlo.com/)
 
+### LATEST ADDITION
+
+* **Trailers & Teasers!** Display a **trailer clip to non-access users** instead of the locked screen — great for driving upgrades or sign-ups.
+* **Email & Lead Capture!** Show an **email collection form over your video** to capture leads before, during, or after playback.
+
 ### SUPPORT AND DOCUMENTATION
 
-We do have [documentation](https://plugins360.com/all-in-one-video-gallery/documentation/) on the plugin. 
+We do have [documentation](https://plugins360.com/all-in-one-video-gallery/documentation/) on the plugin.
 
 Still, Having Issues? We are just an email away. Please write to us describing your issue using the "Contact" form available under our plugin's menu. You should receive a reply within 24 hours (except Sunday).
 
@@ -133,13 +134,28 @@ Sure, the plugin doesn't apply any restriction on the uploaded file size. If you
 = 4. Does the plugin support third-party page builders like "Elementor", "WPBakery", "Divi", etc.? =
 Yes. Simply, generate your shortcode using the plugin's "Shortcode Builder" and add it to your favorite page builder.
 
-= 5. Is the plugin compatible with WordPress Multisite? =
+= 5. Does this plugin work with the Gutenberg block editor? =
+Yes. All-in-One Video Gallery includes native Gutenberg blocks for video galleries, single video players, video categories, and the search form. You can build your gallery layout directly inside the block editor without writing any shortcode.
+
+= 6. Is the plugin compatible with WordPress Multisite? =
 Yes, it is. However, do not "network-activate" the plugin. Activate it only on the subsites on which you need the gallery. This can be done under "Plugins => Add New" as the Administrator user.
 
-= 6. The download button in the plugin is not working. =
+= 7. The download button in the plugin is not working. =
 The download option works only on the "Self Hosted / External URL" source type. Even if the video is self-hosted, the video file must be publicly accessible to download. So, make sure that your file is publicly accessible.
 
 Also, the videos from third-party services like "YouTube", "Vimeo", "Dailymotion", or "Rumble" cannot be downloaded.
+
+= 8. How do I embed a YouTube playlist or channel in WordPress? =
+You can embed individual YouTube videos using the plugin's video editor — paste the YouTube URL and the plugin handles the rest. For automatic YouTube channel or playlist imports (fetching new videos on a schedule), upgrade to the Premium version which includes the Video Automations feature.
+
+= 9. Does this plugin support HLS or MPEG-DASH adaptive streaming? =
+Yes. The built-in HTML5 video player supports HLS (`.m3u8`) and MPEG-DASH (`.mpd`) streams in addition to standard MP4, WebM, and OGV files. Simply paste your streaming URL as the video source.
+
+= 10. Can I restrict videos so only logged-in users can watch them? =
+Yes. The plugin includes a video access control system that lets you restrict videos globally or per video. You can allow all visitors, logged-in users only, logged-out users only, or specific user roles. A trailer/teaser clip can also be shown to users who do not have access.
+
+= 11. Does this plugin support subtitles and closed captions? =
+Yes. You can upload WebVTT (`.vtt`) subtitle tracks for your self-hosted videos and configure the default language. Multiple subtitle tracks are supported on a single video.
 
 == Screenshots ==
 
@@ -152,6 +168,18 @@ Also, the videos from third-party services like "YouTube", "Vimeo", "Dailymotion
 7. Plugin Settings.
 
 == Changelog ==
+
+= 4.8.5 =
+
+* New: Added Trailers / Teaser feature — display a trailer clip to restricted (non-access) users instead of the locked screen.
+* New: Added Email & Lead Capture — display an email collection form over your video to capture leads before, during, or after playback.
+* New: Added the ability to search videos by ID using the "id:123" format in the back-end "All Videos" search box (e.g., id:42).
+* New: Introduced a "Primary Color" setting under "Video Gallery => Settings => Advanced => General", replacing the former "Player Theme Color" setting and applying the color consistently across the plugin UI.
+* Tweak: Completely restructured the plugin's settings menu for improved clarity and navigation.
+* Tweak: Rewrote the categories list template in the front-end using a custom hierarchical function to avoid conflicts with third-party templates or plugins.
+* Tweak: Updated Freemius SDK to version 2.13.1.
+* Fix: WordPress 7.0 compatibility issues.
+* Fix: Various performance and security improvements.
 
 = 4.7.5 = 
 
@@ -597,6 +625,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 4.7.5 =
+= 4.8.5 =
 
-Introduces several new features, bug fixes & enhancements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)
+The plugin's settings menu has been completely restructured. Also introduces new features, performance and security improvements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

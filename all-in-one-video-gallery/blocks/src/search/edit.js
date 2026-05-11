@@ -45,8 +45,8 @@ function Edit( { attributes, setAttributes } ) {
 								{ label: aiovg_blocks.i18n.horizontal, value: 'horizontal' }
 							] }
 							onChange={ ( value ) => setAttributes( { template: value } ) }
-							__nextHasNoMarginBottom
-            				__next40pxDefaultSize
+							__nextHasNoMarginBottom={ true }
+            				__next40pxDefaultSize={ true }
 						/>
 					</PanelRow>
 
@@ -55,7 +55,7 @@ function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.search_by_keywords }
 							checked={ keyword }
 							onChange={ () => setAttributes( { keyword: ! keyword } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -64,7 +64,7 @@ function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.search_by_categories }
 							checked={ category }
 							onChange={ () => setAttributes( { category: ! category } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -73,7 +73,7 @@ function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.search_by_tags }
 							checked={ tag }
 							onChange={ () => setAttributes( { tag: ! tag } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -82,7 +82,7 @@ function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.sort_by_dropdown }
 							checked={ sort }
 							onChange={ () => setAttributes( { sort: ! sort } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -91,7 +91,7 @@ function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.search_button }
 							checked={ search_button }
 							onChange={ () => setAttributes( { search_button: ! search_button } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -100,7 +100,7 @@ function Edit( { attributes, setAttributes } ) {
 							label={ aiovg_blocks.i18n.reset_button }
 							checked={ reset_button }
 							onChange={ () => setAttributes( { reset_button: ! reset_button } ) }
-							__nextHasNoMarginBottom
+							__nextHasNoMarginBottom={ true }
 						/>
 					</PanelRow>
 
@@ -113,8 +113,8 @@ function Edit( { attributes, setAttributes } ) {
 								{ label: aiovg_blocks.i18n.current_page, value: 'current' }
 							] }
 							onChange={ ( value ) => setAttributes( { target: value } ) }
-							__nextHasNoMarginBottom
-            				__next40pxDefaultSize
+							__nextHasNoMarginBottom={ true }
+            				__next40pxDefaultSize={ true }
 						/>
 					</PanelRow>
 				</PanelBody>

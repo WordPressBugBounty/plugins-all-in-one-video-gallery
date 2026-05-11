@@ -11,7 +11,9 @@
 
 			// Set references to the DOM elements used by the component
 			this.player = null;
-			this.playButtonEl = null;		
+			this.playButtonEl = null;	
+			this.cookieConsentEl = null;
+			this.emailCaptureEl = null;	
 
 			// Set references to the public properties used by the component
 			this.settings = {};
@@ -42,10 +44,25 @@
 				}
 			};		
 
-			if ( this.settings.cookie_consent ) {
-				const privacyConsentButtonEl = this.querySelector( '.aiovg-privacy-consent-button' );
-				if ( privacyConsentButtonEl !== null ) {
-					privacyConsentButtonEl.addEventListener( 'click', () => this._onCookieConsent() );
+			if ( this.settings.hasOwnProperty( 'email_capture' ) ) {
+				this.emailCaptureEl = this.querySelector( '.aiovg-email-capture' );
+			}			
+
+			if ( this.emailCaptureEl && parseInt( this.emailCaptureEl.dataset.pre_roll ) ) {
+				this._initPreRollEmailCapture();
+			} else if ( this.settings.cookie_consent ) {
+				this.cookieConsentEl        = this.querySelector( '.aiovg-privacy-wrapper' );
+				const cookieConsentButtonEl = this.querySelector( '.aiovg-privacy-consent-button' );
+
+				if ( this.cookieConsentEl && cookieConsentButtonEl !== null ) {
+					const poster = this.cookieConsentEl.getAttribute( 'data-poster' ) || '';
+					if ( AIOVGVideoElement.isValidUrl( poster ) ) {
+						this.cookieConsentEl.style.backgroundImage = `url("${poster}")`; 
+					} 
+
+					cookieConsentButtonEl.addEventListener( 'click', () => this._onCookieConsent() );
+				} else {
+					this._initPlayer();
 				}
 			} else {
 				this._initPlayer();
@@ -79,7 +96,84 @@
 			}, window.location.origin );
 		}
 
+		_initPreRollEmailCapture() {
+			this.classList.add( 'aiovg-show-email-capture' );
+
+			const poster = this.emailCaptureEl.getAttribute( 'data-poster' ) || '';
+			if ( AIOVGVideoElement.isValidUrl( poster ) ) {
+				this.emailCaptureEl.style.backgroundImage = `url("${poster}")`; 
+			} 
+
+			const firstInput = this.emailCaptureEl.querySelector( 'input' );
+			if ( firstInput ) {
+				firstInput.focus();
+			}
+
+			this._initEmailCaptureForm( ( data ) => {
+				if ( ! this.emailCaptureEl ) return false;
+
+				if ( this.emailCaptureEl.classList.contains( 'aiovg-is-loading' ) ) return false; // Prevent multiple submissions
+				this.emailCaptureEl.classList.add( 'aiovg-is-loading' );
+
+				const xmlhttp = new XMLHttpRequest();
+
+				xmlhttp.onreadystatechange = () => {
+					if ( 4 == xmlhttp.readyState ) {
+						let response = null;
+
+						if ( 200 == xmlhttp.status && xmlhttp.responseText ) {
+							try {
+								response = JSON.parse( xmlhttp.responseText );
+							} catch ( e ) {}
+						}
+
+						if ( response && response.success ) {
+							// Hide the form and remove it from the DOM to prevent it from being submitted again.
+							this.classList.remove( 'aiovg-show-email-capture' );
+
+							this.emailCaptureEl.remove();
+							this.emailCaptureEl = null;
+
+							// Render player
+							this.settings.player.autoplay = true;
+							this._initPlayer();
+
+							// Email submission implies consent — remove both gates from other players
+							const videos = document.querySelectorAll( '.aiovg-player-element' );
+							for ( let i = 0; i < videos.length; i++ ) {
+								videos[ i ].removeCookieConsent();
+								videos[ i ].removeEmailCapture();
+							}
+
+							window.postMessage({
+								message: 'aiovg-email-captured'
+							}, window.location.origin );
+						} else {
+							// Show error message
+							const errorSpan = this.emailCaptureEl.querySelector( '.aiovg-email-capture-error' );
+
+							if ( errorSpan ) {
+								errorSpan.textContent   = ( response && response.data && typeof response.data === 'string' ) ? response.data : errorSpan.getAttribute( 'data-error_generic' );
+								errorSpan.style.display = 'block';
+							}
+
+							// Restore the form so the user can retry.
+							this.emailCaptureEl.classList.remove( 'aiovg-is-loading' );
+						}
+					}
+				};
+
+				xmlhttp.open( 'POST', this._ajaxUrl + '?action=aiovg_save_email_lead&security=' + this._ajaxNonce, true );
+				xmlhttp.setRequestHeader( 'Content-type', 'application/x-www-form-urlencoded' );
+				xmlhttp.send( data );
+			} );
+		}
+
 		_initPlayer() {
+			if ( this.player ) {
+				return false;
+			}
+
 			this.player = videojs( this.querySelector( 'video-js' ), this.settings.player );				
 
 			this.player.ready( () => this._onReady() );
@@ -90,10 +184,11 @@
 
 			this._initOffset();
 			this._initChapters();
-			this._initQualitySelector();			
+			this._initQualitySelector();
 			this._initOverlays();	
-			this._initHotKeys();
-			this._initContextMenu();	
+			this._initHotKeys();		
+			this._initEmailCapture();
+			this._initContextMenu();			
 
 			// Dispatch a player ready event
 			const options = {					
@@ -242,7 +337,7 @@
 					'TimeTooltip',
 				]).update = function( seekBarRect, seekBarPoint, time ) {
 					const markers = root.settings.chapters;
-					const markerIndex = markers.findIndex( ( { time: markerTime } ) => markerTime == root._formatedTimeToSeconds( time ) );
+					const markerIndex = markers.findIndex( ( { time: markerTime } ) => markerTime == root._formattedTimeToSeconds( time ) );
 			
 					if ( markerIndex > -1 ) {
 						const label = markers[ markerIndex ].label;
@@ -279,7 +374,7 @@
 			const src = this.player.src();
 
 			if ( /.m3u8/.test( src ) || /.mpd/.test( src ) ) {
-				if ( this.settings.player.controlBar.children.indexOf( 'qualitySelector' ) != -1 ) {
+				if ( this.settings.player.controlBar.children.indexOf( 'QualitySelector' ) != -1 ) {
 					this.player.qualityMenu();
 				}
 			}
@@ -318,41 +413,63 @@
 				});
 			}
 
-			// Logo
-			if ( this.settings.hasOwnProperty( 'logo' ) ) {
-				if ( this.settings.logo.margin ) {
-					this.settings.logo.margin = this.settings.logo.margin - 5;
-				}
-				
-				let style = 'margin: ' + this.settings.logo.margin + 'px;';
+			// Logo / Trailer Badge
+			let hasLogo    = this.settings.hasOwnProperty( 'logo' );
+			let hasTrailer = this.settings.hasOwnProperty( 'trailer' );
+
+			if ( hasLogo || hasTrailer ) {
 				let align = 'bottom-left';
+				let style = 'margin: 5px;';
 
-				switch ( this.settings.logo.position ) {
-					case 'topleft':						
-						align = 'top-left';
-						break;
+				if ( hasLogo ) {
+					if ( this.settings.logo.margin ) {
+						this.settings.logo.margin = this.settings.logo.margin - 5;
+					}
+					
+					style = 'margin: ' + this.settings.logo.margin + 'px;';
 
-					case 'topright':						
-						align = 'top-right';
-						break;
+					switch ( this.settings.logo.position ) {
+						case 'topleft':						
+							align = 'top-left';
+							break;
 
-					case 'bottomright':
-						align = 'bottom-right';
-						break;				
+						case 'topright':						
+							align = 'top-right';
+							break;
+
+						case 'bottomright':
+							align = 'bottom-right';
+							break;				
+					}
 				}
 
-				const logo = '<a href="' + this.settings.logo.link + '" style="' + style + '">' + 
-					'<img src="' + this.settings.logo.image + '" alt="" />' + 
-					'<span class="vjs-control-text" aria-live="polite">Logo</span>' + 
-				'</a>';
+				// Determine the href: trailer URL takes precedence when active.
+				let logoHref = hasLogo ? this.settings.logo.link : 'javascript:void(0)';
+				
+				if ( hasTrailer && this.settings.trailer.url ) {
+					logoHref = this.settings.trailer.url;
+				}
+
+				// Icon: logo image > external-link SVG (only when URL set) > nothing.
+				let iconHtml = '';
+
+				if ( hasLogo ) {
+					iconHtml = '<img src="' + this.settings.logo.image + '" alt="" />';
+				} else if ( hasTrailer && this.settings.trailer.url ) {
+					iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>';
+				}
+
+				// Label: visible trailer label or sr-only text for logo-only mode.
+				let labelHtml   = hasTrailer ? '<span class="vjs-logo-label">' + this.settings.trailer.label + '</span>' : '<span class="vjs-control-text" aria-live="polite">Logo</span>';
+				let logoContent = '<a href="' + logoHref + '" target="_top" style="' + style + '">'	+ iconHtml + labelHtml	+ '</a>';
 
 				overlays.push({
-					content: logo,
+					content: logoContent,
 					class: 'vjs-logo',
 					align: align,
 					start: 'controlsshown',
 					end: 'controlshidden',
-					showBackground: false					
+					showBackground: false
 				});
 			}
 
@@ -375,9 +492,8 @@
 					this.player.addChild( modal );
 
 					let wasPlaying = true;
-
 					this.querySelector( '.vjs-share-embed-button' ).addEventListener( 'click', () => {
-						wasPlaying = ! this.player.paused;
+						wasPlaying = ! this.player.paused();
 						modal.open();						
 					});
 
@@ -391,7 +507,12 @@
 				if ( this.settings.hasOwnProperty( 'embed' ) ) {
 					this.querySelector( '.vjs-input-embed-code' ).addEventListener( 'focus', function() {
 						this.select();
-						document.execCommand( 'copy' );					
+						
+						if ( navigator.clipboard && navigator.clipboard.writeText ) {
+							navigator.clipboard.writeText( this.value ).catch( () => {} );
+						} else {
+							document.execCommand( 'copy' );
+						}
 					});
 				}
 			}
@@ -400,6 +521,236 @@
 		_initHotKeys() {
 			if ( this.settings.hotkeys ) {
 				this.player.hotkeys();
+			}
+		}
+
+		_initEmailCapture() {
+			if ( ! this.emailCaptureEl ) return false;
+			
+			this.emailCaptureEl.style.backgroundImage = 'none';
+			this.player.el().appendChild( this.emailCaptureEl );
+
+			let isModalOpen = false;
+			let wasPlaying  = false;
+
+			const showEmailCapture = () => {
+				if ( ! this.emailCaptureEl || isModalOpen ) return false;
+				isModalOpen = true;
+
+				if ( this.player && ! this.player.ended() ) {
+					wasPlaying = ! this.player.paused();
+					this.player.pause();
+				}
+
+				this.classList.add( 'aiovg-show-email-capture' );
+
+				const firstInput = this.emailCaptureEl.querySelector( 'input' );
+				if ( firstInput ) {
+					firstInput.focus();
+				}
+			};
+
+			const hideEmailCapture = () => {
+				if ( ! this.emailCaptureEl || ! isModalOpen ) return false;
+				isModalOpen = false; // Clear before player.play() so the guard above does not block it.
+
+				this.classList.remove( 'aiovg-show-email-capture' );
+
+				this.emailCaptureEl.remove();
+				this.emailCaptureEl = null;
+
+				if ( wasPlaying ) {
+					this.player.play();
+				}
+			}
+
+			const ajaxEmailCapture = ( data ) => {
+				if ( ! this.emailCaptureEl ) return false;
+
+				if ( this.emailCaptureEl.classList.contains( 'aiovg-is-loading' ) ) return false; // Prevent multiple submissions
+				this.emailCaptureEl.classList.add( 'aiovg-is-loading' );
+
+				const xmlhttp = new XMLHttpRequest();
+
+				xmlhttp.onreadystatechange = () => {
+					if ( 4 == xmlhttp.readyState ) {
+						let response = null;
+
+						if ( 200 == xmlhttp.status && xmlhttp.responseText ) {
+							try {
+								response = JSON.parse( xmlhttp.responseText );
+							} catch ( e ) {}
+						}
+
+						if ( response && response.success ) {
+							// Hide the form and remove it from the DOM to prevent it from being submitted again.
+							hideEmailCapture();
+
+							// Email submission implies consent — remove both gates from other players
+							const videos = document.querySelectorAll( '.aiovg-player-element' );
+							for ( let i = 0; i < videos.length; i++ ) {
+								videos[ i ].removeCookieConsent();
+								videos[ i ].removeEmailCapture();
+							}
+
+							window.postMessage({
+								message: 'aiovg-email-captured'
+							}, window.location.origin );
+						} else {
+							// Show error message
+							const errorSpan = this.emailCaptureEl.querySelector( '.aiovg-email-capture-error' );
+
+							if ( errorSpan ) {
+								errorSpan.textContent   = ( response && response.data && typeof response.data === 'string' ) ? response.data : errorSpan.getAttribute( 'data-error_generic' );
+								errorSpan.style.display = 'block';
+							}
+
+							// Restore the form so the user can retry.
+							this.emailCaptureEl.classList.remove( 'aiovg-is-loading' );
+						}
+					}
+				};
+
+				xmlhttp.open( 'POST', this._ajaxUrl + '?action=aiovg_save_email_lead&security=' + this._ajaxNonce, true );
+				xmlhttp.setRequestHeader( 'Content-type', 'application/x-www-form-urlencoded' );
+				xmlhttp.send( data );			
+			};
+
+			// Mid-roll — show when currentTime reaches the configured percentage.
+			const midRoll = parseInt( this.emailCaptureEl.dataset.mid_roll );
+
+			if ( midRoll ) {
+				let midRollFired = false;
+
+				const onMidRollTimeUpdate = () => {
+					if ( ! this.emailCaptureEl ) {
+						this.player.off( 'timeupdate', onMidRollTimeUpdate );
+						return false;
+					}
+
+					if ( midRollFired ) return false;
+
+					// Skip during ad playback — currentTime/duration reflect the ad, not the content.
+					if ( this.settings.hasOwnProperty( 'ads' ) && this.player.ads && this.player.ads.isInAdMode() ) {
+						return false;
+					}
+
+					const duration = this.player.duration();
+					const current  = this.player.currentTime();
+
+					if ( duration && current >= ( midRoll / 100 ) * duration ) {
+						midRollFired = true;
+						this.player.off( 'timeupdate', onMidRollTimeUpdate );
+						showEmailCapture();
+					}
+				};
+
+				this.player.on( 'timeupdate', onMidRollTimeUpdate );
+			}
+
+			// Post-roll — show after the video ends.
+			const postRoll = parseInt( this.emailCaptureEl.dataset.post_roll );
+
+			if ( postRoll ) {
+				this.player.on( 'ended', () => {
+					showEmailCapture();
+				} );
+			}
+
+			// Re-pause on any play event while the overlay is open.
+			this.player.on( 'play', () => {
+				if ( ! this.emailCaptureEl || ! isModalOpen ) return false;
+
+				wasPlaying = true;
+				this.player.pause();
+			} );
+
+			this.player.on( 'playing', () => {
+				if ( ! this.emailCaptureEl || ! isModalOpen ) return false;
+
+				wasPlaying = true;
+				this.player.pause();
+			} );
+
+			this._initEmailCaptureForm( ( data ) => ajaxEmailCapture( data ) );
+		}
+
+		_initEmailCaptureForm( onSubmit ) {
+			const submitBtn = this.querySelector( '.aiovg-email-capture-submit' );
+			const skipLink  = this.querySelector( '.aiovg-email-capture-skip' );
+
+			if ( submitBtn ) {
+				submitBtn.addEventListener( 'click', () => {
+					const emailField = this.emailCaptureEl.querySelector( '.aiovg-email-capture-email' );
+					const errorSpan  = this.emailCaptureEl.querySelector( '.aiovg-email-capture-error' );
+
+					const email = emailField ? emailField.value.trim() : '';
+					const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+					if ( ! email || ! regex.test( email ) ) {
+						if ( errorSpan ) {
+							const errorMessage = errorSpan.getAttribute( 'data-invalid_email' ) || 'Please enter a valid email address.';
+
+							errorSpan.textContent = errorMessage;
+							errorSpan.style.display = 'block';
+						}
+
+						if ( emailField ) {
+							emailField.classList.add( 'aiovg-is-invalid' );
+							emailField.setAttribute( 'aria-invalid', 'true' );
+						}
+
+						return false;
+					}
+
+					if ( errorSpan ) {
+						errorSpan.style.display = 'none';
+					}
+
+					if ( emailField ) {
+						emailField.classList.remove( 'aiovg-is-invalid' );
+						emailField.removeAttribute( 'aria-invalid' );
+					}
+
+					let params = 'email=' + encodeURIComponent( email );
+
+					const nameField = this.emailCaptureEl.querySelector( '.aiovg-email-capture-name' );
+					if ( nameField && nameField.value.trim() ) {
+						params += '&name=' + encodeURIComponent( nameField.value.trim() );
+					}
+
+					const phoneField = this.emailCaptureEl.querySelector( '.aiovg-email-capture-phone' );
+					if ( phoneField && phoneField.value.trim() ) {
+						params += '&phone=' + encodeURIComponent( phoneField.value.trim() );
+					}
+
+					if ( 'aiovg_videos' == this.settings.post_type && this.settings.post_id ) {
+						params += '&video_id=' + encodeURIComponent( this.settings.post_id );
+					} else {
+						params += '&video_id=0';
+
+						if ( this.emailCaptureEl.dataset.video_url ) {
+							params += '&video_url=' + encodeURIComponent( this.emailCaptureEl.dataset.video_url );
+						}
+					}
+
+					params += '&page_url=' + encodeURIComponent( window.location.href );
+
+					onSubmit( params );
+				} );
+			}
+
+			if ( skipLink ) {
+				const doSkip = () => onSubmit( 'skipped=1' );
+
+				skipLink.addEventListener( 'click', doSkip );
+
+				skipLink.addEventListener( 'keydown', ( event ) => {
+					if ( 13 === event.keyCode || 32 === event.keyCode ) {
+						event.preventDefault();
+						doSkip();
+					}
+				} );
 			}
 		}
 
@@ -575,7 +926,7 @@
 			}
 		}
 
-		_formatedTimeToSeconds( time ) {
+		_formattedTimeToSeconds( time ) {
 			let timeSplit = time.split( ':' );
 			let seconds   = +timeSplit.pop();
 
@@ -628,15 +979,44 @@
 		}	
 
 		/**
+		 * Define public static methods.
+		 */
+
+		static isValidUrl( url ) {
+			if ( url === '' ) return false;
+
+			try {
+				new URL( url );
+				return true;
+			} catch ( error ) {
+				return false;
+			}
+		}
+
+		/**
 		 * Define API methods.
 		 */
 
 		removeCookieConsent() {
-			const privacyWrapperEl = this.querySelector( '.aiovg-privacy-wrapper' );
-			if ( privacyWrapperEl != null ) {
-				privacyWrapperEl.remove();
-				this._initPlayer();		
-			}	
+			if ( ! this.cookieConsentEl ) return false;
+
+			this.cookieConsentEl.remove();
+			this.cookieConsentEl = null;
+
+			this._initPlayer();
+		}
+
+		removeEmailCapture() {
+			if ( ! this.emailCaptureEl ) return false;
+
+			this.classList.remove( 'aiovg-show-email-capture' );
+
+			this.emailCaptureEl.remove();
+			this.emailCaptureEl = null;
+
+			if ( ! this.player ) {
+				this._initPlayer();
+			}
 		}
 
 		pause() {
@@ -708,6 +1088,13 @@
 				const videos = document.querySelectorAll( '.aiovg-player-element' );
 				for ( let i = 0; i < videos.length; i++ ) {
 					videos[ i ].removeCookieConsent();
+				}
+			}
+
+			if ( event.data.message == 'aiovg-email-captured' ) {
+				const videos = document.querySelectorAll( '.aiovg-player-element' );
+				for ( let i = 0; i < videos.length; i++ ) {
+					videos[ i ].removeEmailCapture();
 				}
 			}
 

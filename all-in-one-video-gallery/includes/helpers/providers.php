@@ -236,11 +236,12 @@ function aiovg_get_dailymotion_id_from_url( $url ) {
  * Get Dailymotion image from URL.
  *
  * @since  1.5.0
- * @param  string $url Dailymotion video URL.
- * @return string      Dailymotion image URL.
+ * @param  string $url           Dailymotion video URL.
+ * @param  bool   $force_refresh Skip the cache and fetch fresh data. Default false.
+ * @return string                Dailymotion image URL.
  */
-function aiovg_get_dailymotion_image_url( $url ) {	
-	$data = aiovg_get_dailymotion_oembed_data( $url );		
+function aiovg_get_dailymotion_image_url( $url, $force_refresh = false ) {
+	$data = aiovg_get_dailymotion_oembed_data( $url, $force_refresh );
 	return $data['thumbnail_url'];
 }
 
@@ -248,22 +249,26 @@ function aiovg_get_dailymotion_image_url( $url ) {
  * Get Dailymotion data using oEmbed.
  *
  * @since  3.8.4
- * @param  string $url      Dailymotion URL.
- * @return string $response Dailymotion oEmbed response data.
+ * @param  string $url           Dailymotion URL.
+ * @param  bool   $force_refresh Skip the cache and fetch fresh data. Default false.
+ * @return string $response      Dailymotion oEmbed response data.
  */
-function aiovg_get_dailymotion_oembed_data( $url ) {
-	$response = array(		
+function aiovg_get_dailymotion_oembed_data( $url, $force_refresh = false ) {
+	$response = array(
 		'thumbnail_url' => '',
 		'duration'      => ''
 	);
 
-	$cache_key   = 'aiovg_' . md5( $url );
-	$cache_value = wp_cache_get( $cache_key );
+	$cache_key = 'aiovg_' . md5( $url );
 
-	if ( is_array( $cache_value ) ) {
-		$response = array_merge( $response, $cache_value );
-		return $response;
-	}	
+	if ( ! $force_refresh ) {
+		$cache_value = get_transient( $cache_key );
+
+		if ( is_array( $cache_value ) ) {
+			$response = array_merge( $response, $cache_value );
+			return $response;
+		}
+	}
 
 	$id = aiovg_get_dailymotion_id_from_url( $url );
 
@@ -284,11 +289,11 @@ function aiovg_get_dailymotion_oembed_data( $url ) {
 			}
 		} else {
 			// error_log( $api_response->get_error_message() );
-		}		
+		}
 	}
 
-	if ( ! empty( $response['thumbnail_url'] ) ) {	
-		wp_cache_set( $cache_key, $response, '', HOUR_IN_SECONDS );
+	if ( ! empty( $response['thumbnail_url'] ) ) {
+		set_transient( $cache_key, $response, DAY_IN_SECONDS );
 	}
 	
 	return $response;
@@ -342,10 +347,11 @@ function aiovg_get_embedcode_video_duration( $embedcode ) {
  * Get image from the Third-Party Player Code.
  *
  * @since  1.0.0
- * @param  string $embedcode Player Code.
- * @return string $url       Image URL.
+ * @param  string $embedcode     Player Code.
+ * @param  bool   $force_refresh Skip the cache and fetch fresh data. Default false.
+ * @return string $url           Image URL.
  */
-function aiovg_get_embedcode_image_url( $embedcode ) {
+function aiovg_get_embedcode_image_url( $embedcode, $force_refresh = false ) {
 	$url = '';
 
 	$iframe_src = aiovg_extract_iframe_src( $embedcode );
@@ -357,33 +363,34 @@ function aiovg_get_embedcode_image_url( $embedcode ) {
 
 		// Vimeo
 		elseif ( false !== strpos( $iframe_src, 'vimeo.com' ) ) {
-			$url = aiovg_get_vimeo_image_url( $iframe_src );
+			$url = aiovg_get_vimeo_image_url( $iframe_src, $force_refresh );
 		}
 
 		// Dailymotion
 		elseif ( false !== strpos( $iframe_src, 'dailymotion.com' ) ) {
-			$url = aiovg_get_dailymotion_image_url( $iframe_src );
+			$url = aiovg_get_dailymotion_image_url( $iframe_src, $force_refresh );
 		}
 
 		// Rumble
 		elseif ( false !== strpos( $iframe_src, 'rumble.com' ) ) {
-			$url = aiovg_get_rumble_image_url( $iframe_src );
+			$url = aiovg_get_rumble_image_url( $iframe_src, $force_refresh );
 		}
 	}
-    	
+
 	// Return image url
-	return $url;	
+	return $url;
 }
 
 /**
  * Get Rumble image from URL.
  *
  * @since  3.8.4
- * @param  string $url Rumble video URL.
- * @return string      Rumble image URL.
+ * @param  string $url           Rumble video URL.
+ * @param  bool   $force_refresh Skip the cache and fetch fresh data. Default false.
+ * @return string                Rumble image URL.
  */
-function aiovg_get_rumble_image_url( $url ) {	
-	$data = aiovg_get_rumble_oembed_data( $url );		
+function aiovg_get_rumble_image_url( $url, $force_refresh = false ) {
+	$data = aiovg_get_rumble_oembed_data( $url, $force_refresh );
 	return $data['thumbnail_url'];
 }
 
@@ -391,29 +398,33 @@ function aiovg_get_rumble_image_url( $url ) {
  * Get Rumble data using oEmbed.
  *
  * @since  2.6.3
- * @param  string $url      Rumble URL.
- * @return string $response Rumble oEmbed response data.
+ * @param  string $url           Rumble URL.
+ * @param  bool   $force_refresh Skip the cache and fetch fresh data. Default false.
+ * @return string $response      Rumble oEmbed response data.
  */
-function aiovg_get_rumble_oembed_data( $url ) {
-	$response = array(		
+function aiovg_get_rumble_oembed_data( $url, $force_refresh = false ) {
+	$response = array(
 		'thumbnail_url' => '',
 		'duration'      => '',
 		'html'          => ''
 	);
 
-	$cache_key   = 'aiovg_' . md5( $url );
-	$cache_value = wp_cache_get( $cache_key );
+	$cache_key = 'aiovg_' . md5( $url );
 
-	if ( is_array( $cache_value ) ) {
-		$response = array_merge( $response, $cache_value );
-		return $response;
-	}	
+	if ( ! $force_refresh ) {
+		$cache_value = get_transient( $cache_key );
+
+		if ( is_array( $cache_value ) ) {
+			$response = array_merge( $response, $cache_value );
+			return $response;
+		}
+	}
 
 	$api_response = wp_remote_get( 'https://rumble.com/api/Media/oembed.json?url=' . urlencode( $url ) );
 
 	if ( is_array( $api_response ) && ! is_wp_error( $api_response ) ) {
 		$api_response = json_decode( $api_response['body'] );
-		
+
 		if ( isset( $api_response->thumbnail_url ) ) {
 			$response['thumbnail_url'] = $api_response->thumbnail_url;
 		}
@@ -424,11 +435,11 @@ function aiovg_get_rumble_oembed_data( $url ) {
 
 		if ( isset( $api_response->html ) ) {
 			$response['html'] = $api_response->html;
-		}		
+		}
 	}
-	
+
 	if ( ! empty( $response['thumbnail_url'] ) ) {
-		wp_cache_set( $cache_key, $response, '', HOUR_IN_SECONDS );
+		set_transient( $cache_key, $response, DAY_IN_SECONDS );
 	}
 	
 	return $response;
@@ -476,28 +487,40 @@ function aiovg_get_vimeo_id_from_url( $url ) {
  * Get Vimeo image from URL.
  *
  * @since  3.5.0
- * @param  string $url Vimeo video URL.
- * @return string      Vimeo image URL.
+ * @param  string $url           Vimeo video URL.
+ * @param  bool   $force_refresh Skip the cache and fetch fresh data. Default false.
+ * @return string                Vimeo image URL.
  */
-function aiovg_get_vimeo_image_url( $url ) {
-	$data = aiovg_get_vimeo_oembed_data( $url );	
+function aiovg_get_vimeo_image_url( $url, $force_refresh = false ) {
+	$data = aiovg_get_vimeo_oembed_data( $url, $force_refresh );
+
+	if ( empty( $data['video_id'] ) ) {
+		return $data['thumbnail_url'];
+	}
+
+	$cache_key = 'aiovg_vimeo_image_' . $data['video_id'];
+
+	if ( ! $force_refresh ) {
+		$cached_image = get_transient( $cache_key );
+		if ( false !== $cached_image ) {
+			return add_query_arg( 'isnew', 1, $cached_image );
+		}
+	}
 
 	// Find large thumbnail using the Vimeo API v2
-	if ( ! empty( $data['video_id'] ) ) {			
-		$api_response = wp_remote_get( 'https://vimeo.com/api/v2/video/' . $data['video_id'] . '.php' );
-		
-		if ( ! is_wp_error( $api_response ) ) {
-			$api_response = maybe_unserialize( $api_response['body'] );
+	$api_response = wp_remote_get( 'https://vimeo.com/api/v2/video/' . $data['video_id'] . '.php' );
 
-			if ( is_array( $api_response ) && isset( $api_response[0]['thumbnail_large'] ) ) {
-				$data['thumbnail_url'] = $api_response[0]['thumbnail_large'];
-			}
+	if ( ! is_wp_error( $api_response ) ) {
+		$api_response = maybe_unserialize( $api_response['body'] );
+
+		if ( is_array( $api_response ) && isset( $api_response[0]['thumbnail_large'] ) ) {
+			$data['thumbnail_url'] = $api_response[0]['thumbnail_large'];
 		}
 	}
 
 	// Get images from private videos
-	if ( ! empty( $data['video_id'] ) && empty( $data['thumbnail_url'] ) ) {
-		$api_settings = aiovg_get_option( 'aiovg_api_settings' );	
+	if ( empty( $data['thumbnail_url'] ) ) {
+		$api_settings = aiovg_get_option( 'aiovg_api_settings' );
 
 		if ( isset( $api_settings['vimeo_access_token'] ) && ! empty( $api_settings['vimeo_access_token'] ) ) {
 			$args = array(
@@ -507,23 +530,23 @@ function aiovg_get_vimeo_image_url( $url ) {
 			);
 
 			$api_response = wp_remote_get( 'https://api.vimeo.com/videos/' . $data['video_id'] . '/pictures', $args );
-			
+
 			if ( is_array( $api_response ) && ! is_wp_error( $api_response ) ) {
-				$api_response = json_decode( $api_response['body'] );					
+				$api_response = json_decode( $api_response['body'] );
 
 				if ( isset( $api_response->data ) ) {
 					$bypass = false;
-		
+
 					foreach ( $api_response->data as $item ) {
 						foreach ( $item->sizes as $picture ) {
 							$data['thumbnail_url'] = $picture->link;
-	
+
 							if ( $picture->width >= 400 ) {
 								$bypass = true;
 								break;
 							}
 						}
-	
+
 						if ( $bypass ) break;
 					}
 				}
@@ -532,6 +555,7 @@ function aiovg_get_vimeo_image_url( $url ) {
 	}
 
 	if ( ! empty( $data['thumbnail_url'] ) ) {
+		set_transient( $cache_key, $data['thumbnail_url'], DAY_IN_SECONDS );
 		$data['thumbnail_url'] = add_query_arg( 'isnew', 1, $data['thumbnail_url'] );
 	}
 
@@ -542,23 +566,27 @@ function aiovg_get_vimeo_image_url( $url ) {
  * Get Vimeo data using oEmbed.
  *
  * @since  1.6.6
- * @param  string $url      Vimeo URL.
- * @return string $response Vimeo oEmbed response data.
+ * @param  string $url           Vimeo URL.
+ * @param  bool   $force_refresh Skip the cache and fetch fresh data. Default false.
+ * @return string $response      Vimeo oEmbed response data.
  */
-function aiovg_get_vimeo_oembed_data( $url ) {
-	$response = array(		
+function aiovg_get_vimeo_oembed_data( $url, $force_refresh = false ) {
+	$response = array(
 		'video_id'      => '',
 		'thumbnail_url' => '',
 		'duration'      => '',
 		'html'          => ''
 	);
 
-	$cache_key   = 'aiovg_' . md5( $url );
-	$cache_value = wp_cache_get( $cache_key );
+	$cache_key = 'aiovg_' . md5( $url );
 
-	if ( is_array( $cache_value ) ) {
-		$response = array_merge( $response, $cache_value );
-		return $response;
+	if ( ! $force_refresh ) {
+		$cache_value = get_transient( $cache_key );
+
+		if ( is_array( $cache_value ) ) {
+			$response = array_merge( $response, $cache_value );
+			return $response;
+		}
 	}
 
 	$api_response = wp_remote_get( 'https://vimeo.com/api/oembed.json?url=' . urlencode( $url ) );
@@ -568,8 +596,8 @@ function aiovg_get_vimeo_oembed_data( $url ) {
 
 		if ( isset( $api_response->video_id ) ) {
 			$response['video_id'] = $api_response->video_id;
-		}	
-		
+		}
+
 		if ( isset( $api_response->thumbnail_url ) ) {
 			$response['thumbnail_url'] = $api_response->thumbnail_url;
 		}
@@ -584,15 +612,15 @@ function aiovg_get_vimeo_oembed_data( $url ) {
 	}
 
 	// Fallback to our old method to get the Vimeo ID
-	if ( empty( $response['video_id'] ) ) {			
-		$is_vimeo = preg_match( '/vimeo\.com/i', $url );  
+	if ( empty( $response['video_id'] ) ) {
+		$is_vimeo = preg_match( '/vimeo\.com/i', $url );
 		if ( $is_vimeo ) {
 			$response['video_id'] = preg_replace( '/[^\/]+[^0-9]|(\/)/', '', rtrim( $url, '/' ) );
 		}
 	}
 
-	if ( ! empty( $response['video_id'] ) ) {	
-		wp_cache_set( $cache_key, $response, '', HOUR_IN_SECONDS );
+	if ( ! empty( $response['video_id'] ) ) {
+		set_transient( $cache_key, $response, DAY_IN_SECONDS );
 	}
 	
 	return $response;
@@ -689,7 +717,7 @@ function aiovg_has_bunny_stream_enabled() {
 
 /**
  * Resolve YouTube URLs.
- * 
+ *
  * @since  2.5.6
  * @param  string $url YouTube URL.
  * @return string $url Resolved YouTube URL.
@@ -699,7 +727,7 @@ function aiovg_resolve_youtube_url( $url ) {
 		$id = aiovg_get_youtube_id_from_url( $url );
 
 		if ( ! empty( $id ) ) {
-			$url = 'https://www.youtube.com/watch?v=' . $id; 
+			$url = 'https://www.youtube.com/watch?v=' . $id;
 		}
 	}
 

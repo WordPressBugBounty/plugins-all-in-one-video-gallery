@@ -172,16 +172,21 @@
  	 * Copy to Clipboard.
  	 */
 	function copyToClipboard( value ) {
-		var input = document.createElement( 'input' );
-		input.value = value;
+		if ( navigator.clipboard && navigator.clipboard.writeText ) {
+			navigator.clipboard.writeText( value ).catch( () => {} );
+		} else {
+			var input = document.createElement( 'input' );
+			input.value = value;
 
-		document.body.appendChild( input );		
-		input.focus();
-		input.select();
+			document.body.appendChild( input );
+			input.focus();
+			input.select();
 
-		document.execCommand( 'copy' );
+			document.execCommand( 'copy' );
 
-		input.remove();
+			input.remove();
+		}
+		
 		alert( aiovg_admin.i18n.copied + "\n" + value );
 	}
 
@@ -193,105 +198,121 @@
 	}
 
 	/**
- 	 * Init Bunny Stream Uploader.
- 	 */
-	class InitBunnyStreamUploader {
+	 * Bunny Stream Uploader.
+	 */
+	class BunnyStreamUploader {
 
-		constructor() {
-		  	this.$uploadButton = $( '#aiovg-bunny-stream-upload-button' );
+		constructor( config ) {
+			this.$uploadButton = $( config.uploadButtonSelector );
 
-		  	if ( this.$uploadButton.length === 0 ) {
+			if ( this.$uploadButton.length === 0 ) {
 				return;
-		  	}
-	  
-		  	this.$root          = $( '#aiovg-field-mp4' );
-		  	this.$uploadWrapper = $( '#aiovg-field-mp4 .aiovg-media-uploader' );
-		  	this.$uploadField   = $( '#aiovg-field-mp4 input[type="file"]' );
-		  	this.$uploadStatus  = $( '#aiovg-field-mp4 .aiovg-upload-status' );
-	  
-		  	this.upload  = null;
-		  	this.timeout = null;
-		  	this.options = {};
-	  
-		  	this.initOptions();
-		  	this.bindEvents();
-		}
-	  
-		initOptions() {
-		  	this.upload = null;
+			}
 
-		  	if ( this.timeout ) clearTimeout( this.timeout );
-		  	this.timeout = null;
-	  
-		  	this.options = {
+			this.$root          = $( config.rootSelector );
+			this.$uploadWrapper = $( config.rootSelector + ' .aiovg-media-uploader' );
+			this.$uploadField   = $( config.rootSelector + ' input[type="file"]' );
+			this.$uploadStatus  = $( config.rootSelector + ' .aiovg-upload-status' );
+
+			this.srcSelector               = config.srcSelector;
+			this.videoIdSelector           = config.videoIdSelector;
+			this.deletableVideoIdsSelector = config.deletableVideoIdsSelector;
+			this.imageSelector             = config.imageSelector    || null;
+			this.durationSelector          = config.durationSelector || null;
+			this.titleSuffix               = config.titleSuffix      || '';
+			this.onCancel                  = config.onCancel         || null;
+
+			this.upload  = null;
+			this.timeout = null;
+			this.options = {};
+
+			this.initOptions();
+			this.bindEvents();
+		}
+
+		initOptions() {
+			this.upload = null;
+
+			if ( this.timeout ) clearTimeout( this.timeout );
+			this.timeout = null;
+
+			this.options = {
 				status: '',
 				videoId: '',
 				retryCount: 0,
 				maxRetries: 30,
 				cache: null
-		  	};
+			};
 		}
-	  
+
 		bindEvents() {
-		  	this.$uploadButton.on( 'click', ( e ) => {
+			this.$uploadButton.on( 'click', ( e ) => {
 				e.preventDefault();
 				this.$uploadField.click();
-		  	});
-	  
-		  	this.$uploadField.on( 'change', ( e ) => {
+			});
+
+			this.$uploadField.on( 'change', ( e ) => {
 				this.handleUpload( e );
-		  	});
-	  
-		  	$( '#aiovg-field-mp4' ).on( 'click', '.aiovg-upload-cancel', ( e ) => {
+			});
+
+			this.$root.on( 'click', '.aiovg-upload-cancel', ( e ) => {
 				e.preventDefault();
 				this.cancelUpload();
-				toggleThumbnailGenerator();
-		  	});
-		}				
-	  
+
+				if ( this.onCancel ) {
+					this.onCancel();
+				}
+			});
+		}
+
 		handleUpload( e ) {
 			const file = e.target.files[0];
 			if ( ! file ) return;
 
-		  	this.initOptions();
-		  	this.$uploadStatus.html( '<span class="aiovg-text-success">' + aiovg_admin.i18n.preparing_upload + '</span><span class="aiovg-animate-dots"></span>' );
-		  	this.$root.addClass( 'aiovg-is-bunny-stream' );
-		  	this.$uploadWrapper.addClass( 'aiovg-uploading' );
-			
-			$( '#aiovg-thumbnail-generator' ).hide();
-	  
-		  	let title = $( '#title' ).val();
-		  	if ( ! title || title.trim().length === 0 ) {
+			this.initOptions();
+			this.$uploadStatus.html( '<span class="aiovg-text-success">' + aiovg_admin.i18n.preparing_upload + '</span><span class="aiovg-animate-dots"></span>' );
+			this.$root.addClass( 'aiovg-is-bunny-stream' );
+			this.$uploadWrapper.addClass( 'aiovg-uploading' );
+
+			if ( this.imageSelector ) {
+				$( '#aiovg-thumbnail-generator' ).hide();
+			}
+
+			let title = $( '#title' ).val();
+			if ( ! title || title.trim().length === 0 ) {
 				title = file.name;
-		  	}
-	  
+			}
+
+			if ( this.titleSuffix ) {
+				title = title + this.titleSuffix;
+			}
+
 			const data = {
 				action: 'aiovg_create_bunny_stream_video',
 				security: aiovg_admin.ajax_nonce,
 				post_id: aiovg_admin.post_id,
 				title: title
 			};
-	  
-			// Create Bunny video
-		  	$.post( ajaxurl, data, ( response ) => {
+
+			$.post( ajaxurl, data, ( response ) => {
 				if ( ! response.success ) {
 					this.$uploadField.val( '' );
 					this.$uploadStatus.html( '<span class="aiovg-text-error">' + response.data.error + '</span>' );
 					this.$uploadWrapper.removeClass( 'aiovg-uploading' );
 					return;
 				}
-	  
+
 				const metadata = {
 					filetype: file.type,
 					title: title
 				};
-	  
+
 				if ( response.data.collection_id ) {
 					metadata.collection = response.data.collection_id;
 				}
-	  
+
 				this.options.videoId = response.data.video_id;
-	  
+
 				// TUS Upload
 				this.upload = new tus.Upload( file, {
 					endpoint: 'https://video.bunnycdn.com/tusupload',
@@ -313,7 +334,7 @@
 
 						const percent = ( ( bytesUploaded / bytesTotal ) * 100 ).toFixed(2);
 						const status  = aiovg_admin.i18n.upload_status.replace( '%d', Math.min( 99.99, percent ) );
-			
+
 						if ( this.$uploadStatus.find( '.aiovg-upload-cancel' ).length > 0 ) {
 							this.$uploadStatus.find( '.aiovg-text-success' ).html( status );
 						} else {
@@ -325,28 +346,31 @@
 
 						this.upload = null;
 						this.$uploadField.val( '' );
-		
+
 						this.options.cache = {
-							mp4: $( '#aiovg-mp4' ).val(),
-							image: $( '#aiovg-image' ).val(),
-							video_id: $( '#aiovg-bunny_stream_video_id' ).val(),
-							deletable_video_ids: $( '#aiovg-deletable_bunny_stream_video_ids' ).val()
+							src: $( this.srcSelector ).val(),
+							video_id: $( this.videoIdSelector ).val(),
+							deletable_video_ids: $( this.deletableVideoIdsSelector ).val()
 						};
-		
-						$( '#aiovg-mp4' ).val( response.data.video_url );
-						$( '#aiovg-image' ).val( response.data.thumbnail_url );
-						$( '#aiovg-bunny_stream_video_id' ).val( response.data.video_id );
-		
+
+						$( this.srcSelector ).val( response.data.video_url );
+						$( this.videoIdSelector ).val( response.data.video_id );
+
+						if ( this.imageSelector ) {
+							this.options.cache.image = $( this.imageSelector ).val();
+							$( this.imageSelector ).val( response.data.thumbnail_url );
+						}
+
 						if ( this.options.cache.video_id ) {
 							let deletableVideoIds = this.options.cache.deletable_video_ids ? this.options.cache.deletable_video_ids.split( ',' ) : [];
-				
+
 							if ( deletableVideoIds.indexOf( this.options.cache.video_id ) === -1 ) {
 								deletableVideoIds.push( this.options.cache.video_id );
 							}
-				
-							$( '#aiovg-deletable_bunny_stream_video_ids' ).val( deletableVideoIds.join( ',' ) );
+
+							$( this.deletableVideoIdsSelector ).val( deletableVideoIds.join( ',' ) );
 						}
-			
+
 						if ( this.$uploadStatus.find( '.aiovg-upload-cancel' ).length > 0 ) {
 							this.$uploadStatus.find( '.aiovg-text-success' ).html( removeEndingDot( aiovg_admin.i18n.upload_processing ) + '<span class="aiovg-animate-dots"></span>' );
 						} else {
@@ -356,94 +380,99 @@
 						this.checkVideoStatus();
 					}
 				});
-		
+
 				this.upload.start();
 			}, 'json');
-		}		
-	
-	  	checkVideoStatus() {
+		}
+
+		checkVideoStatus() {
 			if ( ! this.options.videoId || this.options.retryCount++ >= this.options.maxRetries ) return;
-	
+
 			$.ajax({
-			  	url: ajaxurl,
-			  	method: 'POST',
-			  	data: {
+				url: ajaxurl,
+				method: 'POST',
+				data: {
 					action: 'aiovg_get_bunny_stream_video',
 					security: aiovg_admin.ajax_nonce,
 					post_id: aiovg_admin.post_id,
 					video_id: this.options.videoId
-			  	},
-			  	success: ( response ) => {
+				},
+				success: ( response ) => {
 					if ( this.options.status === 'cancelled' ) return;
-	
-					if ( ! response.success ) {	
-						this.resetFieldValues();
-					  	this.$uploadStatus.html( '<span class="aiovg-text-error">' + response.data.error + '</span>' );
-					  	this.$uploadWrapper.removeClass( 'aiovg-uploading' );
-					  	return;
-					}
-	
-					if ( response.data.status == 4 ) {
-					  	this.$uploadStatus.html( '<span class="aiovg-text-success">' + response.data.message + '</span>' );
-					  	this.$uploadWrapper.removeClass( 'aiovg-uploading' );
 
-					  	$( '#aiovg-duration' ).val( response.data.duration );
+					if ( ! response.success ) {
+						this.resetFieldValues();
+						this.$uploadStatus.html( '<span class="aiovg-text-error">' + response.data.error + '</span>' );
+						this.$uploadWrapper.removeClass( 'aiovg-uploading' );
+						return;
+					}
+
+					if ( response.data.status == 4 ) {
+						this.$uploadStatus.html( '<span class="aiovg-text-success">' + response.data.message + '</span>' );
+						this.$uploadWrapper.removeClass( 'aiovg-uploading' );
+
+						if ( this.durationSelector ) {
+							$( this.durationSelector ).val( response.data.duration );
+						}
 					} else {
 						if ( this.$uploadStatus.find( '.aiovg-upload-cancel' ).length > 0 ) {
 							this.$uploadStatus.find( '.aiovg-text-success' ).html( removeEndingDot( response.data.message ) + '<span class="aiovg-animate-dots"></span>' );
 						} else {
-					  		this.$uploadStatus.html( '<span class="aiovg-text-success">' + removeEndingDot( response.data.message ) + '<span class="aiovg-animate-dots"></span></span> <a class="aiovg-upload-cancel" href="javascript: void(0);">' + aiovg_admin.i18n.cancel_upload + '</a>' );
+							this.$uploadStatus.html( '<span class="aiovg-text-success">' + removeEndingDot( response.data.message ) + '<span class="aiovg-animate-dots"></span></span> <a class="aiovg-upload-cancel" href="javascript: void(0);">' + aiovg_admin.i18n.cancel_upload + '</a>' );
 						}
 
 						this.timeout = setTimeout( () => this.checkVideoStatus(), 5000 );
 					}
-			  	}
+				}
 			});
-	  	}
-	
+		}
+
 		cancelUpload() {
 			clearTimeout( this.timeout );
-			this.options.status = 'cancelled';			
+			this.options.status = 'cancelled';
 			this.$uploadField.val( '' );
 			this.$uploadStatus.html( '' );
-			this.resetFieldValues();			
-	
+			this.resetFieldValues();
+
 			if ( this.upload && typeof this.upload.abort === 'function' ) {
-			  	this.upload.abort().then( () => this.deleteVideo() ).catch( () => this.deleteVideo() );
+				this.upload.abort().then( () => this.deleteVideo() ).catch( () => this.deleteVideo() );
 			} else {
-			  	this.deleteVideo();
+				this.deleteVideo();
 			}
 
 			this.$uploadWrapper.removeClass( 'aiovg-uploading' );
 			this.$root.removeClass( 'aiovg-is-bunny-stream' );
-	  	}
+		}
 
-	  	deleteVideo() {
-			if ( ! this.options.videoId ) return;	
+		deleteVideo() {
+			if ( ! this.options.videoId ) return;
 			this.upload = null;
 
 			const data = {
-			  	action: 'aiovg_delete_bunny_stream_video',
-			  	security: aiovg_admin.ajax_nonce,
+				action: 'aiovg_delete_bunny_stream_video',
+				security: aiovg_admin.ajax_nonce,
 				post_id: aiovg_admin.post_id,
-			  	video_id: this.options.videoId
+				video_id: this.options.videoId
 			};
-	
+
 			setTimeout( () => {
-			  	$.post( ajaxurl, data, null, 'json' );
+				$.post( ajaxurl, data, null, 'json' );
 			}, 500 );
-	  	}
+		}
 
 		resetFieldValues() {
 			if ( ! this.options.cache ) return;
-	
-			$( '#aiovg-mp4' ).val( this.options.cache.mp4 );
-			$( '#aiovg-image' ).val( this.options.cache.image );
-			$( '#aiovg-bunny_stream_video_id' ).val( this.options.cache.video_id );
-			$( '#aiovg-deletable_bunny_stream_video_ids' ).val( this.options.cache.deletable_video_ids );
-	  	}
 
-	}	
+			$( this.srcSelector ).val( this.options.cache.src );
+			$( this.videoIdSelector ).val( this.options.cache.video_id );
+			$( this.deletableVideoIdsSelector ).val( this.options.cache.deletable_video_ids );
+
+			if ( this.imageSelector ) {
+				$( this.imageSelector ).val( this.options.cache.image );
+			}
+		}
+
+	}
 
 	/**
 	 * Called when the page has loaded.
@@ -661,11 +690,11 @@
 		});
 		
 		// Videos: Toggle fields based on the selected video source type.
-		$( '#aiovg-video-type' ).on( 'change', function( event ) { 
+		$( '#aiovg-video-type' ).on( 'change', function( event ) {
             event.preventDefault();
- 
+
 			var type = $( this ).val();
-			
+
 			$( '.aiovg-toggle-fields' ).hide();
 			$( '.aiovg-type-' + type ).slideDown();
 
@@ -675,6 +704,14 @@
 			} else {
 				$( '#aiovg-thumbnail-generator' ).hide();
 			}
+		}).trigger( 'change' );
+
+		// Videos: Toggle trailer source type fields.
+		$( '#aiovg-trailer-type' ).on( 'change', function() {			
+			$( '.aiovg-trailer-fields' ).hide();
+
+			var type = 'embedcode' === $( this ).val() ? 'embedcode' : 'default';
+			$( '.aiovg-trailer-type-' + type ).show();
 		}).trigger( 'change' );
 		
 		// Videos: Add new source fields when "Add More Quality Levels" link is clicked.
@@ -754,8 +791,28 @@
 
 		// Videos: Bunny Stream.
 		if ( ( typeof tus !== 'undefined' && typeof tus.Upload === 'function' ) ) {
-			new InitBunnyStreamUploader();
-		}		
+			new BunnyStreamUploader({
+				uploadButtonSelector: '#aiovg-bunny-stream-upload-button',
+				rootSelector: '#aiovg-field-mp4',
+				srcSelector: '#aiovg-mp4',
+				imageSelector: '#aiovg-image',
+				durationSelector: '#aiovg-duration',
+				videoIdSelector: '#aiovg-bunny_stream_video_id',
+				deletableVideoIdsSelector: '#aiovg-deletable_bunny_stream_video_ids',
+				onCancel: toggleThumbnailGenerator
+			});
+
+			if ( $( '#aiovg-field-trailer-src' ).length > 0 ) {
+				new BunnyStreamUploader({
+					uploadButtonSelector: '#aiovg-trailer-bunny-stream-upload-button',
+					rootSelector: '#aiovg-field-trailer-src',
+					srcSelector: '#aiovg-trailer-src',
+					videoIdSelector: '#aiovg-trailer_bunny_stream_video_id',
+					deletableVideoIdsSelector: '#aiovg-deletable_trailer_bunny_stream_video_ids',
+					titleSuffix: ' (' + aiovg_admin.i18n.trailer + ')'
+				});
+			}
+		}
 
 		// Categories: Upload Image.
 		$( '#aiovg-categories-upload-image' ).on( 'click', function( event ) { 
@@ -818,12 +875,6 @@
 			$( this ).attr( 'id', id );
 		});
 		
-		// Settings: Toggle fields based on the selected player library.
-		$( '#aiovg-player-settings tr.player input[type=radio]' ).on( 'change', function() {			
-			var value = $( '#aiovg-player-settings tr.player input[type=radio]:checked' ).val();			
-			$( '#aiovg-player-settings' ).aiovgReplaceClass( /\aiovg-player-\S+/ig, 'aiovg-player-' + value );
-		}).trigger( 'change' );
-
 		// Settings: Toggle fields based on the selected categories template.
 		$( '#aiovg-categories-settings tr.template select' ).on( 'change', function() {			
 			var value = $( this ).val();			

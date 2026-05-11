@@ -21,7 +21,7 @@
         <?php wp_nonce_field( 'aiovg_save_category_fields', 'aiovg_category_fields_nonce' ); // Nonce ?>
         
         <p>            
-            <input type="button" id="aiovg-categories-upload-image" class="button button-secondary" value="<?php esc_attr_e( 'Add Image', 'all-in-one-video-gallery' ); ?>" />
+            <input type="button" id="aiovg-categories-upload-image" class="button button-secondary" value="<?php esc_attr_e( 'Upload Image', 'all-in-one-video-gallery' ); ?>" />
             <input type="button" id="aiovg-categories-remove-image" class="button button-secondary" value="<?php esc_attr_e( 'Remove Image', 'all-in-one-video-gallery' ); ?>" style="display: none;" />
         </p>
     </div>
@@ -53,7 +53,7 @@
             <?php wp_nonce_field( 'aiovg_save_category_fields', 'aiovg_category_fields_nonce' ); // Nonce ?>
 
             <p>
-                <input type="button" id="aiovg-categories-upload-image" class="button button-secondary" value="<?php esc_attr_e( 'Add Image', 'all-in-one-video-gallery' ); ?>" <?php if ( $image ) echo 'style="display: none;"'; ?>/>
+                <input type="button" id="aiovg-categories-upload-image" class="button button-secondary" value="<?php esc_attr_e( 'Upload Image', 'all-in-one-video-gallery' ); ?>" <?php if ( $image ) echo 'style="display: none;"'; ?>/>
                 <input type="button" id="aiovg-categories-remove-image" class="button button-secondary" value="<?php esc_attr_e( 'Remove Image', 'all-in-one-video-gallery' ); ?>" <?php if ( ! $image ) echo 'style="display: none;"'; ?>/>
             </p>
         </td>
