@@ -2378,12 +2378,111 @@ function aiovg_is_gutenberg_page() {
 }
 
 /**
+ * Check whether a remote URL is safe for the server to request.
+ *
+ * Guards against Server-Side Request Forgery (SSRF) by allowing only the
+ * http/https schemes and by rejecting URLs whose host resolves to a loopback,
+ * private, link-local, or otherwise reserved IP address (IPv4 or IPv6).
+ *
+ * @since  4.9.0
+ * @param  string $url URL to validate.
+ * @return bool        True if the URL is safe to request, false otherwise.
+ */
+function aiovg_is_safe_remote_url( $url ) {
+	$url = trim( (string) $url );
+
+	if ( empty( $url ) ) {
+		return false;
+	}
+
+	$parsed = wp_parse_url( $url );
+
+	if ( empty( $parsed['scheme'] ) || empty( $parsed['host'] ) ) {
+		return false;
+	}
+
+	// Allow the http and https schemes only (blocks file://, gopher://, dict://, etc.).
+	$scheme = strtolower( $parsed['scheme'] );
+
+	if ( 'http' !== $scheme && 'https' !== $scheme ) {
+		return false;
+	}
+
+	// Strip the brackets from IPv6 literals (e.g. "[::1]").
+	$host = trim( $parsed['host'], '[]' );
+
+	// Resolve the host to one or more IP addresses.
+	$ip_addresses = array();
+
+	if ( filter_var( $host, FILTER_VALIDATE_IP ) ) {
+		$ip_addresses[] = $host;
+	} else {
+		$ipv4 = gethostbynamel( $host );
+
+		if ( is_array( $ipv4 ) ) {
+			$ip_addresses = array_merge( $ip_addresses, $ipv4 );
+		}
+
+		if ( function_exists( 'dns_get_record' ) && defined( 'DNS_AAAA' ) ) {
+			$records = @dns_get_record( $host, DNS_AAAA );
+
+			if ( is_array( $records ) ) {
+				foreach ( $records as $record ) {
+					if ( ! empty( $record['ipv6'] ) ) {
+						$ip_addresses[] = $record['ipv6'];
+					}
+				}
+			}
+		}
+	}
+
+	// Unable to resolve the host? Treat it as unsafe.
+	if ( empty( $ip_addresses ) ) {
+		return false;
+	}
+
+	// Reject the request if any resolved IP falls within a private or reserved range.
+	foreach ( $ip_addresses as $ip_address ) {
+		if ( ! filter_var( $ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+			return false;
+		}
+	}
+
+	return (bool) apply_filters( 'aiovg_is_safe_remote_url', true, $url, $ip_addresses );
+}
+
+/**
+ * Check whether a URL points to the current site's own host.
+ *
+ * Used to allow the site to serve its own files even when the resolved IP falls
+ * within a private/reserved range (for example, on a local or intranet install).
+ *
+ * @since  4.9.0
+ * @param  string $url URL to check.
+ * @return bool        True if the URL host matches the site's host.
+ */
+function aiovg_is_same_host_url( $url ) {
+	$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+
+	if ( empty( $host ) ) {
+		return false;
+	}
+
+	$allowed_hosts = array(
+		strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ),
+		strtolower( (string) wp_parse_url( site_url(), PHP_URL_HOST ) )
+	);
+
+	return in_array( $host, $allowed_hosts, true );
+}
+
+/**
  * Check if Yoast or the Rank Math SEO plugin is active.
  *
  * @since  3.9.5
  * @return bool  True if active, false if not.
  */
-function aiovg_is_yoast_or_rank_math_active() {	
+function aiovg_is_yoast_or_rank_math_active() {
 	$active_plugins = apply_filters( 'active_plugins', get_option( 'active_plugins' ) );
 
 	// Check if Yoast SEO plugin is active
@@ -2493,8 +2592,96 @@ function aiovg_remove_unfiltered_html_capability_from_editors() {
 }
 
 /**
+ * Resolve a URL to its final destination, validating every redirect hop.
+ *
+ * Follows up to a fixed number of HTTP redirects manually, re-checking each
+ * target with aiovg_is_safe_remote_url()/aiovg_is_same_host_url(). This lets the
+ * download handler support legitimate redirecting hosts (e.g. links that 302 to
+ * a CDN) without the SSRF risk that blind redirect-following would re-introduce.
+ *
+ * Redirect following is disabled at the stream level (so the caller's subsequent
+ * get_headers()/fopen() calls also won't follow redirects on their own).
+ *
+ * @since  4.9.0
+ * @param  string $url           URL to resolve.
+ * @param  int    $max_redirects Maximum number of redirects to follow.
+ * @return string|false          Final, validated URL, or false if unsafe/unreachable.
+ */
+function aiovg_resolve_safe_url( $url, $max_redirects = 5 ) {
+	$url = trim( (string) $url );
+
+	// Don't let the stream wrappers follow redirects on their own; we follow them
+	// manually below so that each hop can be validated.
+	stream_context_set_default(
+		array(
+			'http' => array(
+				'follow_location' => 0,
+				'timeout'         => 30
+			)
+		)
+	);
+
+	for ( $i = 0; $i <= $max_redirects; $i++ ) {
+		// Every hop must be the site's own host or a validated public host.
+		if ( ! aiovg_is_same_host_url( $url ) && ! aiovg_is_safe_remote_url( $url ) ) {
+			return false;
+		}
+
+		$headers = @get_headers( $url, true );
+
+		// Couldn't read the headers (e.g. get_headers() is disabled on the host, or
+		// a transient failure)? The current URL is already validated above and
+		// redirect following is disabled at the stream level, so fall back to a
+		// direct fetch of it rather than failing the download outright. This keeps
+		// the pre-4.9.0 behaviour on hosts where get_headers() is unavailable.
+		if ( empty( $headers ) || ! isset( $headers[0] ) ) {
+			return $url;
+		}
+
+		// Determine the HTTP status code (supports HTTP/1.x and HTTP/2).
+		$status_code = 0;
+
+		if ( preg_match( '#^HTTP/\S+\s+(\d{3})#', $headers[0], $matches ) ) {
+			$status_code = (int) $matches[1];
+		}
+
+		// Not a redirect? This is the final URL.
+		if ( $status_code < 300 || $status_code >= 400 ) {
+			return $url;
+		}
+
+		// Find the Location header (case-insensitive; may be an array on multiple hits).
+		$location = '';
+
+		foreach ( $headers as $key => $value ) {
+			if ( 0 === strcasecmp( (string) $key, 'Location' ) ) {
+				$location = is_array( $value ) ? end( $value ) : $value;
+				break;
+			}
+		}
+
+		if ( empty( $location ) ) {
+			return $url; // Redirect without a target — treat the current URL as final.
+		}
+
+		// Resolve relative redirect targets against the current URL.
+		if ( ! preg_match( '#^https?://#i', $location ) && function_exists( '_wp_http_get_object' ) ) {
+			$http = _wp_http_get_object();
+
+			if ( method_exists( $http, 'make_absolute_url' ) ) {
+				$location = $http->make_absolute_url( $location, $url );
+			}
+		}
+
+		$url = $location;
+	}
+
+	return false; // Too many redirects.
+}
+
+/**
  * Convert relative file paths into absolute URLs.
- * 
+ *
  * @since      2.4.0
  * @deprecated 3.8.4  Use aiovg_make_url_absolute() instead.
  * @param      string $url Input file URL.
@@ -2540,6 +2727,67 @@ function aiovg_sanitize_url( $value ) {
 	}
 	
 	return sanitize_url( $value );
+}
+
+/**
+ * Re-sort an array of term objects, in case a third-party plugin (e.g. a custom
+ * post/term ordering plugin) has overridden the `orderby`/`order` args of get_terms().
+ *
+ * Note: 'menu_order' is intentionally not a supported field. When a user selects
+ * that option, they want the order defined by the third-party plugin, so we must
+ * leave the terms untouched.
+ *
+ * @since  4.9.0
+ * @param  array  $terms   Array of term objects.
+ * @param  string $orderby Field to sort by. Accepts 'id', 'count', 'name', 'slug'.
+ * @param  string $order   Sort direction. Accepts 'ASC', 'DESC'.
+ * @return array           Sorted array of term objects.
+ */
+function aiovg_sort_terms( $terms, $orderby = 'name', $order = 'ASC' ) {
+	$allowed_fields = array( 'id', 'term_id', 'count', 'name', 'slug' );
+
+	if ( ! is_array( $terms ) || empty( $terms ) || ! in_array( $orderby, $allowed_fields, true ) ) {
+		return $terms;
+	}
+
+	// WP_Term objects expose the ID as "term_id", not "id".
+	$field = ( 'id' === $orderby ) ? 'term_id' : $orderby;
+
+	// For text fields, use a locale-aware collator so accented/non-English
+	// category names sort the way the database collation would (e.g. "Ä" near
+	// "A" rather than after "Z"). Falls back gracefully when the intl extension
+	// is unavailable.
+	$collator = null;
+
+	if ( ( 'name' === $field || 'slug' === $field ) && class_exists( 'Collator' ) ) {
+		$collator = collator_create( get_locale() );
+	}
+
+	usort(
+		$terms,
+		function( $a, $b ) use ( $field, $collator ) {
+			if ( 'name' === $field || 'slug' === $field ) {
+				if ( null !== $collator ) {
+					return collator_compare( $collator, $a->$field, $b->$field );
+				}
+
+				// Multibyte-safe, case-insensitive fallback.
+				if ( function_exists( 'mb_strtolower' ) ) {
+					return strcmp( mb_strtolower( $a->$field, 'UTF-8' ), mb_strtolower( $b->$field, 'UTF-8' ) );
+				}
+
+				return strcasecmp( $a->$field, $b->$field );
+			}
+
+			return $a->$field - $b->$field;
+		}
+	);
+
+	if ( 'DESC' === strtoupper( $order ) ) {
+		$terms = array_reverse( $terms );
+	}
+
+	return $terms;
 }
 
 /**

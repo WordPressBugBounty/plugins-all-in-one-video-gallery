@@ -6,7 +6,7 @@ Tags: video gallery, video player, youtube, vimeo, html5 video
 Requires at least: 6.3
 Tested up to: 7.0
 Requires PHP: 5.6.20
-Stable tag: 4.8.5
+Stable tag: 4.9.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -168,6 +168,13 @@ Yes. You can upload WebVTT (`.vtt`) subtitle tracks for your self-hosted videos 
 7. Plugin Settings.
 
 == Changelog ==
+
+= 4.9.0 =
+
+* Security Fix: "Authenticated (Subscriber+) Server-Side Request Forgery via 'vdl' Parameter" issue that was discovered by "KoreaInfoSec - Korea University", and reported responsibly to us by [Wordfence](https://www.wordfence.com/).
+* Tweak: Updated Freemius SDK to version 2.13.2.
+* Fix: Categories grid layout did not respect the configured "Order By" / "Order" settings when a third-party custom term ordering plugin was active.
+* Fix: Various performance and security improvements.
 
 = 4.8.5 =
 
@@ -625,6 +632,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 4.8.5 =
+= 4.9.0 =
 
-The plugin's settings menu has been completely restructured. Also introduces new features, performance and security improvements. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)
+Security Fix. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

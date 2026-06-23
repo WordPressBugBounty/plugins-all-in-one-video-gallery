@@ -721,13 +721,28 @@ class AIOVG_Public_Video {
         }
         
         if ( $formatted_path == 'url' ) {
+          	// Guard against SSRF: resolve the URL to its final destination, validating
+          	// every redirect hop and rejecting loopback/private/link-local/reserved hosts.
+          	// Redirect following stays disabled for the get_headers()/fopen() calls below.
+          	$file = aiovg_resolve_safe_url( $file );
+
+          	if ( false === $file ) {
+          		die( esc_html__( 'File is not readable or not found.', 'all-in-one-video-gallery' ) );
+          	}
+
           	$file_headers = @get_headers( $file );
   
           	if ( is_array( $file_headers ) && $file_headers[0] == 'HTTP/1.1 404 Not Found' ) {
            		die( esc_html__( 'File is not readable or not found.', 'all-in-one-video-gallery' ) );
            		exit;
           	}          
-        } elseif ( $formatted_path == 'filepath' ) {		
+        } elseif ( $formatted_path == 'filepath' ) {
+          	// Reject PHP stream wrappers (file://, php://, phar://, etc.) so that only
+          	// real filesystem paths reach is_readable()/fopen() below.
+          	if ( false !== strpos( $file, '://' ) ) {
+          		die( esc_html__( 'File is not readable or not found.', 'all-in-one-video-gallery' ) );
+          	}
+
           	if ( ! @is_readable( $file ) ) {
 				die( esc_html__( 'File is not readable or not found.', 'all-in-one-video-gallery' ) );
                	exit;
@@ -752,8 +767,8 @@ class AIOVG_Public_Video {
                	@curl_setopt( $ch, CURLOPT_NOBODY, true );
                	@curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
                	@curl_setopt( $ch, CURLOPT_HEADER, true );
-               	@curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, true );
-               	@curl_setopt( $ch, CURLOPT_MAXREDIRS, 3 );
+               	@curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, false );
+               	@curl_setopt( $ch, CURLOPT_MAXREDIRS, 0 );
                	@curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 10 );
                	@curl_exec( $ch );
                

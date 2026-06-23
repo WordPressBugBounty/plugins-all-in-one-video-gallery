@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: All-in-One Video Gallery\n"
-"POT-Creation-Date: 2026-05-10 20:34+0530\n"
-"PO-Revision-Date: 2026-05-10 20:34+0530\n"
+"POT-Creation-Date: 2026-06-23 07:48+0530\n"
+"PO-Revision-Date: 2026-06-23 07:48+0530\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en_US\n"
@@ -5948,7 +5948,7 @@ msgstr ""
 msgid "comments"
 msgstr ""
 
-#: premium/public/thumbnail-generator.php:48 public/video.php:879
+#: premium/public/thumbnail-generator.php:48 public/video.php:894
 msgid "Invalid file format."
 msgstr ""
 
@@ -6067,8 +6067,8 @@ msgstr ""
 msgid "Reset"
 msgstr ""
 
-#: public/video.php:674 public/video.php:690 public/video.php:727
-#: public/video.php:732
+#: public/video.php:674 public/video.php:690 public/video.php:730
+#: public/video.php:736 public/video.php:743 public/video.php:747
 msgid "File is not readable or not found."
 msgstr ""
 

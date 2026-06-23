@@ -145,9 +145,15 @@ class AIOVG_Public_Categories {
 			}
 
 			$args = apply_filters( 'aiovg_categories_args', $args, $attributes );
-			$terms = get_terms( $args );			
-			
+			$terms = get_terms( $args );
+
 			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+				// Re-sort the terms in case a third-party plugin (e.g. a custom term ordering plugin) has overridden the orderby/order args above.
+				// Return false through this filter to keep the third-party plugin's ordering intact.
+				if ( isset( $args['orderby'], $args['order'] ) && apply_filters( 'aiovg_force_categories_order', true, $args, $attributes ) ) {
+					$terms = aiovg_sort_terms( $terms, $args['orderby'], $args['order'] );
+				}
+
 				if ( isset( $args['child_of'] ) ) {
 					foreach ( $terms as $key => $term ) {
 						if ( $term->parent != $args['child_of'] ) {
