@@ -516,11 +516,6 @@ class AIOVG_Public {
 	 * @return array       The filtered query variables.
 	 */
 	public function query_vars( $vars ) {
-		$vars[] = 'vi';
-		$vars[] = 'ca';
-		$vars[] = 'ta';
-		$vars[] = 'sort';
-		$vars[] = 'video';
 		$vars[] = 'aiovg_category';
 		$vars[] = 'aiovg_tag';
 		$vars[] = 'aiovg_user';

@@ -1,4 +1,4 @@
-=== All-in-One Video Gallery ===
+=== All-in-One Video Gallery – Video Player & Galleries for YouTube, Vimeo & Self-Hosted Videos ===
 Plugin URI: https://plugins360.com/all-in-one-video-gallery/
 Contributors: plugins360, wpvideogallery, freemius
 Donate link: https://plugins360.com
@@ -6,7 +6,7 @@ Tags: video gallery, video player, youtube, vimeo, html5 video
 Requires at least: 6.3
 Tested up to: 7.0
 Requires PHP: 5.6.20
-Stable tag: 4.9.0
+Stable tag: 4.9.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,7 +36,7 @@ Whether you need a single embedded video player or a full video-sharing website 
 
 Back-End
 
-* An user-friendly interface to upload and manage your videos.
+* A user-friendly interface to upload and manage your videos.
 * Create unlimited categories/subcategories and tags.
 * Ability to group videos by categories and tags.
 * Create a featured videos group.
@@ -56,7 +56,7 @@ Front-End
 * Filter videos on the same page using AJAX — search by keyword, category, or tag and sort by title, date, or popularity without a page reload.
 * Numeric Pagination for the large galleries.
 * Likes / Dislikes.
-* Social Sharing (Facebook, Twitter, Linkedin, Pinterest, Tumblr & WhatsApp).
+* Social Sharing (Facebook, X (Twitter), LinkedIn, Pinterest, Tumblr & WhatsApp).
 * Comments System.
 * Dedicated search form & layout.
 * Shortcode Builder to build the gallery shortcodes.
@@ -159,15 +159,46 @@ Yes. You can upload WebVTT (`.vtt`) subtitle tracks for your self-hosted videos 
 
 == Screenshots ==
 
-1. Categories Layout.
-2. Video Gallery ("Classic" Template).
-3. Single Video page.
-4. Videos list back-end.
-5. Video form back-end.
-6. Category form back-end.
-7. Plugin Settings.
+1. Video Gallery — "Classic" Template.
+2. Videos Layout: Image Position — Left.
+3. Video Categories Layout (Grid).
+4. Single Video page with the Plyr.js player.
+5. Front-end AJAX search & filters (keyword, category, tag, sort).
+6. Restricted access screen with Trailer / Teaser playback.
+7. Email & Lead Capture form over the video.
+8. Player with GDPR consent screen.
+9. Premium: Popup Gallery Template.
+10. Premium: Inline Gallery Template.
+11. Premium: Slider Gallery Template.
+12. Premium: Playlist Gallery Template.
+13. Premium: Compact (Modern) Gallery Template.
+14. Premium: VAST / VPAID Ads playing in the player.
+15. Premium: User Playlists / Favorites.
+16. Plugin Dashboard — Shortcode Builder.
+17. Gutenberg Blocks — build your gallery in the block editor.
+18. Widgets — categories, videos, single player & search.
+19. Videos list back-end.
+20. Bulk Import / Export back-end.
+21. Video edit screen (sources, chapters, subtitles & restrictions).
+22. Category edit screen.
+23. Plugin Settings — tabbed interface.
+24. Premium: Video Automations — auto-import from YouTube & Vimeo.
+25. Premium: Front-end video submission form.
 
 == Changelog ==
+
+= 4.9.2 =
+
+* Security Fix: Two bypasses of the Server-Side Request Forgery protection added in 4.9.0 for the video download ('vdl') feature. A download URL on the site's own hostname but a different port skipped the address check entirely, and a hostname could resolve to a permitted address during validation and a different one when the file was actually fetched (DNS rebinding). The site's own web ports are now the only ones treated as its own server, and each download request is sent to the exact address that was validated. Both issues were discovered and reported responsibly to us by [Mohammed Abd Alrahman](https://mohmadev.com/).
+* New: Premium Automations — added an optional "Published After" date field to the import source settings (YouTube and Vimeo). Videos published before this date are skipped during the import, so an automation can pick up only new content going forward instead of crawling the source's entire back catalog. Leave the field empty for the previous behavior. For YouTube channel imports, the plugin also stops requesting further API pages once it reaches videos older than the date, and for YouTube search imports the date is passed natively to the YouTube API — both reducing your API quota usage.
+* New: Premium Automations — added the `aiovg_import_video` developer filter, applied to each video just before it is imported. Modify the video object (title, description, image, and more) or return false to skip the video entirely; skipped videos are counted as "Excluded" in the Import Log. Applies to both YouTube and Vimeo imports, and is reflected on the Preview Import screen.
+* New: Premium Automations — added the `aiovg_can_import_video` developer filter (return true to allow re-importing a video that already exists on the site), replacing the legacy `can_import_video` hook, which remains supported for backward compatibility.
+* Tweak: Updated Freemius SDK to version 2.13.4.
+* Fix: Premium Automations — when videos were imported as drafts with the "keep the original published date" option enabled, the imported date was lost on publish and reset to the current time. Draft posts now retain the original YouTube/Vimeo publish date when they are published.
+* Fix: Premium Automations could occasionally create duplicate video posts when two import runs for the same source (YouTube or Vimeo) overlapped, e.g. when WP-Cron spawned concurrent requests. Each automation now takes an import lock before it runs, with automatic recovery if a run crashes before finishing, so an overlapping run is rescheduled instead of racing the one already in progress. Separate automations are unaffected and still import independently.
+* Fix: Restored the close button on the Premium Popup and Slider gallery templates' video lightbox, based on customer feedback, after it was inadvertently removed in a previous version.
+* Fix: Self-hosted videos linked from Dropbox (www.dropbox.com share links) would fail to seek and eventually stop playing in Firefox, due to Dropbox's download links redirecting to temporary, rate-limited URLs. Dropbox URLs are now automatically converted to their direct-streaming format (dl.dropboxusercontent.com) at playback time, so existing videos keep working without any manual changes.
+* Fix: Various performance and security improvements.
 
 = 4.9.0 =
 
@@ -632,6 +663,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 4.9.0 =
+= 4.9.2 =
 
 Security Fix. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

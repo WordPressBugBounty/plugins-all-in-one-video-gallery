@@ -385,19 +385,68 @@ class AIOVG_Public_Video {
 	/**
 	 * Filters the video sources.
 	 *
+	 * Single entry point for all provider-specific source rewrites and substitutions.
+	 * Registered on both the JS and IFrame player source hooks, for Video.js and Plyr.js.
+	 * Each transform lives in its own helper below and is a no-op for unrelated URLs, so
+	 * adding a future provider is one more line here.
+	 *
 	 * @since  2.6.5
 	 * @param  array $sources  The original video sources.
 	 * @param  array $settings Player settings including post ID and post type.
 	 * @return array $sources  Filtered video sources.
 	 */
 	public function filter_player_sources( $sources, $settings = array() ) {
+		$sources = $this->maybe_convert_dropbox_sources( $sources );
+		$sources = $this->maybe_add_wordpress_hls( $sources, $settings );
+
+		return $sources;
+	}
+
+	/**
+	 * Rewrites Dropbox share links into direct-streaming URLs.
+	 *
+	 * Dropbox's www.dropbox.com share links (dl=1) redirect to a temporary, non-cacheable
+	 * signed URL, which Firefox re-requests on every seek until Dropbox rate-limits it and
+	 * playback breaks. Serving from dl.dropboxusercontent.com with raw=1 avoids the redirect.
+	 * Cost is a single strpos per source for everyone else — no network, no database.
+	 *
+	 * @since  4.9.1
+	 * @access private
+	 * @param  array   $sources The video sources.
+	 * @return array   $sources Modified video sources.
+	 */
+	private function maybe_convert_dropbox_sources( $sources ) {
+		foreach ( $sources as $key => $source ) {
+			if ( empty( $source['src'] ) || false === strpos( $source['src'], '://www.dropbox.com/' ) ) {
+				continue;
+			}
+
+			$url = str_replace( '://www.dropbox.com/', '://dl.dropboxusercontent.com/', $source['src'] );
+			$url = add_query_arg( 'raw', 1, remove_query_arg( 'dl', $url ) );
+
+			$sources[ $key ]['src'] = $url;
+		}
+
+		return $sources;
+	}
+
+	/**
+	 * Upgrades WordPress.com (VideoPress) MP4 sources to their HLS rendition when available.
+	 *
+	 * @since  2.6.5
+	 * @access private
+	 * @param  array   $sources  The video sources.
+	 * @param  array   $settings Player settings including post ID and post type.
+	 * @return array   $sources  Modified video sources.
+	 */
+	private function maybe_add_wordpress_hls( $sources, $settings = array() ) {
 		if ( isset( $sources['hls'] ) ) {
 			return $sources;
 		}
 
 		if ( ! isset( $sources['mp4'] ) || empty( $sources['mp4']['src'] ) ) {
 			return $sources;
-		}		
+		}
 
 		$mp4_src = $sources['mp4']['src'];
 		if ( strpos( $mp4_src, 'videos.files.wordpress.com' ) === false || strpos( $mp4_src, '.mp4' ) === false ) {
@@ -406,14 +455,14 @@ class AIOVG_Public_Video {
 
 		$post_id = isset( $settings['post_id'] ) ? (int) $settings['post_id'] : 0;
 		$hls_src = str_replace( '.mp4', '.master.m3u8', $mp4_src );
-		$has_hls = 0;		
+		$has_hls = 0;
 
 		$query = parse_url( $mp4_src, PHP_URL_QUERY );
 		parse_str( $query, $parsed_url );
 
 		if ( isset( $parsed_url['isnew'] ) ) {
 			$has_hls = (int) $parsed_url['isnew'];
-		} else {					
+		} else {
 			$hls_response = wp_remote_get( $hls_src, array( 'timeout' => 5 ) );
 
 			if ( ! is_wp_error( $hls_response ) && 200 === wp_remote_retrieve_response_code( $hls_response ) ) {
@@ -425,7 +474,7 @@ class AIOVG_Public_Video {
 					update_post_meta( $post_id, 'trailer_src', aiovg_sanitize_url( add_query_arg( 'isnew', $has_hls, $mp4_src ) ) );
 				} elseif ( 'default' === get_post_meta( $post_id, 'type', true ) ) {
 					update_post_meta( $post_id, 'mp4', aiovg_sanitize_url( add_query_arg( 'isnew', $has_hls, $mp4_src ) ) );
-				}				
+				}
 			}
 		}
 
@@ -439,9 +488,9 @@ class AIOVG_Public_Video {
 
 			$sources = array_merge( $hls_source, $sources );
 		}
-		
-		return $sources;	
-	}	
+
+		return $sources;
+	}
 
 	/**
 	 * Filters timestamps in the video description and wraps them with links.
@@ -764,6 +813,15 @@ class AIOVG_Public_Video {
                  	@exit;
                	}
                
+               	// $file addresses the validated IP directly, so carry the original
+               	// hostname over from the default stream context that
+               	// aiovg_resolve_safe_url() pinned it with.
+               	$stream_options = stream_context_get_options( stream_context_get_default() );
+
+               	if ( ! empty( $stream_options['http']['header'] ) ) {
+               		@curl_setopt( $ch, CURLOPT_HTTPHEADER, (array) $stream_options['http']['header'] );
+               	}
+
                	@curl_setopt( $ch, CURLOPT_NOBODY, true );
                	@curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
                	@curl_setopt( $ch, CURLOPT_HEADER, true );
@@ -917,13 +975,22 @@ class AIOVG_Public_Video {
         $chunk = 1 * ( 1024 * 1024 );
 
         if ( $nfile = @fopen( $file, 'rb' ) ) {
-			while ( ! feof( $nfile ) ) {                 
+			while ( ! feof( $nfile ) ) {
 				print( @fread( $nfile, $chunk ) );
 				@ob_flush();
 				@flush();
 			}
 			@fclose( $nfile );
-		}		
+		}
+
+		// Clear the Host header that aiovg_resolve_safe_url() pinned into PHP's default
+		// stream context, so it can't be sent to an unrelated host by anything else that
+		// opens a stream later in this request.
+		aiovg_pin_url_to_ip();
+
+		// The file has been written to the output buffer. Stop here rather than letting
+		// WordPress carry on and append a rendered page to it.
+		exit;
 	}
 	
 }

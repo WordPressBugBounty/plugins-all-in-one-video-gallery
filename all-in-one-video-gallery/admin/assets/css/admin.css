@@ -79,12 +79,16 @@
 }
 
 /* Block Editor */
+.block-editor .aiovg-block-panel .components-panel__row {
+	margin-bottom: 1.25em;
+}
+
 .block-editor .aiovg-block-panel .components-panel__row .aiovg-no-margin {
 	margin: 0;
 }
 
 .block-editor .aiovg-block-panel .components-panel__row label {
-	text-transform: capitalize;
+	text-transform: unset;
 	line-height: 1.6;
 	font-size: 13px;
     font-weight: normal;    
@@ -94,13 +98,18 @@
 	width: 100%;
 }
 
+.block-editor .aiovg-block-panel .components-panel__row .components-base-control__help {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
 .block-editor .aiovg-block-panel .components-panel__row .components-range-control__wrapper {
     flex: 1 1 100%;
 }
 
 .block-editor .aiovg-block-panel .components-panel__row .block-editor-panel-color-gradient-settings {	
-	padding-left: 0;
-	padding-right: 0;
+	border: 0;
+	padding: 0;
 	width: 100%;
 }
 
@@ -810,7 +819,8 @@
 
 #aiovg-dashboard .wp-badge {	
 	border-radius: 3px;
-	background: #0073aa url( '../images/logo.png' ) no-repeat top;
+	background: #3858e9 url( '../images/logo.svg' ) no-repeat center 12px;
+	background-size: 100px 100px;
 }
 
 #aiovg-dashboard .button-hero {

@@ -910,8 +910,8 @@ function aiovg_get_default_settings() {
 			'restricted_message'          => __( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' ),
 			'show_restricted_label'       => 1,
 			'restricted_label_text'       => __( 'Restricted', 'all-in-one-video-gallery' ),
-			'restricted_label_bg_color'   => '#999',
-			'restricted_label_text_color' => '#fff'
+			'restricted_label_bg_color'   => '#eeeeee',
+			'restricted_label_text_color' => '#606060'
 		),
 		'aiovg_trailer_settings' => array(
 			'enable_trailers'          => 0,
@@ -919,8 +919,8 @@ function aiovg_get_default_settings() {
 			'player_overlay_link'      => '',
 			'show_trailer_label'       => 1,
 			'trailer_label_text'       => __( 'Trailer', 'all-in-one-video-gallery' ),
-			'trailer_label_bg_color'   => '#999',
-			'trailer_label_text_color' => '#fff'			
+			'trailer_label_bg_color'   => '#eeeeee',
+			'trailer_label_text_color' => '#606060'			
 		),
 		'aiovg_privacy_settings' => array(
 			'show_consent'         => 0,
@@ -2385,10 +2385,15 @@ function aiovg_is_gutenberg_page() {
  * private, link-local, or otherwise reserved IP address (IPv4 or IPv6).
  *
  * @since  4.9.0
- * @param  string $url URL to validate.
- * @return bool        True if the URL is safe to request, false otherwise.
+ * @param  string $url          URL to validate.
+ * @param  array  $ip_addresses Optional. Set to the validated IP addresses the host
+ *                              resolved to, so that the caller can pin its request to
+ *                              them instead of resolving the hostname a second time.
+ * @return bool                 True if the URL is safe to request, false otherwise.
  */
-function aiovg_is_safe_remote_url( $url ) {
+function aiovg_is_safe_remote_url( $url, &$ip_addresses = array() ) {
+	$ip_addresses = array();
+
 	$url = trim( (string) $url );
 
 	if ( empty( $url ) ) {
@@ -2412,15 +2417,29 @@ function aiovg_is_safe_remote_url( $url ) {
 	$host = trim( $parsed['host'], '[]' );
 
 	// Resolve the host to one or more IP addresses.
-	$ip_addresses = array();
-
 	if ( filter_var( $host, FILTER_VALIDATE_IP ) ) {
 		$ip_addresses[] = $host;
 	} else {
-		$ipv4 = gethostbynamel( $host );
+		// gethostbynamel() is disabled on some hardened hosts. PHP 8 removes a
+		// disabled function outright, so calling it unguarded would be fatal.
+		if ( function_exists( 'gethostbynamel' ) ) {
+			$ipv4 = @gethostbynamel( $host );
 
-		if ( is_array( $ipv4 ) ) {
-			$ip_addresses = array_merge( $ip_addresses, $ipv4 );
+			if ( is_array( $ipv4 ) ) {
+				$ip_addresses = array_merge( $ip_addresses, $ipv4 );
+			}
+		} elseif ( function_exists( 'dns_get_record' ) && defined( 'DNS_A' ) ) {
+			// Fall back to the DNS resolver, so that a host which disables only
+			// gethostbynamel() can still serve remote media downloads.
+			$records = @dns_get_record( $host, DNS_A );
+
+			if ( is_array( $records ) ) {
+				foreach ( $records as $record ) {
+					if ( ! empty( $record['ip'] ) ) {
+						$ip_addresses[] = $record['ip'];
+					}
+				}
+			}
 		}
 
 		if ( function_exists( 'dns_get_record' ) && defined( 'DNS_AAAA' ) ) {
@@ -2444,36 +2463,90 @@ function aiovg_is_safe_remote_url( $url ) {
 	// Reject the request if any resolved IP falls within a private or reserved range.
 	foreach ( $ip_addresses as $ip_address ) {
 		if ( ! filter_var( $ip_address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+			$ip_addresses = array();
 			return false;
 		}
 	}
 
-	return (bool) apply_filters( 'aiovg_is_safe_remote_url', true, $url, $ip_addresses );
+	$is_safe = (bool) apply_filters( 'aiovg_is_safe_remote_url', true, $url, $ip_addresses );
+
+	// Never hand back addresses alongside a negative result.
+	if ( ! $is_safe ) {
+		$ip_addresses = array();
+	}
+
+	return $is_safe;
 }
 
 /**
- * Check whether a URL points to the current site's own host.
+ * Check whether a URL points to the current site's own web server.
  *
  * Used to allow the site to serve its own files even when the resolved IP falls
  * within a private/reserved range (for example, on a local or intranet install).
  *
+ * The hostname on its own is not enough to trust a URL: the site's own hostname
+ * on a different port routinely points at an unrelated service that is only
+ * meant to be reachable from the machine itself (a cache, a database admin
+ * panel, an internal API). Both the scheme and the port are therefore checked
+ * as well, and only the site's own web ports are treated as its own server.
+ *
  * @since  4.9.0
  * @param  string $url URL to check.
- * @return bool        True if the URL host matches the site's host.
+ * @return bool        True if the URL points to the site's own web server.
  */
 function aiovg_is_same_host_url( $url ) {
-	$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+	$url = trim( (string) $url );
 
-	if ( empty( $host ) ) {
+	if ( empty( $url ) ) {
 		return false;
 	}
 
-	$allowed_hosts = array(
-		strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ),
-		strtolower( (string) wp_parse_url( site_url(), PHP_URL_HOST ) )
-	);
+	$parsed = wp_parse_url( $url );
 
-	return in_array( $host, $allowed_hosts, true );
+	if ( empty( $parsed['scheme'] ) || empty( $parsed['host'] ) ) {
+		return false;
+	}
+
+	// Allow the http and https schemes only (blocks ftp://, file://, gopher://, etc.).
+	$scheme = strtolower( $parsed['scheme'] );
+
+	if ( 'http' !== $scheme && 'https' !== $scheme ) {
+		return false;
+	}
+
+	// Collect the site's own hostnames and the web ports it is served on.
+	$allowed_hosts = array();
+	$allowed_ports = array();
+
+	$site_urls = array( home_url(), site_url() );
+
+	foreach ( $site_urls as $site_url ) {
+		$site_parsed = wp_parse_url( $site_url );
+
+		if ( empty( $site_parsed['host'] ) ) {
+			continue;
+		}
+
+		$allowed_hosts[] = strtolower( $site_parsed['host'] );
+
+		if ( ! empty( $site_parsed['port'] ) ) {
+			// Served on an explicit, non-standard port: trust that port only.
+			$allowed_ports[] = (int) $site_parsed['port'];
+		} else {
+			// Served on the standard web ports. Both are allowed, since a site's own
+			// media is routinely still linked over http after a move to https.
+			$allowed_ports[] = 80;
+			$allowed_ports[] = 443;
+		}
+	}
+
+	if ( ! in_array( strtolower( $parsed['host'] ), $allowed_hosts, true ) ) {
+		return false;
+	}
+
+	$port = ! empty( $parsed['port'] ) ? (int) $parsed['port'] : ( 'https' === $scheme ? 443 : 80 );
+
+	return in_array( $port, $allowed_ports, true );
 }
 
 /**
@@ -2522,6 +2595,99 @@ function aiovg_make_url_absolute( $url ) {
 	}
 
     return $url;
+}
+
+/**
+ * Pin a request to an IP address that has already been validated.
+ *
+ * Rewrites the URL so that it addresses $ip directly, and configures the default
+ * stream context so that the get_headers()/fopen() calls made afterwards still
+ * send the original hostname in the Host header and verify TLS against it.
+ *
+ * Validating a hostname and then connecting to it by name resolves DNS a second
+ * time. An attacker who controls the hostname's DNS records can answer with a
+ * public address while the host is being checked and a private one when it is
+ * actually fetched (DNS rebinding), which puts the check back where it started.
+ * Connecting to the address that was validated closes that window no matter how
+ * quickly the DNS answer changes.
+ *
+ * Called with no arguments, it resets the default stream context.
+ *
+ * @since  4.9.1
+ * @param  string $url URL to pin. Pass an empty string to reset the context.
+ * @param  string $ip  Validated IP address to connect to.
+ * @return string      URL to request.
+ */
+function aiovg_pin_url_to_ip( $url = '', $ip = '' ) {
+	$url    = trim( (string) $url );
+	$parsed = wp_parse_url( $url );
+
+	$scheme = ! empty( $parsed['scheme'] ) ? strtolower( $parsed['scheme'] ) : 'http';
+	$host   = ! empty( $parsed['host'] ) ? trim( $parsed['host'], '[]' ) : '';
+	$port   = ! empty( $parsed['port'] ) ? (int) $parsed['port'] : 0;
+
+	// stream_context_set_default() merges into the existing default context instead
+	// of replacing it, so every option has to be written on each call. Otherwise the
+	// Host header and peer name pinned for one redirect hop would linger and be sent
+	// to the next one.
+	$options = array(
+		'http' => array(
+			// Every redirect hop is validated by hand, so the stream wrappers must
+			// never follow one on their own.
+			'follow_location' => 0,
+			'timeout'         => 30,
+			'header'          => array()
+		)
+	);
+
+	// Keep the original hostname on the wire so that name-based virtual hosts and
+	// certificate verification keep working while connected to the pinned address.
+	//
+	// The ssl options are written only when there is a hostname to write. PHP has no
+	// way to remove an option from the default context once it is set, and it treats
+	// a peer_name that is merely *present* as authoritative - a null one is read back
+	// as an empty string, which would fail verification on every later HTTPS stream in
+	// this request. Clearing the http block is enough on its own: a stale peer_name can
+	// only ever make a later request fail closed, whereas a stale Host header is what
+	// would actually send the wrong hostname to the wrong server.
+	if ( ! empty( $host ) ) {
+		$options['http']['header'] = array( 'Host: ' . ( ! empty( $port ) ? $host . ':' . $port : $host ) );
+
+		$options['ssl'] = array(
+			'peer_name'   => $host,
+			'SNI_enabled' => true
+		);
+	}
+
+	stream_context_set_default( $options );
+
+	if ( empty( $url ) || empty( $ip ) || empty( $host ) ) {
+		return $url;
+	}
+
+	// Rebuild the URL against the validated address, bracketing IPv6 literals.
+	$authority = filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ) ? '[' . $ip . ']' : $ip;
+
+	if ( ! empty( $parsed['user'] ) ) {
+		$userinfo  = $parsed['user'] . ( ! empty( $parsed['pass'] ) ? ':' . $parsed['pass'] : '' );
+		$authority = $userinfo . '@' . $authority;
+	}
+
+	if ( ! empty( $port ) ) {
+		$authority .= ':' . $port;
+	}
+
+	$pinned_url = $scheme . '://' . $authority;
+
+	if ( ! empty( $parsed['path'] ) ) {
+		$pinned_url .= $parsed['path'];
+	}
+
+	if ( ! empty( $parsed['query'] ) ) {
+		$pinned_url .= '?' . $parsed['query'];
+	}
+
+	return $pinned_url;
 }
 
 /**
@@ -2599,6 +2765,11 @@ function aiovg_remove_unfiltered_html_capability_from_editors() {
  * download handler support legitimate redirecting hosts (e.g. links that 302 to
  * a CDN) without the SSRF risk that blind redirect-following would re-introduce.
  *
+ * The URL returned for a remote host addresses the validated IP directly, with
+ * the original hostname carried in the default stream context (see
+ * aiovg_pin_url_to_ip()), so that the caller cannot end up resolving the
+ * hostname again and reaching a different address than the one that was checked.
+ *
  * Redirect following is disabled at the stream level (so the caller's subsequent
  * get_headers()/fopen() calls also won't follow redirects on their own).
  *
@@ -2610,24 +2781,23 @@ function aiovg_remove_unfiltered_html_capability_from_editors() {
 function aiovg_resolve_safe_url( $url, $max_redirects = 5 ) {
 	$url = trim( (string) $url );
 
-	// Don't let the stream wrappers follow redirects on their own; we follow them
-	// manually below so that each hop can be validated.
-	stream_context_set_default(
-		array(
-			'http' => array(
-				'follow_location' => 0,
-				'timeout'         => 30
-			)
-		)
-	);
-
 	for ( $i = 0; $i <= $max_redirects; $i++ ) {
-		// Every hop must be the site's own host or a validated public host.
-		if ( ! aiovg_is_same_host_url( $url ) && ! aiovg_is_safe_remote_url( $url ) ) {
+		// Every hop must be the site's own web server or a validated public host.
+		$ip_addresses = array();
+
+		if ( aiovg_is_same_host_url( $url ) ) {
+			// The site's own web server. Its DNS records aren't attacker controlled,
+			// so there's nothing to pin the connection against — but the context is
+			// still rewritten, to clear anything pinned for an earlier hop.
+			$request_url = aiovg_pin_url_to_ip( $url );
+		} elseif ( aiovg_is_safe_remote_url( $url, $ip_addresses ) ) {
+			$request_url = aiovg_pin_url_to_ip( $url, reset( $ip_addresses ) );
+		} else {
+			aiovg_pin_url_to_ip();
 			return false;
 		}
 
-		$headers = @get_headers( $url, true );
+		$headers = @get_headers( $request_url, true );
 
 		// Couldn't read the headers (e.g. get_headers() is disabled on the host, or
 		// a transient failure)? The current URL is already validated above and
@@ -2635,7 +2805,7 @@ function aiovg_resolve_safe_url( $url, $max_redirects = 5 ) {
 		// direct fetch of it rather than failing the download outright. This keeps
 		// the pre-4.9.0 behaviour on hosts where get_headers() is unavailable.
 		if ( empty( $headers ) || ! isset( $headers[0] ) ) {
-			return $url;
+			return $request_url;
 		}
 
 		// Determine the HTTP status code (supports HTTP/1.x and HTTP/2).
@@ -2647,7 +2817,7 @@ function aiovg_resolve_safe_url( $url, $max_redirects = 5 ) {
 
 		// Not a redirect? This is the final URL.
 		if ( $status_code < 300 || $status_code >= 400 ) {
-			return $url;
+			return $request_url;
 		}
 
 		// Find the Location header (case-insensitive; may be an array on multiple hits).
@@ -2661,10 +2831,11 @@ function aiovg_resolve_safe_url( $url, $max_redirects = 5 ) {
 		}
 
 		if ( empty( $location ) ) {
-			return $url; // Redirect without a target — treat the current URL as final.
+			return $request_url; // Redirect without a target — treat the current URL as final.
 		}
 
-		// Resolve relative redirect targets against the current URL.
+		// Resolve relative redirect targets against the hostname URL rather than the
+		// pinned one, so that the next hop is validated (and pinned) by name.
 		if ( ! preg_match( '#^https?://#i', $location ) && function_exists( '_wp_http_get_object' ) ) {
 			$http = _wp_http_get_object();
 
@@ -2675,6 +2846,8 @@ function aiovg_resolve_safe_url( $url, $max_redirects = 5 ) {
 
 		$url = $location;
 	}
+
+	aiovg_pin_url_to_ip(); // Reset the context before bailing out.
 
 	return false; // Too many redirects.
 }

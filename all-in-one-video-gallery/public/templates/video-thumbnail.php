@@ -84,49 +84,6 @@ if ( ! $has_access && ! empty( $trailer_settings['enable_trailers'] ) ) {
         <?php endif; ?>
 
         <?php
-        // Labels
-        if ( ! $has_access ) {
-			if ( $has_trailer && ! empty( $trailer_settings['show_trailer_label'] ) && ! empty( $trailer_settings['trailer_label_text'] ) ) {
-				$styles = array();
-
-                if ( $trailer_label_bg_color = $trailer_settings['trailer_label_bg_color'] ) {
-                    $styles[] = sprintf( 'background-color: %s', $trailer_label_bg_color );
-                }
-
-                if ( $trailer_label_text_color = $trailer_settings['trailer_label_text_color'] ) {
-                    $styles[] = sprintf( 'color: %s', $trailer_label_text_color );
-                }
-
-                printf(
-                    '<div class="aiovg-labels"><span class="aiovg-trailer-label" style="%s">%s</span></div>',
-                    esc_attr( implode( '; ', $styles ) ),
-                    esc_html( $trailer_settings['trailer_label_text'] )
-                );
-			} else {
-				$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
-
-				if ( ! empty( $restrictions_settings['show_restricted_label'] ) && ! empty( $restrictions_settings['restricted_label_text'] ) ) {
-					$styles = array();
-
-					if ( $restricted_label_bg_color = $restrictions_settings['restricted_label_bg_color'] ) {
-						$styles[] = sprintf( 'background-color: %s', $restricted_label_bg_color );
-					}
-
-					if ( $restricted_label_text_color = $restrictions_settings['restricted_label_text_color'] ) {
-						$styles[] = sprintf( 'color: %s', $restricted_label_text_color );
-					}
-
-					printf(
-						'<div class="aiovg-labels"><span class="aiovg-restricted-label" style="%s">%s</span></div>',
-						esc_attr( implode( '; ', $styles ) ),
-						esc_html( $restrictions_settings['restricted_label_text'] )
-					);
-				}
-			}
-		}
-        ?>
-
-        <?php
         $meta = array();
                 
         // Author
@@ -303,8 +260,51 @@ if ( ! $has_access && ! empty( $trailer_settings['enable_trailers'] ) ) {
 
         <?php if ( $attributes['show_excerpt'] ) : ?>
             <div class="aiovg-excerpt aiovg-hide-if-empty"><?php the_aiovg_excerpt( $attributes['excerpt_length'] ); ?></div>
-        <?php endif; ?> 
-        
+        <?php endif; ?>
+
+        <?php
+        // Labels
+        if ( ! $has_access ) {
+			if ( $has_trailer && ! empty( $trailer_settings['show_trailer_label'] ) && ! empty( $trailer_settings['trailer_label_text'] ) ) {
+				$styles = array();
+
+                if ( ! empty( $trailer_settings['trailer_label_bg_color'] ) ) {
+                    $styles[] = sprintf( 'background-color: %s', $trailer_settings['trailer_label_bg_color'] );
+                }
+
+                if ( ! empty( $trailer_settings['trailer_label_text_color'] ) ) {
+                    $styles[] = sprintf( 'color: %s', $trailer_settings['trailer_label_text_color'] );
+                }
+
+                printf(
+                    '<div class="aiovg-labels"><span class="aiovg-trailer-label" style="%s">%s</span></div>',
+                    esc_attr( implode( '; ', $styles ) ),
+                    esc_html( $trailer_settings['trailer_label_text'] )
+                );
+			} else {
+				$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
+
+				if ( ! empty( $restrictions_settings['show_restricted_label'] ) && ! empty( $restrictions_settings['restricted_label_text'] ) ) {
+					$styles = array();
+
+					if ( ! empty( $restrictions_settings['restricted_label_bg_color'] ) ) {
+						$styles[] = sprintf( 'background-color: %s', $restrictions_settings['restricted_label_bg_color'] );
+					}
+
+					if ( ! empty( $restrictions_settings['restricted_label_text_color'] ) ) {
+						$styles[] = sprintf( 'color: %s', $restrictions_settings['restricted_label_text_color'] );
+					}
+
+					printf(
+						'<div class="aiovg-labels"><span class="aiovg-restricted-label" style="%s">%s</span></div>',
+						esc_attr( implode( '; ', $styles ) ),
+						esc_html( $restrictions_settings['restricted_label_text'] )
+					);
+				}
+			}
+		}
+        ?>
+
         <?php the_aiovg_content_after_thumbnail( $attributes ); // After Thumbnail ?>
     </div>    
 </div>

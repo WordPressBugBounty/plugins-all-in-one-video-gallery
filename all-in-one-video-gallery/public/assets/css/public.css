@@ -251,8 +251,8 @@
 .aiovg-svg-icon-locked {
 	min-width: 24px;
 	min-height: 24px;
-	max-width: 48px;
-    max-height: 48px;
+	max-width: 44px;
+    max-height: 44px;
 }
 
 /*----------------------------------------------------------------------------------------------
@@ -571,11 +571,11 @@ img.aiovg-responsive-element {
 .aiovg-caption .aiovg-trailer-label {
 	display: inline-flex;
 	border-radius: 2px;
-	background-color: #999;
-	padding: .25em .5em;
-	color: #fff;
-	font-size: 90%;
-	line-height: 1;
+	background-color: #eee;
+	padding: .25em .75em;
+	color: #606060;
+	font-size: 0.875em;
+	line-height: 1.2;
 }
 
 .aiovg-caption .aiovg-excerpt,
