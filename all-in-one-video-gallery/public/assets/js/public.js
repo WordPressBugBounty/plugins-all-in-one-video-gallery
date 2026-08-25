@@ -182,18 +182,22 @@
 		/**
 		 * Observe dynamically added elements (Elementor, DIVI, AJAX).
 		 */
-		const observer = new MutationObserver(( mutations ) => {
-			for ( const mutation of mutations ) {
-				for ( const node of mutation.addedNodes ) {
-					loadAssets( node );
-				}
-			}
-		});
+		const target = document.body || document.documentElement;
 
-		observer.observe( document.body, {
-			childList: true,
-			subtree: true
-		});
+		if ( target ) {
+			const observer = new MutationObserver(( mutations ) => {
+				for ( const mutation of mutations ) {
+					for ( const node of mutation.addedNodes ) {
+						loadAssets( node );
+					}
+				}
+			});
+
+			observer.observe( target, {
+				childList: true,
+				subtree: true
+			});
+		}
 
 	});
 

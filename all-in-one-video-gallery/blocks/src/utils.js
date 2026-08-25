@@ -26,7 +26,7 @@ export function getVideoAttributes() {
 function getAttributeType( type ) {
 	var _type = 'string';
 
-	if ( 'categories' == type ) {
+	if ( 'categories' == type || 'tags' == type ) {
 		_type = 'array';
 	} else if ( 'number' == type ) {
 		_type = 'number';

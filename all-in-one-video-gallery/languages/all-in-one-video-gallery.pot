@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: All-in-One Video Gallery\n"
-"POT-Creation-Date: 2026-08-04 12:51+0530\n"
-"PO-Revision-Date: 2026-08-04 12:51+0530\n"
+"POT-Creation-Date: 2026-08-25 12:03+0530\n"
+"PO-Revision-Date: 2026-08-25 12:03+0530\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en_US\n"
@@ -217,14 +217,14 @@ msgid "All-in-One Video Gallery - Categories"
 msgstr ""
 
 #: admin/categories.php:33 admin/categories.php:66 admin/import-export.php:2570
-#: admin/partials/import-export.php:144 admin/videos.php:708
+#: admin/partials/import-export.php:144 admin/videos.php:750
 #: premium/admin/partials/automations-video-options.php:61
 #: widgets/categories.php:54
 msgid "Video Categories"
 msgstr ""
 
-#: admin/categories.php:67 admin/videos.php:819
-#: premium/admin/automations.php:204 public/videos.php:99
+#: admin/categories.php:67 admin/videos.php:861
+#: premium/admin/automations.php:226 public/videos.php:99
 msgid "All Categories"
 msgstr ""
 
@@ -293,7 +293,7 @@ msgid "Categories list navigation"
 msgstr ""
 
 #: admin/categories.php:175 admin/settings.php:811 admin/tags.php:125
-#: admin/videos.php:976 blocks/blocks.php:82
+#: admin/videos.php:1018 blocks/blocks.php:82
 #: includes/helpers/functions.php:2002 widgets/forms/categories.php:76
 msgid "ID"
 msgstr ""
@@ -524,7 +524,7 @@ msgstr ""
 msgid "Video ID (existing video)"
 msgstr ""
 
-#: admin/import-export.php:2565 admin/settings.php:746 admin/videos.php:670
+#: admin/import-export.php:2565 admin/settings.php:746 admin/videos.php:712
 #: includes/helpers/email-capture.php:80 includes/helpers/functions.php:1726
 #: premium/admin/partials/automations-video-options.php:21
 #: premium/admin/slider.php:61 premium/public/slider.php:81
@@ -538,11 +538,11 @@ msgid "Video File"
 msgstr ""
 
 #: admin/import-export.php:2567 admin/partials/video-image.php:34
-#: admin/videos.php:698 blocks/blocks.php:124
+#: admin/videos.php:740 blocks/blocks.php:124
 msgid "Poster Image"
 msgstr ""
 
-#: admin/import-export.php:2568 admin/videos.php:113 admin/videos.php:677
+#: admin/import-export.php:2568 admin/videos.php:113 admin/videos.php:719
 #: premium/admin/partials/automations-video-options.php:33
 #: premium/admin/slider.php:62 premium/public/slider.php:89
 #: premium/public/templates/video-form.php:229
@@ -554,7 +554,7 @@ msgid "Video Excerpt"
 msgstr ""
 
 #: admin/import-export.php:2571 admin/partials/import-export.php:167
-#: admin/tags.php:33 admin/tags.php:75 admin/videos.php:715
+#: admin/tags.php:33 admin/tags.php:75 admin/videos.php:757
 #: premium/admin/partials/automations-video-options.php:83
 msgid "Video Tags"
 msgstr ""
@@ -601,7 +601,7 @@ msgid "Enable Download"
 msgstr ""
 
 #: admin/import-export.php:2579 admin/partials/video-submitbox.php:18
-#: admin/videos.php:1050
+#: admin/videos.php:1092
 msgid "Featured"
 msgstr ""
 
@@ -1431,8 +1431,8 @@ msgid "General"
 msgstr ""
 
 #: admin/partials/video-metabox.php:69 admin/partials/video-trailer.php:25
-#: admin/videos.php:684 includes/helpers/functions.php:1366
-#: premium/admin/automations.php:927
+#: admin/videos.php:726 includes/helpers/functions.php:1366
+#: premium/admin/automations.php:980
 #: premium/admin/partials/automations-sources.php:52
 #: premium/admin/partials/automations-sources.php:217
 #: premium/public/templates/video-form.php:51
@@ -1726,7 +1726,7 @@ msgstr ""
 #: admin/settings.php:233
 #, php-format
 msgid ""
-"NOTE: After updating the fields in this section, please visit <a "
+"After updating the fields in this section, please visit <a "
 "href=\"%s\">Settings → Permalinks</a> and simply save the page without "
 "making any changes to flush rewrite rules. Otherwise, you might still see "
 "old links."
@@ -1940,7 +1940,7 @@ msgstr ""
 msgid "Auto"
 msgstr ""
 
-#: admin/settings.php:387 admin/videos.php:975
+#: admin/settings.php:387 admin/videos.php:1017
 msgid "Metadata"
 msgstr ""
 
@@ -3298,7 +3298,7 @@ msgstr ""
 msgid "All-in-One Video Gallery - Videos"
 msgstr ""
 
-#: admin/videos.php:33 admin/videos.php:82 admin/videos.php:836
+#: admin/videos.php:33 admin/videos.php:82 admin/videos.php:878
 msgid "All Videos"
 msgstr ""
 
@@ -3319,7 +3319,7 @@ msgstr ""
 msgid "Parent Video:"
 msgstr ""
 
-#: admin/videos.php:84 premium/admin/automations.php:128
+#: admin/videos.php:84 premium/admin/automations.php:150
 msgid "Add New"
 msgstr ""
 
@@ -3392,49 +3392,49 @@ msgstr ""
 msgid "Filter videos list"
 msgstr ""
 
-#: admin/videos.php:611 admin/videos.php:953
+#: admin/videos.php:653 admin/videos.php:995
 msgid "Export Emails"
 msgstr ""
 
-#: admin/videos.php:653 premium/admin/automations.php:890
+#: admin/videos.php:695 premium/admin/automations.php:943
 msgid "Take a Guided Tour"
 msgstr ""
 
-#: admin/videos.php:654 premium/admin/automations.php:891
+#: admin/videos.php:696 premium/admin/automations.php:944
 #, php-format
 msgid "%s of %s"
 msgstr ""
 
-#: admin/videos.php:655 premium/admin/automations.php:892
+#: admin/videos.php:697 premium/admin/automations.php:945
 msgid "Next →"
 msgstr ""
 
-#: admin/videos.php:656 premium/admin/automations.php:893
+#: admin/videos.php:698 premium/admin/automations.php:946
 msgid "← Previous"
 msgstr ""
 
-#: admin/videos.php:657 premium/admin/automations.php:894
+#: admin/videos.php:699 premium/admin/automations.php:947
 msgid "Done"
 msgstr ""
 
-#: admin/videos.php:663 premium/admin/automations.php:900
+#: admin/videos.php:705 premium/admin/automations.php:953
 msgid "Welcome to the Quick Tour"
 msgstr ""
 
-#: admin/videos.php:664
+#: admin/videos.php:706
 msgid ""
 "This form lets you add or edit videos for your gallery.<br><br>Let's walk "
 "through the key steps to get your first video published."
 msgstr ""
 
-#: admin/videos.php:671
+#: admin/videos.php:713
 msgid ""
 "Start by entering a <strong>clear, descriptive title</strong> for your video."
 "<br><br>This helps visitors (and search engines) understand what your video "
 "is about."
 msgstr ""
 
-#: admin/videos.php:678
+#: admin/videos.php:720
 msgid ""
 "Next, add a <strong>description</strong> for your video.<br><br>This is "
 "optional, but highly recommended, as it helps with <strong>SEO</strong>, "
@@ -3442,24 +3442,24 @@ msgid ""
 "social media."
 msgstr ""
 
-#: admin/videos.php:685
+#: admin/videos.php:727
 msgid ""
 "Choose where your video is hosted — <strong>YouTube</strong>, <strong>Vimeo</"
 "strong>, <strong>Self-Hosted</strong>, or another source.<br><br>This helps "
 "the plugin know how to handle your video."
 msgstr ""
 
-#: admin/videos.php:691
+#: admin/videos.php:733
 msgid "Video File Input"
 msgstr ""
 
-#: admin/videos.php:692
+#: admin/videos.php:734
 msgid ""
 "Depending on the source you selected, either <strong>upload a video file</"
 "strong> or <strong>paste the video URL</strong>."
 msgstr ""
 
-#: admin/videos.php:700
+#: admin/videos.php:742
 #, php-format
 msgid ""
 "Upload a <strong>poster image</strong> for your video.<br><br>This image "
@@ -3470,34 +3470,34 @@ msgid ""
 "target=\"_blank\" rel=\"noopener noreferrer\">Premium Add-on</a>."
 msgstr ""
 
-#: admin/videos.php:709
+#: admin/videos.php:751
 msgid ""
 "Assign your video to <strong>categories</strong> to help visitors find "
 "related content.<br><br><strong>Need a new category?</strong> Just click \"+ "
 "Add New Category\" to create one."
 msgstr ""
 
-#: admin/videos.php:716
+#: admin/videos.php:758
 msgid ""
 "Add <strong>tags</strong> to describe your video in more detail.<br><br>Tags "
 "work like keywords and help visitors find similar videos."
 msgstr ""
 
-#: admin/videos.php:722
+#: admin/videos.php:764
 msgid "Save Your Video"
 msgstr ""
 
-#: admin/videos.php:723
+#: admin/videos.php:765
 msgid ""
 "All set? Great!<br><br>Click <strong>\"Publish\"</strong> to save your video."
 "<br><br>Repeat these steps to add as many videos as you want."
 msgstr ""
 
-#: admin/videos.php:729 premium/admin/automations.php:991
+#: admin/videos.php:771 premium/admin/automations.php:1044
 msgid "Next Steps"
 msgstr ""
 
-#: admin/videos.php:731
+#: admin/videos.php:773
 #, php-format
 msgid ""
 "That's it — you're all set!<br><br>Use the menu on the left to manage your "
@@ -3510,37 +3510,37 @@ msgid ""
 "explore all the display options."
 msgstr ""
 
-#: admin/videos.php:837 includes/helpers/functions.php:1655
+#: admin/videos.php:879 includes/helpers/functions.php:1655
 msgid "Featured Only"
 msgstr ""
 
-#: admin/videos.php:931
+#: admin/videos.php:973
 msgid "Copy URL"
 msgstr ""
 
-#: admin/videos.php:940
+#: admin/videos.php:982
 msgid "Copy Shortcode"
 msgstr ""
 
-#: admin/videos.php:979 includes/helpers/functions.php:1923
-#: premium/admin/automations.php:296
+#: admin/videos.php:1021 includes/helpers/functions.php:1923
+#: premium/admin/automations.php:318
 msgid "Categories"
 msgstr ""
 
-#: admin/videos.php:980 premium/admin/automations.php:297
+#: admin/videos.php:1022 premium/admin/automations.php:319
 msgid "Tags"
 msgstr ""
 
-#: admin/videos.php:1022
+#: admin/videos.php:1064
 msgid "Views"
 msgstr ""
 
-#: admin/videos.php:1031 premium/includes/vimeo-api/resource-objects.php:166
+#: admin/videos.php:1073 premium/includes/vimeo-api/resource-objects.php:166
 #: public/public.php:342 public/public.php:426
 msgid "Likes"
 msgstr ""
 
-#: admin/videos.php:1040 public/public.php:343 public/public.php:427
+#: admin/videos.php:1082 public/public.php:343 public/public.php:427
 msgid "Dislikes"
 msgstr ""
 
@@ -4230,8 +4230,8 @@ msgstr ""
 msgid "Video Automations"
 msgstr ""
 
-#: premium/admin/automations.php:81 premium/admin/automations.php:124
-#: premium/admin/automations.php:126 premium/admin/automations.php:139
+#: premium/admin/automations.php:81 premium/admin/automations.php:146
+#: premium/admin/automations.php:148 premium/admin/automations.php:161
 msgid "Automations"
 msgstr ""
 
@@ -4242,129 +4242,128 @@ msgid ""
 "configure your keys <a href=\"%s\">here</a>."
 msgstr ""
 
-#: premium/admin/automations.php:104
+#: premium/admin/automations.php:117
 msgid "Enable Fast Mode"
 msgstr ""
 
-#: premium/admin/automations.php:105
-msgid ""
-"Increase speed by disabling do_action calls in wp_insert_post during import"
+#: premium/admin/automations.php:120
+#, php-format
+msgid "Increase speed by disabling %1$s calls in %2$s during import."
 msgstr ""
 
-#: premium/admin/automations.php:106
+#: premium/admin/automations.php:126
+#, php-format
 msgid ""
-"NOTE: This option is for advanced users with knowledge of WordPress "
-"development. Your theme or plugins may require these calls when posts are "
-"created. Next action will be disabled: 'transition_post_status', "
-"'save_post', 'pre_post_update', 'add_attachment', 'edit_attachment', "
-"'edit_post', 'post_updated', 'wp_insert_post'. Verify your created posts "
-"work properly if you check this box."
+"This option is for advanced users with knowledge of WordPress development. "
+"Your theme or plugins may require these calls when posts are created. The "
+"following actions will be disabled: %s. Verify your created posts work "
+"properly if you check this box."
 msgstr ""
 
-#: premium/admin/automations.php:125
+#: premium/admin/automations.php:147
 msgid "Automation"
 msgstr ""
 
-#: premium/admin/automations.php:127
+#: premium/admin/automations.php:149
 msgid "Add New Import"
 msgstr ""
 
-#: premium/admin/automations.php:129
+#: premium/admin/automations.php:151
 msgid "New Import"
 msgstr ""
 
-#: premium/admin/automations.php:130
+#: premium/admin/automations.php:152
 msgid "Edit Import"
 msgstr ""
 
-#: premium/admin/automations.php:131
+#: premium/admin/automations.php:153
 msgid "Update Import"
 msgstr ""
 
-#: premium/admin/automations.php:132
+#: premium/admin/automations.php:154
 msgid "View Import"
 msgstr ""
 
-#: premium/admin/automations.php:133
+#: premium/admin/automations.php:155
 msgid "Search Imports"
 msgstr ""
 
-#: premium/admin/automations.php:134
+#: premium/admin/automations.php:156
 msgid "No imports found"
 msgstr ""
 
-#: premium/admin/automations.php:135
+#: premium/admin/automations.php:157
 msgid "No imports found in Trash"
 msgstr ""
 
-#: premium/admin/automations.php:140
+#: premium/admin/automations.php:162
 msgid "Automations Description"
 msgstr ""
 
-#: premium/admin/automations.php:174
+#: premium/admin/automations.php:196
 msgid "Enter your import title"
 msgstr ""
 
-#: premium/admin/automations.php:188
+#: premium/admin/automations.php:210
 msgid "Imported Only"
 msgstr ""
 
-#: premium/admin/automations.php:295
+#: premium/admin/automations.php:317
 msgid "Source"
 msgstr ""
 
-#: premium/admin/automations.php:298
+#: premium/admin/automations.php:320
 msgid "Stats"
 msgstr ""
 
-#: premium/admin/automations.php:378 premium/admin/automations.php:604
+#: premium/admin/automations.php:400 premium/admin/automations.php:657
 msgid "Paused"
 msgstr ""
 
-#: premium/admin/automations.php:398
+#: premium/admin/automations.php:420
 #: premium/admin/partials/automations-statistics.php:38
 msgid "videos imported"
 msgstr ""
 
-#: premium/admin/automations.php:399
+#: premium/admin/automations.php:421
 #: premium/admin/partials/automations-statistics.php:25
 msgid "Import status"
 msgstr ""
 
-#: premium/admin/automations.php:401
+#: premium/admin/automations.php:423
 #: premium/admin/partials/automations-statistics.php:64
 msgid "Next scheduled update"
 msgstr ""
 
-#: premium/admin/automations.php:426
+#: premium/admin/automations.php:448
 msgid "Imported"
 msgstr ""
 
-#: premium/admin/automations.php:473
+#: premium/admin/automations.php:495
 msgid "Configure Import Sources"
 msgstr ""
 
-#: premium/admin/automations.php:482
+#: premium/admin/automations.php:504
 msgid "Imported Video Options"
 msgstr ""
 
-#: premium/admin/automations.php:491 premium/admin/automations.php:984
+#: premium/admin/automations.php:513 premium/admin/automations.php:1037
 msgid "Import Log"
 msgstr ""
 
-#: premium/admin/automations.php:812 premium/admin/automations.php:941
+#: premium/admin/automations.php:865 premium/admin/automations.php:994
 msgid "Preview Import"
 msgstr ""
 
-#: premium/admin/automations.php:813
+#: premium/admin/automations.php:866
 msgid "Publish & Import"
 msgstr ""
 
-#: premium/admin/automations.php:813
+#: premium/admin/automations.php:866
 msgid "Import Next Batch"
 msgstr ""
 
-#: premium/admin/automations.php:902
+#: premium/admin/automations.php:955
 #, php-format
 msgid ""
 "This form lets you automatically import videos from popular platforms like "
@@ -4376,39 +4375,39 @@ msgid ""
 "\t\t\t\t\t\tLet's walk through the key steps to set up your first import."
 msgstr ""
 
-#: premium/admin/automations.php:913
+#: premium/admin/automations.php:966
 msgid "Import Title"
 msgstr ""
 
-#: premium/admin/automations.php:914
+#: premium/admin/automations.php:967
 msgid ""
 "Start by giving your import a <strong>descriptive title</strong>. This helps "
 "you identify the automation later."
 msgstr ""
 
-#: premium/admin/automations.php:920
+#: premium/admin/automations.php:973
 #: premium/admin/partials/automations-sources.php:21
 msgid "Video Platform"
 msgstr ""
 
-#: premium/admin/automations.php:921
+#: premium/admin/automations.php:974
 msgid ""
 "Choose the video platform you want to import from — like <strong>YouTube</"
 "strong> or <strong>Vimeo</strong>."
 msgstr ""
 
-#: premium/admin/automations.php:928
+#: premium/admin/automations.php:981
 msgid ""
 "Select the type of content you want to import — such as a <strong>Channel</"
 "strong>, <strong>Playlist</strong>, <strong>Search Results</strong>, or a "
 "custom list of video URLs."
 msgstr ""
 
-#: premium/admin/automations.php:934
+#: premium/admin/automations.php:987
 msgid "Configure Source Input"
 msgstr ""
 
-#: premium/admin/automations.php:935
+#: premium/admin/automations.php:988
 msgid ""
 "Based on the selected <strong>Source Type</strong>, you will see relevant "
 "input fields appear below.<br><br>For example, if you select "
@@ -4416,49 +4415,49 @@ msgid ""
 "all required fields are correctly filled for smooth imports."
 msgstr ""
 
-#: premium/admin/automations.php:942
+#: premium/admin/automations.php:995
 msgid ""
 "Click <strong>Preview Import</strong> to preview videos from your source."
 "<br><br>If any errors appear, correct them before proceeding."
 msgstr ""
 
-#: premium/admin/automations.php:948
+#: premium/admin/automations.php:1001
 #: premium/admin/partials/automations-sources.php:445
 msgid "Batch Limit"
 msgstr ""
 
-#: premium/admin/automations.php:949
+#: premium/admin/automations.php:1002
 msgid ""
 "Set the maximum number of videos to import in each batch.<br><br>For optimal "
 "performance, we recommend keeping this below <strong>500</strong>."
 msgstr ""
 
-#: premium/admin/automations.php:955
+#: premium/admin/automations.php:1008
 msgid "Schedule Frequency"
 msgstr ""
 
-#: premium/admin/automations.php:956
+#: premium/admin/automations.php:1009
 msgid ""
 "Decide how often the plugin should check for new videos.<br><br>Options "
 "include <strong>Only Once</strong>, <strong>Every Hour</strong>, "
 "<strong>Daily</strong>, <strong>Weekly</strong>, or <strong>Monthly</strong>."
 msgstr ""
 
-#: premium/admin/automations.php:962
+#: premium/admin/automations.php:1015
 msgid "Auto-Continue"
 msgstr ""
 
-#: premium/admin/automations.php:963
+#: premium/admin/automations.php:1016
 msgid ""
 "Enable this option if you want the plugin to keep checking for new videos "
 "even after the initial import is complete."
 msgstr ""
 
-#: premium/admin/automations.php:969
+#: premium/admin/automations.php:1022
 msgid "Video Settings"
 msgstr ""
 
-#: premium/admin/automations.php:970
+#: premium/admin/automations.php:1023
 msgid ""
 "Decide how imported videos should be handled:<br><br>- Assign "
 "<strong>categories</strong> and <strong>tags</strong>.<br>- Set a "
@@ -4470,11 +4469,11 @@ msgid ""
 "<strong>Pending</strong> so the site admin gets notified by email for review."
 msgstr ""
 
-#: premium/admin/automations.php:977
+#: premium/admin/automations.php:1030
 msgid "Start Import"
 msgstr ""
 
-#: premium/admin/automations.php:978
+#: premium/admin/automations.php:1031
 msgid ""
 "Ready to go?<br><br>Click <strong>Publish & Import</strong> to begin "
 "importing and schedule future batches.<br><br>Once the import starts, this "
@@ -4482,13 +4481,13 @@ msgid ""
 "anytime to manually trigger the next batch ahead of schedule."
 msgstr ""
 
-#: premium/admin/automations.php:985
+#: premium/admin/automations.php:1038
 msgid ""
 "This section logs every import batch with a timestamp.<br><br>Click any "
 "entry to view the list of videos imported during that batch."
 msgstr ""
 
-#: premium/admin/automations.php:993
+#: premium/admin/automations.php:1046
 #, php-format
 msgid ""
 "That's it — your automation is ready!<br><br>Manage all imported videos from "
@@ -5611,7 +5610,7 @@ msgstr ""
 msgid "Showcase"
 msgstr ""
 
-#: premium/includes/vimeo-import.php:122
+#: premium/includes/vimeo-import.php:131
 #: premium/includes/youtube-api/youtube-api.php:447
 #: premium/includes/youtube-api/youtube-api.php:497
 msgid "No videos found matching your query."
@@ -5961,7 +5960,7 @@ msgstr ""
 msgid "comments"
 msgstr ""
 
-#: premium/public/thumbnail-generator.php:48 public/video.php:952
+#: premium/public/thumbnail-generator.php:48 public/video.php:961
 msgid "Invalid file format."
 msgstr ""
 

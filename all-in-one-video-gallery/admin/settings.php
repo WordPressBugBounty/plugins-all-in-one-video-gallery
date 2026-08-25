@@ -230,7 +230,7 @@ class AIOVG_Admin_Settings {
                 'id'          => 'aiovg_permalink_settings',
                 'title'       => __( 'Permalinks & Archive Settings', 'all-in-one-video-gallery' ),
 				'description' => sprintf(
-                    __( 'NOTE: After updating the fields in this section, please visit <a href="%s">Settings → Permalinks</a> and simply save the page without making any changes to flush rewrite rules. Otherwise, you might still see old links.', 'all-in-one-video-gallery' ),
+                    __( 'After updating the fields in this section, please visit <a href="%s">Settings → Permalinks</a> and simply save the page without making any changes to flush rewrite rules. Otherwise, you might still see old links.', 'all-in-one-video-gallery' ),
                     esc_url( admin_url( 'options-permalink.php' ) )
                 ),
                 'tab'         => 'advanced',

@@ -4,9 +4,9 @@ Contributors: plugins360, wpvideogallery, freemius
 Donate link: https://plugins360.com
 Tags: video gallery, video player, youtube, vimeo, html5 video
 Requires at least: 6.3
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 5.6.20
-Stable tag: 4.9.2
+Stable tag: 4.9.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -186,6 +186,13 @@ Yes. You can upload WebVTT (`.vtt`) subtitle tracks for your self-hosted videos 
 25. Premium: Front-end video submission form.
 
 == Changelog ==
+
+= 4.9.3 =
+
+* Fix: WordPress 7.1 compatibility issues.
+* Fix: Video Gallery block — the "Tags" filter in the block settings did not save the selected tags.
+* Fix: Empty, leftover panels could appear on other post types’ edit screens in some page builders, left behind by meta boxes retired in an earlier version.
+* Fix: Various performance and security improvements.
 
 = 4.9.2 =
 
@@ -663,6 +670,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 4.9.2 =
+= 4.9.3 =
 
-Security Fix. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)
+WordPress 7.1 compatibility issues. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

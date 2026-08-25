@@ -189,6 +189,7 @@ class AIOVG_Init {
 		if ( is_admin() ) {		
 			$this->loader->add_action( 'post_submitbox_misc_actions', $videos, 'post_submitbox_misc_actions' );
 			$this->loader->add_action( 'add_meta_boxes', $videos, 'add_meta_boxes' );
+			$this->loader->add_action( 'add_meta_boxes', $videos, 'remove_legacy_meta_boxes', 99999 );
 			$this->loader->add_action( 'save_post', $videos, 'save_meta_data', 10, 2 );
 			$this->loader->add_action( 'restrict_manage_posts', $videos, 'restrict_manage_posts' );
 			$this->loader->add_action( 'manage_aiovg_videos_posts_custom_column', $videos, 'custom_column_content', 10, 2 );

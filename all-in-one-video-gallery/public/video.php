@@ -805,38 +805,47 @@ class AIOVG_Public_Video {
           	if ( ! empty( $data['Content-Length'] ) ) {
           		$file_size = (int) $data[ 'Content-Length' ];          
           	} else {               
-               	// If get_headers fails then try to fetch fileSize with curl
-               	$ch = @curl_init();
+               	// If get_headers fails then try to fetch fileSize with curl. ext/curl is
+               	// missing or disabled on some hosts, and PHP 8 raises a fatal Error on a
+               	// call to an undefined function, so the extension has to be checked first.
+               	$ch = function_exists( 'curl_init' ) ? @curl_init() : false;
 
-               	if ( ! @curl_setopt( $ch, CURLOPT_URL, $file ) ) {
-                 	@curl_close( $ch );
-                 	@exit;
+               	if ( false !== $ch ) {
+               		@curl_setopt( $ch, CURLOPT_URL, $file );
+
+               		// $file addresses the validated IP directly, so carry the original
+               		// hostname over from the default stream context that
+               		// aiovg_resolve_safe_url() pinned it with.
+               		$stream_options = stream_context_get_options( stream_context_get_default() );
+
+               		if ( ! empty( $stream_options['http']['header'] ) ) {
+               			@curl_setopt( $ch, CURLOPT_HTTPHEADER, (array) $stream_options['http']['header'] );
+               		}
+
+               		@curl_setopt( $ch, CURLOPT_NOBODY, true );
+               		@curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+               		@curl_setopt( $ch, CURLOPT_HEADER, true );
+               		@curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, false );
+               		@curl_setopt( $ch, CURLOPT_MAXREDIRS, 0 );
+               		@curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 10 );
+               		@curl_exec( $ch );
+
+               		if ( ! @curl_errno( $ch ) ) {
+               			$http_status = (int) @curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+
+               			if ( $http_status >= 200 && $http_status < 300 ) {
+               				// Reports -1 when the origin sent no Content-Length, e.g. on a
+               				// chunked response. Leave the size unknown rather than store it.
+               				$content_length = (int) @curl_getinfo( $ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD );
+
+               				if ( $content_length > 0 ) {
+               					$file_size = $content_length;
+               				}
+               			}
+               		}
+
+               		@curl_close( $ch );
                	}
-               
-               	// $file addresses the validated IP directly, so carry the original
-               	// hostname over from the default stream context that
-               	// aiovg_resolve_safe_url() pinned it with.
-               	$stream_options = stream_context_get_options( stream_context_get_default() );
-
-               	if ( ! empty( $stream_options['http']['header'] ) ) {
-               		@curl_setopt( $ch, CURLOPT_HTTPHEADER, (array) $stream_options['http']['header'] );
-               	}
-
-               	@curl_setopt( $ch, CURLOPT_NOBODY, true );
-               	@curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-               	@curl_setopt( $ch, CURLOPT_HEADER, true );
-               	@curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, false );
-               	@curl_setopt( $ch, CURLOPT_MAXREDIRS, 0 );
-               	@curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 10 );
-               	@curl_exec( $ch );
-               
-               	if ( ! @curl_errno( $ch ) ) {
-                	$http_status = (int) @curl_getinfo( $ch, CURLINFO_HTTP_CODE );
-                    if ( $http_status >= 200 && $http_status <= 300 )
-                    	$file_size = (int) @curl_getinfo( $ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD );
-               	}
-
-               	@curl_close( $ch );               
           	}          
 		} elseif ( $formatted_path == 'filepath' ) {		   
 		    $file_size = (int) @filesize( $file );			   			   
@@ -969,7 +978,9 @@ class AIOVG_Public_Video {
 	    header( 'Cache-Control: post-check=0, pre-check=0', false );
 	    header( 'Cache-Control: no-store, no-cache, must-revalidate' );
 	    header( 'Pragma: no-cache' );
-        header( 'Content-Length: '. $file_size);        
+        if ( $file_size > 0 ) {
+			header( 'Content-Length: ' . (int) $file_size );
+		}
         
         // Will Download 1 MB in chunkwise
         $chunk = 1 * ( 1024 * 1024 );

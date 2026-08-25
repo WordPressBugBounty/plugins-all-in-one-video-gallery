@@ -2466,6 +2466,15 @@ function aiovg_is_safe_remote_url( $url, &$ip_addresses = array() ) {
 			$ip_addresses = array();
 			return false;
 		}
+
+		// PHP's reserved range filter doesn't cover the RFC 6598 shared address
+		// space (100.64.0.0/10), which is routable inside some hosting networks.
+		$octets = explode( '.', $ip_address );
+
+		if ( 4 === count( $octets ) && 100 === (int) $octets[0] && (int) $octets[1] >= 64 && (int) $octets[1] <= 127 ) {
+			$ip_addresses = array();
+			return false;
+		}
 	}
 
 	$is_safe = (bool) apply_filters( 'aiovg_is_safe_remote_url', true, $url, $ip_addresses );

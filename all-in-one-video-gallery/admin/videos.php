@@ -198,6 +198,48 @@ class AIOVG_Admin_Videos {
 	}
 
 	/**
+	 * Remove the meta boxes retired in 4.1.0.
+	 *
+	 * Before 4.1.0, the video fields were split across five meta boxes. They were
+	 * consolidated into "aiovg-video-metabox", but the retired IDs live on in the
+	 * per user "meta-box-order_{screen}" option, which WordPress replays through
+	 * add_meta_box() as title-less meta boxes. Core skips those while rendering,
+	 * though some page builders don't, leaving empty panels behind on unrelated
+	 * post types.
+	 *
+	 * @since 4.9.3
+	 * @param string $post_type Post type of the post being edited.
+	 */
+	public function remove_legacy_meta_boxes( $post_type ) {
+		// Leave our own screen alone, in case the retired boxes are still in use.
+		if ( 'aiovg_videos' === $post_type ) {
+			return;
+		}
+
+		$screen = get_current_screen();
+
+		if ( empty( $screen ) ) {
+			$screen = $post_type;
+		}
+
+		$legacy_ids = array(
+			'aiovg-video-sources',
+			'aiovg-video-tracks',
+			'aiovg-video-image',
+			'aiovg-video-chapters',
+			'aiovg-video-restrictions'
+		);
+
+		$contexts = array( 'normal', 'advanced', 'side' );
+
+		foreach ( $legacy_ids as $legacy_id ) {
+			foreach ( $contexts as $context ) {
+				remove_meta_box( $legacy_id, $screen, $context );
+			}
+		}
+	}
+
+	/**
 	 * Display "Video" meta box.
 	 *
 	 * @since 1.0.0
