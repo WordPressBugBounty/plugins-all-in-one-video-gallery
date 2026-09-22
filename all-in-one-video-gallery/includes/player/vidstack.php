@@ -80,11 +80,10 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
  	 * @return string  Player HTML.
 	 */
 	public function get_player_vidstack() {
-		$player_settings        = $this->get_player_settings();
-		$privacy_settings       = $this->get_privacy_settings();
-		$logo_settings          = $this->get_logo_settings();
-		$trailer_settings       = $this->get_trailer_settings();
-		$email_capture_settings = $this->get_email_capture_settings();
+		$player_settings  = $this->get_player_settings();
+		$privacy_settings = $this->get_privacy_settings();
+		$logo_settings    = $this->get_logo_settings();
+		$trailer_settings = $this->get_trailer_settings();
 
 		$videos = $this->get_videos();
 		$poster = $this->get_poster();	
@@ -372,6 +371,11 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 			}
 		}
 
+		// Decided once the sources are final, so a video with no post of its own is
+		// recognised by the same URL its form posts back.
+		$email_capture_video_url = $this->get_email_capture_video_url( $sources );
+		$email_capture_settings  = $this->get_email_capture_settings( $email_capture_video_url );
+
 		if ( ! empty( $email_capture_settings['enable_email_capture'] ) ) {
 			$settings['email_capture'] = 1;
 		}
@@ -466,7 +470,7 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 
 		wp_enqueue_style( 
 			AIOVG_PLUGIN_SLUG . '-player', 
-			AIOVG_PLUGIN_URL . 'public/assets/css/vidstack.min.css', 
+			AIOVG_PLUGIN_URL . 'public/assets/css/vidstack.min.css',
 			array(), 
 			AIOVG_PLUGIN_VERSION, 
 			'all' 
@@ -605,12 +609,7 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 		}
 
 		if ( ! empty( $settings['email_capture'] ) ) { // Email Capture
-			$video_url = '';
-			if ( 'aiovg_videos' != $this->post_type && empty( $this->post_id ) && ! empty( $sources ) ) {
-				$video_url = reset( $sources )['src'];
-			}
-
-			$player_html .= $this->get_email_capture_html( $video_url );
+			$player_html .= $this->get_email_capture_html( $email_capture_video_url );
 		}
 
 		// Return			

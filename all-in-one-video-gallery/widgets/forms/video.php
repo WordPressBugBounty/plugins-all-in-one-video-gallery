@@ -214,10 +214,27 @@ $email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
 			</div>
 
 			<div class="aiovg-widget-field aiovg-widget-field-email_capture">
-				<label for="<?php echo esc_attr( $this->get_field_id( 'email_capture' ) ); ?>">
-					<input type="checkbox" name="<?php echo esc_attr( $this->get_field_name( 'email_capture' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'email_capture' ) ); ?>" class="aiovg-widget-input-email_capture" value="1" <?php checked( 1, $instance['email_capture'] ); ?> />
-					<?php esc_html_e( 'Email & Lead Capture', 'all-in-one-video-gallery' ); ?>
-				</label>
+				<label class="aiovg-widget-label" for="<?php echo esc_attr( $this->get_field_id( 'email_capture' ) ); ?>"><?php esc_html_e( 'Email Capture', 'all-in-one-video-gallery' ); ?></label>
+				<select name="<?php echo esc_attr( $this->get_field_name( 'email_capture' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'email_capture' ) ); ?>" class="widefat aiovg-widget-input-email_capture">
+					<?php
+					$email_capture_options = array(
+						-1 => '— ' . __( 'Default', 'all-in-one-video-gallery' ) . ' —',
+						1  => __( 'Enable', 'all-in-one-video-gallery' ),
+						0  => __( 'Disable', 'all-in-one-video-gallery' )
+					);
+
+					foreach ( $email_capture_options as $key => $label ) {
+						printf(
+							'<option value="%s"%s>%s</option>',
+							esc_attr( $key ),
+							selected( $key, (int) $instance['email_capture'], false ),
+							esc_html( $label )
+						);
+					}
+					?>
+				</select>
+
+				<p class="description"><?php esc_html_e( 'Show an email collection form on this video to capture leads. Choose Enable or Disable to force the form on or off for this player only.', 'all-in-one-video-gallery' ); ?></p>
 			</div>
 		<?php endif; ?>
 	</div>

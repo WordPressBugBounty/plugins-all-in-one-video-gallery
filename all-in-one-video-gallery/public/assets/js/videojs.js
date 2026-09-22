@@ -105,7 +105,7 @@
 			} 
 
 			const firstInput = this.emailCaptureEl.querySelector( 'input' );
-			if ( firstInput ) {
+			if ( firstInput && ! firstInput.value ) {
 				firstInput.focus();
 			}
 
@@ -114,6 +114,11 @@
 
 				if ( this.emailCaptureEl.classList.contains( 'aiovg-is-loading' ) ) return false; // Prevent multiple submissions
 				this.emailCaptureEl.classList.add( 'aiovg-is-loading' );
+
+				// Per-video scoping, read while the form is still in the DOM — it is removed
+				// before the response arrives. An empty key means "once per visitor", where
+				// one capture clears every player on the page.
+				const captureKey = this.emailCaptureEl.dataset.capture_key || '';
 
 				const xmlhttp = new XMLHttpRequest();
 
@@ -138,15 +143,24 @@
 							this.settings.player.autoplay = true;
 							this._initPlayer();
 
+							// A skip the server did not remember clears only the consent gates.
+							const remembered = ! ( response.data && false === response.data.remembered );
+
 							// Email submission implies consent — remove both gates from other players
 							const videos = document.querySelectorAll( '.aiovg-player-element' );
 							for ( let i = 0; i < videos.length; i++ ) {
 								videos[ i ].removeCookieConsent();
-								videos[ i ].removeEmailCapture();
+
+								if ( remembered ) {
+									videos[ i ].removeEmailCapture( captureKey );
+								}
 							}
 
-							window.postMessage({
-								message: 'aiovg-email-captured'
+							window.postMessage( remembered ? {
+								message: 'aiovg-email-captured',
+								capture_key: captureKey
+							} : {
+								message: 'aiovg-cookie-consent'
 							}, window.location.origin );
 						} else {
 							// Show error message
@@ -186,6 +200,7 @@
 			this._initChapters();
 			this._initQualitySelector();
 			this._initOverlays();	
+			this._initTrailerBadge();
 			this._initHotKeys();		
 			this._initEmailCapture();
 			this._initContextMenu();			
@@ -413,58 +428,36 @@
 				});
 			}
 
-			// Logo / Trailer Badge
-			let hasLogo    = this.settings.hasOwnProperty( 'logo' );
-			let hasTrailer = this.settings.hasOwnProperty( 'trailer' );
+			// Logo
+			if ( this.settings.hasOwnProperty( 'logo' ) ) {
+				if ( this.settings.logo.margin ) {
+					this.settings.logo.margin = this.settings.logo.margin - 5;
+				}
 
-			if ( hasLogo || hasTrailer ) {
+				const style = 'margin: ' + this.settings.logo.margin + 'px;';
 				let align = 'bottom-left';
-				let style = 'margin: 5px;';
 
-				if ( hasLogo ) {
-					if ( this.settings.logo.margin ) {
-						this.settings.logo.margin = this.settings.logo.margin - 5;
-					}
-					
-					style = 'margin: ' + this.settings.logo.margin + 'px;';
+				switch ( this.settings.logo.position ) {
+					case 'topleft':
+						align = 'top-left';
+						break;
 
-					switch ( this.settings.logo.position ) {
-						case 'topleft':						
-							align = 'top-left';
-							break;
+					case 'topright':
+						align = 'top-right';
+						break;
 
-						case 'topright':						
-							align = 'top-right';
-							break;
-
-						case 'bottomright':
-							align = 'bottom-right';
-							break;				
-					}
+					case 'bottomright':
+						align = 'bottom-right';
+						break;
 				}
 
-				// Determine the href: trailer URL takes precedence when active.
-				let logoHref = hasLogo ? this.settings.logo.link : 'javascript:void(0)';
-				
-				if ( hasTrailer && this.settings.trailer.url ) {
-					logoHref = this.settings.trailer.url;
-				}
-
-				// Icon: logo image > external-link SVG (only when URL set) > nothing.
-				let iconHtml = '';
-
-				if ( hasLogo ) {
-					iconHtml = '<img src="' + this.settings.logo.image + '" alt="" />';
-				} else if ( hasTrailer && this.settings.trailer.url ) {
-					iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>';
-				}
-
-				// Label: visible trailer label or sr-only text for logo-only mode.
-				let labelHtml   = hasTrailer ? '<span class="vjs-logo-label">' + this.settings.trailer.label + '</span>' : '<span class="vjs-control-text" aria-live="polite">Logo</span>';
-				let logoContent = '<a href="' + logoHref + '" target="_top" style="' + style + '">'	+ iconHtml + labelHtml	+ '</a>';
+				const logo = '<a href="' + this.settings.logo.link + '" target="_top" style="' + style + '">' +
+					'<img src="' + this.settings.logo.image + '" alt="" />' +
+					'<span class="vjs-control-text" aria-live="polite">Logo</span>' +
+				'</a>';
 
 				overlays.push({
-					content: logoContent,
+					content: logo,
 					class: 'vjs-logo',
 					align: align,
 					start: 'controlsshown',
@@ -518,6 +511,35 @@
 			}
 		}
 
+		_initTrailerBadge() {
+			if ( ! this.settings.hasOwnProperty( 'trailer' ) ) {
+				return false;
+			}
+
+			const trailer = this.settings.trailer;
+
+			const badge = document.createElement( trailer.url ? 'a' : 'span' );
+			badge.className = 'aiovg-trailer-badge';
+			badge.textContent = trailer.label;
+
+			if ( trailer.url ) {
+				badge.href = trailer.url;
+				badge.target = '_top';
+
+				// Turns the badge into a button when the trailer ends.
+				this.player.addClass( 'aiovg-has-trailer-cta' );
+			}
+
+			// Keep clear of a top-left logo.
+			if ( this.settings.hasOwnProperty( 'logo' ) && 'topleft' == this.settings.logo.position ) {
+				badge.classList.add( 'aiovg-trailer-badge-bottom' );
+			}
+
+			// Before the control bar, so its menus, modals and the error display stack above the badge.
+			const controlBar = this.player.getChild( 'ControlBar' );
+			this.player.el().insertBefore( badge, controlBar ? controlBar.el() : null );
+		}
+
 		_initHotKeys() {
 			if ( this.settings.hotkeys ) {
 				this.player.hotkeys();
@@ -545,7 +567,7 @@
 				this.classList.add( 'aiovg-show-email-capture' );
 
 				const firstInput = this.emailCaptureEl.querySelector( 'input' );
-				if ( firstInput ) {
+				if ( firstInput && ! firstInput.value ) {
 					firstInput.focus();
 				}
 			};
@@ -570,6 +592,11 @@
 				if ( this.emailCaptureEl.classList.contains( 'aiovg-is-loading' ) ) return false; // Prevent multiple submissions
 				this.emailCaptureEl.classList.add( 'aiovg-is-loading' );
 
+				// Per-video scoping, read while the form is still in the DOM — it is removed
+				// before the response arrives. An empty key means "once per visitor", where
+				// one capture clears every player on the page.
+				const captureKey = this.emailCaptureEl.dataset.capture_key || '';
+
 				const xmlhttp = new XMLHttpRequest();
 
 				xmlhttp.onreadystatechange = () => {
@@ -586,15 +613,24 @@
 							// Hide the form and remove it from the DOM to prevent it from being submitted again.
 							hideEmailCapture();
 
+							// A skip the server did not remember clears only the consent gates.
+							const remembered = ! ( response.data && false === response.data.remembered );
+
 							// Email submission implies consent — remove both gates from other players
 							const videos = document.querySelectorAll( '.aiovg-player-element' );
 							for ( let i = 0; i < videos.length; i++ ) {
 								videos[ i ].removeCookieConsent();
-								videos[ i ].removeEmailCapture();
+
+								if ( remembered ) {
+									videos[ i ].removeEmailCapture( captureKey );
+								}
 							}
 
-							window.postMessage({
-								message: 'aiovg-email-captured'
+							window.postMessage( remembered ? {
+								message: 'aiovg-email-captured',
+								capture_key: captureKey
+							} : {
+								message: 'aiovg-cookie-consent'
 							}, window.location.origin );
 						} else {
 							// Show error message
@@ -648,10 +684,11 @@
 				this.player.on( 'timeupdate', onMidRollTimeUpdate );
 			}
 
-			// Post-roll — show after the video ends.
+			// Post-roll — show after the video ends, unless a trailer ends on its button instead.
 			const postRoll = parseInt( this.emailCaptureEl.dataset.post_roll );
+			const hasTrailerButton = this.settings.hasOwnProperty( 'trailer' ) && this.settings.trailer.url;
 
-			if ( postRoll ) {
+			if ( postRoll && ! hasTrailerButton ) {
 				this.player.on( 'ended', () => {
 					showEmailCapture();
 				} );
@@ -678,6 +715,23 @@
 		_initEmailCaptureForm( onSubmit ) {
 			const submitBtn = this.querySelector( '.aiovg-email-capture-submit' );
 			const skipLink  = this.querySelector( '.aiovg-email-capture-skip' );
+
+			// Which video this is. The skip path sends it too: without it the server
+			// cannot derive a capture key, and "Once per video" would never remember
+			// the skip, asking again on every play.
+			const videoParams = () => {
+				if ( 'aiovg_videos' == this.settings.post_type && this.settings.post_id ) {
+					return '&video_id=' + encodeURIComponent( this.settings.post_id );
+				}
+
+				let params = '&video_id=0';
+
+				if ( this.emailCaptureEl && this.emailCaptureEl.dataset.video_url ) {
+					params += '&video_url=' + encodeURIComponent( this.emailCaptureEl.dataset.video_url );
+				}
+
+				return params;
+			};
 
 			if ( submitBtn ) {
 				submitBtn.addEventListener( 'click', () => {
@@ -724,16 +778,7 @@
 						params += '&phone=' + encodeURIComponent( phoneField.value.trim() );
 					}
 
-					if ( 'aiovg_videos' == this.settings.post_type && this.settings.post_id ) {
-						params += '&video_id=' + encodeURIComponent( this.settings.post_id );
-					} else {
-						params += '&video_id=0';
-
-						if ( this.emailCaptureEl.dataset.video_url ) {
-							params += '&video_url=' + encodeURIComponent( this.emailCaptureEl.dataset.video_url );
-						}
-					}
-
+					params += videoParams();
 					params += '&page_url=' + encodeURIComponent( window.location.href );
 
 					onSubmit( params );
@@ -741,7 +786,7 @@
 			}
 
 			if ( skipLink ) {
-				const doSkip = () => onSubmit( 'skipped=1' );
+				const doSkip = () => onSubmit( 'skipped=1' + videoParams() );
 
 				skipLink.addEventListener( 'click', doSkip );
 
@@ -1006,8 +1051,14 @@
 			this._initPlayer();
 		}
 
-		removeEmailCapture() {
+		removeEmailCapture( captureKey ) {
 			if ( ! this.emailCaptureEl ) return false;
+
+			// Per-video scoping. No key means "once per visitor", where any capture clears
+			// every player; a key clears only the player showing that same video.
+			if ( captureKey && this.emailCaptureEl.dataset.capture_key !== captureKey ) {
+				return false;
+			}
 
 			this.classList.remove( 'aiovg-show-email-capture' );
 
@@ -1094,7 +1145,11 @@
 			if ( event.data.message == 'aiovg-email-captured' ) {
 				const videos = document.querySelectorAll( '.aiovg-player-element' );
 				for ( let i = 0; i < videos.length; i++ ) {
-					videos[ i ].removeEmailCapture();
+					// Consent is site-wide, so it clears everywhere — unlike the email
+					// capture, which is scoped by key. Matches what the producers do for
+					// players in their own window; this covers a capture inside an iframe.
+					videos[ i ].removeCookieConsent();
+					videos[ i ].removeEmailCapture( event.data.capture_key || '' );
 				}
 			}
 

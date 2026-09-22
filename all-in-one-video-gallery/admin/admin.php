@@ -84,6 +84,28 @@ class AIOVG_Admin {
 				update_option( 'aiovg_email_capture_settings', $email_capture_settings );
 			}
 
+			$new_email_capture_settings = array();
+
+			if ( ! array_key_exists( 'show_to_logged_in_users', $email_capture_settings ) ) {
+				$new_email_capture_settings['show_to_logged_in_users'] = $defaults['aiovg_email_capture_settings']['show_to_logged_in_users'];
+			}
+
+			if ( ! array_key_exists( 'display_frequency', $email_capture_settings ) ) {
+				$new_email_capture_settings['display_frequency'] = $defaults['aiovg_email_capture_settings']['display_frequency'];
+			}
+
+			if ( count( $new_email_capture_settings ) ) {
+				update_option( 'aiovg_email_capture_settings', array_merge( $email_capture_settings, $new_email_capture_settings ) );
+			}
+
+			// Insert the lead captured email settings
+			$email_lead_captured_settings = get_option( 'aiovg_email_lead_captured_settings' );
+
+			if ( ! is_array( $email_lead_captured_settings ) || empty( $email_lead_captured_settings ) ) {
+				$email_lead_captured_settings = $defaults['aiovg_email_lead_captured_settings'];
+				update_option( 'aiovg_email_lead_captured_settings', $email_lead_captured_settings );
+			}
+
 			// Insert the missing videos settings
 			$videos_settings = get_option( 'aiovg_videos_settings' );
 

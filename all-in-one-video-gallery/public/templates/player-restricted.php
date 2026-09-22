@@ -9,12 +9,7 @@
  * @package All_In_One_Video_Gallery
  */
 
-$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
-
-$restricted_message = $restrictions_settings['restricted_message'];
-if ( empty( $restricted_message ) ) {
-	$restricted_message = __( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' );
-}
+$restricted_message = aiovg_get_restricted_message( $post_id, 'iframe' );
 
 $image = '';
 
@@ -59,6 +54,7 @@ if ( ! empty( $image ) ) {
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="robots" content="noindex">
+	<base target="_top">
 
 	<?php if ( $post_id > 0 ) : ?>
 		<title><?php echo wp_kses_post( get_the_title( $post_id ) ); ?></title>
@@ -102,11 +98,72 @@ if ( ! empty( $image ) ) {
 
 		#aiovg-restricted-message {
 			box-sizing: border-box;
+			margin: auto;
 			padding: 16px 24px;
 			width: 100%;
 			max-width: 480px;
 			text-align: center;
 			color: #fff;
+		}
+
+		/* Paid Memberships Pro message, whose stylesheet is not loaded here */
+		#aiovg-restricted-message .pmpro_card_title {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+			margin: 0 0 8px;
+			font-size: 18px;
+			font-weight: 600;
+			line-height: 1.3;
+			color: #fff;
+		}
+
+		#aiovg-restricted-message .pmpro_card_title svg {
+			flex-shrink: 0;
+			width: 20px;
+			height: 20px;
+			stroke: currentColor;
+		}
+
+		#aiovg-restricted-message .pmpro_card_content p {
+			margin: 0 0 12px;
+		}
+
+		#aiovg-restricted-message .pmpro_card_actions {
+			font-size: 13px;
+		}
+
+		#aiovg-restricted-message .pmpro a {
+			color: #fff;
+			text-decoration: underline;
+		}
+
+		/* Same button as the cookie consent and email capture overlays */
+		#aiovg-restricted-message .pmpro a.pmpro_btn,
+		#aiovg-restricted-message .pmpro a.pmpro_btn:hover,
+		#aiovg-restricted-message .pmpro a.pmpro_btn:focus {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			border: 0;
+			border-radius: 3px;
+			box-shadow: none;
+			background: none;
+			background-color: <?php echo esc_attr( $primary_color ); ?>;
+			background-image: none;
+			padding: 0 20px;
+			min-height: 44px;
+			line-height: 1;
+			color: #fff;
+			font-family: inherit;
+			font-size: 1em;
+			font-weight: 600;
+			text-decoration: none;
+		}
+
+		#aiovg-restricted-message .pmpro a.pmpro_btn:hover {
+			opacity: 0.85;
 		}
 	</style>
 
@@ -119,7 +176,7 @@ if ( ! empty( $image ) ) {
 <body>
 	<div id="aiovg-restricted-wrapper"<?php if ( ! empty( $image ) ) : ?> style="background-image: url('<?php echo esc_url( $image ); ?>')"<?php endif; ?>>
 		<div id="aiovg-restricted-overlay">
-			<div id="aiovg-restricted-message"><?php echo wp_kses_post( trim( $restricted_message ) ); ?></div>
+			<div id="aiovg-restricted-message"><?php echo $restricted_message; ?></div>
 		</div>
 	</div>
 </body>

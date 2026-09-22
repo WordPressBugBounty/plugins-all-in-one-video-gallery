@@ -66,15 +66,19 @@ $button_label  = ! empty( $email_capture_settings['button_label'] ) ? $email_cap
 $skip_text     = ! empty( $email_capture_settings['skip_text'] ) ? $email_capture_settings['skip_text'] : __( 'Skip', 'all-in-one-video-gallery' );
 			
 $settings = array(
-    'collect_name'  => ! empty( $email_capture_settings['collect_name'] ) ? 1 : 0,
-    'collect_phone' => ! empty( $email_capture_settings['collect_phone'] ) ? 1 : 0,
-    'allow_skip'    => ! empty( $email_capture_settings['allow_skip'] ) ? 1 : 0,
-    'header_text'   => apply_filters( 'aiovg_translate_strings', $header_text, 'header_text' ),
-    'footer_text'   => apply_filters( 'aiovg_translate_strings', $footer_text, 'footer_text' ),
-    'button_label'  => apply_filters( 'aiovg_translate_strings', $button_label, 'button_label' ),
-    'skip_text'     => apply_filters( 'aiovg_translate_strings', $skip_text, 'skip_text' ),
-    'video_id'      => (int) $video_id,
-    'video_url'     => ! empty( $video_url ) ? esc_url_raw( $video_url ) : '',
+    'collect_name'      => ! empty( $email_capture_settings['collect_name'] ) ? 1 : 0,
+    'collect_phone'     => ! empty( $email_capture_settings['collect_phone'] ) ? 1 : 0,
+    'allow_skip'        => ! empty( $email_capture_settings['allow_skip'] ) ? 1 : 0,
+    'header_text'       => apply_filters( 'aiovg_translate_strings', $header_text, 'header_text' ),
+    'footer_text'       => apply_filters( 'aiovg_translate_strings', $footer_text, 'footer_text' ),
+    'button_label'      => apply_filters( 'aiovg_translate_strings', $button_label, 'button_label' ),
+    'skip_text'         => apply_filters( 'aiovg_translate_strings', $skip_text, 'skip_text' ),
+    'video_id'          => (int) $video_id,
+    'video_url'         => ! empty( $video_url ) ? esc_url_raw( $video_url ) : '',
+    // Resolved here because player.php picks this template before the providers above
+    // have been read. Same helper, so the rule is still defined once. Empty in the
+    // site-wide modes, which is how the listener knows any capture clears this page.
+    'capture_key'       => aiovg_get_email_capture_markup_key( $video_id, $post_type, $video_url )
 );
 ?>
 <!DOCTYPE html>
@@ -275,20 +279,22 @@ $settings = array(
 	<?php endif; ?>
 </head>
 <body>
-	<div id="aiovg-email-capture"<?php if ( ! empty( $image_url ) ) : ?> style="background-image: url('<?php echo esc_url( $image_url ); ?>')"<?php endif; ?>>
+	<div id="aiovg-email-capture" data-capture_key="<?php echo esc_attr( $settings['capture_key'] ); ?>"<?php if ( ! empty( $image_url ) ) : ?> style="background-image: url('<?php echo esc_url( $image_url ); ?>')"<?php endif; ?>>
 		<div id="aiovg-email-capture-overlay">
 			<div id="aiovg-email-capture-block">
 				<div id="aiovg-email-capture-header"><?php echo esc_html( $settings['header_text'] ); ?></div>
 
+				<?php $email_capture_prefill = aiovg_get_email_capture_prefill(); ?>
+
 				<div id="aiovg-email-capture-fields">
 					<?php if ( ! empty( $settings['collect_name'] ) ) : ?>
-						<input type="text" id="aiovg-email-capture-name" name="name" placeholder="<?php esc_attr_e( 'Your name', 'all-in-one-video-gallery' ); ?>" autocomplete="name" />
+						<input type="text" id="aiovg-email-capture-name" name="name" value="<?php echo esc_attr( $email_capture_prefill['name'] ); ?>" placeholder="<?php esc_attr_e( 'Your name', 'all-in-one-video-gallery' ); ?>" autocomplete="name" />
 					<?php endif; ?>
 
-					<input type="email" id="aiovg-email-capture-email" name="email" placeholder="<?php esc_attr_e( 'Your email address *', 'all-in-one-video-gallery' ); ?>" required autocomplete="email" aria-describedby="aiovg-email-capture-error" />
+					<input type="email" id="aiovg-email-capture-email" name="email" value="<?php echo esc_attr( $email_capture_prefill['email'] ); ?>" placeholder="<?php esc_attr_e( 'Your email address *', 'all-in-one-video-gallery' ); ?>" required autocomplete="email" aria-describedby="aiovg-email-capture-error" />
 					
                     <?php if ( ! empty( $settings['collect_phone'] ) ) : ?>
-						<input type="tel" id="aiovg-email-capture-phone" name="phone" placeholder="<?php esc_attr_e( 'Your phone number', 'all-in-one-video-gallery' ); ?>" autocomplete="tel" />
+						<input type="tel" id="aiovg-email-capture-phone" name="phone" value="<?php echo esc_attr( $email_capture_prefill['phone'] ); ?>" placeholder="<?php esc_attr_e( 'Your phone number', 'all-in-one-video-gallery' ); ?>" autocomplete="tel" />
 					<?php endif; ?>
 				</div>
 
@@ -338,6 +344,23 @@ $settings = array(
 			}
 
 			/**
+			 * Which video this is. The skip path sends it too: without it the server
+			 * cannot derive a capture key, and "Once per video" would never remember
+			 * the skip, asking again on every play.
+			 *
+			 * @return {string} URL-encoded video identity parameters.
+			 */
+			function videoParams() {
+				let params = '&video_id=' + encodeURIComponent( settings.video_id );
+
+				if ( settings.video_url ) {
+					params += '&video_url=' + encodeURIComponent( settings.video_url );
+				}
+
+				return params;
+			}
+
+			/**
 			 * Send AJAX and reload on success.
 			 *
 			 * @param {string} data URL-encoded POST body, e.g. "email=foo%40bar.com&name=Foo".
@@ -359,9 +382,16 @@ $settings = array(
 						}
 
 						if ( response && response.success ) {
-							// Remove email capture form from other players
-							window.parent.postMessage( {
+							// A skip the server did not remember clears only the consent gates. An empty
+							// key means "once per visitor", where one capture clears every player.
+							const remembered = ! ( response.data && false === response.data.remembered );
+
+							window.parent.postMessage( remembered ? {
 								message: 'aiovg-email-captured',
+								context: 'iframe',
+								capture_key: <?php echo wp_json_encode( $settings['capture_key'] ); ?>
+							} : {
+								message: 'aiovg-cookie-consent',
 								context: 'iframe'
 							}, window.location.origin );
 
@@ -424,11 +454,7 @@ $settings = array(
 					}
 				}
 
-				params += '&video_id=' + encodeURIComponent( settings.video_id );
-
-                if ( settings.video_url ) {
-					params += '&video_url=' + encodeURIComponent( settings.video_url );
-				}
+				params += videoParams();
 
                 let pageUrl = document.referrer;
                 if ( ! pageUrl ) {
@@ -449,13 +475,13 @@ $settings = array(
 
 				if ( skipLink ) {
 					skipLink.addEventListener( 'click', function() {
-						ajaxSubmit( 'skipped=1' );
+						ajaxSubmit( 'skipped=1' + videoParams() );
 					} );
 
 					skipLink.addEventListener( 'keydown', function( event ) {
 						if ( 13 === event.keyCode || 32 === event.keyCode ) {
 							event.preventDefault();
-							ajaxSubmit( 'skipped=1' );
+							ajaxSubmit( 'skipped=1' + videoParams() );
 						}
 					} );
 				}
@@ -473,14 +499,19 @@ $settings = array(
 
 				switch ( event.data.message ) {
 					case 'aiovg-email-captured':
-						reloadPlayer(0);
+						// Per-video scoping. No key in the message means "once per visitor",
+						// where any capture clears every player. Otherwise only reload when
+						// the capture was for this same video, shown twice on one page.
+						if ( ! event.data.capture_key || event.data.capture_key === <?php echo wp_json_encode( $settings['capture_key'] ); ?> ) {
+							reloadPlayer(0);
+						}
 						break;
 				}
 			});
 
             // Focus the first input for better accessibility
             const firstInput = document.querySelector( '#aiovg-email-capture input' );
-            if ( firstInput ) {
+            if ( firstInput && ! firstInput.value ) {
                 firstInput.focus();
             }
 		} );

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Video Metabox: [Tab: Access Control] "Trailer / Teaser" accordion.
+ * Video Metabox: [Tab: Trailer / Teaser].
  *
  * @link    https://plugins360.com
  * @since   4.7.6

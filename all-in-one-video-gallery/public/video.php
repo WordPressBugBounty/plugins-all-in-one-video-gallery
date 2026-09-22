@@ -553,14 +553,7 @@ class AIOVG_Public_Video {
 				}
 
 				if ( ! $has_trailer ) {
-					$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
-
-					$restricted_message = $restrictions_settings['restricted_message'];
-					if ( empty( $restricted_message ) ) {
-						$restricted_message = __( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' );
-					}
-
-					$content = '<p>' . wp_kses_post( $restricted_message ) . '</p>';
+					$content = aiovg_get_restricted_message( $post->ID, 'page', $content );
 					return $content;
 				}
 			}
@@ -971,7 +964,10 @@ class AIOVG_Public_Video {
         
         header( 'Content-Description: File Transfer' );
         header( 'Content-Type: '. $mime_type );
-        header( 'Content-Disposition: attachment; filename=' . (string) @basename( $file ) );
+        // Leave the query string out of the filename (e.g. signed CDN URLs)
+        $filename = ( 'url' == $formatted_path && ! empty( $path ) ) ? $path : $file;
+
+        header( 'Content-Disposition: attachment; filename=' . (string) @basename( $filename ) );
         header( 'Content-Transfer-Encoding: binary' );
         header( 'Expires: Wed, 07 May 2013 09:09:09 GMT' );
 	    header( 'Last-Modified: ' . gmdate( 'D, d M Y H:i:s' ) . ' GMT' );

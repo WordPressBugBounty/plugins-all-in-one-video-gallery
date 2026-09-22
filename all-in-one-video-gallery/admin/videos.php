@@ -560,6 +560,9 @@ class AIOVG_Admin_Videos {
 						// OK to save meta data
 						$email_capture = isset( $_POST['email_capture'] ) ? (int) $_POST['email_capture'] : -1;
 						update_post_meta( $post_id, 'email_capture', $email_capture );
+
+						$email_capture_notification_email = isset( $_POST['email_capture_notification_email'] ) ? sanitize_text_field( $_POST['email_capture_notification_email'] ) : '';
+						update_post_meta( $post_id, 'email_capture_notification_email', $email_capture_notification_email );
 					}
 				}
 				
@@ -717,7 +720,7 @@ class AIOVG_Admin_Videos {
 				'element' => '#postdivrich',
 				'popover' => array(
 					'title'       => __( 'Video Description', 'all-in-one-video-gallery' ),
-					'description' => __( 'Next, add a <strong>description</strong> for your video.<br><br>This is optional, but highly recommended, as it helps with <strong>SEO</strong>, provides context to your audience, and even shows up when sharing videos on social media.', 'all-in-one-video-gallery' )
+					'description' => __( 'Next, add a <strong>description</strong> for your video.<br><br>This is optional, but highly recommended, as it helps with <strong>SEO</strong>, provides context to your audience, and even shows up when sharing videos on social media.', 'all-in-one-video-gallery' ) . '<br><br>' . __( '<strong>Do not add your video here.</strong> You will add it in the <strong>Video</strong> box, in the next step.', 'all-in-one-video-gallery' )
 				)
 			),
 			array(
@@ -842,6 +845,71 @@ class AIOVG_Admin_Videos {
 						initTour();
 					}
 				});
+			})( jQuery );
+		</script>
+		<?php
+	}
+
+	/**
+	 * Print a placeholder in the description editor, pointing users to the "Video" meta box.
+	 *
+	 * @since 4.9.4
+	 */
+	public function print_editor_placeholder_script() {
+		global $pagenow, $typenow;
+		if ( ! in_array( $pagenow, array( 'post-new.php', 'post.php' ) ) || 'aiovg_videos' != $typenow ) {
+			return false;
+		}
+
+		$placeholder = __( 'Video description (optional). Add the video itself in the "Video" box below.', 'all-in-one-video-gallery' );
+		?>
+		<script type="text/javascript">
+			(function( $ ) {
+				'use strict';
+
+				const placeholder = <?php echo wp_json_encode( $placeholder ); ?>;
+
+				// Drawn with CSS on the editor body, so it never becomes part of the saved content.
+				function addPlaceholder( editor ) {
+					if ( ! editor || 'content' !== editor.id || editor.aiovgPlaceholder ) {
+						return;
+					}
+
+					editor.aiovgPlaceholder = true;
+
+					// A failure here must never stop other plugins' editor handlers.
+					try {
+						const body = editor.getBody();
+
+						// On the first block, not the body, so it lines up with the caret.
+						editor.dom.addStyle( 'body.aiovg-is-empty > :first-child::before { color: #8c8f94; content: ' + JSON.stringify( placeholder ) + '; pointer-events: none; position: absolute; }' );
+
+						const toggle = function() {
+							try {
+								editor.dom.toggleClass( body, 'aiovg-is-empty', editor.dom.isEmpty( body ) );
+							} catch ( e ) {}
+						};
+
+						editor.on( 'input keyup change SetContent NodeChange Undo Redo', toggle );
+						toggle();
+					} catch ( e ) {}
+				}
+
+				$( document ).on( 'tinymce-editor-init', function( event, editor ) {
+					addPlaceholder( editor );
+				});
+
+				// In case the editor was ready before this script ran.
+				if ( window.tinymce ) {
+					const editor = window.tinymce.get( 'content' );
+
+					if ( editor && editor.initialized ) {
+						addPlaceholder( editor );
+					}
+				}
+
+				// Text tab
+				$( '#content' ).attr( 'placeholder', placeholder );
 			})( jQuery );
 		</script>
 		<?php
@@ -1087,13 +1155,37 @@ class AIOVG_Admin_Videos {
 				if ( current_user_can( 'manage_aiovg_options' ) ) {
 					$value = get_post_meta( $post_id, 'featured', true );
 
-					$meta[] = sprintf( 
-						'<span class="aiovg-meta-label">%s:</span> <span class="aiovg-meta-value">%s</span>', 
+					$meta[] = sprintf(
+						'<span class="aiovg-meta-label">%s:</span> <span class="aiovg-meta-value">%s</span>',
 						esc_html__( 'Featured', 'all-in-one-video-gallery' ),
-						( 1 == $value ? '&#x2713;' : '&#x2717;' ) 
+						( 1 == $value ? '&#x2713;' : '&#x2717;' )
 					);
 				}
-				
+
+				// Email Capture: the resolved state, not the raw meta.
+				$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
+
+				if ( ! empty( $email_capture_settings['enable_email_capture'] ) ) {
+					$value = get_post_meta( $post_id, 'email_capture', true );
+					$value = ( '' !== $value ) ? (int) $value : -1;
+
+					if ( 1 === $value ) {
+						$email_capture_label = __( 'Enabled', 'all-in-one-video-gallery' );
+					} elseif ( 0 === $value ) {
+						$email_capture_label = __( 'Disabled', 'all-in-one-video-gallery' );
+					} elseif ( aiovg_is_email_capture_global_enabled() ) {
+						$email_capture_label = __( 'Default (On)', 'all-in-one-video-gallery' );
+					} else {
+						$email_capture_label = __( 'Default (Off)', 'all-in-one-video-gallery' );
+					}
+
+					$meta[] = sprintf(
+						'<span class="aiovg-meta-label">%s:</span> <span class="aiovg-meta-value">%s</span>',
+						esc_html__( 'Email Capture', 'all-in-one-video-gallery' ),
+						esc_html( $email_capture_label )
+					);
+				}
+
 				echo '<ul class="aiovg-unstyled-list"><li>' . implode( '</li><li>', $meta ) . '</li></ul>';
 				break;
 			case 'post_id':

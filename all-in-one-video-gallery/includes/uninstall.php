@@ -80,6 +80,7 @@ class AIOVG_Uninstall {
         $aiovg_settings = array(
             'aiovg_player_settings',
             'aiovg_email_capture_settings',
+            'aiovg_email_lead_captured_settings',
             'aiovg_socialshare_settings',
             'aiovg_videos_settings',
             'aiovg_categories_settings',

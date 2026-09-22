@@ -32,6 +32,7 @@
         <custom-field action="copy-once">chapter</custom-field>
         <custom-field action="copy-once">featured</custom-field>
         <custom-field action="copy-once">email_capture</custom-field>
+        <custom-field action="copy-once">email_capture_notification_email</custom-field>
         <custom-field action="copy-once">access_control</custom-field>
         <custom-field action="copy-once">restricted_roles</custom-field>
         <custom-field action="copy-once">trailer_type</custom-field>
@@ -59,6 +60,10 @@
             <key name="button_label"/>
             <key name="skip_text"/>
             <key name="footer_text"/>
+        </key>
+        <key name="aiovg_email_lead_captured_settings">
+            <key name="subject"/>
+            <key name="body"/>
         </key>
         <key name="aiovg_restrictions_settings">
             <key name="restricted_message"/>

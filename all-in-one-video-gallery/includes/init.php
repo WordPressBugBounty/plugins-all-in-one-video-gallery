@@ -115,6 +115,7 @@ class AIOVG_Init {
 		require_once AIOVG_PLUGIN_DIR . 'public/public.php';		
 		require_once AIOVG_PLUGIN_DIR . 'public/yoast.php';
 		require_once AIOVG_PLUGIN_DIR . 'public/rank-math.php';			
+		require_once AIOVG_PLUGIN_DIR . 'public/pmpro.php';
 		require_once AIOVG_PLUGIN_DIR . 'public/categories.php';
 		require_once AIOVG_PLUGIN_DIR . 'public/videos.php';		
 		require_once AIOVG_PLUGIN_DIR . 'public/video.php';
@@ -194,6 +195,7 @@ class AIOVG_Init {
 			$this->loader->add_action( 'restrict_manage_posts', $videos, 'restrict_manage_posts' );
 			$this->loader->add_action( 'manage_aiovg_videos_posts_custom_column', $videos, 'custom_column_content', 10, 2 );
 			$this->loader->add_action( 'admin_print_footer_scripts', $videos, 'print_footer_scripts', 99 );
+			$this->loader->add_action( 'admin_print_footer_scripts', $videos, 'print_editor_placeholder_script', 99 );
 
 			$this->loader->add_filter( 'parent_file', $videos, 'parent_file' );
 			$this->loader->add_filter( 'parse_query', $videos, 'parse_query' );
@@ -301,6 +303,7 @@ class AIOVG_Init {
 		$this->loader->add_filter( 'wpseo_opengraph_url', $yoast, 'wpseo_canonical' );
 		$this->loader->add_filter( 'wpseo_opengraph_image', $yoast, 'wpseo_opengraph_image' );
 		$this->loader->add_filter( 'wpseo_twitter_image', $yoast, 'wpseo_twitter_image' );
+		$this->loader->add_filter( 'wpseo_add_opengraph_additional_images', $yoast, 'wpseo_add_opengraph_additional_images' );
 		$this->loader->add_filter( 'wpseo_breadcrumb_links', $yoast, 'wpseo_breadcrumb_links' );
 		$this->loader->add_filter( 'wpseo_video_custom_field_details', $yoast, 'wpseo_video_sitemap_entry' );
 		$this->loader->add_filter( 'wpseo_video_youtube_details', $yoast, 'wpseo_video_sitemap_entry' );
@@ -315,6 +318,15 @@ class AIOVG_Init {
 		$this->loader->add_filter( 'rank_math/opengraph/facebook/image', $rank_math, 'opengraph_image_url' );
 		$this->loader->add_filter( 'rank_math/opengraph/twitter/image', $rank_math, 'opengraph_image_url' );
 		$this->loader->add_filter( 'rank_math/frontend/breadcrumb/items', $rank_math, 'breadcrumb_items' );
+
+		// Hooks specific to the Paid Memberships Pro plugin
+		$pmpro = new AIOVG_Public_PMPro();
+
+		$this->loader->add_filter( 'aiovg_current_user_can', $pmpro, 'filter_user_access', 10, 3 );
+		$this->loader->add_filter( 'aiovg_restricted_message_html', $pmpro, 'filter_restricted_message_html', 10, 4 );
+		$this->loader->add_filter( 'aiovg_player_overlay_link', $pmpro, 'filter_player_overlay_link', 10, 2 );
+		$this->loader->add_filter( 'pmpro_membership_content_filter', $pmpro, 'filter_membership_content', 10, 3 );
+		$this->loader->add_filter( 'pmprocpt_redirect_to', $pmpro, 'filter_cpt_redirect_to' );
 
 		// Hooks specific to the categories page
 		$categories = new AIOVG_Public_Categories();

@@ -31,7 +31,7 @@ $sources = array();
 $allowed_types = array( 'mp4', 'webm', 'ogv', 'hls', 'dash', 'youtube', 'vimeo' );
 
 if ( ! empty( $post_meta ) ) {
-	$type = $post_meta['type'][0];
+	$type = isset( $post_meta['type'] ) ? $post_meta['type'][0] : 'default';
 
 	switch ( $type ) {
 		case 'default':
@@ -596,47 +596,43 @@ if ( ! empty( $is_trailer ) ) {
 
 // Email Capture.
 if ( ! isset( $_GET['nocapture'] ) ) {
-	if ( ! empty( $email_capture_settings['enable_email_capture'] ) && ! is_user_logged_in() && ! isset( $_COOKIE['aiovg_email_captured'] ) ) {
-		$show_email_capture = 1;
+	// Only a video with no post of its own needs a URL to be identified by. Picked the
+	// same way includes/player/vidstack.php does, so both integration modes derive the
+	// same capture key for the same video.
+	$email_capture_video_url = '';
 
-		if ( 'aiovg_videos' == $post_type && isset( $post_meta['email_capture'] ) ) {
-			$show_email_capture = (int) $post_meta['email_capture'][0];
-		}
+	if ( 'aiovg_videos' != $post_type && ! empty( $sources ) ) {
+		$email_capture_source    = reset( $sources );
+		$email_capture_video_url = isset( $email_capture_source['src'] ) ? $email_capture_source['src'] : '';
+	}
 
-		if ( isset( $_GET['email_capture'] ) ) {
-			$show_email_capture = (int) $_GET['email_capture'];
-		}
+	$email_capture_config = aiovg_get_email_capture_config( array(
+		'post_id'   => $post_id,
+		'post_type' => $post_type,
+		'post_meta' => $post_meta,
+		'override'  => isset( $_GET['email_capture'] ) ? $_GET['email_capture'] : null,
+		'rolls'     => 'midpost',
+		'video_url' => $email_capture_video_url
+	) );
 
-		if ( $show_email_capture === -1 ) { // Global
-			$show_email_capture = 1;
-		}
-
-		if ( ! empty( $show_email_capture ) ) {
-			$mid_roll     = ! empty( $email_capture_settings['mid_roll'] ) ? (int) $email_capture_settings['mid_roll'] : 0;
-			$post_roll    = ! empty( $email_capture_settings['post_roll'] ) ? 1 : 0;
-			$header_text  = ! empty( $email_capture_settings['header_text'] ) ? $email_capture_settings['header_text'] : __( 'Enter your email to continue watching', 'all-in-one-video-gallery' );
-			$footer_text  = ! empty( $email_capture_settings['footer_text'] ) ? $email_capture_settings['footer_text'] : '';
-			$button_label = ! empty( $email_capture_settings['button_label'] ) ? $email_capture_settings['button_label'] : __( 'Submit', 'all-in-one-video-gallery' );
-			$skip_text    = ! empty( $email_capture_settings['skip_text'] ) ? $email_capture_settings['skip_text'] : __( 'Skip', 'all-in-one-video-gallery' );
-			
-			if ( ! empty( $mid_roll ) || ! empty( $post_roll ) ) {
-				$settings['email_capture'] = array(
-					'mid_roll'      => $mid_roll,
-					'post_roll'     => $post_roll,
-					'collect_name'  => ! empty( $email_capture_settings['collect_name'] ) ? 1 : 0,
-					'collect_phone' => ! empty( $email_capture_settings['collect_phone'] ) ? 1 : 0,
-					'allow_skip'    => ! empty( $email_capture_settings['allow_skip'] ) ? 1 : 0,
-					'header_text'   => apply_filters( 'aiovg_translate_strings', $header_text, 'header_text' ),
-					'footer_text'   => apply_filters( 'aiovg_translate_strings', $footer_text, 'footer_text' ),
-					'button_label'  => apply_filters( 'aiovg_translate_strings', $button_label, 'button_label' ),
-					'skip_text'     => apply_filters( 'aiovg_translate_strings', $skip_text, 'skip_text' )
-				);
-			}
-		}
+	// The memory test needs the capture key, so it follows resolution rather than
+	// wrapping it.
+	if ( false !== $email_capture_config && aiovg_should_display_email_capture( $email_capture_config['capture_key'] ) ) {
+		$settings['email_capture'] = $email_capture_config;
 	}
 }
 
 $settings = apply_filters( 'aiovg_iframe_vidstack_player_settings', $settings );
+
+// The inline scripts below reference this from outside the email capture markup
+// block, which only renders when the form is actually being shown. Resolved once here
+// so a video with no form does not index into a key that is not there. Already empty
+// in the site-wide modes — see aiovg_get_email_capture_markup_key().
+$email_capture_key       = isset( $settings['email_capture']['capture_key'] ) ? $settings['email_capture']['capture_key'] : '';
+
+// Set only inside the "nocapture" guard above, and the submit handler below sits
+// outside it — a reload carrying nocapture=1 would otherwise read an undefined var.
+$email_capture_video_url = isset( $email_capture_video_url ) ? $email_capture_video_url : '';
 
 // Trailers should not send statistics and should have limited controls to encourage users to watch the full video.
 if ( ! empty( $is_trailer ) ) {
@@ -1023,33 +1019,88 @@ if ( ! empty( $is_trailer ) ) {
 		}
 
 		/* Trailer Badge */
-		.aiovg-is-trailer .plyr__logo a {
-			display: flex;
-			flex-direction: row;
-			flex-wrap: wrap;
+		.aiovg-player .plyr .aiovg-trailer-badge {
+			display: inline-flex;
+			position: absolute;
+			top: 10px;
+			left: 10px;
 			align-items: center;
-			justify-content: center;
-			gap: 6px;
+			z-index: 3;
+			box-sizing: border-box;
+			margin: 0;
+			border: 0;
 			border-radius: 3px;
-			background: rgba( 0, 0, 0, 0.5 );
-			padding: 6px 10px;
-			max-width: 160px;
-		}
-
-		.aiovg-is-trailer .plyr__logo img {			
-			flex-shrink: 0;
-			border-radius: 3px;
-			max-width: 40px;
-			max-height: 24px;
-			object-fit: contain;
-		}
-
-		.aiovg-is-trailer .plyr__logo .plyr__logo-label {
-			text-align: center;			
+			box-shadow: none;
+			background-color: rgba( 0, 0, 0, 0.75 );
+			padding: 4px 10px;
+			max-width: calc( 100% - 20px );
+			min-height: 24px;
+			text-decoration: none;
 			line-height: 1.3;
-			white-space: normal;
 			color: #fff;
-			font-size: 11px;
+			font-size: 12px;
+			font-weight: 600;
+		}
+
+		.aiovg-player .plyr a.aiovg-trailer-badge:hover {
+			background-color: rgba( 0, 0, 0, 0.9 );
+		}
+
+		.aiovg-player .plyr a.aiovg-trailer-badge:focus-visible {
+			outline: 2px solid #fff;
+			outline-offset: 2px;
+		}
+
+		/* Clears the control bar, as a bottom-left logo does. */
+		.aiovg-player .plyr .aiovg-trailer-badge-bottom {
+			top: auto;
+			bottom: 50px;
+		}
+
+		/* The custom theme puts the progress bar on its own row above the buttons. */
+		.aiovg-player.aiovg-player-theme-custom .plyr .aiovg-trailer-badge-bottom {
+			bottom: 70px;
+		}
+
+		.aiovg-ads-playing .aiovg-trailer-badge,
+		.aiovg-show-email-capture .aiovg-trailer-badge {
+			display: none !important;
+		}
+
+		/* Trailer ended: the 72px replay button, an 8px gap and the 44px button, centred as a group
+		   in the space above the control bar, which stays visible. */
+		.aiovg-player .plyr.aiovg-has-trailer-cta.aiovg-is-ended .plyr__control--overlaid {
+			top: calc( 50% - 49px );
+		}
+
+		.aiovg-player .plyr.aiovg-has-trailer-cta.aiovg-is-ended a.aiovg-trailer-badge {
+			top: calc( 50% - 5px );
+			right: 0;
+			bottom: auto;
+			left: 0;
+			justify-content: center;
+			margin: 0 auto;
+			background-color: var(--plyr-color-main, #3b82f6);
+			padding: 8px 20px;
+			width: fit-content;
+			min-height: 44px;
+			text-align: center;
+			font-size: 19px;
+			font-weight: 700;
+		}
+
+		.aiovg-player .plyr.aiovg-has-trailer-cta.aiovg-is-ended a.aiovg-trailer-badge:hover {
+			background-color: var(--plyr-color-main, #3b82f6);
+			opacity: 0.85;
+		}
+
+		/* The custom theme's control bar is taller (progress bar on its own row). */
+		.aiovg-player.aiovg-player-theme-custom .plyr.aiovg-has-trailer-cta.aiovg-is-ended .plyr__control--overlaid {
+			top: calc( 50% - 61px );
+		}
+
+		.aiovg-player.aiovg-player-theme-custom .plyr.aiovg-has-trailer-cta.aiovg-is-ended a.aiovg-trailer-badge {
+			top: calc( 50% - 17px );
 		}
 
 		/* Email Capture */
@@ -1339,19 +1390,21 @@ if ( ! empty( $is_trailer ) ) {
 	<?php endif; ?>
 
 	<?php if ( isset( $settings['email_capture'] ) ) : ?>
-		<div id="aiovg-email-capture" style="display: none;">
+		<div id="aiovg-email-capture" data-capture_key="<?php echo esc_attr( $settings['email_capture']['capture_key'] ); ?>" style="display: none;">
 			<div id="aiovg-email-capture-block">
 				<div id="aiovg-email-capture-header"><?php echo esc_html( $settings['email_capture']['header_text'] ); ?></div>
 
+				<?php $email_capture_prefill = aiovg_get_email_capture_prefill(); ?>
+
 				<div id="aiovg-email-capture-fields">
 					<?php if ( ! empty( $settings['email_capture']['collect_name'] ) ) : ?>
-						<input type="text" id="aiovg-email-capture-name" name="name" placeholder="<?php esc_attr_e( 'Your name', 'all-in-one-video-gallery' ); ?>" autocomplete="name" />
+						<input type="text" id="aiovg-email-capture-name" name="name" value="<?php echo esc_attr( $email_capture_prefill['name'] ); ?>" placeholder="<?php esc_attr_e( 'Your name', 'all-in-one-video-gallery' ); ?>" autocomplete="name" />
 					<?php endif; ?>
 
-					<input type="email" id="aiovg-email-capture-email" name="email" placeholder="<?php esc_attr_e( 'Your email address *', 'all-in-one-video-gallery' ); ?>" required autocomplete="email" aria-describedby="aiovg-email-capture-error" />
+					<input type="email" id="aiovg-email-capture-email" name="email" value="<?php echo esc_attr( $email_capture_prefill['email'] ); ?>" placeholder="<?php esc_attr_e( 'Your email address *', 'all-in-one-video-gallery' ); ?>" required autocomplete="email" aria-describedby="aiovg-email-capture-error" />
 
 					<?php if ( ! empty( $settings['email_capture']['collect_phone'] ) ) : ?>
-						<input type="tel" id="aiovg-email-capture-phone" name="phone" placeholder="<?php esc_attr_e( 'Your phone number', 'all-in-one-video-gallery' ); ?>" autocomplete="tel" />
+						<input type="tel" id="aiovg-email-capture-phone" name="phone" value="<?php echo esc_attr( $email_capture_prefill['phone'] ); ?>" placeholder="<?php esc_attr_e( 'Your phone number', 'all-in-one-video-gallery' ); ?>" autocomplete="tel" />
 					<?php endif; ?>
 				</div>
 			
@@ -1424,7 +1477,7 @@ if ( ! empty( $is_trailer ) ) {
 				document.body.classList.add( 'aiovg-show-email-capture' );
 
 				const firstInput = emailCaptureEl.querySelector( 'input' );
-				if ( firstInput ) {
+				if ( firstInput && ! firstInput.value ) {
 					firstInput.focus();
 				}
 			}
@@ -1443,6 +1496,22 @@ if ( ! empty( $is_trailer ) ) {
 					player.play();
 				}
 			}
+
+			const emailCaptureVideoUrl = <?php echo wp_json_encode( $email_capture_video_url ); ?>;
+
+			// Which video this is. The skip path sends it too: without it the server
+			// cannot derive a capture key, and "Once per video" would never remember
+			// the skip, asking again on every play.
+			const videoParams = () => {
+				if ( 'aiovg_videos' == settings.post_type && settings.post_id ) {
+					return '&video_id=' + encodeURIComponent( settings.post_id );
+				}
+
+				// The URL PHP derived the capture key from, not the player's resolved
+				// source, which can be a variant and would make the server recompute a
+				// different key from the one in data-capture_key.
+				return '&video_id=0&video_url=' + encodeURIComponent( emailCaptureVideoUrl );
+			};
 
 			// Hide the overlay; POST to the AJAX handler.
 			const ajaxEmailCapture = ( data ) => {
@@ -1467,9 +1536,16 @@ if ( ! empty( $is_trailer ) ) {
 							// Hide the form and resume playback if mid-roll.
 							hideEmailCapture();
 
-							// Remove email capture form from other players
-							window.parent.postMessage( {
+							// A skip the server did not remember clears only the consent gates. An empty
+							// key means "once per visitor", where one capture clears every player.
+							const remembered = ! ( response.data && false === response.data.remembered );
+
+							window.parent.postMessage( remembered ? {
 								message: 'aiovg-email-captured',
+								context: 'iframe',
+								capture_key: <?php echo wp_json_encode( $email_capture_key ); ?>
+							} : {
+								message: 'aiovg-cookie-consent',
 								context: 'iframe'
 							}, window.location.origin );
 						} else {
@@ -1515,8 +1591,11 @@ if ( ! empty( $is_trailer ) ) {
 			}				
 
 			// Post-roll — show after the video ends.
-			// Skipped when autoadvance is active to avoid conflicting with next-video navigation.
-			if ( settings.email_capture.post_roll && ! settings.hasOwnProperty( 'autoadvance' ) ) {
+			// Skipped when autoadvance is active to avoid conflicting with next-video navigation,
+			// and when a trailer ends on its button instead.
+			const hasTrailerButton = settings.hasOwnProperty( 'trailer' ) && settings.trailer.url;
+
+			if ( settings.email_capture.post_roll && ! settings.hasOwnProperty( 'autoadvance' ) && ! hasTrailerButton ) {
 				player.on( 'ended', function() {
 					showEmailCapture();
 				});
@@ -1581,12 +1660,7 @@ if ( ! empty( $is_trailer ) ) {
 						}
 					}
 
-					if ( 'aiovg_videos' == settings.post_type && settings.post_id ) {
-						params += '&video_id=' + encodeURIComponent( settings.post_id );
-					} else {
-						params += '&video_id=0';
-						params += '&video_url=' + encodeURIComponent( player.source );
-					}
+					params += videoParams();
 
 					let pageUrl = document.referrer;
 					if ( ! pageUrl ) {
@@ -1606,13 +1680,13 @@ if ( ! empty( $is_trailer ) ) {
 
 				if ( skipLink ) {
 					skipLink.addEventListener( 'click', function() {
-						ajaxEmailCapture( 'skipped=1' );
+						ajaxEmailCapture( 'skipped=1' + videoParams() );
 					});
 
 					skipLink.addEventListener( 'keydown', function( event ) {
 						if ( 13 === event.keyCode || 32 === event.keyCode ) {
 							event.preventDefault();
-							ajaxEmailCapture( 'skipped=1' );
+							ajaxEmailCapture( 'skipped=1' + videoParams() );
 						}
 					});
 				}
@@ -1732,55 +1806,53 @@ if ( ! empty( $is_trailer ) ) {
 					}
 				}
 
-				// Logo / Trailer Badge
-				var hasLogo    = settings.hasOwnProperty( 'logo' );
-				var hasTrailer = settings.hasOwnProperty( 'trailer' );
+				// Logo
+				if ( settings.hasOwnProperty( 'logo' ) ) {
+					var style = 'bottom:50px; left:' + settings.logo.margin + 'px;';
 
-				if ( hasLogo || hasTrailer ) {
-					var style = 'bottom:50px; left:15px;';
+					switch ( settings.logo.position ) {
+						case 'topleft':
+							style = 'top:' + settings.logo.margin + 'px; left:' + settings.logo.margin + 'px;';
+							break;
 
-					if ( hasLogo ) {
-						var style = 'bottom:50px; left:' + settings.logo.margin + 'px;';
+						case 'topright':
+							style = 'top:' + settings.logo.margin + 'px; right:' + settings.logo.margin + 'px;';
+							break;
 
-						switch ( settings.logo.position ) {
-							case 'topleft':
-								style = 'top:' + settings.logo.margin + 'px; left:' + settings.logo.margin + 'px;';
-								break;
-
-							case 'topright':
-								style = 'top:' + settings.logo.margin + 'px; right:' + settings.logo.margin + 'px;';
-								break;
-
-							case 'bottomright':
-								style = 'bottom:50px; right:' + settings.logo.margin + 'px;';
-								break;
-						}
+						case 'bottomright':
+							style = 'bottom:50px; right:' + settings.logo.margin + 'px;';
+							break;
 					}
-
-					// Determine the href: trailer URL takes precedence when active.
-					var logoHref = hasLogo ? settings.logo.link : 'javascript:void(0)';
-
-					if ( hasTrailer && settings.trailer.url ) {
-						logoHref = settings.trailer.url;
-					}
-
-					// Icon: logo image > external-link SVG (only when URL set) > nothing.
-					var iconHtml = '';
-					
-					if ( hasLogo ) {
-						iconHtml = '<img src="' + settings.logo.image + '" alt="" />';
-					} else if ( hasTrailer && settings.trailer.url ) {
-						iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>';
-					}
-
-					// Label: visible trailer label or sr-only text for logo-only mode.
-					var labelHtml = hasTrailer ? '<span class="plyr__logo-label">' + settings.trailer.label + '</span>' : '<span class="plyr__sr-only">Logo</span>';
 
 					var logo = document.createElement( 'div' );
 					logo.className = 'plyr__logo';
-					logo.innerHTML = '<a href="' + logoHref + '" target="_top" style="' + style + '">' + iconHtml + labelHtml	+ '</a>';
+					logo.innerHTML = '<a href="' + settings.logo.link + '" target="_top" style="' + style + '"><img src="' + settings.logo.image + '" alt="" /><span class="plyr__sr-only">Logo</span></a>';
 
 					plyr.appendChild( logo );
+				}
+
+				// Trailer Badge
+				if ( settings.hasOwnProperty( 'trailer' ) ) {
+					const badge = document.createElement( settings.trailer.url ? 'a' : 'span' );
+					badge.className = 'aiovg-trailer-badge';
+					badge.textContent = settings.trailer.label;
+
+					if ( settings.trailer.url ) {
+						badge.href = settings.trailer.url;
+						badge.target = '_top';
+
+						// Turns the badge into a button when the trailer ends, unless the next video autoplays.
+						if ( ! settings.hasOwnProperty( 'autoadvance' ) ) {
+							plyr.classList.add( 'aiovg-has-trailer-cta' );
+						}
+					}
+
+					// Keep clear of a top-left logo.
+					if ( settings.hasOwnProperty( 'logo' ) && 'topleft' == settings.logo.position ) {
+						badge.classList.add( 'aiovg-trailer-badge-bottom' );
+					}
+
+					plyr.appendChild( badge );
 				}
 
 				// Email Capture.
@@ -1818,13 +1890,20 @@ if ( ! empty( $is_trailer ) ) {
 				lastEvent = 'ended';
 				plyr.className += ' plyr--stopped';
 
+				// Plyr also sets plyr--stopped on the poster, so it can't mark the end.
+				plyr.classList.add( 'aiovg-is-ended' );
+
 				// Autoplay next video.
 				if ( settings.hasOwnProperty( 'autoadvance' ) ) {
 					window.parent.postMessage({ 				
 						message: 'aiovg-video-ended',
 						context: 'iframe'
-					}, window.location.origin ); 
+					}, window.location.origin );
 				}
+			});
+
+			player.on( 'play', function() {
+				plyr.classList.remove( 'aiovg-is-ended' );
 			});
 
 			// HLS
@@ -1894,8 +1973,12 @@ if ( ! empty( $is_trailer ) ) {
 
 				switch ( event.data.message ) {
 					case 'aiovg-email-captured':
-						emailCaptureEl = null;
-						document.body.classList.remove( 'aiovg-show-email-capture' );						
+						// Per-video scoping. No key in the message means "once per visitor",
+						// where any capture clears every player.
+						if ( ! event.data.capture_key || event.data.capture_key === <?php echo wp_json_encode( $email_capture_key ); ?> ) {
+							emailCaptureEl = null;
+							document.body.classList.remove( 'aiovg-show-email-capture' );
+						}
 						break;
 
 					case 'aiovg-video-play':

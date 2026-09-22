@@ -7,8 +7,10 @@
         <style>
             :host {                             
                 display: block;  
+                border-radius: 3px;
                 width: 100%;      
                 contain: content;
+                overflow: hidden;
             }
 
             :host([hidden]) {
@@ -646,9 +648,26 @@
             this._addPosterImage();         
             this._addClass( 'email-capture' );
 
+            // Which video this is. The skip path sends it too: without it the server
+            // cannot derive a capture key, and "Once per video" would never remember
+            // the skip, asking again on every play.
+            const videoParams = () => {
+                if ( 'aiovg_videos' === this.postType && this.postId ) {
+                    return '&video_id=' + encodeURIComponent( this.postId );
+                }
+
+                let params = '&video_id=0';
+
+                if ( this.src ) {
+                    params += '&video_url=' + encodeURIComponent( this.src );
+                }
+
+                return params;
+            };
+
             // Focus the first input for better accessibility
             const firstInput = this.$emailCaptureModal.querySelector( 'input' );
-            if ( firstInput ) {
+            if ( firstInput && ! firstInput.value ) {
                 firstInput.focus();
             }
 
@@ -700,17 +719,7 @@
                         params += '&phone=' + encodeURIComponent( phoneField.value.trim() );
                     }
 
-                    if ( 'aiovg_videos' === this.postType && this.postId ) {
-                        params += '&video_id=' + encodeURIComponent( this.postId );                   
-                    } else {
-                        params += '&video_id=0';
-                        
-                        if ( this.src ) {
-                            params += '&video_url=' + encodeURIComponent( this.src );
-                        }
-
-                    }
-
+                    params += videoParams();
                     params += '&page_url=' + encodeURIComponent( window.location.href );
 
                     this._onEmailCapture( params );
@@ -722,7 +731,7 @@
 
             if ( skipLink ) {
                 const doSkip = () => {
-                    this._onEmailCapture( 'skipped=1' );
+                    this._onEmailCapture( 'skipped=1' + videoParams() );
                 };
 
                 skipLink.addEventListener( 'click', doSkip );
@@ -762,15 +771,28 @@
                         this._warmConnections();
                         this._addIframe( true ); 
 
+                        // Per-video scoping. An empty key means "once per visitor", where one
+                        // capture clears every player on the page.
+                        const captureKey = this.getAttribute( 'capture-key' ) || '';
+
+                        // A skip the server did not remember clears only the consent gates.
+                        const remembered = ! ( response.data && false === response.data.remembered );
+
                         // Email submission implies consent — remove both gates from other players
                         const videos = document.querySelectorAll( '.aiovg-player-element' );
                         for ( let i = 0; i < videos.length; i++ ) {
                             videos[ i ].removeCookieConsent();
-                            videos[ i ].removeEmailCapture();
+
+                            if ( remembered ) {
+                                videos[ i ].removeEmailCapture( captureKey );
+                            }
                         }
 
-                        window.postMessage({ 
-                            message: 'aiovg-email-captured' 
+                        window.postMessage( remembered ? {
+                            message: 'aiovg-email-captured',
+                            capture_key: captureKey
+                        } : {
+                            message: 'aiovg-cookie-consent'
                         }, window.location.origin );
                     } else {
                         // Show error message
@@ -949,8 +971,14 @@
             this._render();
         }
 
-        removeEmailCapture() {
+        removeEmailCapture( captureKey ) {
             if ( this._isRendered ) return false;
+
+            // Per-video scoping. No key means "once per visitor", where any capture clears
+            // every player; a key clears only the player showing that same video.
+            if ( captureKey && this.getAttribute( 'capture-key' ) !== captureKey ) {
+                return false;
+            }
 
             this._removeClass( 'email-capture' );
             this.emailCapture = false;
@@ -1312,7 +1340,11 @@
             if ( event.data.message == 'aiovg-email-captured' ) {
                 const videos = document.querySelectorAll( '.aiovg-player-element' );
                 for ( let i = 0; i < videos.length; i++ ) {
-                    videos[ i ].removeEmailCapture();
+                    // Consent is site-wide, so it clears everywhere — unlike the email
+                    // capture, which is scoped by key. Matches what the producers do for
+                    // players in their own window; this covers a capture inside an iframe.
+                    videos[ i ].removeCookieConsent();
+                    videos[ i ].removeEmailCapture( event.data.capture_key || '' );
                 }
             }
 

@@ -16,9 +16,10 @@ import {
 	Disabled,
 	PanelBody,
 	PanelRow,
-	Placeholder,	
+	Placeholder,
+	SelectControl,
 	Spinner,
-	TextControl,	
+	TextControl,
 	ToggleControl
 } from '@wordpress/components';
 
@@ -87,7 +88,16 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 		embed,
 		download,
 		email_capture
-	} = attributes;	
+	} = attributes;
+
+	// Blocks saved before 4.9.4 hold a boolean here, where true meant "enable" and
+	// false meant "disable". Map those onto the -1/1/0 vocabulary for display.
+	let emailCaptureValue = email_capture;
+	if ( true === emailCaptureValue ) {
+		emailCaptureValue = 1;
+	} else if ( false === emailCaptureValue ) {
+		emailCaptureValue = 0;
+	}
 
 	const [ temporaryURL, setTemporaryURL ] = useState( attributes.blob );
 
@@ -421,10 +431,16 @@ function Edit( { isSelected: isSingleSelected, attributes, className, setAttribu
 				{ aiovg_blocks.video.email_capture_enabled && (
 					<PanelBody title={ aiovg_blocks.i18n.email_capture } className="aiovg-block-panel">
 						<PanelRow>
-							<ToggleControl
-								label={ aiovg_blocks.i18n.email_capture }
-								checked={ email_capture }
-								onChange={ () => setAttributes( { email_capture: ! email_capture } ) }
+							<SelectControl
+								label={ aiovg_blocks.i18n.email_capture_label }
+								help={ aiovg_blocks.i18n.email_capture_description }
+								value={ String( emailCaptureValue ) }
+								options={ [
+									{ label: aiovg_blocks.i18n.global, value: '-1' },
+									{ label: aiovg_blocks.i18n.enable, value: '1' },
+									{ label: aiovg_blocks.i18n.disable, value: '0' }
+								] }
+								onChange={ ( value ) => setAttributes( { email_capture: parseInt( value, 10 ) } ) }
 								__nextHasNoMarginBottom={ true }
 							/>
 						</PanelRow>

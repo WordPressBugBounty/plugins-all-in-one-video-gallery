@@ -95,9 +95,12 @@ registerBlockType( metadata.name, {
 			type: 'boolean',
 			default: aiovg_blocks.video.download
 		},
+		// -1 Global, 1 Enable, 0 Disable. "boolean" stays accepted so blocks saved
+		// before 4.9.4 keep their stored true/false instead of silently falling back
+		// to the default. build_shortcode_attributes() casts those to 1/0 on render.
 		email_capture: {
-			type: 'boolean',
-			default: aiovg_blocks.video.email_capture
+			type: [ 'number', 'boolean' ],
+			default: -1
 		}
 	},
 

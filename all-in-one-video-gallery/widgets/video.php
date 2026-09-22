@@ -127,7 +127,9 @@ class AIOVG_Widget_Video extends WP_Widget {
 		$instance['download']   = isset( $new_instance['download'] ) ? (int) $new_instance['download'] : 0;
 
 		if ( ! empty( $email_capture_settings['enable_email_capture'] ) ) {
-			$instance['email_capture'] = isset( $new_instance['email_capture'] ) ? (int) $new_instance['email_capture'] : 0;
+			$email_capture = isset( $new_instance['email_capture'] ) ? (int) $new_instance['email_capture'] : -1;
+
+			$instance['email_capture'] = in_array( $email_capture, array( -1, 1, 0 ), true ) ? $email_capture : -1;
 		}
 
 		return $instance;
@@ -140,8 +142,7 @@ class AIOVG_Widget_Video extends WP_Widget {
 	 * @param array $instance The array of keys and values for the widget.
 	 */
 	public function form( $instance ) {
-		$player_settings        = aiovg_get_option( 'aiovg_player_settings' );
-		$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
+		$player_settings = aiovg_get_option( 'aiovg_player_settings' );
 
 		// Define the array of defaults
 		$defaults = array(
@@ -166,7 +167,7 @@ class AIOVG_Widget_Video extends WP_Widget {
 			'share'         => isset( $player_settings['controls']['share'] ) ? 1 : 0,
 			'embed'         => isset( $player_settings['controls']['embed'] ) ? 1 : 0,
 			'download'      => isset( $player_settings['controls']['download'] ) ? 1 : 0,
-			'email_capture' => ! empty( $email_capture_settings['enable_email_capture'] ) ? 1 : 0
+			'email_capture' => -1
 		);
 		
 		// Parse incoming $instance into an array and merge it with $defaults

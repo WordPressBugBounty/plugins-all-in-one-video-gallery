@@ -241,6 +241,10 @@ $consent_button_label = apply_filters( 'aiovg_translate_strings', $privacy_setti
                     break;
 
                 case 'aiovg-email-captured':
+                    // Deliberately NOT scoped by capture_key, unlike the email capture
+                    // listeners. A submission implies consent, and consent is site-wide —
+                    // so a capture on any video should clear this gate, not just one on
+                    // the same video.
                     reloadPlayer(0);
                     break;
             }

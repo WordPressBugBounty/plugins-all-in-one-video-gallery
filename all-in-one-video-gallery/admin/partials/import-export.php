@@ -230,7 +230,7 @@ $restrictions_settings  = aiovg_get_option( 'aiovg_restrictions_settings' );
                                     <select name="email_capture" id="aiovg-email_capture" class="widefat">
                                         <?php
                                         $options = array(
-                                            -1 => '— ' . __( 'Global', 'all-in-one-video-gallery' ) . ' —',
+                                            -1 => '— ' . __( 'Default', 'all-in-one-video-gallery' ) . ' —',
                                             1  => __( 'Enable', 'all-in-one-video-gallery' ),
                                             0  => __( 'Disable', 'all-in-one-video-gallery' ),
                                         );

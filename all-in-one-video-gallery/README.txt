@@ -6,7 +6,7 @@ Tags: video gallery, video player, youtube, vimeo, html5 video
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 5.6.20
-Stable tag: 4.9.3
+Stable tag: 4.9.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -157,6 +157,13 @@ Yes. The plugin includes a video access control system that lets you restrict vi
 = 11. Does this plugin support subtitles and closed captions? =
 Yes. You can upload WebVTT (`.vtt`) subtitle tracks for your self-hosted videos and configure the default language. Multiple subtitle tracks are supported on a single video.
 
+= 12. Is the plugin compatible with Paid Memberships Pro? =
+Yes. Install Paid Memberships Pro and its [Custom Post Type Membership Access](https://www.paidmembershipspro.com/add-ons/custom-post-type-membership-access/) add-on, select "aiovg_videos" under "Memberships => CPT Access", and then use the "Require Membership" box on any video to choose which membership levels can watch it.
+
+Visitors without a required level see the Paid Memberships Pro membership message in place of the video, wherever it appears: single video pages, shortcodes, blocks, widgets, and popups. If the video has a trailer, they see the trailer instead. Administrators without a level see the same message; use the admin bar's "View" menu to preview the member and non-member views.
+
+This protects the player, not the video file itself: anyone who already has a self-hosted file's URL can still open it. For stronger protection, use Bunny Stream with token authentication, or Paid Memberships Pro's own file protection.
+
 == Screenshots ==
 
 1. Video Gallery — "Classic" Template.
@@ -186,6 +193,32 @@ Yes. You can upload WebVTT (`.vtt`) subtitle tracks for your self-hosted videos 
 25. Premium: Front-end video submission form.
 
 == Changelog ==
+
+= 4.9.5 =
+
+* New: Paid Memberships Pro support - membership-restricted videos play only for members in every player, including for admins without a level.
+* New: Email & Lead Capture - choose whether the form is enabled on all videos by default or on individual videos only.
+* New: Email & Lead Capture - "Display Frequency" setting to control how often the form is shown, and a "Logged-in Users" option.
+* New: Email & Lead Capture - Lead Notifications, emailed to a site-wide address, a per-video address, or the video's author.
+* New: Developers - added the `aiovg_email_capture_lead_saved` action and several email capture filters.
+* Tweak: Trailers are easier to find - the "Access Control" settings tab is now "Access & Trailers", and the video form has separate "Restrictions" and "Trailer / Teaser" tabs.
+* Tweak: Trailers - the player badge is now always visible and separate from the logo, and becomes a button when the trailer ends.
+* Tweak: Developers - the email capture rate limit is now per video, with a new site-wide limit (`aiovg_email_capture_rate_limit_global`). The `enable_email_capture` setting can now also be `2`.
+* Tweak: Developers - new `aiovg_restricted_message_html` filter for the restricted video markup, plus `aiovg_the_content_in_the_loop` and `aiovg_the_content_is_main_query` for themes that render content outside the main loop.
+* Tweak: Developers - `aiovg_premium_send_mail()` is deprecated. Use `aiovg_send_mail()` instead.
+* Tweak: The default gallery image size on new installations is now "Large".
+* Tweak: Clarified the "Enable Featured Images" and "Download External Images" setting descriptions.
+* Tweak: The video description editor now shows a placeholder, and the guided tour points to the "Video" box for adding the video.
+* Fix: With JavaScript initialization and Plyr.js, a player could fail to load after an email was submitted on another player.
+* Fix: Yoast SEO and Rank Math breadcrumbs on single video pages did not include the custom Video Archive Page.
+* Fix: Yoast SEO - breadcrumb schema was missing on the category, tag and user videos pages, and category pages had no Open Graph image.
+* Fix: Yoast SEO - PHP warning and wrong canonical URL on the user videos page for a non-existent user.
+* Fix: Rank Math - breadcrumb schema left out the current category, tag or user, and plugin query parameters could change the SEO data of unrelated pages.
+* Fix: Video schema markup exposed the video file URL to visitors who could not watch a restricted video.
+* Fix: Downloaded video filenames included the URL's query string, for example with Bunny Stream signed URLs.
+* Fix: PHP warnings on the player for videos saved without a source type, for example after "Edit with Elementor".
+* Fix: Video ads failed to load when the player was embedded on another website or previewed in the block editor.
+* Fix: Various performance and security improvements.
 
 = 4.9.3 =
 
@@ -670,6 +703,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 4.9.3 =
+= 4.9.5 =
 
-WordPress 7.1 compatibility issues. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)
+Paid Memberships Pro support, Email & Lead Capture enhancements, and bug fixes. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

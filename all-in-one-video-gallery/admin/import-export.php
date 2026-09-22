@@ -728,6 +728,9 @@ class AIOVG_Admin_Import_Export {
 					case 'email_capture':
 						$row[] = isset( $post_meta['email_capture'] ) ? (int) $post_meta['email_capture'][0] : -1;
 						break;
+					case 'email_capture_notification_email':
+						$row[] = isset( $post_meta['email_capture_notification_email'] ) ? sanitize_text_field( $post_meta['email_capture_notification_email'][0] ) : '';
+						break;
 					case 'access_control':
 						$row[] = isset( $post_meta['access_control'] ) ? (int) $post_meta['access_control'][0] : -1;
 						break;
@@ -1373,8 +1376,13 @@ class AIOVG_Admin_Import_Export {
 		
 		if ( is_wp_error( $unzip_result ) ) {
 			// Remove protection files before returning
-			unlink( $htaccess_file );
-			unlink( $webconfig_file );
+			if ( file_exists( $htaccess_file ) ) {
+				unlink( $htaccess_file );
+			}
+
+			if ( file_exists( $webconfig_file ) ) {
+				unlink( $webconfig_file );
+			}
 
 			return $unzip_result;
 		}
@@ -1385,8 +1393,15 @@ class AIOVG_Admin_Import_Export {
 			RecursiveIteratorIterator::CHILD_FIRST
 		);
 
+		$protection_files = array( $htaccess_file, $webconfig_file );
+
 		foreach ( $iterator as $file ) {
 			if ( $file->isFile() ) {
+				// Skip our own protection files, they are removed in the cleanup below
+				if ( in_array( $file->getPathname(), $protection_files ) ) {
+					continue;
+				}
+
 				$filetype = wp_check_filetype( $file->getFilename() );
 				if ( empty( $filetype['type'] ) ) {
 					unlink( $file->getPathname() );
@@ -1395,8 +1410,13 @@ class AIOVG_Admin_Import_Export {
 		}
 
 		// Security cleanup
-		unlink( $htaccess_file );
-		unlink( $webconfig_file );
+		if ( file_exists( $htaccess_file ) ) {
+			unlink( $htaccess_file );
+		}
+
+		if ( file_exists( $webconfig_file ) ) {
+			unlink( $webconfig_file );
+		}
 
 		return untrailingslashit( $extract_path );
 	}
@@ -2036,6 +2056,15 @@ class AIOVG_Admin_Import_Export {
 					}
 				}
 
+				// Email Capture: Notification Email. Stored as typed, like the setting it
+				// overrides — the send path validates each address, so a mistake here stays
+				// visible and correctable rather than being silently discarded on import.
+				// An empty cell clears the override, so the video falls back to the
+				// site-wide address.
+				if ( isset( $row['email_capture_notification_email'] ) ) {
+					$meta['email_capture_notification_email'] = sanitize_text_field( $row['email_capture_notification_email'] );
+				}
+
 				// Access Control
 				if ( isset( $row['access_control'] ) ) {
 					$meta['access_control'] = -1;
@@ -2561,29 +2590,30 @@ class AIOVG_Admin_Import_Export {
 	 */
 	private function get_csv_column_mapping_fields() {
 		$fields = array(
-			'post_id'          => __( 'Video ID (existing video)', 'all-in-one-video-gallery' ),
-			'post_title'       => __( 'Video Title', 'all-in-one-video-gallery' ),
-			'video'            => __( 'Video File', 'all-in-one-video-gallery' ),
-			'image'            => __( 'Poster Image', 'all-in-one-video-gallery' ),
-			'post_content'     => __( 'Video Description', 'all-in-one-video-gallery' ),
-			'post_excerpt'     => __( 'Video Excerpt', 'all-in-one-video-gallery' ),					
-			'aiovg_categories' => __( 'Video Categories', 'all-in-one-video-gallery' ),			
-			'aiovg_tags'       => __( 'Video Tags', 'all-in-one-video-gallery' ),
-			'track'            => __( 'Subtitles', 'all-in-one-video-gallery' ),
-			'chapter'          => __( 'Chapters', 'all-in-one-video-gallery' ),
-			'duration'         => __( 'Video Duration', 'all-in-one-video-gallery' ),					
-			'views'            => __( 'Views Count', 'all-in-one-video-gallery' ),
-			'likes'            => __( 'Likes Count', 'all-in-one-video-gallery' ),
-			'dislikes'         => __( 'Dislikes Count', 'all-in-one-video-gallery' ),
-			'download'         => __( 'Enable Download', 'all-in-one-video-gallery' ),
-			'featured'         => __( 'Featured', 'all-in-one-video-gallery' ),
-			'email_capture'    => __( 'Email & Lead Capture', 'all-in-one-video-gallery' ),
-			'access_control'   => __( 'Access Control', 'all-in-one-video-gallery' ),
-			'restricted_roles' => __( 'Allowed User Roles', 'all-in-one-video-gallery' ),
-			'comment_status'   => __( 'Comment Status', 'all-in-one-video-gallery' ),
-			'post_status'      => __( 'Video Status', 'all-in-one-video-gallery' ),
-			'post_author'      => __( 'Video Author', 'all-in-one-video-gallery' ),
-			'post_date'        => __( 'Published Date', 'all-in-one-video-gallery' )
+			'post_id'                          => __( 'Video ID (existing video)', 'all-in-one-video-gallery' ),
+			'post_title'                       => __( 'Video Title', 'all-in-one-video-gallery' ),
+			'video'                            => __( 'Video File', 'all-in-one-video-gallery' ),
+			'image'                            => __( 'Poster Image', 'all-in-one-video-gallery' ),
+			'post_content'                     => __( 'Video Description', 'all-in-one-video-gallery' ),
+			'post_excerpt'                     => __( 'Video Excerpt', 'all-in-one-video-gallery' ),
+			'aiovg_categories'                 => __( 'Video Categories', 'all-in-one-video-gallery' ),
+			'aiovg_tags'                       => __( 'Video Tags', 'all-in-one-video-gallery' ),
+			'track'                            => __( 'Subtitles', 'all-in-one-video-gallery' ),
+			'chapter'                          => __( 'Chapters', 'all-in-one-video-gallery' ),
+			'duration'                         => __( 'Video Duration', 'all-in-one-video-gallery' ),
+			'views'                            => __( 'Views Count', 'all-in-one-video-gallery' ),
+			'likes'                            => __( 'Likes Count', 'all-in-one-video-gallery' ),
+			'dislikes'                         => __( 'Dislikes Count', 'all-in-one-video-gallery' ),
+			'download'                         => __( 'Enable Download', 'all-in-one-video-gallery' ),
+			'featured'                         => __( 'Featured', 'all-in-one-video-gallery' ),
+			'email_capture'                    => __( 'Email & Lead Capture', 'all-in-one-video-gallery' ),
+			'email_capture_notification_email' => __( 'Lead Notification Email', 'all-in-one-video-gallery' ),
+			'access_control'                   => __( 'Access Control', 'all-in-one-video-gallery' ),
+			'restricted_roles'                 => __( 'Allowed User Roles', 'all-in-one-video-gallery' ),
+			'comment_status'                   => __( 'Comment Status', 'all-in-one-video-gallery' ),
+			'post_status'                      => __( 'Video Status', 'all-in-one-video-gallery' ),
+			'post_author'                      => __( 'Video Author', 'all-in-one-video-gallery' ),
+			'post_date'                        => __( 'Published Date', 'all-in-one-video-gallery' )
 		);
 
 		return $fields;

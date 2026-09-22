@@ -138,7 +138,14 @@ class AIOVG_Blocks {
 				'share'                         => __( 'Share Buttons', 'all-in-one-video-gallery' ),
 				'embed'                         => __( 'Embed Button', 'all-in-one-video-gallery' ),
 				'download'                      => __( 'Download Button', 'all-in-one-video-gallery' ),
-				'email_capture'                 => __( 'Email & Lead Capture', 'all-in-one-video-gallery' )
+				'email_capture'                 => __( 'Email & Lead Capture', 'all-in-one-video-gallery' ),
+				'email_capture_label'           => __( 'Email Capture', 'all-in-one-video-gallery' ),
+				'email_capture_description'     => __( 'Show an email collection form on this video to capture leads. Choose Enable or Disable to force the form on or off for this player only.', 'all-in-one-video-gallery' ),
+				// Key kept as "global" so blocks/build/ needs no rebuild; the value is
+				// the "no override" choice, which is not the site-wide setting.
+				'global'                        => '— ' . __( 'Default', 'all-in-one-video-gallery' ) . ' —',
+				'enable'                        => __( 'Enable', 'all-in-one-video-gallery' ),
+				'disable'                       => __( 'Disable', 'all-in-one-video-gallery' )
 			),
 			'categories' => array(
 				'template'         => $categories_settings['template'],
@@ -154,28 +161,27 @@ class AIOVG_Blocks {
 				'show_pagination'  => 1
 			),			
 			'video'	=> array(
-				'src'                  => '',
-				'id'                   => 0,
-				'poster'               => '',
-				'width'                => 0,
-				'ratio'                => $player_settings['ratio'],
-				'autoplay'             => $player_settings['autoplay'] ? true : false,
-				'loop'                 => $player_settings['loop'] ? true : false,
-				'muted'                => $player_settings['muted'] ? true : false,
-				'playpause'            => isset( $player_settings['controls']['playpause'] ),
-				'current'              => isset( $player_settings['controls']['current'] ),
-				'progress'             => isset( $player_settings['controls']['progress'] ),
-				'duration'             => isset( $player_settings['controls']['duration'] ),				
-				'speed'                => isset( $player_settings['controls']['speed'] ),
-				'quality'              => isset( $player_settings['controls']['quality'] ),					
-				'volume'               => isset( $player_settings['controls']['volume'] ),
-				'pip'                  => isset( $player_settings['controls']['pip'] ),
-				'fullscreen'           => isset( $player_settings['controls']['fullscreen'] ),
-				'share'                => isset( $player_settings['controls']['share'] ),
-				'embed'                => isset( $player_settings['controls']['embed'] ),
-				'download'             => isset( $player_settings['controls']['download'] ),
-				'email_capture'        => ! empty( $email_capture_settings['enable_email_capture'] ),
-				'email_capture_enabled'=> ! empty( $email_capture_settings['enable_email_capture'] )
+				'src'                   => '',
+				'id'                    => 0,
+				'poster'                => '',
+				'width'                 => 0,
+				'ratio'                 => $player_settings['ratio'],
+				'autoplay'              => $player_settings['autoplay'] ? true : false,
+				'loop'                  => $player_settings['loop'] ? true : false,
+				'muted'                 => $player_settings['muted'] ? true : false,
+				'playpause'             => isset( $player_settings['controls']['playpause'] ),
+				'current'               => isset( $player_settings['controls']['current'] ),
+				'progress'              => isset( $player_settings['controls']['progress'] ),
+				'duration'              => isset( $player_settings['controls']['duration'] ),
+				'speed'                 => isset( $player_settings['controls']['speed'] ),
+				'quality'               => isset( $player_settings['controls']['quality'] ),
+				'volume'                => isset( $player_settings['controls']['volume'] ),
+				'pip'                   => isset( $player_settings['controls']['pip'] ),
+				'fullscreen'            => isset( $player_settings['controls']['fullscreen'] ),
+				'share'                 => isset( $player_settings['controls']['share'] ),
+				'embed'                 => isset( $player_settings['controls']['embed'] ),
+				'download'              => isset( $player_settings['controls']['download'] ),
+				'email_capture_enabled' => ! empty( $email_capture_settings['enable_email_capture'] )
 			),
 			'videos' => $videos
 		);
@@ -333,8 +339,12 @@ class AIOVG_Blocks {
 			'download' => array(
 				'type' => 'boolean'
 			),
+			// -1 Global, 1 Enable, 0 Disable. "boolean" stays accepted so blocks saved
+			// before 4.9.4 keep their stored true/false. This schema is what the REST
+			// block-renderer validates the editor's preview request against, so it has
+			// to match blocks/src/video/index.js exactly.
 			'email_capture' => array(
-				'type' => 'boolean'
+				'type' => array( 'number', 'boolean' )
 			),
 			'style' => array(
 				'type' => 'object'

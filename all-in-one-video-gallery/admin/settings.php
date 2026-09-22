@@ -98,7 +98,7 @@ class AIOVG_Admin_Settings {
 			'display'    => __( 'Display', 'all-in-one-video-gallery' ),
             'player'     => __( 'Player', 'all-in-one-video-gallery' ),
             'engagement' => __( 'Engagement', 'all-in-one-video-gallery' ),
-            'access'     => __( 'Access Control', 'all-in-one-video-gallery' ),
+            'access'     => __( 'Access & Trailers', 'all-in-one-video-gallery' ),
             'seo'        => __( 'SEO', 'all-in-one-video-gallery' ),
 			'advanced'   => __( 'Advanced', 'all-in-one-video-gallery' )
 		);
@@ -183,10 +183,17 @@ class AIOVG_Admin_Settings {
                 'title'       => __( 'Email & Lead Capture', 'all-in-one-video-gallery' ),
                 'description' => sprintf(
                     '<div class="aiovg-margin-bottom">%s</div><div class="aiovg-notice aiovg-notice-info"><strong>%s:</strong> %s</div>',
-                    __( 'Show an email collection form over your videos to capture leads. The form is not displayed for logged-in WordPress users. Once a viewer submits the email form or skips it, a browser cookie is stored to prevent the form from appearing again. If the viewer clears their cookies, the form will reappear.', 'all-in-one-video-gallery' ),
+                    __( 'Show an email collection form over your videos to capture leads.', 'all-in-one-video-gallery' ),
                     __( 'Coming Soon', 'all-in-one-video-gallery' ),
                     __( 'We are working on third-party email provider integrations (Mailchimp, FluentCRM, ActiveCampaign, MailerLite, Webhooks, etc.) as a part of our PRO version. These will allow automatic syncing of captured leads to your email marketing platform.', 'all-in-one-video-gallery' )
                 ),
+                'tab'         => 'engagement',
+                'page'        => 'aiovg_email_capture_settings'
+            ),
+            array(
+                'id'          => 'aiovg_email_lead_captured_settings',
+                'title'       => __( 'Lead Notifications', 'all-in-one-video-gallery' ),
+                'description' => '',
                 'tab'         => 'engagement',
                 'page'        => 'aiovg_email_capture_settings'
             ),
@@ -477,9 +484,48 @@ class AIOVG_Admin_Settings {
                 array(
                     'name'              => 'enable_email_capture',
                     'label'             => __( 'Email Capture', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Show an email collection form over your videos to capture leads.', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Show an email collection form over your videos to capture leads. Choose "Enabled on all videos by default" to show the form on every video, leaving individual videos free to opt out. Choose "Enabled on individual videos only" to show it nowhere until you switch it on per video, in the "Email & Lead Capture" tab of that video.', 'all-in-one-video-gallery' ),
+                    'type'              => 'select',
+                    'options'           => array(
+                        0 => __( 'Disabled', 'all-in-one-video-gallery' ),
+                        1 => __( 'Enabled on all videos by default', 'all-in-one-video-gallery' ),
+                        2 => __( 'Enabled on individual videos only', 'all-in-one-video-gallery' )
+                    ),
+                    'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'show_to_logged_in_users',
+                    'label'             => __( 'Logged-in Users', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Also show the form to users who are logged in to your site. Off by default, because a logged-in visitor has usually already given you their email address. When on, the email and name fields are filled in from their profile.', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
                     'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'display_frequency',
+                    'label'             => __( 'Display Frequency', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'How often a viewer is asked. There are two things to decide: whether you want one email per visitor or one per video, and whether skipping the form counts as having been asked.', 'all-in-one-video-gallery' ) . '<br /><br />' .
+                        sprintf(
+                            '<strong>%s</strong> %s<br /><strong>%s</strong> %s<br /><strong>%s</strong> %s<br /><strong>%s</strong> %s<br /><strong>%s</strong> %s',
+                            __( 'Once per visitor —', 'all-in-one-video-gallery' ),
+                            __( 'asked a single time and then never again, on any video, whether they submit or skip.', 'all-in-one-video-gallery' ),
+                            __( 'Once per visitor, unless they skip —', 'all-in-one-video-gallery' ),
+                            __( 'the same, except that skipping does not count, so they keep being asked on the next video until they actually submit once. Then they are never asked again.', 'all-in-one-video-gallery' ),
+                            __( 'Once per video —', 'all-in-one-video-gallery' ),
+                            __( 'asked on every video, but never twice on the same one. Skipping counts as asked. Use this when each video should collect its own lead.', 'all-in-one-video-gallery' ),
+                            __( 'Once per video, unless they skip —', 'all-in-one-video-gallery' ),
+                            __( 'the same, except that skipping leaves that video free to ask again; only a submission stops it.', 'all-in-one-video-gallery' ),
+                            __( 'Every time a video is played —', 'all-in-one-video-gallery' ),
+                            __( 'nothing is remembered, so the form returns each time the page is loaded. Expect fewer leads and more annoyance.', 'all-in-one-video-gallery' )
+                        ),
+                    'type'              => 'select',
+                    'options'           => array(
+                        'once_per_visitor'                 => __( 'Once per visitor', 'all-in-one-video-gallery' ),
+                        'once_per_visitor_until_submitted' => __( 'Once per visitor, unless they skip', 'all-in-one-video-gallery' ),
+                        'once_per_video'                   => __( 'Once per video', 'all-in-one-video-gallery' ),
+                        'once_per_video_until_submitted'   => __( 'Once per video, unless they skip', 'all-in-one-video-gallery' ),
+                        'always'                           => __( 'Every time a video is played', 'all-in-one-video-gallery' )
+                    ),
+                    'sanitize_callback' => 'sanitize_key'
                 ),
                 array(
                     'name'              => 'pre_roll',
@@ -563,6 +609,53 @@ class AIOVG_Admin_Settings {
                     'sanitize_callback' => 'aiovg_sanitize_email_domains'
                 ),
             ),
+            'aiovg_email_lead_captured_settings' => array(
+                array(
+                    'name'              => 'notification_email',
+                    'label'             => __( 'Notification Email', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Where to send an email each time a lead is captured. Separate multiple addresses with commas. Leave this empty and no notification is sent, unless you switch on "Also Notify the Video Author" below — the lead is still saved either way, and you can export it at any time. An individual video can override this with its own address, in the "Email & Lead Capture" tab of that video.', 'all-in-one-video-gallery' ) . '<br /><br />' .
+                        __( 'Note that this forwards the visitor\'s name, email address and phone number to whoever you enter here. If that is someone outside your organisation, such as a client, make sure the consent text on your form and your privacy policy say so.', 'all-in-one-video-gallery' ),
+                    'type'              => 'text',
+                    'placeholder'       => 'leads@example.com, sales@example.com',
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                array(
+                    'name'              => 'notify_video_author',
+                    'label'             => __( 'Also Notify the Video Author', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Also send each lead to the WordPress user who owns the video, as well as to any addresses above. This works on its own: if you leave the addresses above empty, the owner is the only person notified. Useful when your members upload their own videos, or when you point each automatic import at a different author.', 'all-in-one-video-gallery' ) . '<br /><br />' .
+                        __( 'Leave this off unless you mean it: it sends the visitor\'s name, email address and phone number to whichever account owns the video, which may be a member you have not vetted. A video you added yourself is owned by your own account, so you would receive those leads.', 'all-in-one-video-gallery' ),
+                    'type'              => 'checkbox',
+                    'sanitize_callback' => 'intval'
+                ),
+                array(
+                    'name'              => 'subject',
+                    'label'             => __( 'Email Subject', 'all-in-one-video-gallery' ),
+                    'description'       => '',
+                    'type'              => 'text',
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                array(
+                    'name'              => 'body',
+                    'label'             => __( 'Email Body', 'all-in-one-video-gallery' ),
+                    'description'       => sprintf(
+                        '<pre><strong>%s</strong><br>{email} - %s<br>{name} - %s<br>{phone} - %s<br>{video_title} - %s<br>{video_link} - %s<br>{video_url} - %s<br>{page_url} - %s<br>{site_name} - %s<br>{site_link} - %s<br>{today} - %s<br>{now} - %s</pre>',
+                        __( 'Supported Placeholders:', 'all-in-one-video-gallery' ),
+                        __( 'The email address the visitor entered', 'all-in-one-video-gallery' ),
+                        __( 'The name the visitor entered, if you collect it', 'all-in-one-video-gallery' ),
+                        __( 'The phone number the visitor entered, if you collect it', 'all-in-one-video-gallery' ),
+                        __( 'Video\'s title', 'all-in-one-video-gallery' ),
+                        __( 'Video\'s title with link', 'all-in-one-video-gallery' ),
+                        __( 'Video\'s url with link', 'all-in-one-video-gallery' ),
+                        __( 'The page the visitor was watching on', 'all-in-one-video-gallery' ),
+                        __( 'Your site name', 'all-in-one-video-gallery' ),
+                        __( 'Your site name with link', 'all-in-one-video-gallery' ),
+                        __( 'Current Date', 'all-in-one-video-gallery' ),
+                        __( 'Current Time', 'all-in-one-video-gallery' )
+                    ),
+                    'type'              => 'wysiwyg',
+                    'sanitize_callback' => 'wp_kses_post'
+                ),
+            ),
             'aiovg_images_settings' => array(
                 array(
                     'name'              => 'width',
@@ -597,14 +690,17 @@ class AIOVG_Admin_Settings {
                 array(
                     'name'              => 'enabled',
                     'label'             => __( 'Enable Featured Images', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Check this option to enable featured images.', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Check this option to store your video poster images as WordPress featured images.', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
                 ),
                 array(
                     'name'              => 'download_external_images',
                     'label'             => __( 'Download External Images', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'WordPress requires featured images to be stored locally as attachments. But, when you add videos from YouTube, Vimeo, Dailymotion & Rumble websites, we simply link the image URLs from their server. Check this option to download the images from such external websites to your server and to link them as featured.', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Recommended for GDPR and privacy compliance. Requires the "Enable Featured Images" option.', 'all-in-one-video-gallery' ) . '<br /><br />' . 
+                        __( 'When you add videos from YouTube, Vimeo, Dailymotion or Rumble, the plugin links their thumbnail images directly from the provider. Every visitor who opens a page showing those videos contacts that provider, which receives their IP address, before any cookie consent is given. The "Cookie Consent" option under <strong>GDPR &amp; Cookie Consent</strong> covers the video player only, not these images.', 'all-in-one-video-gallery' ) . '<br /><br />' . 
+                        __( 'Check this option to download those images to your own server and serve them from there instead. No request is made to the provider, so this works alongside any cookie consent plugin you may already use.', 'all-in-one-video-gallery' ) . '<br /><br />' . 
+                        __( 'This applies to videos added or updated after you save this setting. To update the videos you already have, go to <strong>Video Gallery → Bulk Import / Export</strong>, export your videos to a CSV file, then import that same file back with "Set Featured Images" ticked.', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
 					'sanitize_callback' => 'intval'
                 ),
@@ -1002,7 +1098,8 @@ class AIOVG_Admin_Settings {
                     'name'              => 'enable_restrictions',
                     'label'             => __( 'Enable Restrictions', 'all-in-one-video-gallery' ),
                     'description'       => sprintf(
-                        __( 'Enable restrictions to control who can access your videos. Adds a "Restrictions" accordion under the "Access Control" tab in the video form (<a href="%s" target="_blank" rel="noopener noreferrer">Video Gallery → All Videos</a>).', 'all-in-one-video-gallery' ),
+                        /* translators: %s: URL of the All Videos screen. */
+                        __( 'Enable restrictions to control who can access your videos. Adds a "Restrictions" tab to the video form (<a href="%s" target="_blank" rel="noopener noreferrer">Video Gallery → All Videos</a>).', 'all-in-one-video-gallery' ),
                         esc_url( admin_url( 'edit.php?post_type=aiovg_videos' ) )
                     ),
                     'type'              => 'checkbox',
@@ -1070,7 +1167,8 @@ class AIOVG_Admin_Settings {
                     'name'              => 'enable_trailers',
                     'label'             => __( 'Enable Trailers', 'all-in-one-video-gallery' ),
                     'description'       => sprintf(
-                        __( 'Enable trailers for restricted videos. Adds a "Trailer / Teaser" accordion under the "Access Control" tab in the video form (<a href="%s" target="_blank" rel="noopener noreferrer">Video Gallery → All Videos</a>).', 'all-in-one-video-gallery' ),
+                        /* translators: %s: URL of the All Videos screen. */
+                        __( 'Show a trailer to visitors who cannot watch the full video, whether it is restricted by this plugin or by a membership plugin such as <strong>Paid Memberships Pro</strong>. Adds a "Trailer / Teaser" tab to the video form (<a href="%s" target="_blank" rel="noopener noreferrer">Video Gallery → All Videos</a>).', 'all-in-one-video-gallery' ),
                         esc_url( admin_url( 'edit.php?post_type=aiovg_videos' ) )
                     ),
                     'type'              => 'checkbox',
@@ -1087,14 +1185,14 @@ class AIOVG_Admin_Settings {
                 array(
                     'name'              => 'player_overlay_link',
                     'label'             => __( 'Player Overlay Link URL', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Enter a URL for the player overlay (e.g. membership or login page). Leave empty to display text only.', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Enter a URL for the player overlay (e.g. membership or login page). Leave empty to display text only. If you use <strong>Paid Memberships Pro</strong>, leaving this empty links membership-restricted videos to its checkout or levels page automatically.', 'all-in-one-video-gallery' ),
                     'type'              => 'text',
                     'sanitize_callback' => 'aiovg_sanitize_url'
                 ),
                 array(
                     'name'              => 'show_trailer_label',
                     'label'             => __( 'Show Trailer Badge on Thumbnails', 'all-in-one-video-gallery' ),
-                    'description'       => __( 'Display a badge on gallery thumbnails when a restricted video has a trailer.', 'all-in-one-video-gallery' ),
+                    'description'       => __( 'Display a badge on gallery thumbnails when a visitor cannot watch the video but a trailer is available.', 'all-in-one-video-gallery' ),
                     'type'              => 'checkbox',
                     'sanitize_callback' => 'intval'
                 ),

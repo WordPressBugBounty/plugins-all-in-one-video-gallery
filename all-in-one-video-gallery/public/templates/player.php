@@ -41,7 +41,7 @@ if ( $post_id > 0 ) {
 		$post_meta = get_post_meta( $post_id );		
 		
 		// Determine the video provider based on the post meta.
-		$current_video_provider = $post_meta['type'][0];
+		$current_video_provider = isset( $post_meta['type'] ) ? $post_meta['type'][0] : 'default';
 
 		// Check if the user has access to this video.
 		$has_access = aiovg_current_user_can( 'play_aiovg_video', $post_id );
@@ -188,24 +188,31 @@ if ( ! isset( $_GET['nocookie'] ) ) {
 
 // Email capture handling
 if ( ! isset( $_GET['nocapture'] ) ) {
-	if ( ! empty( $email_capture_settings['enable_email_capture'] ) && ! empty( $email_capture_settings['pre_roll'] ) && ! is_user_logged_in() && ! isset( $_COOKIE['aiovg_email_captured'] ) ) {
-		$show_email_capture = 1;
+	// A video played from a bare URL is identified by that URL. Same provider order
+	// player-email-capture.php uses, so both derive the same capture key.
+	$email_capture_video_url = '';
 
-		if ( 'aiovg_videos' == $post_type && isset( $post_meta['email_capture'] ) ) {
-			$show_email_capture = (int) $post_meta['email_capture'][0];
+	if ( 'aiovg_videos' != $post_type || empty( $post_id ) ) {
+		foreach ( array( 'mp4', 'webm', 'ogv', 'hls', 'dash', 'youtube', 'vimeo', 'dailymotion', 'rumble', 'facebook' ) as $provider ) {
+			if ( isset( $_GET[ $provider ] ) ) {
+				$email_capture_video_url = aiovg_base64_decode( $_GET[ $provider ] );
+			}
 		}
+	}
 
-		if ( isset( $_GET['email_capture'] ) ) {
-			$show_email_capture = (int) $_GET['email_capture'];
-		}
+	$email_capture_config = aiovg_get_email_capture_config( array(
+		'post_id'   => $post_id,
+		'post_type' => $post_type,
+		'post_meta' => $post_meta,
+		'override'  => isset( $_GET['email_capture'] ) ? $_GET['email_capture'] : null,
+		'rolls'     => 'pre',
+		'video_url' => $email_capture_video_url
+	) );
 
-		if ( $show_email_capture === -1 ) { // Global
-			$show_email_capture = 1;
-		}
-
-		if ( ! empty( $show_email_capture ) ) {
-			$player_template = 'email-capture';
-		}
+	// The memory test needs the capture key, so it follows resolution rather than
+	// wrapping it.
+	if ( false !== $email_capture_config && aiovg_should_display_email_capture( $email_capture_config['capture_key'] ) ) {
+		$player_template = 'email-capture';
 	}
 }
 

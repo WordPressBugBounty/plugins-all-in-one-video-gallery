@@ -208,7 +208,7 @@ class AIOVG_Public {
 		if ( 'vidstack' == $player_settings['player'] ) {
 			wp_register_style( 
 				AIOVG_PLUGIN_SLUG . '-player', 
-				AIOVG_PLUGIN_URL . 'public/assets/css/vidstack.min.css', 
+				AIOVG_PLUGIN_URL . 'public/assets/css/vidstack.min.css',
 				array(), 
 				AIOVG_PLUGIN_VERSION, 
 				'all' 
@@ -216,7 +216,7 @@ class AIOVG_Public {
 		} else {
 			wp_register_style( 
 				AIOVG_PLUGIN_SLUG . '-player', 
-				AIOVG_PLUGIN_URL . 'public/assets/css/videojs.min.css', 
+				AIOVG_PLUGIN_URL . 'public/assets/css/videojs.min.css',
 				array(), 
 				AIOVG_PLUGIN_VERSION, 
 				'all' 
@@ -365,7 +365,7 @@ class AIOVG_Public {
 
 		wp_register_script( 
 			AIOVG_PLUGIN_SLUG . '-player', 
-			AIOVG_PLUGIN_URL . 'public/assets/js/videojs.min.js', 
+			AIOVG_PLUGIN_URL . 'public/assets/js/videojs.min.js',
 			array( 'jquery' ), 
 			AIOVG_PLUGIN_VERSION, 
 			array( 'strategy' => 'defer' ) 
@@ -868,7 +868,10 @@ class AIOVG_Public {
 
 						if ( event.data.message == 'aiovg-email-captured' ) {
 							iframe.contentWindow.postMessage({
-								message: 'aiovg-email-captured'
+								message: 'aiovg-email-captured',
+								// Forwarded as sent. An empty key means "once per visitor",
+								// where one capture clears every player on the page.
+								capture_key: event.data.capture_key || ''
 							}, window.location.origin );
 						}
 
@@ -1127,54 +1130,84 @@ class AIOVG_Public {
 	}
 
 	/**
-	 * Save the email lead and set the capture cookie.
+	 * Save the email lead and record the capture.
 	 *
-	 * Handles the aiovg_save_email_lead AJAX action for both logged-out visitors
-	 * (wp_ajax_nopriv_) and logged-in users (wp_ajax_). Logged-in users are
-	 * rejected immediately so the form never fires for them.
+	 * Handles the aiovg_save_email_lead AJAX action. A logged-in user is accepted only
+	 * when aiovg_can_show_email_capture_to_user() allows it; before 4.9.4 they were
+	 * always rejected. A skip arrives here too: it records the capture but stores no lead.
 	 *
 	 * @since 4.7.6
 	 */
 	public function save_email_lead() {
 		check_ajax_referer( 'aiovg_public_ajax_nonce', 'security' );
 
-		// Logged-in users never see the form; reject any direct AJAX calls too.
-		if ( is_user_logged_in() ) {
+		// Never accept from a visitor the form would not have been shown to.
+		if ( ! aiovg_can_show_email_capture_to_user() ) {
 			wp_send_json_error();
 			return;
 		}
 
-		// Skip — only set the cookie; do not store a lead row.
+		// Read before the skip branch below, which returns early and needs them too.
+		$video_id  = isset( $_POST['video_id'] ) ? absint( $_POST['video_id'] ) : 0;
+		$video_url = isset( $_POST['video_url'] ) ? esc_url_raw( $_POST['video_url'] ) : '';
+
+		// Recomputed server-side, never trusted from the client.
+		$capture_key = aiovg_get_email_capture_key( $video_id, $video_id > 0 ? 'aiovg_videos' : '', $video_url );
+
+		// Skip — only record the capture; do not store a lead row.
 		if ( ! empty( $_POST['skipped'] ) ) {
-			setcookie( 'aiovg_email_captured', 1, time() + ( 86400 * 30 ), COOKIEPATH, COOKIE_DOMAIN );
+			$remembered = aiovg_record_email_capture( $capture_key, true );
 
 			if ( ! isset( $_COOKIE['aiovg_gdpr_consent'] ) ) {
 				setcookie( 'aiovg_gdpr_consent', 1, time() + ( 86400 * 30 ), COOKIEPATH, COOKIE_DOMAIN );
 			}
 
-			wp_send_json_success();
+			// Lets the page leave other players' forms alone when the skip was not remembered.
+			wp_send_json_success( array( 'remembered' => $remembered ) );
 			return;
 		}
 
-		// IP-based rate limiting — submission attempts only; skips are not counted.
-		// Filter: set to false to bypass entirely (e.g. for trusted environments or testing).
+		// Rate limiting, on submissions only — skips are never counted.
 		$rate_limit_enabled = apply_filters( 'aiovg_email_capture_rate_limit_enabled', true );
 
 		if ( $rate_limit_enabled ) {
-			$ip_hash          = wp_hash( isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : '' );
-			$rate_limit_key   = 'aiovg_email_capture_rate_limit_' . $ip_hash;
-			$rate_limit_count = (int) get_transient( $rate_limit_key );
+			$ip_hash = wp_hash( isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : '' );
 
-			// Filter: raise or lower the per-IP hourly submission limit.
-			$rate_limit = (int) apply_filters( 'aiovg_email_capture_rate_limit', 10 );
+			// Two counters: one video can be hammered, but a genuine visitor may submit
+			// once per video across a large gallery.
+			$rate_limits = array();
 
-			if ( $rate_limit_count >= $rate_limit ) {
-				wp_send_json_error( __( 'Too many attempts. Please try again in an hour.', 'all-in-one-video-gallery' ) );
-				return;
+			// Per video — tight; an honest visitor needs one or two. A video with no
+			// derivable key falls through to the site-wide counter below.
+			if ( '' !== $capture_key ) {
+				$rate_limits[] = array(
+					'key' => 'aiovg_ec_rate_video_' . $ip_hash . '_' . md5( $capture_key ),
+					// This filter was site-wide before 4.9.4.
+					'max' => (int) apply_filters( 'aiovg_email_capture_rate_limit', 10, $capture_key )
+				);
+			}
+
+			// Site-wide — above any human ceiling. Stops an attacker walking video ids
+			// from using the notification mailer as a relay.
+			$rate_limits[] = array(
+				'key' => 'aiovg_ec_rate_all_' . $ip_hash,
+				// 0 disables this tier.
+				'max' => (int) apply_filters( 'aiovg_email_capture_rate_limit_global', 100 )
+			);
+
+			foreach ( $rate_limits as $rate_limit ) {
+				if ( $rate_limit['max'] > 0 && (int) get_transient( $rate_limit['key'] ) >= $rate_limit['max'] ) {
+					wp_send_json_error( __( 'Too many attempts. Please try again in an hour.', 'all-in-one-video-gallery' ) );
+					return;
+				}
 			}
 
 			// Increment before further validation so probing attempts count against the limit.
-			set_transient( $rate_limit_key, $rate_limit_count + 1, HOUR_IN_SECONDS );
+			foreach ( $rate_limits as $rate_limit ) {
+				if ( $rate_limit['max'] > 0 ) {
+					set_transient( $rate_limit['key'], (int) get_transient( $rate_limit['key'] ) + 1, HOUR_IN_SECONDS );
+				}
+			}
 		}
 
 		// Sanitize and validate email.
@@ -1186,11 +1219,9 @@ class AIOVG_Public {
 		}
 
 		// Sanitize optional fields.
-		$name      = isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : '';
-		$phone     = isset( $_POST['phone'] ) ? sanitize_text_field( $_POST['phone'] ) : '';
-		$video_id  = isset( $_POST['video_id'] ) ? absint( $_POST['video_id'] ) : 0;
-		$video_url = isset( $_POST['video_url'] ) ? esc_url_raw( $_POST['video_url'] ) : '';
-		$page_url  = isset( $_POST['page_url'] ) ? esc_url_raw( $_POST['page_url'] ) : '';
+		$name     = isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : '';
+		$phone    = isset( $_POST['phone'] ) ? sanitize_text_field( $_POST['phone'] ) : '';
+		$page_url = isset( $_POST['page_url'] ) ? esc_url_raw( $_POST['page_url'] ) : '';
 
 		// Server-side blocked domain check.
 		$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
@@ -1213,29 +1244,46 @@ class AIOVG_Public {
 			}
 		}
 
-		// Insert the lead row.
-		$inserted = aiovg_email_capture_insert_lead(
-			array(
-				'email'     => $email,
-				'name'      => $name,
-				'phone'     => $phone,
-				'video_id'  => $video_id,
-				'video_url' => $video_url,
-				'page_url'  => $page_url
-			)
+		// Held in a variable because the action below hands it to listeners.
+		$data = array(
+			'email'     => $email,
+			'name'      => $name,
+			'phone'     => $phone,
+			'video_id'  => $video_id,
+			'video_url' => $video_url,
+			'page_url'  => $page_url
 		);
+
+		$inserted = aiovg_email_capture_insert_lead( $data );
 
 		if ( false === $inserted ) {
 			wp_send_json_error();
 			return;
 		}
 
-		// Set cookies.
-		setcookie( 'aiovg_email_captured', 1, time() + ( 86400 * 30 ), COOKIEPATH, COOKIE_DOMAIN );
+		// Before the action and the notification, so third-party code cannot cost the
+		// visitor the record of a form they have already filled in.
+		aiovg_record_email_capture( $capture_key, false );
 
 		if ( ! isset( $_COOKIE['aiovg_gdpr_consent'] ) ) {
 			setcookie( 'aiovg_gdpr_consent', 1, time() + ( 86400 * 30 ), COOKIEPATH, COOKIE_DOMAIN );
 		}
+
+		/**
+		 * Fires after a lead has been captured and stored.
+		 *
+		 * The integration point for CRMs, marketing platforms and webhooks. Fires for
+		 * every stored lead in both integration modes, never for a skip.
+		 *
+		 * @since 4.9.4
+		 * @param int   $lead_id ID of the stored lead row.
+		 * @param array $data    Sanitized lead data: email, name, phone, video_id,
+		 *                       video_url, page_url.
+		 */
+		do_action( 'aiovg_email_capture_lead_saved', $inserted, $data );
+
+		// Success either way — playback must not depend on SMTP.
+		aiovg_email_capture_notify( $inserted, $data );
 
 		wp_send_json_success();
 	}

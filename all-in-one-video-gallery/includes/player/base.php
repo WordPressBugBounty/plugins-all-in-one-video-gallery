@@ -631,67 +631,53 @@ class AIOVG_Player_Base {
 	 * Get the email capture settings, merged with per-video and shortcode overrides.
 	 *
 	 * @since  4.7.6
- 	 * @return array $settings Email capture settings.
+	 * @param  string|null $video_url Final source URL, "" for a video with a post. Omit to reuse the last result.
+ 	 * @return array       $settings  Email capture settings.
 	 */
-	public function get_email_capture_settings() {
-		if ( isset( $this->cache['email_capture_settings'] ) ) {
+	public function get_email_capture_settings( $video_url = null ) {
+		if ( null === $video_url && isset( $this->cache['email_capture_settings'] ) ) {
 			return $this->cache['email_capture_settings'];
 		}
 
-		$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
 		$settings = array( 'enable_email_capture' => false );
 
-		if ( ! empty( $email_capture_settings['enable_email_capture'] ) && ! is_user_logged_in() && ! isset( $_COOKIE['aiovg_email_captured'] ) ) {
-			$show_email_capture = 1;
+		$email_capture_config = aiovg_get_email_capture_config( array(
+			'post_id'   => $this->post_id,
+			'post_type' => $this->post_type,
+			'override'  => isset( $this->args['email_capture'] ) ? $this->args['email_capture'] : null,
+			'rolls'     => 'all',
+			'atts'      => $this->args,
+			'video_url' => (string) $video_url
+		) );
 
-			if ( $this->post_id > 0 && 'aiovg_videos' == $this->post_type ) {
-				$email_capture = get_post_meta( $this->post_id, 'email_capture', true );
-
-				if ( '' !== $email_capture ) {
-					$show_email_capture = (int) $email_capture;
-				}
-			}
-
-			if ( isset( $this->args['email_capture'] ) ) {
-				$show_email_capture = (int) $this->args['email_capture'];
-			}
-
-			if ( $show_email_capture === -1 ) { // Global
-				$show_email_capture = 1;
-			}
-
-			if ( ! empty( $show_email_capture ) ) {
-				$email_capture_settings = shortcode_atts( $email_capture_settings, $this->args );
-
-				$pre_roll     = ! empty( $email_capture_settings['pre_roll'] ) ? 1 : 0;
-				$mid_roll     = ! empty( $email_capture_settings['mid_roll'] ) ? (int) $email_capture_settings['mid_roll'] : 0;
-				$post_roll    = ! empty( $email_capture_settings['post_roll'] ) ? 1 : 0;
-				$header_text  = ! empty( $email_capture_settings['header_text'] ) ? $email_capture_settings['header_text'] : __( 'Enter your email to continue watching', 'all-in-one-video-gallery' );
-				$footer_text  = ! empty( $email_capture_settings['footer_text'] ) ? $email_capture_settings['footer_text'] : '';
-				$button_label = ! empty( $email_capture_settings['button_label'] ) ? $email_capture_settings['button_label'] : __( 'Submit', 'all-in-one-video-gallery' );
-				$skip_text    = ! empty( $email_capture_settings['skip_text'] ) ? $email_capture_settings['skip_text'] : __( 'Skip', 'all-in-one-video-gallery' );
-
-				if ( ! empty( $pre_roll ) || ! empty( $mid_roll ) || ! empty( $post_roll ) ) {
-					$settings = array(
-						'enable_email_capture' => true,
-						'pre_roll'             => $pre_roll,
-						'mid_roll'             => $mid_roll,
-						'post_roll'            => $post_roll,
-						'collect_name'         => ! empty( $email_capture_settings['collect_name'] ) ? 1 : 0,
-						'collect_phone'        => ! empty( $email_capture_settings['collect_phone'] ) ? 1 : 0,
-						'allow_skip'           => ! empty( $email_capture_settings['allow_skip'] ) ? 1 : 0,
-						'header_text'          => apply_filters( 'aiovg_translate_strings', $header_text, 'header_text' ),
-						'footer_text'          => apply_filters( 'aiovg_translate_strings', $footer_text, 'footer_text' ),
-						'button_label'         => apply_filters( 'aiovg_translate_strings', $button_label, 'button_label' ),
-						'skip_text'            => apply_filters( 'aiovg_translate_strings', $skip_text, 'skip_text' )
-					);
-				}
-			}
+		// The memory test needs the capture key, so it follows resolution.
+		if ( false !== $email_capture_config && aiovg_should_display_email_capture( $email_capture_config['capture_key'] ) ) {
+			$settings = array_merge( array( 'enable_email_capture' => true ), $email_capture_config );
 		}
 
 		// Output
 		$this->cache['email_capture_settings'] = $settings;
 		return $settings;
+	}
+
+	/**
+	 * Get the URL a video with no post of its own is identified by for email capture.
+	 *
+	 * The first source, picked the way the iframe templates pick it, so both integration
+	 * modes derive the same capture key for the same video.
+	 *
+	 * @since  4.9.4
+	 * @param  array  $sources Final player sources.
+	 * @return string          Source URL, or "" for a video with a post.
+	 */
+	protected function get_email_capture_video_url( $sources ) {
+		if ( 'aiovg_videos' == $this->post_type || empty( $sources ) ) {
+			return '';
+		}
+
+		$source = reset( $sources );
+
+		return isset( $source['src'] ) ? $source['src'] : '';
 	}
 
 	/**
@@ -940,13 +926,9 @@ class AIOVG_Player_Base {
  	 * @return string $html The HTML message for restricted access.
 	 */
 	public function get_player_restricted_message() {
-		$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
 		$player_settings = $this->get_player_settings();
 
-		$restricted_message = $restrictions_settings['restricted_message'];
-		if ( empty( $restricted_message ) ) {
-			$restricted_message = __( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' );
-		}
+		$restricted_message = aiovg_get_restricted_message( $this->post_id, 'player' );
 
 		$poster = $this->get_poster();
 
@@ -969,7 +951,7 @@ class AIOVG_Player_Base {
 		$html .= sprintf(
 			'<div class="aiovg-restrictions-wrapper"%s><div class="aiovg-restrictions-overlay"><div class="aiovg-restrictions-message">%s</div></div></div>',
 			$wrapper_style,
-			wp_kses_post( trim( $restricted_message ) )
+			$restricted_message
 		);
 
 		$html .= '</div>';
@@ -1008,9 +990,8 @@ class AIOVG_Player_Base {
  	 * @return string $html Player HTML.
 	 */
 	public function get_player_lite_embed() {
-		$player_settings        = $this->get_player_settings();
-		$privacy_settings       = $this->get_privacy_settings();
-		$email_capture_settings = $this->get_email_capture_settings();
+		$player_settings  = $this->get_player_settings();
+		$privacy_settings = $this->get_privacy_settings();
 
 		$videos = $this->get_videos();
 		$poster = $this->get_poster();				
@@ -1037,6 +1018,10 @@ class AIOVG_Player_Base {
 			'post_id'   => (int) $this->post_id,
 			'post_type' => esc_attr( $this->post_type )
 		);
+
+		// The raw URL, not the escaped "src" attribute: embed.js posts back what the browser
+		// decodes, and "&#038;" would give a different capture key from "&".
+		$email_capture_settings = $this->get_email_capture_settings( $videos['iframe'] );
 		
 		if ( ! empty( $player_settings['lazyloading'] ) ) {
 			$attributes['lazyloading'] = '';
@@ -1052,6 +1037,14 @@ class AIOVG_Player_Base {
 
 		if ( ! empty( $email_capture_settings['pre_roll'] ) ) { // Email Capture
 			$attributes['email-capture'] = '';
+
+			// Keyed on the raw URL for the same reason as above. Empty in the site-wide
+			// modes, which is how embed.js knows one capture clears every player.
+			$attributes['capture-key'] = aiovg_get_email_capture_markup_key(
+				$this->post_id,
+				$this->post_type,
+				$videos['iframe']
+			);
 
 			// Suppress GDPR when email capture is active
 			unset( $attributes['cookieconsent'] );
@@ -1083,15 +1076,29 @@ class AIOVG_Player_Base {
 			
 			$html .= '<div class="email-capture-fields">';
 
+			$email_capture_prefill = aiovg_get_email_capture_prefill();
+
 			if ( ! empty( $email_capture_settings['collect_name'] ) ) {
-				$html .= sprintf( '<input type="text" class="email-capture-name" name="name" placeholder="%s" autocomplete="name" />', esc_attr__( 'Your name', 'all-in-one-video-gallery' ) );
+				$html .= sprintf(
+					'<input type="text" class="email-capture-name" name="name" value="%s" placeholder="%s" autocomplete="name" />',
+					esc_attr( $email_capture_prefill['name'] ),
+					esc_attr__( 'Your name', 'all-in-one-video-gallery' )
+				);
 			}
 
-			$html .= sprintf( '<input type="email" class="email-capture-email" name="email" placeholder="%s" required autocomplete="email" aria-describedby="email-capture-error" />', esc_attr__( 'Your email address *', 'all-in-one-video-gallery' ) );
+			$html .= sprintf(
+				'<input type="email" class="email-capture-email" name="email" value="%s" placeholder="%s" required autocomplete="email" aria-describedby="email-capture-error" />',
+				esc_attr( $email_capture_prefill['email'] ),
+				esc_attr__( 'Your email address *', 'all-in-one-video-gallery' )
+			);
 			
 
 			if ( ! empty( $email_capture_settings['collect_phone'] ) ) {
-				$html .= sprintf( '<input type="tel" class="email-capture-phone" name="phone" placeholder="%s" autocomplete="tel" />', esc_attr__( 'Your phone number', 'all-in-one-video-gallery' ) );
+				$html .= sprintf(
+					'<input type="tel" class="email-capture-phone" name="phone" value="%s" placeholder="%s" autocomplete="tel" />',
+					esc_attr( $email_capture_prefill['phone'] ),
+					esc_attr__( 'Your phone number', 'all-in-one-video-gallery' )
+				);
 			}
 
 			$html .= '</div>'; // .email-capture-fields			
@@ -1157,12 +1164,15 @@ class AIOVG_Player_Base {
 		$poster = $this->get_poster();
 
 		$html = sprintf(
-			'<div class="aiovg-email-capture" data-poster="%s" data-pre_roll="%d" data-mid_roll="%d" data-post_roll="%d" data-video_url="%s" style="display: none;">',
+			'<div class="aiovg-email-capture" data-poster="%s" data-pre_roll="%d" data-mid_roll="%d" data-post_roll="%d" data-video_url="%s" data-capture_key="%s" style="display: none;">',
 			esc_url( $poster ),
 			(int) $email_capture_settings['pre_roll'],
 			(int) $email_capture_settings['mid_roll'],
 			(int) $email_capture_settings['post_roll'],
-			esc_url( $video_url )
+			esc_url( $video_url ),
+			// From the same URL the settings were decided with. Empty in the site-wide modes,
+			// which is how the scripts know one capture clears every player on the page.
+			esc_attr( aiovg_get_email_capture_markup_key( $this->post_id, $this->post_type, $video_url ) )
 		);
 
 		$html .= '<div class="aiovg-email-capture-overlay">';
@@ -1170,18 +1180,29 @@ class AIOVG_Player_Base {
 		$html .= sprintf( '<div class="aiovg-email-capture-header">%s</div>', esc_html( $email_capture_settings['header_text'] ) );
 		$html .= '<div class="aiovg-email-capture-fields">';
 
+		$email_capture_prefill = aiovg_get_email_capture_prefill();
+
 		if ( ! empty( $email_capture_settings['collect_name'] ) ) {
-			$html .= sprintf( '<input type="text" class="aiovg-email-capture-name" name="name" placeholder="%s" autocomplete="name" />', esc_attr__( 'Your name', 'all-in-one-video-gallery' ) );
+			$html .= sprintf(
+				'<input type="text" class="aiovg-email-capture-name" name="name" value="%s" placeholder="%s" autocomplete="name" />',
+				esc_attr( $email_capture_prefill['name'] ),
+				esc_attr__( 'Your name', 'all-in-one-video-gallery' )
+			);
 		}
 
 		$html .= sprintf(
-			'<input type="email" class="aiovg-email-capture-email" name="email" placeholder="%s" required autocomplete="email" aria-describedby="aiovg-email-capture-error-%d" />',
+			'<input type="email" class="aiovg-email-capture-email" name="email" value="%s" placeholder="%s" required autocomplete="email" aria-describedby="aiovg-email-capture-error-%d" />',
+			esc_attr( $email_capture_prefill['email'] ),
 			esc_attr__( 'Your email address *', 'all-in-one-video-gallery' ),
 			(int) $this->player_uid
 		);
 
 		if ( ! empty( $email_capture_settings['collect_phone'] ) ) {
-			$html .= sprintf( '<input type="tel" class="aiovg-email-capture-phone" name="phone" placeholder="%s" autocomplete="tel" />', esc_attr__( 'Your phone number', 'all-in-one-video-gallery' ) );
+			$html .= sprintf(
+				'<input type="tel" class="aiovg-email-capture-phone" name="phone" value="%s" placeholder="%s" autocomplete="tel" />',
+				esc_attr( $email_capture_prefill['phone'] ),
+				esc_attr__( 'Your phone number', 'all-in-one-video-gallery' )
+			);
 		}
 
 		$html .= '</div>'; // .aiovg-email-capture-fields

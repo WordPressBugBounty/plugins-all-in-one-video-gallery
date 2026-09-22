@@ -804,20 +804,28 @@ function aiovg_get_default_settings() {
 			'hotkeys'                 => 0
 		),
 		'aiovg_email_capture_settings' => array(
-			'enable_email_capture'  => 0,
-			'pre_roll'              => 1,
-			'mid_roll'              => '',
-			'post_roll'             => 0,
-			'collect_name'          => 0,
-			'collect_phone'         => 0,
-			'allow_skip'            => 0,
-			'header_text'           => __( 'Enter your email to continue watching', 'all-in-one-video-gallery' ),
-			'footer_text'           => '',
-			'button_label'          => __( 'Submit', 'all-in-one-video-gallery' ),
-			'skip_text'             => __( 'Skip', 'all-in-one-video-gallery' ),				
-			'blocked_email_domains' => '',
+			'enable_email_capture'    => 0,
+			'show_to_logged_in_users' => 0,
+			'display_frequency'       => 'once_per_visitor',
+			'pre_roll'                => 1,
+			'mid_roll'                => '',
+			'post_roll'               => 0,
+			'collect_name'            => 0,
+			'collect_phone'           => 0,
+			'allow_skip'              => 0,
+			'header_text'             => __( 'Enter your email to continue watching', 'all-in-one-video-gallery' ),
+			'footer_text'             => '',
+			'button_label'            => __( 'Submit', 'all-in-one-video-gallery' ),
+			'skip_text'               => __( 'Skip', 'all-in-one-video-gallery' ),
+			'blocked_email_domains'   => '',
 		),
-		'aiovg_socialshare_settings' => array(				
+		'aiovg_email_lead_captured_settings' => array(
+			'notification_email'  => '',
+			'notify_video_author' => 0,
+			'subject'             => __( '[{site_name}] New lead captured on "{video_title}"', 'all-in-one-video-gallery' ),
+			'body'                => __( "A new lead was captured on \"{video_title}\".\n\nEmail: {email}\nName: {name}\nPhone: {phone}\n\nVideo: {video_link}\nWatched on: {page_url}\n\nCaptured on {now}.", 'all-in-one-video-gallery' )
+		),
+		'aiovg_socialshare_settings' => array(
 			'services' => array( 
 				'facebook'  => 'facebook',
 				'twitter'   => 'twitter',				
@@ -863,7 +871,7 @@ function aiovg_get_default_settings() {
 		'aiovg_images_settings' => array(
 			'width' => '',
 			'ratio' => 56.25,
-			'size'  => 'medium'	
+			'size'  => 'large'	
 		),
 		'aiovg_featured_images_settings' => array(
 			'enabled'                    => 0,
@@ -1309,6 +1317,34 @@ function aiovg_get_page_number() {
  */
 function aiovg_get_private_base_url() {
 	return untrailingslashit( get_site_url() ) . '/private/';
+}
+
+/**
+ * Get the message shown in place of a video the current user cannot play.
+ *
+ * @since  4.9.4
+ * @param  int    $post_id Video post ID.
+ * @param  string $context "page", "player" or "iframe".
+ * @param  string $content Optional. Post content filtered so far, "page" context only.
+ * @return string          Message HTML.
+ */
+function aiovg_get_restricted_message( $post_id, $context, $content = '' ) {
+	$restrictions_settings = aiovg_get_option( 'aiovg_restrictions_settings' );
+
+	$restricted_message = $restrictions_settings['restricted_message'];
+	if ( empty( $restricted_message ) ) {
+		$restricted_message = __( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' );
+	}
+
+	// The single video page has never trimmed the message, the players always have
+	if ( 'page' == $context ) {
+		$html = '<p>' . wp_kses_post( $restricted_message ) . '</p>';
+	} else {
+		$html = wp_kses_post( trim( $restricted_message ) );
+	}
+
+	// Returned unescaped, so a callback escapes its own markup
+	return apply_filters( 'aiovg_restricted_message_html', $html, (int) $post_id, $context, $content );
 }
 
 /**
@@ -2143,9 +2179,14 @@ function aiovg_get_shortcode_fields() {
 				array(
 					'name'        => 'email_capture',
 					'label'       => __( 'Email Capture', 'all-in-one-video-gallery' ),
-					'description' => __( 'Show an email collection form on this video to capture leads.', 'all-in-one-video-gallery' ),
-					'type'        => 'checkbox',
-					'value'       => 1
+					'description' => __( 'Show an email collection form on this video to capture leads. Choose Enable or Disable to force the form on or off for this player only.', 'all-in-one-video-gallery' ),
+					'type'        => 'select',
+					'options'     => array(
+						-1 => '— ' . __( 'Default', 'all-in-one-video-gallery' ) . ' —',
+						1  => __( 'Enable', 'all-in-one-video-gallery' ),
+						0  => __( 'Disable', 'all-in-one-video-gallery' )
+					),
+					'value'       => -1
 				)
 			)
 		);
@@ -2909,6 +2950,48 @@ function aiovg_sanitize_url( $value ) {
 	}
 	
 	return sanitize_url( $value );
+}
+
+/**
+ * Send mail, similar to PHP's mail.
+ *
+ * @since  4.9.4
+ * @param  string|array $to          Array or comma-separated list of email addresses to send message.
+ * @param  string       $subject     Email subject.
+ * @param  string       $message     Message contents.
+ * @param  string|array $headers     Additional headers.
+ * @param  string|array $attachments Files to attach.
+ * @return bool                      Whether the email contents were sent successfully.
+ */
+function aiovg_send_mail( $to, $subject, $message, $headers = '', $attachments = array() ) {
+	if ( empty( $to ) || empty( $subject ) || empty( $message ) ) {
+		return false;
+	}
+
+	if ( empty( $headers ) ) {
+		$name  = sanitize_text_field( get_option( 'blogname' ) );
+		$email = sanitize_email( get_option( 'admin_email' ) );
+
+		$headers .= "From: {$name} <{$email}>\r\n";
+		$headers .= "Reply-To: {$email}\r\n";
+	}
+
+	add_filter( 'wp_mail_content_type', 'aiovg_set_html_mail_content_type' );
+	$success = wp_mail( $to, sanitize_text_field( html_entity_decode( $subject ) ), wp_kses_post( $message ), $headers, $attachments );
+	remove_filter( 'wp_mail_content_type', 'aiovg_set_html_mail_content_type' );
+
+	return $success;
+}
+
+/**
+ * Set the email content type.
+ *
+ * @since  4.9.4
+ * @param  string $content_type Default content type.
+ * @return string               Content type to use.
+ */
+function aiovg_set_html_mail_content_type( $content_type ) {
+	return 'text/html';
 }
 
 /**

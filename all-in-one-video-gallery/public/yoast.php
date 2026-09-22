@@ -112,8 +112,7 @@ class AIOVG_Public_Yoast {
 		
 		// User videos page
 		if ( $post->ID == $page_settings['user_videos'] ) {		
-			if ( $slug = get_query_var( 'aiovg_user' ) ) {
-				$user = get_user_by( 'slug', $slug );
+			if ( ( $slug = get_query_var( 'aiovg_user' ) ) && ( $user = get_user_by( 'slug', $slug ) ) ) {
 				$replacements['%%title%%'] = $user->display_name;
 				
 				// Get Archive SEO title
@@ -230,8 +229,7 @@ class AIOVG_Public_Yoast {
 		
 		// User videos page
 		if ( $post->ID == $page_settings['user_videos'] ) {		
-			if ( $slug = get_query_var( 'aiovg_user' ) ) {
-				$user = get_user_by( 'slug', $slug );
+			if ( ( $slug = get_query_var( 'aiovg_user' ) ) && ( $user = get_user_by( 'slug', $slug ) ) ) {
 				$replacements['%%title%%'] = $user->display_name;
 				
 				// Get Archive SEO desc				
@@ -292,8 +290,7 @@ class AIOVG_Public_Yoast {
 		
 		// User videos page
 		if ( $post->ID == $page_settings['user_videos'] ) {		
-			if ( $slug = get_query_var( 'aiovg_user' ) ) {
-				$user = get_user_by( 'slug', $slug );
+			if ( ( $slug = get_query_var( 'aiovg_user' ) ) && ( $user = get_user_by( 'slug', $slug ) ) ) {
 				$url = aiovg_get_user_videos_page_url( $user->ID );
 			}			
 		}
@@ -467,6 +464,22 @@ class AIOVG_Public_Yoast {
 	}
 
 	/**
+	 * Add our Open Graph image when Yoast SEO has found none.
+	 *
+	 * @since  4.9.4
+	 * @param  object $image_container Yoast SEO image container.
+	 * @return object                  The image container.
+	 */
+	public function wpseo_add_opengraph_additional_images( $image_container ) {
+		// wpseo_opengraph_image only filters images Yoast has already found
+		if ( method_exists( $image_container, 'has_images' ) && ! $image_container->has_images() ) {
+			$image_container->add_image_by_url( $this->wpseo_opengraph_image( '' ) );
+		}
+
+		return $image_container;
+	}
+
+	/**
 	 * Filter Yoast SEO breadcrumbs.
 	 *
 	 * @since  3.9.5
@@ -481,14 +494,41 @@ class AIOVG_Public_Yoast {
 		}
 
 		if ( is_singular( 'aiovg_videos' ) ) {
-			foreach ( $crumbs as $index => $crumb ) {
-				if ( ! empty( $crumb['ptarchive'] ) && 'aiovg_videos' == $crumb['ptarchive'] ) {
-					$obj = get_post_type_object( 'aiovg_videos' );
+			$permalink_settings = aiovg_get_option( 'aiovg_permalink_settings' );
+			$post_type_object   = get_post_type_object( 'aiovg_videos' );
 
-					$crumbs[ $index ] = array(
-						'text' => $obj->labels->name,
-						'url'  => aiovg_get_search_page_url()
+			$page_id = isset( $permalink_settings['video_archive_page'] ) ? (int) $permalink_settings['video_archive_page'] : 0;
+
+			// A valid custom archive page disables has_archive, so Yoast adds no archive crumb
+			if ( $page_id > 0 && ! $post_type_object->has_archive ) {
+				$page_ids   = array_reverse( get_post_ancestors( $page_id ) );
+				$page_ids[] = $page_id;
+
+				$archive_crumbs = array();
+
+				foreach ( $page_ids as $id ) {
+					$title = get_post_meta( $id, '_yoast_wpseo_bctitle', true );
+
+					$archive_crumbs[] = array(
+						'text' => ! empty( $title ) ? $title : wp_strip_all_tags( get_the_title( $id ), true ),
+						'url'  => get_permalink( $id ),
+						'id'   => $id
 					);
+				}
+
+				// Insert after the Home crumb
+				$breadcrumbs_home = WPSEO_Options::get( 'breadcrumbs-home' );
+				$position         = '' !== $breadcrumbs_home ? 1 : 0;
+
+				array_splice( $crumbs, $position, 0, $archive_crumbs );
+			} else {
+				foreach ( $crumbs as $index => $crumb ) {
+					if ( ! empty( $crumb['ptarchive'] ) && 'aiovg_videos' == $crumb['ptarchive'] ) {
+						$crumbs[ $index ] = array(
+							'text' => $post_type_object->labels->name,
+							'url'  => aiovg_get_search_page_url()
+						);
+					}
 				}
 			}
 		} else {
@@ -513,7 +553,8 @@ class AIOVG_Public_Yoast {
 
 						// Include the current category page
 						$crumbs[] = array(
-							'text' => $term->name
+							'text' => $term->name,
+							'url'  => aiovg_get_category_page_url( $term )
 						);	
 					}		
 				}
@@ -523,17 +564,18 @@ class AIOVG_Public_Yoast {
 				if ( $slug = get_query_var( 'aiovg_tag' ) ) {
 					if ( $term = get_term_by( 'slug', $slug, 'aiovg_tags' ) ) {
 						$crumbs[] = array(
-							'text' => $term->name
+							'text' => $term->name,
+							'url'  => aiovg_get_tag_page_url( $term )
 						);	
 					}		
 				}
 			}
 			
 			if ( $post->ID == $page_settings['user_videos'] ) {				
-				if ( $slug = get_query_var( 'aiovg_user' ) ) {
-					$user = get_user_by( 'slug', $slug );
+				if ( ( $slug = get_query_var( 'aiovg_user' ) ) && ( $user = get_user_by( 'slug', $slug ) ) ) {
 					$crumbs[] = array(
-						'text' => $user->display_name
+						'text' => $user->display_name,
+						'url'  => aiovg_get_user_videos_page_url( $user->ID )
 					);			
 				}	
 			}

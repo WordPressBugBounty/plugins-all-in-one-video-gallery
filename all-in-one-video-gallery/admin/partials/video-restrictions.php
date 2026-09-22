@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Video Metabox: [Tab: Access Control] "Restrictions" accordion.
+ * Video Metabox: [Tab: Restrictions].
  *
  * @link    https://plugins360.com
  * @since   3.9.6
