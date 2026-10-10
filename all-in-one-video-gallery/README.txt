@@ -6,7 +6,7 @@ Tags: video gallery, video player, youtube, vimeo, html5 video
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 5.6.20
-Stable tag: 4.9.5
+Stable tag: 4.9.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -193,6 +193,27 @@ This protects the player, not the video file itself: anyone who already has a se
 25. Premium: Front-end video submission form.
 
 == Changelog ==
+
+= 4.9.7 =
+
+* New: Dailymotion Player ID setting, now required by Dailymotion to embed videos. Without it, videos show a "Watch on Dailymotion" link.
+* Tweak: Premium - The User Dashboard, Video Form and playlist pages are now "noindex" and left out of sitemaps, as visitors see only a login form.
+* Tweak: Developers - added the `aiovg_object_id`, `aiovg_ajax_url`, `aiovg_page_path`, `aiovg_page_rewrite_bases` and `aiovg_private_page_ids` filters.
+* Tweak: Developers - `aiovg_get_playlist_image()` is deprecated. Use `aiovg_premium_get_playlist_image()` instead.
+* Tweak: Updated Freemius SDK to version 2.13.5.
+* Fix: Dailymotion videos showing "Forbidden".
+* Fix: Dailymotion short links (dai.ly) and URLs with extra parameters were not recognised.
+* Fix: Rumble videos now start after accepting cookie consent or email capture, instead of needing another click.
+* Fix: "Automatically Show Subtitles" now controls YouTube captions - they could turn on while it was disabled, and did not turn on while it was enabled. Thanks to Studio Passionlab.
+* Fix: CSV import - an "Access Control" value of 0 (Everyone) was imported as Global.
+* Fix: With Plyr.js, a JavaScript error when the player had no video to play, e.g. a widget set to the latest video on a site with none.
+* Fix: Featured images were not downloaded from image URLs that redirect, e.g. GitHub release links.
+* Fix: WPML compatibility issues.
+* Fix: Polylang compatibility issues.
+* Fix: Canonical URLs, titles and breadcrumbs of category, tag, user, playlist and paginated pages, with or without Yoast SEO or Rank Math.
+* Fix: Deleting a video removed its Bunny Stream videos even with "Delete Media Files on Delete" turned off.
+* Fix: Pagination links now end with a slash, avoiding a redirect.
+* Fix: Various minor bug fixes and performance improvements.
 
 = 4.9.5 =
 
@@ -703,6 +724,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 4.9.5 =
+= 4.9.7 =
 
-Paid Memberships Pro support, Email & Lead Capture enhancements, and bug fixes. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)
+Dailymotion now needs a Player ID (Settings → Advanced → API Keys), plus WPML, Polylang and SEO fixes. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

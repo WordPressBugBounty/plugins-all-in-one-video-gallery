@@ -326,9 +326,11 @@ $attributes = apply_filters( 'aiovg_iframe_videojs_player_attributes', $attribut
 // YouTube
 if ( isset( $sources['youtube'] ) ) {
 	$settings['player']['techOrder'] = array( 'youtube' );
-	$settings['player']['youtube']   = array( 
+	
+	$settings['player']['youtube']   = array(
 		'iv_load_policy' => 3,
-		'playsinline'    => $playsinline
+		'playsinline'    => $playsinline,
+		'cc_load_policy' => ( ! empty( $settings['cc_load_policy'] ) ? 1 : 0 )
 	);
 
 	parse_str( $sources['youtube']['src'], $queries );
@@ -2138,6 +2140,29 @@ if ( ! empty( $is_trailer ) ) {
 			var evt = document.createEvent( 'CustomEvent' );
 			evt.initCustomEvent( 'player.init', false, false, { player: player, settings: settings } );
 			window.dispatchEvent( evt );
+
+			// YouTube can switch captions on by itself even with cc_load_policy=0,
+			// so unload its captions module once the player is ready and on play.
+			if ( 0 === settings.cc_load_policy ) {
+				const disableYouTubeCaptions = function() {
+					const tech = player.tech( true );
+					const yt = tech && tech.ytPlayer;
+					if ( ! yt || 'function' !== typeof yt.unloadModule ) return;
+
+					try { yt.setOption( 'captions', 'track', {} ); } catch ( e ) {}
+					try { yt.unloadModule( 'captions' ); } catch ( e ) {}
+					try { yt.unloadModule( 'cc' ); } catch ( e ) {}
+				};
+
+				const disableWithRetries = function() {
+					[ 0, 300, 1200 ].forEach( function( delay ) {
+						setTimeout( disableYouTubeCaptions, delay );
+					});
+				};
+
+				player.ready( disableWithRetries );
+				player.on( 'playing', disableWithRetries );
+			}
 
 			// On player ready.
 			player.ready(function() {

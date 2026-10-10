@@ -77,8 +77,8 @@ class AIOVG_Player_AMP extends AIOVG_Player_Base {
 		if ( ! empty( $videos['vimeo'] ) ) {
 			return $this->get_player_vimeo();
 		}
-		
-		// Dailymotion
+
+		// Dailymotion (without a Player ID)
 		if ( ! empty( $videos['dailymotion'] ) ) {
 			return $this->get_player_dailymotion();
 		}
@@ -113,7 +113,7 @@ class AIOVG_Player_AMP extends AIOVG_Player_Base {
 
 		$attributes['src'] = esc_url( $videos['iframe'] );
 
-		$attributes['sandbox'] = 'allow-scripts allow-same-origin allow-popups';
+		$attributes['sandbox'] = 'allow-scripts allow-same-origin allow-popups allow-presentation';
 		$attributes['allowfullscreen'] = '';
 		$attributes['frameborder'] = '0';
 
@@ -129,7 +129,7 @@ class AIOVG_Player_AMP extends AIOVG_Player_Base {
 			'<amp-iframe %s>%s</amp-iframe>',
 			aiovg_combine_video_attributes( $attributes ),
 			$placeholder
-		);		
+		);
 	}
 
 	/**
@@ -209,48 +209,46 @@ class AIOVG_Player_AMP extends AIOVG_Player_Base {
 	}
 
 	/**
-	 * Get the dailymotion player.
+	 * Get the "Watch on Dailymotion" link shown when no Dailymotion Player ID is set.
 	 *
 	 * @since  3.5.0
- 	 * @return string Player HTML.
+ 	 * @return string $html Player HTML.
 	 */
 	public function get_player_dailymotion() {
 		$player_settings = $this->get_player_settings();
+
 		$videos = $this->get_videos();
+		$poster = $this->get_poster();
 
 		$width  = ! empty( $player_settings['width'] ) ? (int) $player_settings['width'] : 640;
 		$ratio  = (float) $player_settings['ratio'];
 		$height = ( $width * $ratio ) / 100;
 
-		$attributes = array(
-			'width'  => $width,
-			'height' => $height,
-			'layout' => 'responsive'
+		$watch_url = aiovg_get_dailymotion_watch_url( $videos['dailymotion'] );
+
+		$html = '<div class="aiovg-player-dailymotion">';
+
+		// AMP allows no inline styles, so the poster and the link sit one above the other
+		if ( ! empty( $poster ) ) {
+			$html .= sprintf(
+				'<p><a href="%s" target="_blank" rel="noopener noreferrer"><amp-img src="%s" width="%d" height="%d" layout="responsive" alt="%s"></amp-img></a></p>',
+				esc_url( $watch_url ),
+				esc_url( $poster ),
+				$width,
+				$height,
+				esc_attr( $this->post_title )
+			);
+		}
+
+		$html .= sprintf(
+			'<p><a href="%s" target="_blank" rel="noopener noreferrer">%s</a></p>',
+			esc_url( $watch_url ),
+			esc_html__( 'Watch on Dailymotion', 'all-in-one-video-gallery' )
 		);
 
-		$src = $videos['dailymotion'];
-		$attributes['data-videoid'] = aiovg_get_dailymotion_id_from_url( $src );
+		$html .= '</div>';
 
-		if ( empty( $player_settings['controls'] ) ) {
-			$attributes['data-param-controls'] = 'false';
-		}
-
-		if ( ! empty( $player_settings['autoplay'] ) ) {
-			$attributes['autoplay'] = '';
-		}
-
-		if ( ! empty( $player_settings['muted'] ) ) {
-			$attributes['mute'] = 'true';
-		}
-
-		$attributes['data-endscreen-enable'] = 'false';
-		$attributes['data-sharing-enable'] = 'false';
-		$attributes['data-ui-logo'] = 'false';
-
-		$attributes['data-param-queue-autoplay-next'] = 0;
-		$attributes['data-param-queue-enable'] = 0;
-
-		return sprintf( '<amp-dailymotion %s></amp-dailymotion>', aiovg_combine_video_attributes( $attributes ) );
+		return $html;
 	}
 
 	/**
@@ -348,6 +346,10 @@ class AIOVG_Player_AMP extends AIOVG_Player_Base {
 		$videos = parent::get_videos();
 
 		// Force native embed when applicable
+		if ( ! empty( $videos['dailymotion'] ) && '' != aiovg_get_dailymotion_player_id() ) {
+			$videos['iframe'] = $this->get_dailymotion_embed_url( $videos['dailymotion'] );
+		}
+
 		if ( ! empty( $videos['rumble'] ) ) {
 			$videos['iframe'] = $this->get_rumble_embed_url( $videos['rumble'] );
 		}

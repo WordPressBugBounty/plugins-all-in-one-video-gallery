@@ -14,6 +14,7 @@ $maybe_shortcode        = false;
 $is_youtube             = false;
 $is_vimeo               = false;
 $enable_referrer_policy = false;
+$dailymotion_watch_url  = '';
 
 if ( ! empty( $post_meta ) ) {
     if ( in_array( $current_video_provider, $thirdparty_providers_all ) ) {
@@ -35,6 +36,11 @@ if ( ! empty( $post_meta ) ) {
 
             if ( false !== strpos( $embed_url, 'vimeo.com' ) ) {
                 $is_vimeo = true;
+            }
+
+            // Dailymotion embed codes without their own Player ID play through ours, like a Dailymotion URL.
+            if ( false !== strpos( $embed_url, 'dailymotion.com' ) && false === strpos( $embed_url, 'dailymotion.com/player/' ) && '' != aiovg_get_dailymotion_id_from_url( $embed_url ) ) {
+                $current_video_provider = 'dailymotion';
             }
         } else {
             $player_html     = $embedcode;
@@ -156,18 +162,37 @@ if ( ! empty( $embed_url ) ) {
 
     // Dailymotion
     if ( 'dailymotion' == $current_video_provider ) {
-        $embed_url = 'https://www.dailymotion.com/embed/video/' . aiovg_get_dailymotion_id_from_url( $embed_url ) . '?queue-autoplay-next=0&queue-enable=0&sharing-enable=0&ui-logo=0&ui-start-screen-info=0';
+        $dailymotion_player_id = aiovg_get_dailymotion_player_id();
 
-        $autoplay = isset( $_GET['autoplay'] ) ? $_GET['autoplay'] : $player_settings['autoplay'];
-        $embed_url = add_query_arg( 'autoplay', (int) $autoplay, $embed_url );
+        if ( ! empty( $dailymotion_player_id ) ) {
+            // The iframe player only reads "loop"; the rest is set on the player in Dailymotion Studio.
+            $embed_url = 'https://geo.dailymotion.com/player/' . $dailymotion_player_id . '.html?video=' . aiovg_get_dailymotion_id_from_url( $embed_url );
 
-        $loop = isset( $_GET['loop'] ) ? $_GET['loop'] : $player_settings['loop'];
-        $embed_url = add_query_arg( 'loop', (int) $loop, $embed_url );
+            $loop = isset( $_GET['loop'] ) ? $_GET['loop'] : $player_settings['loop'];
+            if ( ! empty( $loop ) ) {
+                $embed_url = add_query_arg( 'loop', 'true', $embed_url );
+            }
 
-        $muted = isset( $_GET['muted'] ) ? $_GET['muted'] : $player_settings['muted'];
-        $embed_url = add_query_arg( 'mute', (int) $muted, $embed_url );
+            $embed_url = apply_filters( 'aiovg_dailymotion_embed_url', $embed_url, $post_id );
+        } else {
+            // Dailymotion refuses embeds without a Player ID, so link to the video instead.
+            $dailymotion_watch_url = aiovg_get_dailymotion_watch_url( $embed_url );
 
-        $embed_url = apply_filters( 'aiovg_dailymotion_embed_url', $embed_url, $post_id );
+            $dailymotion_image = '';
+
+            if ( isset( $_GET['poster'] ) ) {
+                $dailymotion_image = aiovg_base64_decode( $_GET['poster'] );
+            } elseif ( ! empty( $post_meta ) ) {
+                $image_data = aiovg_get_image( $post_id, 'large' );
+                $dailymotion_image = $image_data['src'];
+            }
+
+            if ( ! empty( $dailymotion_image ) ) {
+                $dailymotion_image = aiovg_make_url_absolute( $dailymotion_image );
+            } else {
+                $dailymotion_image = aiovg_get_dailymotion_image_url( $embed_url );
+            }
+        }
     }
 
     // Rumble
@@ -230,13 +255,23 @@ if ( ! empty( $embed_url ) ) {
         $embed_url = add_query_arg( 'showSpeed', $speed, $embed_url );
     }
 
-    // Build iframe code
-    $player_html = sprintf(
-        '<iframe id="aiovg-player-iframe" src="%s" title="%s" width="560" height="315" frameborder="0" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen%s></iframe>',
-        esc_url( $embed_url ),
-        esc_attr( $post_title ),
-        ( $enable_referrer_policy ? ' referrerpolicy="strict-origin-when-cross-origin"' : '' )
-    );
+    if ( ! empty( $dailymotion_watch_url ) ) {
+        // "Watch on Dailymotion" link over the poster
+        $player_html = sprintf(
+            '<a id="aiovg-dailymotion-link" href="%s" target="_blank" rel="noopener noreferrer"%s><span id="aiovg-dailymotion-button">%s</span></a>',
+            esc_url( $dailymotion_watch_url ),
+            ( ! empty( $dailymotion_image ) ? sprintf( ' style="background-image: url(\'%s\')"', esc_url( $dailymotion_image ) ) : '' ),
+            esc_html__( 'Watch on Dailymotion', 'all-in-one-video-gallery' )
+        );
+    } else {
+        // Build iframe code
+        $player_html = sprintf(
+            '<iframe id="aiovg-player-iframe" src="%s" title="%s" width="560" height="315" frameborder="0" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen%s></iframe>',
+            esc_url( $embed_url ),
+            esc_attr( $post_title ),
+            ( $enable_referrer_policy ? ' referrerpolicy="strict-origin-when-cross-origin"' : '' )
+        );
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -262,6 +297,53 @@ if ( ! empty( $embed_url ) ) {
             overflow: hidden;
         }
     </style>
+
+    <?php if ( ! empty( $dailymotion_watch_url ) ) : ?>
+        <style type="text/css">
+            #aiovg-dailymotion-link {
+                display: flex;
+                position: relative;
+                align-items: center;
+                justify-content: center;
+                background-color: #222;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: cover;
+                width: 100%;
+                height: 100%;
+                text-decoration: none;
+            }
+
+            #aiovg-dailymotion-link:before {
+                position: absolute;
+                inset: 0;
+                background-color: rgba( 0, 0, 0, 0.5 );
+                content: "";
+            }
+
+            /* Same button as the cookie consent and email capture overlays */
+            #aiovg-dailymotion-button {
+                display: inline-flex;
+                position: relative;
+                align-items: center;
+                justify-content: center;
+                border-radius: 3px;
+                background-color: <?php echo esc_attr( $primary_color ); ?>;
+                padding: 0 20px;
+                min-height: 44px;
+                line-height: 1;
+                color: #fff;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+            }
+
+            #aiovg-dailymotion-link:hover #aiovg-dailymotion-button,
+            #aiovg-dailymotion-link:focus #aiovg-dailymotion-button {
+                opacity: 0.85;
+            }
+        </style>
+    <?php endif; ?>
 
     <?php if ( isset( $general_settings['custom_css'] ) && ! empty( $general_settings['custom_css'] ) ) : ?>
         <style type="text/css">

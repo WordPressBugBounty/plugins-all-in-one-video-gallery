@@ -88,7 +88,12 @@ class AIOVG_Init {
 		 * The class responsibe for the video player related functionalities.
 		 */
 		require_once AIOVG_PLUGIN_DIR . 'includes/player.php';
-		
+
+		/**
+		 * The base class of the WPML and Polylang integrations.
+		 */
+		require_once AIOVG_PLUGIN_DIR . 'includes/multilingual.php';
+
 		/**
 		 * The files with the helper functions.
 		 */		
@@ -116,12 +121,13 @@ class AIOVG_Init {
 		require_once AIOVG_PLUGIN_DIR . 'public/yoast.php';
 		require_once AIOVG_PLUGIN_DIR . 'public/rank-math.php';			
 		require_once AIOVG_PLUGIN_DIR . 'public/pmpro.php';
+		require_once AIOVG_PLUGIN_DIR . 'public/wpml.php';
+		require_once AIOVG_PLUGIN_DIR . 'public/polylang.php';
 		require_once AIOVG_PLUGIN_DIR . 'public/categories.php';
 		require_once AIOVG_PLUGIN_DIR . 'public/videos.php';		
 		require_once AIOVG_PLUGIN_DIR . 'public/video.php';
 		require_once AIOVG_PLUGIN_DIR . 'public/search.php';
 		require_once AIOVG_PLUGIN_DIR . 'public/likes.php';
-		require_once AIOVG_PLUGIN_DIR . 'public/multilingual.php';
 		require_once AIOVG_PLUGIN_DIR . 'public/bunny-stream.php';
 		require_once AIOVG_PLUGIN_DIR . 'public/conflict.php';		
 		
@@ -291,6 +297,7 @@ class AIOVG_Init {
 		$this->loader->add_filter( 'has_post_thumbnail', $public, 'has_post_thumbnail', 10, 3 );
 		$this->loader->add_filter( 'post_thumbnail_html', $public, 'post_thumbnail_html', 10, 5 );
 		$this->loader->add_filter( 'term_link', $public, 'term_link', 10, 3 );
+		$this->loader->add_filter( 'get_canonical_url', $public, 'get_canonical_url', 10, 2 );
 		
 		// Hooks specific to the Yoast SEO plugin
 		$yoast = new AIOVG_Public_Yoast();
@@ -305,6 +312,7 @@ class AIOVG_Init {
 		$this->loader->add_filter( 'wpseo_twitter_image', $yoast, 'wpseo_twitter_image' );
 		$this->loader->add_filter( 'wpseo_add_opengraph_additional_images', $yoast, 'wpseo_add_opengraph_additional_images' );
 		$this->loader->add_filter( 'wpseo_breadcrumb_links', $yoast, 'wpseo_breadcrumb_links' );
+		$this->loader->add_filter( 'wpseo_schema_graph', $yoast, 'wpseo_schema_graph', 10, 2 );
 		$this->loader->add_filter( 'wpseo_video_custom_field_details', $yoast, 'wpseo_video_sitemap_entry' );
 		$this->loader->add_filter( 'wpseo_video_youtube_details', $yoast, 'wpseo_video_sitemap_entry' );
 		$this->loader->add_filter( 'wpseo_video_vimeo_details', $yoast, 'wpseo_video_sitemap_entry' );
@@ -318,6 +326,7 @@ class AIOVG_Init {
 		$this->loader->add_filter( 'rank_math/opengraph/facebook/image', $rank_math, 'opengraph_image_url' );
 		$this->loader->add_filter( 'rank_math/opengraph/twitter/image', $rank_math, 'opengraph_image_url' );
 		$this->loader->add_filter( 'rank_math/frontend/breadcrumb/items', $rank_math, 'breadcrumb_items' );
+		$this->loader->add_filter( 'rank_math/snippet/rich_snippet_videoobject_entity', $rank_math, 'videoobject_entity' );
 
 		// Hooks specific to the Paid Memberships Pro plugin
 		$pmpro = new AIOVG_Public_PMPro();
@@ -327,6 +336,50 @@ class AIOVG_Init {
 		$this->loader->add_filter( 'aiovg_player_overlay_link', $pmpro, 'filter_player_overlay_link', 10, 2 );
 		$this->loader->add_filter( 'pmpro_membership_content_filter', $pmpro, 'filter_membership_content', 10, 3 );
 		$this->loader->add_filter( 'pmprocpt_redirect_to', $pmpro, 'filter_cpt_redirect_to' );
+
+		// Hooks specific to the WPML plugin
+		$wpml = new AIOVG_Public_WPML();
+
+		$this->loader->add_action( 'wpml_translation_update', $wpml, 'force_rewrite_rules_on_translation_update' );
+		$this->loader->add_action( 'wpml_pro_translation_completed', $wpml, 'force_rewrite_rules_on_translation_job', 10, 3 );
+		$this->loader->add_action( 'save_post_page', $wpml, 'force_rewrite_rules_on_page_update', 10, 3 );
+
+		$this->loader->add_filter( 'aiovg_ajax_url', $wpml, 'filter_ajax_url' );
+		$this->loader->add_filter( 'aiovg_object_id', $wpml, 'filter_object_id', 10, 2 );
+		$this->loader->add_filter( 'aiovg_page_path', $wpml, 'filter_page_path', 10, 2 );
+		$this->loader->add_filter( 'aiovg_page_rewrite_bases', $wpml, 'filter_page_rewrite_bases', 10, 2 );
+		$this->loader->add_filter( 'post_type_link', $wpml, 'filter_video_permalink', 1, 2 );
+		$this->loader->add_filter( 'term_link', $wpml, 'filter_term_link', 11, 3 );
+
+		if ( ! is_admin() || wp_doing_ajax() ) {
+			$this->loader->add_filter( 'option_aiovg_page_settings', $wpml, 'filter_page_settings' );
+		}
+
+		if ( ! is_admin() ) {
+			$this->loader->add_filter( 'wpml_ls_language_url', $wpml, 'filter_language_switcher_url', 10, 2 );
+			$this->loader->add_filter( 'wpml_head_langs', $wpml, 'filter_head_langs' );
+		}
+
+		// Hooks specific to the Polylang plugin
+		$polylang = new AIOVG_Public_Polylang();
+
+		$this->loader->add_action( 'pll_save_post', $polylang, 'force_rewrite_rules_on_translation_save', 10, 3 );
+		$this->loader->add_action( 'save_post_page', $polylang, 'force_rewrite_rules_on_page_update', 10, 3 );
+
+		$this->loader->add_filter( 'aiovg_ajax_url', $polylang, 'filter_ajax_url' );
+		$this->loader->add_filter( 'aiovg_object_id', $polylang, 'filter_object_id', 10, 2 );
+		$this->loader->add_filter( 'aiovg_page_path', $polylang, 'filter_page_path', 10, 2 );
+		$this->loader->add_filter( 'aiovg_page_rewrite_bases', $polylang, 'filter_page_rewrite_bases', 10, 2 );
+		$this->loader->add_filter( 'post_type_link', $polylang, 'filter_video_permalink', 1, 2 );
+		$this->loader->add_filter( 'term_link', $polylang, 'filter_term_link', 11, 3 );
+
+		if ( ! is_admin() || wp_doing_ajax() ) {
+			$this->loader->add_filter( 'option_aiovg_page_settings', $polylang, 'filter_page_settings' );
+		}
+
+		if ( ! is_admin() ) {
+			$this->loader->add_filter( 'pll_translation_url', $polylang, 'filter_translation_url', 10, 2 );
+		}
 
 		// Hooks specific to the categories page
 		$categories = new AIOVG_Public_Categories();
@@ -372,14 +425,6 @@ class AIOVG_Init {
 			$this->loader->add_action( 'wp_ajax_nopriv_aiovg_toggle_likes', $likes, 'ajax_callback_toggle_likes' );
 			$this->loader->add_action( 'wp_ajax_aiovg_toggle_dislikes', $likes, 'ajax_callback_toggle_dislikes' );
 			$this->loader->add_action( 'wp_ajax_nopriv_aiovg_toggle_dislikes', $likes, 'ajax_callback_toggle_dislikes' );
-		}		
-
-		// Hooks that make the plugin multilingual compatible
-		if ( ! is_admin() ) {
-			$public_multilingual = new AIOVG_Public_Multilingual();
-
-			$this->loader->add_action( 'init', $public, 'init', 11 );
-			$this->loader->add_filter( 'option_aiovg_page_settings', $public_multilingual, 'filter_page_settings_for_polylang' );
 		}
 
 		// Hooks specific to the Bunny Stream integration
@@ -406,7 +451,6 @@ class AIOVG_Init {
 
 		$this->loader->add_filter( 'autoptimize_filter_noptimize', $conflict, 'noptimize' );
 		$this->loader->add_filter( 'smush_skip_iframe_from_lazy_load', $conflict, 'smush', 999, 2 );
-		$this->loader->add_filter( 'rank_math/snippet/rich_snippet_videoobject_entity', $conflict, 'rank_math' );
 	}
 
 	/**

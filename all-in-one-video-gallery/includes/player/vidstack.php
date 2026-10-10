@@ -389,6 +389,10 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 				'modestbranding' => 1
 			);
 
+			// 1 forces YouTube captions on. 0 also tells vidstack.js to switch off
+			// the captions YouTube may turn on by itself.
+			$settings['player']['youtube']['cc_load_policy'] = ! empty( $player_settings['cc_load_policy'] ) ? 1 : 0;
+
 			parse_str( $sources['youtube']['src'], $queries );
 
 			if ( isset( $queries['start'] ) ) {

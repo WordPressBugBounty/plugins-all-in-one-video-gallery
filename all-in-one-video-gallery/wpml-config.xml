@@ -40,12 +40,18 @@
         <custom-field action="copy-once">trailer_src_id</custom-field>
         <custom-field action="copy-once">bunny_stream_video_id</custom-field>
         <custom-field action="copy-once">trailer_bunny_stream_video_id</custom-field>
+        <custom-field action="copy-once">is_video_uploaded</custom-field>
+        <custom-field action="copy-once">is_image_uploaded</custom-field>
+        <custom-field action="copy-once">disable_ads</custom-field>
+        <custom-field action="copy-once">override_vast_url</custom-field>
+        <custom-field action="copy-once">vast_url</custom-field>
     </custom-fields>
     <custom-term-fields>
         <custom-term-field action="copy-once">image</custom-term-field>
         <custom-term-field action="copy-once">image_id</custom-term-field>
         <custom-term-field action="copy-once">exclude_search_form</custom-term-field>
         <custom-term-field action="copy-once">exclude_video_form</custom-term-field> 
+        <custom-term-field action="copy-once">playlist_author</custom-term-field>
     </custom-term-fields>
     <admin-texts>
         <key name="aiovg_related_videos_settings">

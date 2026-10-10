@@ -71,27 +71,5 @@ class AIOVG_Public_Conflict {
 
 		return $skip;
 	}
-
-	/**
-	 * Set thumbnailUrl field in VideoObject Schema.
-	 *
-	 * @since  2.4.3
-	 * @param  array $entity Snippet Data
-	 * @return array
-	 */
-	public function rank_math( $entity ) {
-		if ( is_singular( 'aiovg_videos' ) ) {
-			global $post;
-		   
-			$image_data = aiovg_get_image( $post->ID, 'large' );
-			$image = $image_data['src'];
-	
-			if ( ! empty( $image ) ) {
-				$entity['thumbnailUrl'] = $image;
-			}      
-		}
-	   
-		return $entity;
-	}
 	
 }

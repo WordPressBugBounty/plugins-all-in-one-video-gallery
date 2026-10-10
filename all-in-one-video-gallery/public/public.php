@@ -72,11 +72,9 @@ class AIOVG_Public {
 	 * @since 1.0.0
 	 */
 	public function init() {
-		$page_settings      = aiovg_get_option( 'aiovg_page_settings' );
+		$page_settings      = aiovg_get_page_settings();
 		$permalink_settings = aiovg_get_option( 'aiovg_permalink_settings' );
 
-		$site_url = home_url();
-		
 		// Rewrite tags
 		add_rewrite_tag( '%aiovg_category%', '([^/]+)' );
 		add_rewrite_tag( '%aiovg_tag%', '([^/]+)' );
@@ -84,99 +82,47 @@ class AIOVG_Public {
 		add_rewrite_tag( '%aiovg_type%', '([^/]+)' );
 		add_rewrite_tag( '%aiovg_video%', '([^/]+)' );
 		
-		// Single category page		
+		// Rules for every path the page answers on
+
+		// Single category page
 		if ( ! empty( $page_settings['category'] ) ) {
-			$id   = (int) $page_settings['category'];
-			$post = get_post( $id );
-
-			if ( $post && 'publish' === $post->post_status ) {
-				$permalink = get_permalink( $id );
-
-				if ( $permalink ) {
-					$slug = str_replace( $site_url, '', $permalink );			
-					$slug = trim( $slug, '/' );
-					$slug = urldecode( $slug );		
-					
-					add_rewrite_rule( "^$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&aiovg_category=$matches[1]&paged=$matches[2]', 'top' );
-					add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_category=$matches[1]', 'top' );
-				}
+			foreach ( aiovg_get_page_rewrite_bases( $page_settings['category'] ) as $id => $slug ) {
+				add_rewrite_rule( "^$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&aiovg_category=$matches[1]&paged=$matches[2]', 'top' );
+				add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_category=$matches[1]', 'top' );
 			}
 		}
 
 		// Single tag page
 		if ( ! empty( $page_settings['tag'] ) ) {
-			$id   = (int) $page_settings['tag'];
-			$post = get_post( $id );
-
-			if ( $post && 'publish' === $post->post_status ) {
-				$permalink = get_permalink( $id );
-
-				if ( $permalink ) {
-					$slug = str_replace( $site_url, '', $permalink );			
-					$slug = trim( $slug, '/' );
-					$slug = urldecode( $slug );		
-					
-					add_rewrite_rule( "^$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&aiovg_tag=$matches[1]&paged=$matches[2]', 'top' );
-					add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_tag=$matches[1]', 'top' );
-				}
+			foreach ( aiovg_get_page_rewrite_bases( $page_settings['tag'] ) as $id => $slug ) {
+				add_rewrite_rule( "^$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&aiovg_tag=$matches[1]&paged=$matches[2]', 'top' );
+				add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_tag=$matches[1]', 'top' );
 			}
 		}
 		
 		// User videos page
 		if ( ! empty( $page_settings['user_videos'] ) ) {
-			$id   = (int) $page_settings['user_videos'];
-			$post = get_post( $id );
-
-			if ( $post && 'publish' === $post->post_status ) {
-				$permalink = get_permalink( $id );
-
-				if ( $permalink ) {
-					$slug = str_replace( $site_url, '', $permalink );			
-					$slug = trim( $slug, '/' );
-					$slug = urldecode( $slug );		
-					
-					add_rewrite_rule( "^$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&aiovg_user=$matches[1]&paged=$matches[2]', 'top' );
-					add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_user=$matches[1]', 'top' );
-				}
+			foreach ( aiovg_get_page_rewrite_bases( $page_settings['user_videos'] ) as $id => $slug ) {
+				add_rewrite_rule( "^$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&aiovg_user=$matches[1]&paged=$matches[2]', 'top' );
+				add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_user=$matches[1]', 'top' );
 			}
 		}
 		
 		// Player page
 		if ( ! empty( $page_settings['player'] ) ) {
-			$id   = (int) $page_settings['player'];
-			$post = get_post( $id );
-
-			if ( $post && 'publish' === $post->post_status ) {
-				$permalink = get_permalink( $id );
-
-				if ( $permalink ) {
-					$slug = str_replace( $site_url, '', $permalink );			
-					$slug = trim( $slug, '/' );
-					$slug = urldecode( $slug );		
-					
-					add_rewrite_rule( "^$slug/id/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_type=id&aiovg_video=$matches[1]', 'top' );
-				}
+			foreach ( aiovg_get_page_rewrite_bases( $page_settings['player'] ) as $id => $slug ) {
+				add_rewrite_rule( "^$slug/id/([^/]+)/?$", 'index.php?page_id=' . $id . '&aiovg_type=id&aiovg_video=$matches[1]', 'top' );
 			}
 		}
 
 		// Video archive page
 		if ( ! empty( $permalink_settings['video_archive_page'] ) ) {
-			$id   = (int) $permalink_settings['video_archive_page'];
-			$post = get_post( $id );
-
-			if ( $post && 'publish' === $post->post_status ) {
-				$permalink = get_permalink( $id );
-
-				if ( $permalink ) {
-					$slug = str_replace( $site_url, '', $permalink );			
-					$slug = trim( $slug, '/' );
-					$slug = urldecode( $slug );		
-					
-					add_rewrite_rule( "^$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?post_type=aiovg_videos&name=$matches[1]&paged=$matches[2]', 'top' );
-					add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?post_type=aiovg_videos&name=$matches[1]', 'top' );
-					
-					add_rewrite_rule( "^$slug/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&paged=$matches[1]', 'top' );
-				}
+			foreach ( aiovg_get_page_rewrite_bases( $permalink_settings['video_archive_page'] ) as $id => $slug ) {
+				add_rewrite_rule( "^$slug/([^/]+)/page/?([0-9]{1,})/?$", 'index.php?post_type=aiovg_videos&name=$matches[1]&paged=$matches[2]', 'top' );
+				add_rewrite_rule( "^$slug/([^/]+)/?$", 'index.php?post_type=aiovg_videos&name=$matches[1]', 'top' );
+				add_rewrite_rule( "^$slug/([^/]+)/embed/?$", 'index.php?post_type=aiovg_videos&name=$matches[1]&embed=true', 'top' );
+				
+				add_rewrite_rule( "^$slug/page/?([0-9]{1,})/?$", 'index.php?page_id=' . $id . '&paged=$matches[1]', 'top' );
 			}
 		}
 	}
@@ -240,9 +186,12 @@ class AIOVG_Public {
 	public function register_scripts() {
 		$likes_settings = aiovg_get_option( 'aiovg_likes_settings' );
 
-		$ajax_url   = admin_url( 'admin-ajax.php' );
+		$ajax_url   = aiovg_get_ajax_url();
 		$ajax_nonce = wp_create_nonce( 'aiovg_public_ajax_nonce' );
 		$user_id    = get_current_user_id();
+
+		// The player and embed scripts append "?action=" themselves, so they need the URL without query args
+		$plain_ajax_url = admin_url( 'admin-ajax.php' );
 
 		$scroll_to_top_offset = 20;
 		if ( is_admin_bar_showing() ) $scroll_to_top_offset += 32;
@@ -348,7 +297,7 @@ class AIOVG_Public {
 
 		wp_register_script( 
 			AIOVG_PLUGIN_SLUG . '-embed', 
-			AIOVG_PLUGIN_URL . 'public/assets/js/embed.min.js', 
+			AIOVG_PLUGIN_URL . 'public/assets/js/embed.min.js',
 			array(), 
 			AIOVG_PLUGIN_VERSION,
 			array( 'strategy' => 'defer' )
@@ -356,9 +305,9 @@ class AIOVG_Public {
 
 		wp_localize_script( 
 			AIOVG_PLUGIN_SLUG . '-embed', 
-			'aiovg_embed', 
+			'aiovg_embed',
 			array(
-				'ajax_url'   => $ajax_url,
+				'ajax_url'   => $plain_ajax_url,
 				'ajax_nonce' => $ajax_nonce
 			) 
 		);
@@ -373,9 +322,9 @@ class AIOVG_Public {
 		
 		wp_localize_script( 
 			AIOVG_PLUGIN_SLUG . '-player', 
-			'aiovg_player', 
+			'aiovg_player',
 			array(
-				'ajax_url'   => $ajax_url,
+				'ajax_url'   => $plain_ajax_url,
 				'ajax_nonce' => $ajax_nonce,
 				'i18n'       => array(				
 					'stream_not_found' => __( 'This stream is currently not live. Please check back or refresh your page.', 'all-in-one-video-gallery' ),
@@ -1095,6 +1044,51 @@ class AIOVG_Public {
 		}
 
 		return $html;		
+	}
+
+	/**
+	 * Use the category, tag or user videos URL as the canonical URL on those plugin pages.
+	 *
+	 * @since  4.9.6
+	 * @param  string  $canonical_url The canonical URL.
+	 * @param  WP_Post $post          The queried page.
+	 * @return string                 Filtered canonical URL.
+	 */
+	public function get_canonical_url( $canonical_url, $post ) {
+		// Without this, every category, tag and user page is canonical to the plugin page itself
+		if ( ! $post || 'page' != $post->post_type ) {
+			return $canonical_url;
+		}
+
+		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
+
+		// Category page
+		if ( ! empty( $page_settings['category'] ) && $post->ID == $page_settings['category'] && ( $slug = get_query_var( 'aiovg_category' ) ) ) {
+			if ( $term = get_term_by( 'slug', $slug, 'aiovg_categories' ) ) {
+				$canonical_url = aiovg_add_page_number_to_url( aiovg_get_category_page_url( $term ) );
+			}
+		}
+
+		// Tag page
+		if ( ! empty( $page_settings['tag'] ) && $post->ID == $page_settings['tag'] && ( $slug = get_query_var( 'aiovg_tag' ) ) ) {
+			if ( $term = get_term_by( 'slug', $slug, 'aiovg_tags' ) ) {
+				$canonical_url = aiovg_add_page_number_to_url( aiovg_get_tag_page_url( $term ) );
+			}
+		}
+
+		// User videos page
+		if ( ! empty( $page_settings['user_videos'] ) && $post->ID == $page_settings['user_videos'] && ( $slug = get_query_var( 'aiovg_user' ) ) ) {
+			if ( $user = get_user_by( 'slug', $slug ) ) {
+				$canonical_url = aiovg_add_page_number_to_url( aiovg_get_user_videos_page_url( $user->ID ) );
+			}
+		}
+
+		// Video archive page, from page 2 onwards
+		if ( aiovg_is_video_archive_page( $post->ID ) ) {
+			$canonical_url = aiovg_add_page_number_to_url( $canonical_url );
+		}
+
+		return $canonical_url;
 	}
 
 	/**

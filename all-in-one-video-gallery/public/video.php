@@ -42,7 +42,7 @@ class AIOVG_Public_Video {
 		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 
 		// Check the assigned player page
-		$player_page_id = apply_filters( 'wpml_object_id', (int) $page_settings['player'], 'page' );		
+		$player_page_id = (int) $page_settings['player'];
 		if ( ! empty( $player_page_id ) && is_page( $player_page_id ) ) {
 			return AIOVG_PLUGIN_DIR . 'public/templates/player.php';
 		}
@@ -65,7 +65,7 @@ class AIOVG_Public_Video {
 	public function remove_admin_bar( $show_admin_bar ) {
 		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 
-		$player_page_id = apply_filters( 'wpml_object_id', (int) $page_settings['player'], 'page' );
+		$player_page_id = (int) $page_settings['player'];
 		if ( ! empty( $player_page_id ) && is_page( $player_page_id ) ) {
 			return false;
 		}
@@ -90,7 +90,7 @@ class AIOVG_Public_Video {
 		$post_id = 0;
 		
 		if ( isset( $attributes['id'] ) && ! empty( $attributes['id'] ) ) {
-			$post_id = (int) $attributes['id'];
+			$post_id = (int) apply_filters( 'aiovg_object_id', (int) $attributes['id'], 'aiovg_videos' );
 			$post_status = get_post_status( $post_id );
 
 			$has_permission = true;
@@ -116,7 +116,7 @@ class AIOVG_Public_Video {
 					$attributes['youtube'] = aiovg_resolve_youtube_url( $attributes['src'] );
 				} elseif ( false !== strpos( $attributes['src'], 'vimeo.com' ) ) {
 					$attributes['vimeo'] = $attributes['src'];
-				} elseif ( false !== strpos( $attributes['src'], 'dailymotion.com' ) ) {
+				} elseif ( false !== strpos( $attributes['src'], 'dailymotion.com' ) || false !== strpos( $attributes['src'], 'dai.ly' ) ) {
 					$attributes['dailymotion'] = $attributes['src'];
 				} elseif ( false !== strpos( $attributes['src'], 'rumble.com' ) ) {
 					$attributes['rumble'] = $attributes['src'];

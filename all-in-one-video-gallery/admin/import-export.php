@@ -2069,7 +2069,8 @@ class AIOVG_Admin_Import_Export {
 				if ( isset( $row['access_control'] ) ) {
 					$meta['access_control'] = -1;
 
-					if ( ! empty( $row['access_control'] ) ) {
+					// 0 is "Everyone", so only an empty cell falls back to Global
+					if ( '' !== (string) $row['access_control'] ) {
 						$meta['access_control'] = (int) $row['access_control'];
 					}
 				}
@@ -2232,7 +2233,7 @@ class AIOVG_Admin_Import_Export {
 			return 'youtube';
 		} elseif ( false !== stripos( $src, 'vimeo.com' ) ) {
 			return 'vimeo';
-		} elseif ( false !== stripos( $src, 'dailymotion.com' ) ) {
+		} elseif ( false !== stripos( $src, 'dailymotion.com' ) || false !== stripos( $src, 'dai.ly' ) ) {
 			return 'dailymotion';
 		} elseif ( false !== stripos( $src, 'rumble.com' ) ) {
 			return 'rumble';

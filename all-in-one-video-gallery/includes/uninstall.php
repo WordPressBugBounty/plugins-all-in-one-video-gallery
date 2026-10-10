@@ -68,7 +68,8 @@ class AIOVG_Uninstall {
             ), array('%s') );
         }
         // Delete the plugin pages
-        $aiovg_created_pages = get_option( 'aiovg_page_settings' );
+        // A missing option would fall back to the defaults, which create the pages
+        $aiovg_created_pages = ( get_option( 'aiovg_page_settings' ) ? aiovg_get_page_settings() : array() );
         if ( is_array( $aiovg_created_pages ) ) {
             foreach ( $aiovg_created_pages as $page => $id ) {
                 if ( $id > 0 ) {

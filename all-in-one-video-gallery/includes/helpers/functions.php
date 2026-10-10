@@ -115,6 +115,25 @@ function aiovg_base64_encode( $string ) {
 }
 
 /**
+ * Whether the page settings filters may change the settings.
+ *
+ * False while aiovg_get_page_settings() reads the option as saved.
+ *
+ * @since  4.9.6
+ * @param  bool|null $can_filter Optional. Sets the state; for aiovg_get_page_settings() only.
+ * @return bool                  True if the filters may map the settings.
+ */
+function aiovg_can_filter_page_settings( $can_filter = null ) {
+	static $is_allowed = true;
+
+	if ( null !== $can_filter ) {
+		$is_allowed = (bool) $can_filter;
+	}
+
+	return $is_allowed;
+}
+
+/**
  * Combine video attributes as a string.
  * 
  * @since 2.0.0
@@ -215,32 +234,19 @@ function aiovg_create_attachment_from_external_image_url( $image_url, $post_id )
         return 0;
     }
 
-    // Validate remote URL accessibility using wp_remote_head
-    $response = wp_remote_head( $image_url, array(
-        'timeout' => 5,
-        'headers' => array(
-            'User-Agent' => 'Mozilla/5.0 (compatible; WordPress/' . get_bloginfo( 'version' ) . '; ' . get_bloginfo( 'url' ) . ')'
-        )
-    ) );
+    // Guard against SSRF: validates every redirect hop and pins the host's IP
+    $resolved_url = aiovg_resolve_safe_url( $image_url );
 
-    if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
+    if ( false === $resolved_url ) {
         return 0;
     }
 
-    // Check MIME type from the header
-    $mime_type = wp_get_image_mime( $image_url );
+    // Fetch once, so the bytes checked below are the bytes saved
+    $image_data = @file_get_contents( $resolved_url );
 
-    if ( $mime_type == false ) {
-        $content_type = wp_remote_retrieve_header( $response, 'content-type' );
+    aiovg_pin_url_to_ip(); // Reset the default stream context
 
-        if ( empty( $content_type ) || ! in_array( $content_type, array_values( $allowed_mimes ) ) ) {
-            return 0;
-        }
-
-        $mime_type = $content_type; // Use MIME type from the header
-    }
-
-    if ( ! in_array( $mime_type, array_values( $allowed_mimes ) ) ) {
+    if ( false === $image_data ) {
         return 0;
     }
 
@@ -258,17 +264,18 @@ function aiovg_create_attachment_from_external_image_url( $image_url, $post_id )
 
     $file_path = $upload_dir . '/' . $file_name;
 
-    // Get image data using file_get_contents
-    $image_data = @file_get_contents( $image_url );
-
-    if ( false === $image_data ) {
-        return 0;
-    }
-
     // Create the image file on the server
 	if ( false === @file_put_contents( $file_path, $image_data ) ) {
 		return 0;
 	}
+
+    // Check the MIME type from the file's contents, not the remote headers
+    $mime_type = wp_get_image_mime( $file_path );
+
+    if ( ! in_array( $mime_type, array_values( $allowed_mimes ) ) ) {
+        @unlink( $file_path );
+        return 0;
+    }
 
     // Create the attachment
     require_once( ABSPATH . 'wp-admin/includes/image.php' );
@@ -438,7 +445,7 @@ function aiovg_delete_category_attachments( $term_id ) {
 	
 	if ( ! empty( $general_settings['delete_media_files'] ) ) {
 		$image_id = get_term_meta( $term_id, 'image_id', true );
-		if ( ! empty( $image_id ) ) wp_delete_attachment( $image_id, true );
+		if ( ! empty( $image_id ) && ! aiovg_is_media_in_use( $image_id, 'attachment', 0, $term_id ) ) wp_delete_attachment( $image_id, true );
 	}
 }
 
@@ -452,22 +459,23 @@ function aiovg_delete_video_attachments( $post_id ) {
 	$general_settings = aiovg_get_option( 'aiovg_general_settings' );
 	
 	if ( ! empty( $general_settings['delete_media_files'] ) ) {
+		// Translations share media IDs, so keep any file another video or category still uses
 		$mp4_id = get_post_meta( $post_id, 'mp4_id', true );
-		if ( ! empty( $mp4_id ) ) wp_delete_attachment( $mp4_id, true );
+		if ( ! empty( $mp4_id ) && ! aiovg_is_media_in_use( $mp4_id, 'attachment', $post_id ) ) wp_delete_attachment( $mp4_id, true );
 		
 		$webm_id = get_post_meta( $post_id, 'webm_id', true );
-		if ( ! empty( $webm_id ) ) wp_delete_attachment( $webm_id, true );
+		if ( ! empty( $webm_id ) && ! aiovg_is_media_in_use( $webm_id, 'attachment', $post_id ) ) wp_delete_attachment( $webm_id, true );
 		
 		$ogv_id = get_post_meta( $post_id, 'ogv_id', true );
-		if ( ! empty( $ogv_id ) ) wp_delete_attachment( $ogv_id, true );
+		if ( ! empty( $ogv_id ) && ! aiovg_is_media_in_use( $ogv_id, 'attachment', $post_id ) ) wp_delete_attachment( $ogv_id, true );
 		
 		$image_id = get_post_meta( $post_id, 'image_id', true );
-		if ( ! empty( $image_id ) ) wp_delete_attachment( $image_id, true );
+		if ( ! empty( $image_id ) && ! aiovg_is_media_in_use( $image_id, 'attachment', $post_id ) ) wp_delete_attachment( $image_id, true );
 		
 		$sources = get_post_meta( $post_id, 'sources', true );	
 		if ( ! empty( $sources ) && is_array( $sources ) ) {
 			foreach ( $sources as $source ) {
-				if ( ! empty( $source['src_id'] ) ) {
+				if ( ! empty( $source['src_id'] ) && ! aiovg_is_media_in_use( $source['src_id'], 'attachment', $post_id ) ) {
 					wp_delete_attachment( (int) $source['src_id'], true );
 				}
 			}
@@ -476,14 +484,14 @@ function aiovg_delete_video_attachments( $post_id ) {
 		$tracks = get_post_meta( $post_id, 'track' );	
 		if ( ! empty( $tracks ) ) {
 			foreach ( $tracks as $track ) {
-				if ( ! empty( $track['src_id'] ) ) {
+				if ( ! empty( $track['src_id'] ) && ! aiovg_is_media_in_use( $track['src_id'], 'attachment', $post_id ) ) {
 					wp_delete_attachment( (int) $track['src_id'], true );
 				}
 			}
 		}
 
 		$trailer_src_id = get_post_meta( $post_id, 'trailer_src_id', true );
-		if ( ! empty( $trailer_src_id ) ) wp_delete_attachment( $trailer_src_id, true );
+		if ( ! empty( $trailer_src_id ) && ! aiovg_is_media_in_use( $trailer_src_id, 'attachment', $post_id ) ) wp_delete_attachment( $trailer_src_id, true );
 	}
 }
 
@@ -953,8 +961,9 @@ function aiovg_get_default_settings() {
 			'custom_css'                => ''
 		),
 		'aiovg_api_settings' => array(
-			'youtube_api_key'    => '',
-			'vimeo_access_token' => '',
+			'youtube_api_key'       => '',
+			'vimeo_access_token'    => '',
+			'dailymotion_player_id' => ''
 		),
 		'aiovg_bunny_stream_settings' => array(
 			'enable_bunny_stream'         => 0,
@@ -1310,6 +1319,76 @@ function aiovg_get_page_number() {
 }
 
 /**
+ * Get the path of a published page, as rewrite rules match it.
+ *
+ * @since  4.9.6
+ * @param  int    $page_id Page ID.
+ * @return string          URL-decoded page path, or empty when the page is not published.
+ */
+function aiovg_get_page_path( $page_id ) {
+	$post = (int) $page_id > 0 ? get_post( (int) $page_id ) : null;
+
+	if ( ! $post || 'publish' !== $post->post_status ) {
+		return '';
+	}
+
+	// From the permalink, so plugins that customise page URLs are followed
+	$path = urldecode( trim( str_replace( home_url(), '', get_permalink( $post ) ), '/' ) );
+
+	return (string) apply_filters( 'aiovg_page_path', $path, (int) $page_id );
+}
+
+/**
+ * Get the paths a page answers on in the rewrite rules.
+ *
+ * @since  4.9.6
+ * @param  int   $page_id Page ID.
+ * @return array          URL-decoded page paths keyed by page ID, the given page first.
+ */
+function aiovg_get_page_rewrite_bases( $page_id ) {
+	$page_id = (int) $page_id;
+	$path    = aiovg_get_page_path( $page_id );
+	$default = '' === $path ? array() : array( $page_id => $path );
+
+	$bases = apply_filters( 'aiovg_page_rewrite_bases', $default, $page_id );
+
+	if ( ! is_array( $bases ) ) {
+		return $default;
+	}
+
+	// Each entry becomes a rewrite rule, so keep only page IDs with a path
+	$valid = array();
+
+	foreach ( $bases as $id => $base ) {
+		$base = is_string( $base ) ? trim( $base, '/' ) : '';
+
+		if ( (int) $id > 0 && '' !== $base ) {
+			$valid[ (int) $id ] = $base;
+		}
+	}
+
+	return $valid;
+}
+
+/**
+ * Get the page settings as saved, before any filter changes them.
+ *
+ * Rewrite rules, settings updates and uninstall all start from the assigned pages.
+ *
+ * @since  4.9.6
+ * @return array Page settings.
+ */
+function aiovg_get_page_settings() {
+	aiovg_can_filter_page_settings( false );
+
+	try {
+		return aiovg_get_option( 'aiovg_page_settings' );
+	} finally {
+		aiovg_can_filter_page_settings( true );
+	}
+}
+
+/**
  * Returns the base URL used for private masked media.
  *
  * @since  4.7.0
@@ -1443,7 +1522,11 @@ function aiovg_get_shortcode_fields() {
 						array(
 							'name'        => 'dailymotion',
 							'label'       => __( 'Dailymotion', 'all-in-one-video-gallery' ),
-							'description' => sprintf( '%s: https://www.dailymotion.com/video/x11prnt', __( 'Example', 'all-in-one-video-gallery' ) ),
+							'description' => sprintf( '%s: https://www.dailymotion.com/video/x11prnt', __( 'Example', 'all-in-one-video-gallery' ) ) . ( '' == aiovg_get_dailymotion_player_id() ? '<span style="display: block; margin-top: 6px;">' . sprintf(
+								/* translators: %s: URL of the API Keys settings page. */
+								__( 'Dailymotion videos need a Player ID to play on your site. Add it under <a href="%s" target="_blank">Settings → Advanced → API Keys</a>.', 'all-in-one-video-gallery' ),
+								esc_url( admin_url( 'admin.php?page=aiovg_settings&tab=advanced&section=aiovg_api_settings' ) )
+							) . '</span>' : '' ),
 							'type'        => 'text',
 							'value'       => ''
 						),
@@ -2368,7 +2451,7 @@ function aiovg_insert_custom_pages() {
  * @since 2.4.3
  */
 function aiovg_insert_missing_pages() {
-	$pages = aiovg_get_option( 'aiovg_page_settings' );
+	$pages = aiovg_get_page_settings();
 	$page_definitions = aiovg_get_custom_pages_list();		
 
 	foreach ( $page_definitions as $slug => $page ) {
@@ -2416,6 +2499,95 @@ function aiovg_is_gutenberg_page() {
     }
 	
     return false;
+}
+
+/**
+ * Check whether another video or category still uses a media file.
+ *
+ * Translations share media IDs, so a file must outlive the video or category being deleted
+ * while another one still refers to it.
+ *
+ * @since  4.9.6
+ * @param  int|string $media_id        Attachment ID, or a Bunny Stream video ID when $type is "bunny_stream".
+ * @param  string     $type            Optional. "attachment" or "bunny_stream". Default "attachment".
+ * @param  int        $exclude_post_id Optional. The video being deleted.
+ * @param  int        $exclude_term_id Optional. The category being deleted.
+ * @return bool                        True if another video or category refers to it.
+ */
+function aiovg_is_media_in_use( $media_id, $type = 'attachment', $exclude_post_id = 0, $exclude_term_id = 0 ) {
+	global $wpdb;
+
+	$exclude_post_id = (int) $exclude_post_id;
+	$exclude_term_id = (int) $exclude_term_id;
+
+	// Direct queries: language-filtered queries would miss the other translations
+	if ( 'bunny_stream' == $type ) {
+		$media_id = trim( (string) $media_id );
+
+		if ( '' === $media_id ) {
+			return false;
+		}
+
+		$found = $wpdb->get_var( $wpdb->prepare(
+			"SELECT pm.post_id FROM {$wpdb->postmeta} pm INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE p.post_type = 'aiovg_videos' AND pm.meta_key IN ( 'bunny_stream_video_id', 'trailer_bunny_stream_video_id' ) AND pm.meta_value = %s AND pm.post_id != %d LIMIT 1",
+			$media_id,
+			$exclude_post_id
+		) );
+
+		return ! empty( $found );
+	}
+
+	$media_id = (int) $media_id;
+
+	if ( $media_id <= 0 ) {
+		return false;
+	}
+
+	// Single-ID keys
+	$found = $wpdb->get_var( $wpdb->prepare(
+		"SELECT pm.post_id FROM {$wpdb->postmeta} pm INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE p.post_type = 'aiovg_videos' AND pm.meta_key IN ( 'mp4_id', 'webm_id', 'ogv_id', 'image_id', 'trailer_src_id' ) AND pm.meta_value = %s AND pm.post_id != %d LIMIT 1",
+		(string) $media_id,
+		$exclude_post_id
+	) );
+
+	if ( ! empty( $found ) ) {
+		return true;
+	}
+
+	// Additional sources and caption tracks store arrays with a "src_id"
+	$values = $wpdb->get_col( $wpdb->prepare(
+		"SELECT pm.meta_value FROM {$wpdb->postmeta} pm INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE p.post_type = 'aiovg_videos' AND pm.meta_key IN ( 'sources', 'track' ) AND pm.meta_value LIKE %s AND pm.post_id != %d",
+		'%' . $wpdb->esc_like( (string) $media_id ) . '%',
+		$exclude_post_id
+	) );
+
+	foreach ( $values as $value ) {
+		$items = maybe_unserialize( $value );
+
+		if ( ! is_array( $items ) ) {
+			continue;
+		}
+
+		// A "track" row holds one item, a "sources" row a list of them
+		if ( isset( $items['src_id'] ) ) {
+			$items = array( $items );
+		}
+
+		foreach ( $items as $item ) {
+			if ( is_array( $item ) && isset( $item['src_id'] ) && $media_id === (int) $item['src_id'] ) {
+				return true;
+			}
+		}
+	}
+
+	// Category images
+	$found = $wpdb->get_var( $wpdb->prepare(
+		"SELECT tm.term_id FROM {$wpdb->termmeta} tm INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = tm.term_id WHERE tt.taxonomy = 'aiovg_categories' AND tm.meta_key = 'image_id' AND tm.meta_value = %s AND tm.term_id != %d LIMIT 1",
+		(string) $media_id,
+		$exclude_term_id
+	) );
+
+	return ! empty( $found );
 }
 
 /**
@@ -2597,6 +2769,25 @@ function aiovg_is_same_host_url( $url ) {
 	$port = ! empty( $parsed['port'] ) ? (int) $parsed['port'] : ( 'https' === $scheme ? 443 : 80 );
 
 	return in_array( $port, $allowed_ports, true );
+}
+
+/**
+ * Check whether a page is the video archive page.
+ *
+ * @since  4.9.6
+ * @param  int  $post_id Page ID.
+ * @return bool          True for the video archive page.
+ */
+function aiovg_is_video_archive_page( $post_id ) {
+	$permalink_settings = aiovg_get_option( 'aiovg_permalink_settings' );
+
+	if ( empty( $post_id ) || empty( $permalink_settings['video_archive_page'] ) ) {
+		return false;
+	}
+
+	$page_id = (int) apply_filters( 'aiovg_object_id', (int) $permalink_settings['video_archive_page'], 'page' );
+
+	return (int) $post_id === $page_id;
 }
 
 /**

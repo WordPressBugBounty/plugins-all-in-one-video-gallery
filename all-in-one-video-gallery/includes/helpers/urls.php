@@ -15,6 +15,53 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
+ * Add the current page number to a URL, from page 2 onwards.
+ *
+ * @since  4.9.6
+ * @param  string $url Page URL.
+ * @return string      URL of the current page.
+ */
+function aiovg_add_page_number_to_url( $url ) {
+	$paged = aiovg_get_page_number();
+
+	// Nothing to add on page 1, or when the URL already names the page
+	if ( $paged < 2 || preg_match( '#/page/' . $paged . '/?(\?|$)|[?&]paged=' . $paged . '(&|$)#', $url ) ) {
+		return $url;
+	}
+
+	if ( '' == get_option( 'permalink_structure' ) ) {
+		return add_query_arg( 'paged', $paged, $url );
+	}
+
+	return aiovg_add_path_to_url( $url, 'page/' . $paged );
+}
+
+/**
+ * Add a path to a page URL, before any query string.
+ *
+ * @since  4.9.6
+ * @param  string $url  Page URL.
+ * @param  string $path Path to add.
+ * @return string       URL with the path.
+ */
+function aiovg_add_path_to_url( $url, $path ) {
+	$parts = explode( '?', $url, 2 );
+	$url   = user_trailingslashit( trailingslashit( $parts[0] ) . $path );
+
+	return isset( $parts[1] ) ? $url . '?' . $parts[1] : $url;
+}
+
+/**
+ * Get the admin-ajax.php URL.
+ *
+ * @since  4.9.6
+ * @return string AJAX URL.
+ */
+function aiovg_get_ajax_url() {
+	return apply_filters( 'aiovg_ajax_url', admin_url( 'admin-ajax.php' ) );
+}
+
+/**
  * Get the category page URL.
  *
  * @since  1.0.0
@@ -30,7 +77,7 @@ function aiovg_get_category_page_url( $term ) {
 		$url = get_permalink( $page_settings['category'] );
 	
 		if ( '' != get_option( 'permalink_structure' ) ) {
-    		$url = user_trailingslashit( trailingslashit( $url ) . $term->slug );
+    		$url = aiovg_add_path_to_url( $url, $term->slug );
   		} else {
     		$url = add_query_arg( 'aiovg_category', $term->slug, $url );
   		}
@@ -67,7 +114,7 @@ function aiovg_get_player_page_url( $post_id = 0, $atts = array() ) {
 		
 		if ( ! empty( $id ) ) {
 			if ( '' != get_option( 'permalink_structure' ) ) {
-				$url = user_trailingslashit( trailingslashit( $url ) . 'id/' . $id );
+				$url = aiovg_add_path_to_url( $url, 'id/' . $id );
 			} else {
 				$url = add_query_arg( array( 'aiovg_type' => 'id', 'aiovg_video' => $id ), $url );
 			}
@@ -170,7 +217,7 @@ function aiovg_get_tag_page_url( $term ) {
 		$url = get_permalink( $page_settings['tag'] );
 	
 		if ( '' != get_option( 'permalink_structure' ) ) {
-    		$url = user_trailingslashit( trailingslashit( $url ) . $term->slug );
+    		$url = aiovg_add_path_to_url( $url, $term->slug );
   		} else {
     		$url = add_query_arg( 'aiovg_tag', $term->slug, $url );
   		}
@@ -196,7 +243,7 @@ function aiovg_get_user_videos_page_url( $user_id ) {
 		$user_slug = get_the_author_meta( 'user_nicename', $user_id );
 		
 		if ( '' != get_option( 'permalink_structure' ) ) {
-    		$url = user_trailingslashit( trailingslashit( $url ) . $user_slug );
+    		$url = aiovg_add_path_to_url( $url, $user_slug );
   		} else {
     		$url = add_query_arg( 'aiovg_user', $user_slug, $url );
   		}		

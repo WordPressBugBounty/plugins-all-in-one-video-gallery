@@ -60,7 +60,7 @@ class AIOVG_Widget_Video extends WP_Widget {
 		$post_id = 0;
 				
 		if ( ! empty( $instance['id'] ) ) {
-			$post_id = (int) $instance['id'];
+			$post_id = (int) apply_filters( 'aiovg_object_id', (int) $instance['id'], 'aiovg_videos' );
 		} else {
 			$query_args = array(				
 				'post_type' => 'aiovg_videos',			

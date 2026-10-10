@@ -106,32 +106,6 @@
                 background: rgb(98, 175, 237);       
             }
 
-            /* Dailymotion */
-            .dailymotion > #playbutton {
-                display: block;
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate3d(-50%, -50%, 0);
-                transition: all 0.2s cubic-bezier(0, 0, 0.2, 1); 
-                opacity: 1;
-                z-index: 1;
-                border: 0;
-                border-radius: 40px;
-                background-color: rgba(13, 13, 13, 0.6);
-                background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8.56047 5.09337C8.34001 4.9668 8.07015 4.96875 7.85254 5.10019C7.63398 5.23162 7.5 5.47113 7.5 5.73011L7.5 18.2698C7.5 18.5298 7.63398 18.7693 7.85254 18.9007C7.96372 18.9669 8.0882 19 8.21268 19C8.33241 19 8.45309 18.9688 8.56047 18.9075L18.1351 12.6377C18.3603 12.5082 18.5 12.2648 18.5 12C18.5 11.7361 18.3603 11.4917 18.1351 11.3632L8.56047 5.09337Z' fill='%23fff'%3E%3C/path%3E%3C/svg%3E");
-                background-position: center;
-                background-size: 64px; 
-                cursor: pointer;            
-                width: 80px;
-                height: 80px;
-            }     
-            
-            .dailymotion:hover > #playbutton,
-            .dailymotion > #playbutton:focus {
-                opacity: 0.8;
-            }
-
             /* Cookie consent */
             #cookieconsent-modal {
                 display: none;
@@ -453,7 +427,7 @@
             if ( ! this._forceIframeElement ) {
                 const url = new URL( this.src );
                 const query = new URLSearchParams( url.search );            
-                const autoplayRequested = query.has( 'autoplay' ) && ( query.get( 'autoplay' ) == 1 || query.get( 'autoplay' ) == true );    
+                const autoplayRequested = query.has( 'autoplay' ) && ( query.get( 'autoplay' ) == 1 || query.get( 'autoplay' ) == this._getAutoplayValue() );
                 
                 if ( autoplayRequested ) this._forceIframeElement = true;
             }        
@@ -845,7 +819,7 @@
                 const url = new URL( this.src );
 
                 let searchParams = url.searchParams;
-                searchParams.set( 'autoplay', 1 );
+                searchParams.set( 'autoplay', this._getAutoplayValue() );
 
                 url.search = searchParams.toString();
 
@@ -932,6 +906,10 @@
 
         _onIframeAdded() {
             // Always overridden by the child classes
+        }
+
+        _getAutoplayValue() {
+            return 1; // Overridden by child classes whose player takes another value
         }
 
         /**
@@ -1246,25 +1224,6 @@
 
     }
 
-    class AIOVGDailymotionElement extends AIOVGBaseElement {
-
-        constructor() {
-            super();
-            this._addClass( 'dailymotion' );
-        }
-
-        _warmConnections() {
-            if ( window.AIOVGDailymotionIsPreconnected ) return false;
-
-            AIOVGBaseElement.addPrefetch( 'preconnect', 'https://s1.dmcdn.net' );
-            AIOVGBaseElement.addPrefetch( 'preconnect', 'https://s2.dmcdn.net' );
-            AIOVGBaseElement.addPrefetch( 'preconnect', 'https://www.dailymotion.com' );
-
-            window.AIOVGDailymotionIsPreconnected = true;
-        }
-
-    }
-
     class AIOVGIframeElement extends AIOVGBaseElement {
 
         constructor() {
@@ -1272,11 +1231,19 @@
             this._forceIframeElement = true;
         }
 
+        _getAutoplayValue() {
+            // Rumble's player autoplays on 2, as in our PHP
+            if ( /rumble\.com/.test( this.src ) ) return 2;
+
+            // Keep the format the URL already uses, e.g. Bunny Stream's "true" or "false"
+            const autoplay = new URL( this.src ).searchParams.get( 'autoplay' );
+            return ( 'true' === autoplay || 'false' === autoplay ) ? 'true' : 1;
+        }
+
     }
 
     window.AIOVGYouTubeIsPreconnected = false;
     window.AIOVGVimeoIsPreconnected = false;
-    window.AIOVGDailymotionIsPreconnected = false;
 
     /**
      * Called when the page has loaded.
@@ -1289,10 +1256,6 @@
 
         if ( ! customElements.get( 'aiovg-vimeo' ) ) {
             customElements.define( 'aiovg-vimeo', AIOVGVimeoElement );
-        }
-
-        if ( ! customElements.get( 'aiovg-dailymotion' ) ) {
-            customElements.define( 'aiovg-dailymotion', AIOVGDailymotionElement );
         }
 
         if ( ! customElements.get( 'aiovg-embed' ) ) {

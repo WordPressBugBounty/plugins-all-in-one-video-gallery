@@ -66,7 +66,7 @@ if ( $post_id > 0 ) {
 					} elseif ( false !== strpos( $trailer_src, 'vimeo.com' ) ) {
 						$post_meta['vimeo'] = array( $trailer_src );
 						$current_video_provider = 'vimeo';
-					} elseif ( false !== strpos( $trailer_src, 'dailymotion.com' ) ) {
+					} elseif ( false !== strpos( $trailer_src, 'dailymotion.com' ) || false !== strpos( $trailer_src, 'dai.ly' ) ) {
 						$post_meta['dailymotion'] = array( $trailer_src );
 						$current_video_provider = 'dailymotion';
 					} elseif ( false !== strpos( $trailer_src, 'rumble.com' ) ) {

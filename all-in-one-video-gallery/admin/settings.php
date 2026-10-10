@@ -1354,8 +1354,19 @@ class AIOVG_Admin_Settings {
                     'description'       => sprintf( __( 'Follow <a href="%s" target="_blank" rel="noopener noreferrer">this guide</a> to get your own access token.', 'all-in-one-video-gallery' ), 'https://plugins360.com/all-in-one-video-gallery/how-to-get-vimeo-access-token/' ),
                     'type'              => 'text',
                     'sanitize_callback' => 'sanitize_text_field'
+                ),
+                array(
+                    'name'              => 'dailymotion_player_id',
+                    'label'             => __( 'Dailymotion Player ID', 'all-in-one-video-gallery' ),
+                    'description'       => sprintf(
+                        /* translators: %s: URL of Dailymotion's help article on creating players. */
+                        __( 'Required to play Dailymotion videos on your site. Create a player in your Dailymotion Studio under <strong>Embeds → Players</strong> and enter its ID here. This needs a Dailymotion Pro plan. <a href="%s" target="_blank" rel="noopener noreferrer">Learn more</a>', 'all-in-one-video-gallery' ),
+                        'https://faq.dailymotion.com/hc/en-us/articles/4408224350994-Create-manage-your-Players'
+                    ),
+                    'type'              => 'text',
+                    'sanitize_callback' => 'sanitize_text_field'
                 )
-            ),	
+            ),
             'aiovg_page_settings' => array(
 				array(
                     'name'              => 'category',

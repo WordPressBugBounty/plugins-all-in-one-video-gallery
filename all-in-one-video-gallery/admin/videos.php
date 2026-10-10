@@ -142,22 +142,12 @@ class AIOVG_Admin_Videos {
 				$post    = get_post( $page_id );
 
 				if ( $post && 'publish' === $post->post_status ) {
-					$permalink = get_permalink( $page_id );
+					$args['rewrite'] = array(
+						'slug'       => aiovg_get_page_path( $page_id ),
+						'with_front' => false
+					);
 
-					if ( $permalink ) {
-						$site_url = trailingslashit( home_url() );
-
-						$slug = str_replace( $site_url, '', $permalink );            
-						$slug = trim( $slug, '/' );
-						$slug = urldecode( $slug );
-
-						$args['rewrite'] = array(
-							'slug'       => $slug,
-							'with_front' => false
-						);
-
-						$args['has_archive'] = false;
-					}
+					$args['has_archive'] = false;
 				}
 			}
 		}

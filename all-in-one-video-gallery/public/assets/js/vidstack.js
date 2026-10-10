@@ -241,7 +241,10 @@
 			if ( this._isPlayerLoaded ) return false; 
 			this._isPlayerLoaded = true;
 
-			const video = document.getElementById( this._playerId );
+			// Scoped lookup: separately rendered block previews can repeat the same ID.
+			const video = this.querySelector( '#' + this._playerId );
+			if ( ! video ) return false; // No video to play, e.g. none published yet
+			
 			this._player = new Plyr( video, this._params.player );
 
 			this._playerEl = this.querySelector( '.plyr' );
@@ -257,6 +260,8 @@
 				bubbles: true,
 				cancelable: true,
 			}));
+
+			this._disableYouTubeCaptions();
 
 			// On ready
 			this._player.on( 'ready', () => {
@@ -336,7 +341,7 @@
 			}
 
 			// Init Ads
-			if ( this._params.player.hasOwnProperty( 'ads' ) ) {
+			if ( this._player.ads ) {
 				this._initAds();					
 			}
 
@@ -344,6 +349,29 @@
 			if ( this._params.hasOwnProperty( 'contextmenu' ) ) {
 				this._initContextMenu();
 			}
+		}
+
+		_disableYouTubeCaptions() {
+			const youtube = this._params.player.youtube;
+			if ( ! youtube || 0 !== youtube.cc_load_policy ) return;
+
+			// YouTube can switch captions on by itself even with cc_load_policy=0,
+			// so unload its captions module once the player is ready and on play.
+			const disable = () => {
+				const embed = this._player.embed;
+				if ( ! embed || 'function' !== typeof embed.unloadModule ) return;
+
+				try { embed.setOption( 'captions', 'track', {} ); } catch ( e ) {}
+				try { embed.unloadModule( 'captions' ); } catch ( e ) {}
+				try { embed.unloadModule( 'cc' ); } catch ( e ) {}
+			};
+
+			const disableWithRetries = () => {
+				[ 0, 300, 1200 ].forEach( ( delay ) => setTimeout( disable, delay ) );
+			};
+
+			this._player.on( 'ready', disableWithRetries );
+			this._player.on( 'playing', disableWithRetries );
 		}
 
 		_initAds() {

@@ -534,7 +534,7 @@ class AIOVG_Admin {
 		$ignored = $_issues['ignored'];		
 
 		// Check: pages_misconfigured
-		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_page_settings();
 		$pages = aiovg_get_custom_pages_list();
 
 		foreach ( $pages as $key => $page ) {
@@ -594,7 +594,7 @@ class AIOVG_Admin {
 				case 'pages_misconfigured':	
 					global $wpdb;
 
-					$page_settings = aiovg_get_option( 'aiovg_page_settings' );
+					$page_settings = aiovg_get_page_settings();
 					$pages = aiovg_get_custom_pages_list();					
 
 					foreach ( $pages as $key => $page ) {
@@ -975,7 +975,7 @@ class AIOVG_Admin {
 	 * @param WP_Post $post        The current post object.
 	 */
 	public function add_display_post_states( $post_states, $post ) {
-		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
+		$page_settings = aiovg_get_page_settings();
 		
 		if ( isset( $page_settings['category'] ) && $page_settings['category'] == $post->ID ) {
 			$post_states['aiovg_page_for_category'] = __( 'Video Category Page', 'all-in-one-video-gallery' );
@@ -1170,8 +1170,7 @@ class AIOVG_Admin {
     }
 
 	/**
-     * Flags rewrite rules for flushing when an assigned AIOVG page
-     * or its translation is updated.
+     * Flags rewrite rules for flushing when an assigned AIOVG page is updated.
      *
      * @since 4.7.3
      * @param int     $post_id Post ID.
@@ -1194,7 +1193,7 @@ class AIOVG_Admin {
             return;
         }
 
-        $page_settings      = aiovg_get_option( 'aiovg_page_settings' );
+        $page_settings      = aiovg_get_page_settings();
 		$permalink_settings = aiovg_get_option( 'aiovg_permalink_settings' );
 
 		if ( ! empty( $permalink_settings['video_archive_page'] ) ) {
@@ -1212,39 +1211,6 @@ class AIOVG_Admin {
         if ( in_array( (int) $post_id, $assigned_pages, true ) ) {
             delete_option( 'aiovg_rewrite_rules_flushed' );
             return;
-        }
-
-        // Check for Polylang translations
-        if ( function_exists( 'pll_get_post_translations' ) ) {
-            foreach ( $assigned_pages as $assigned_id ) {
-                $translations = pll_get_post_translations( $assigned_id );
-
-                if ( empty( $translations ) ) {
-                    continue;
-                }
-
-                if ( in_array( (int) $post_id, array_map( 'intval', $translations ), true ) ) {
-                    delete_option( 'aiovg_rewrite_rules_flushed' );
-                    return;
-                }
-            }
-        }
-
-        // Check for WPML translations (TRID-based)
-        if ( defined( 'ICL_SITEPRESS_VERSION' ) ) {
-            $element_type = apply_filters( 'wpml_element_type', 'page' );
-            $current_trid = apply_filters( 'wpml_element_trid', null, $post_id, $element_type );
-
-            if ( ! empty( $current_trid ) ) {
-                foreach ( $assigned_pages as $assigned_id ) {
-                    $assigned_trid = apply_filters( 'wpml_element_trid', null, $assigned_id, $element_type );
-
-                    if ( (int) $current_trid === (int) $assigned_trid ) {
-                        delete_option( 'aiovg_rewrite_rules_flushed' );
-                        return;
-                    }
-                }
-            }
         }
     }
 

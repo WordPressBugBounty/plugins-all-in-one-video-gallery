@@ -196,6 +196,7 @@
 			this.player.on( 'playing', () => this._onPlaying() );
 			this.player.on( 'ended', () => this._onEnded() );
 
+			this._disableYouTubeCaptions();
 			this._initOffset();
 			this._initChapters();
 			this._initQualitySelector();
@@ -215,6 +216,29 @@
 			};
 
 			this._dispatchEvent( 'player.init', options );
+		}
+
+		_disableYouTubeCaptions() {
+			if ( 0 !== this.settings.cc_load_policy ) return;
+
+			// YouTube can switch captions on by itself even with cc_load_policy=0,
+			// so unload its captions module once the player is ready and on play.
+			const disable = () => {
+				const tech = this.player.tech( true );
+				const yt = tech && tech.ytPlayer;
+				if ( ! yt || 'function' !== typeof yt.unloadModule ) return;
+
+				try { yt.setOption( 'captions', 'track', {} ); } catch ( e ) {}
+				try { yt.unloadModule( 'captions' ); } catch ( e ) {}
+				try { yt.unloadModule( 'cc' ); } catch ( e ) {}
+			};
+
+			const disableWithRetries = () => {
+				[ 0, 300, 1200 ].forEach( ( delay ) => setTimeout( disable, delay ) );
+			};
+
+			this.player.ready( disableWithRetries );
+			this.player.on( 'playing', disableWithRetries );
 		}
 
 		_onReady() {

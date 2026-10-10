@@ -226,6 +226,17 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 	<div id="aiovg-field-dailymotion" class="aiovg-form-control aiovg-toggle-fields aiovg-type-dailymotion"<?php if ( 'dailymotion' !== $type ) echo ' style="display: none;"'; ?>>
 		<label for="aiovg-dailymotion" class="aiovg-form-label"><?php esc_html_e( 'Dailymotion URL', 'all-in-one-video-gallery' ); ?></label>
 		<input type="text" name="dailymotion" id="aiovg-dailymotion" class="widefat" placeholder="<?php printf( '%s: https://www.dailymotion.com/video/x11prnt', esc_attr__( 'Example', 'all-in-one-video-gallery' ) ); ?>" value="<?php echo esc_url( $dailymotion ); ?>" />
+		<?php if ( '' == aiovg_get_dailymotion_player_id() ) : ?>
+			<p class="description">
+				<?php
+				printf(
+					/* translators: %s: URL of the API Keys settings page. */
+					wp_kses_post( __( 'Dailymotion videos need a Player ID to play on your site. Add it under <a href="%s" target="_blank">Settings → Advanced → API Keys</a>.', 'all-in-one-video-gallery' ) ),
+					esc_url( admin_url( 'admin.php?page=aiovg_settings&tab=advanced&section=aiovg_api_settings' ) )
+				);
+				?>
+			</p>
+		<?php endif; ?>
 	</div>
 			
 	<div id="aiovg-field-rumble" class="aiovg-form-control aiovg-toggle-fields aiovg-type-rumble"<?php if ( 'rumble' !== $type ) echo ' style="display: none;"'; ?>>

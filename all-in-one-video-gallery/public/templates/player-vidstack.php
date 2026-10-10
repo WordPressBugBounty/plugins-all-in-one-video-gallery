@@ -384,6 +384,10 @@ if ( isset( $sources['youtube'] ) ) {
 		'modestbranding' => 1
 	);
 
+	// 1 forces YouTube captions on. 0 also tells the player script below to switch
+	// off the captions YouTube may turn on by itself.
+	$settings['player']['youtube']['cc_load_policy'] = ! empty( $cc_load_policy ) ? 1 : 0;
+
 	parse_str( $sources['youtube']['src'], $queries );
 
 	if ( isset( $queries['start'] ) ) {
@@ -1731,6 +1735,28 @@ if ( ! empty( $is_trailer ) ) {
 			var customEvent = document.createEvent( 'CustomEvent' );
 			customEvent.initCustomEvent( 'player.init', false, false, { player: player, settings: settings } );
 			window.dispatchEvent( customEvent );
+
+			// YouTube can switch captions on by itself even with cc_load_policy=0,
+			// so unload its captions module once the player is ready and on play.
+			if ( settings.player.youtube && 0 === settings.player.youtube.cc_load_policy ) {
+				const disableYouTubeCaptions = function() {
+					const embed = player.embed;
+					if ( ! embed || 'function' !== typeof embed.unloadModule ) return;
+
+					try { embed.setOption( 'captions', 'track', {} ); } catch ( e ) {}
+					try { embed.unloadModule( 'captions' ); } catch ( e ) {}
+					try { embed.unloadModule( 'cc' ); } catch ( e ) {}
+				};
+
+				const disableWithRetries = function() {
+					[ 0, 300, 1200 ].forEach( function( delay ) {
+						setTimeout( disableYouTubeCaptions, delay );
+					});
+				};
+
+				player.on( 'ready', disableWithRetries );
+				player.on( 'playing', disableWithRetries );
+			}
 
 			// On ready.
 			player.on( 'ready', function() {

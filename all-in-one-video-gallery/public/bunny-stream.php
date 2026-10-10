@@ -91,11 +91,11 @@ class AIOVG_Public_Bunny_Stream {
 
 		if ( ! empty( $bunny_stream_video_id ) ) {
 			if ( 'default' != $type ) {
-				$this->delete_bunny_stream_video( $bunny_stream_video_id );
+				$this->delete_unused_bunny_stream_video( $bunny_stream_video_id, $post_id );
 				$bunny_stream_video_id = 0;
 			} elseif ( ! empty( $mp4 ) ) {
 				if ( strpos( $mp4, '/' . $bunny_stream_video_id . '/' ) === false ) {
-					$this->delete_bunny_stream_video( $bunny_stream_video_id );
+					$this->delete_unused_bunny_stream_video( $bunny_stream_video_id, $post_id );
 					$bunny_stream_video_id = 0;
 				}
 			}			
@@ -109,7 +109,7 @@ class AIOVG_Public_Bunny_Stream {
 
 			if ( ! empty( $deletable_bunny_stream_video_ids ) ) {
 				foreach ( $deletable_bunny_stream_video_ids as $bunny_stream_video_id ) {
-					$this->delete_bunny_stream_video( $bunny_stream_video_id );
+					$this->delete_unused_bunny_stream_video( $bunny_stream_video_id, $post_id );
 				}
 			}
  		}
@@ -123,11 +123,11 @@ class AIOVG_Public_Bunny_Stream {
 
 			if ( ! empty( $trailer_bunny_stream_video_id ) ) {
 				if ( 'embedcode' === $trailer_type ) {
-					$this->delete_bunny_stream_video( $trailer_bunny_stream_video_id );
+					$this->delete_unused_bunny_stream_video( $trailer_bunny_stream_video_id, $post_id );
 					$trailer_bunny_stream_video_id = '';
 				} elseif ( ! empty( $trailer_src ) ) {
 					if ( strpos( $trailer_src, '/' . $trailer_bunny_stream_video_id . '/' ) === false ) {
-						$this->delete_bunny_stream_video( $trailer_bunny_stream_video_id );
+						$this->delete_unused_bunny_stream_video( $trailer_bunny_stream_video_id, $post_id );
 						$trailer_bunny_stream_video_id = '';
 					}
 				}
@@ -141,7 +141,7 @@ class AIOVG_Public_Bunny_Stream {
 
 				if ( ! empty( $deletable_trailer_bunny_stream_video_ids ) ) {
 					foreach ( $deletable_trailer_bunny_stream_video_ids as $deletable_trailer_id ) {
-						$this->delete_bunny_stream_video( $deletable_trailer_id );
+						$this->delete_unused_bunny_stream_video( $deletable_trailer_id, $post_id );
 					}
 				}
 			}
@@ -159,6 +159,13 @@ class AIOVG_Public_Bunny_Stream {
 			return false;
 		}
 
+		// "Delete Media Files on Delete" covers the Bunny Stream copies too
+		$general_settings = aiovg_get_option( 'aiovg_general_settings' );
+
+		if ( empty( $general_settings['delete_media_files'] ) ) {
+			return false;
+		}
+
 		// Main video: delete Bunny Stream video if one is stored
 		$video_id = get_post_meta( $post_id, 'bunny_stream_video_id', true );
 
@@ -166,7 +173,7 @@ class AIOVG_Public_Bunny_Stream {
 			$video_url = get_post_meta( $post_id, 'mp4', true );
 
 			if ( strpos( $video_url, '/' . $video_id . '/' ) !== false ) {
-				$this->delete_bunny_stream_video( $video_id );
+				$this->delete_unused_bunny_stream_video( $video_id, $post_id );
 			}
 		}
 
@@ -177,7 +184,7 @@ class AIOVG_Public_Bunny_Stream {
 			$trailer_src = get_post_meta( $post_id, 'trailer_src', true );
 
 			if ( strpos( $trailer_src, '/' . $trailer_video_id . '/' ) !== false ) {
-				$this->delete_bunny_stream_video( $trailer_video_id );
+				$this->delete_unused_bunny_stream_video( $trailer_video_id, $post_id );
 			}
 		}
 	}
@@ -272,6 +279,14 @@ class AIOVG_Public_Bunny_Stream {
 			wp_send_json_error( $response );
 		}
 
+		// A wrong API key or library ID returns an error object
+		if ( empty( $json['guid'] ) ) {
+			$code = wp_remote_retrieve_response_code( $api_response );
+
+			$response['error'] = ( 401 == $code || 403 == $code ) ? __( 'Invalid API Credentials.', 'all-in-one-video-gallery' ) : __( 'Sorry, transcoding failed. Please contact the site administrator.', 'all-in-one-video-gallery' );
+			wp_send_json_error( $response );
+		}
+
 		$video_id = $json['guid'];
 
 		// Build the final response with token and metadata		
@@ -283,7 +298,7 @@ class AIOVG_Public_Bunny_Stream {
 			'collection_id' => $collection_id,
 			'title'         => $title,
 			'video_url'     => 'https://' . $cdn_hostname . '/' . $video_id . '/playlist.m3u8',
-			'thumbnail_url' => 'https://' . $cdn_hostname . '/' . $video_id . '/' . $json['thumbnailFileName']
+			'thumbnail_url' => 'https://' . $cdn_hostname . '/' . $video_id . '/' . ( isset( $json['thumbnailFileName'] ) ? $json['thumbnailFileName'] : 'thumbnail.jpg' )
 		);
 
 		wp_send_json_success( $response ); // Return successful JSON response
@@ -359,7 +374,7 @@ class AIOVG_Public_Bunny_Stream {
 		$body = wp_remote_retrieve_body( $api_response );
 		$json = json_decode( $body, true );
 
-		if ( ! is_array( $json ) ) {
+		if ( ! is_array( $json ) || ! isset( $json['status'] ) ) {
 			$response['error'] = __( 'Sorry, transcoding failed. Please contact the site administrator.', 'all-in-one-video-gallery' );
 			wp_send_json_error( $response );
 		}
@@ -431,7 +446,7 @@ class AIOVG_Public_Bunny_Stream {
 			wp_send_json_error( $response );
 		}
 
-		$this->delete_bunny_stream_video( $video_id );
+		$this->delete_unused_bunny_stream_video( $video_id, $post_id );
 		
 		wp_send_json_success(); // Send successful JSON response
 	}
@@ -478,6 +493,21 @@ class AIOVG_Public_Bunny_Stream {
 
 		// Check for successful HTTP response code
 		return wp_remote_retrieve_response_code( $response ) === 200;
+	}
+
+	/**
+	 * Delete a Bunny Stream video unless another video still uses it.
+	 *
+	 * @since  4.9.6
+	 * @access private
+	 * @param  string  $video_id Bunny Stream video ID.
+	 * @param  int     $post_id  The video post letting go of it, or 0 when there is none yet.
+	 */
+	private function delete_unused_bunny_stream_video( $video_id, $post_id ) {
+		// Translations share the Bunny Stream video, so keep it while another video uses it
+		if ( ! aiovg_is_media_in_use( $video_id, 'bunny_stream', $post_id ) ) {
+			$this->delete_bunny_stream_video( $video_id );
+		}
 	}
 
 	/**

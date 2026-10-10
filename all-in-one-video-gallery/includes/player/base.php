@@ -217,7 +217,7 @@ class AIOVG_Player_Base {
 							$videos['youtube'] = aiovg_resolve_youtube_url( $trailer_src );
 						} elseif ( false !== strpos( $trailer_src, 'vimeo.com' ) ) {
 							$videos['vimeo'] = $trailer_src;
-						} elseif ( false !== strpos( $trailer_src, 'dailymotion.com' ) ) {
+						} elseif ( false !== strpos( $trailer_src, 'dailymotion.com' ) || false !== strpos( $trailer_src, 'dai.ly' ) ) {
 							$videos['dailymotion'] = $trailer_src;
 						} elseif ( false !== strpos( $trailer_src, 'rumble.com' ) ) {
 							$videos['rumble'] = $trailer_src;
@@ -335,6 +335,12 @@ class AIOVG_Player_Base {
 
 		if ( ! empty( $videos['ogv'] ) ) {
 			$videos['ogv'] = aiovg_make_url_absolute( $videos['ogv'] );
+		}
+
+		// Dailymotion embed codes without their own Player ID play through ours, like a Dailymotion URL.
+		if ( isset( $videos['iframe'] ) && false !== strpos( $videos['iframe'], 'dailymotion.com' ) && false === strpos( $videos['iframe'], 'dailymotion.com/player/' ) && '' != aiovg_get_dailymotion_id_from_url( $videos['iframe'] ) ) {
+			$videos['dailymotion'] = $videos['iframe'];
+			unset( $videos['iframe'] );
 		}
 
 		// Set embed URL if available
@@ -959,7 +965,49 @@ class AIOVG_Player_Base {
 
 		return $html;
 	}
-	
+
+	/**
+	 * Get the "Watch on Dailymotion" link shown when no Dailymotion Player ID is set.
+	 *
+	 * @since  4.9.6
+ 	 * @return string $html Player HTML.
+	 */
+	public function get_player_dailymotion_link() {
+		$player_settings = $this->get_player_settings();
+
+		$videos = $this->get_videos();
+		$poster = $this->get_poster();
+
+		// Enqueue dependencies
+		wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-player' );
+
+		// HTML output
+		$html = sprintf(
+			'<div class="aiovg-player-container" style="max-width: %s;">',
+			( ! empty( $player_settings['width'] ) ? (int) $player_settings['width'] . 'px' : '100%' )
+		);
+
+		$html .= sprintf(
+			'<div class="aiovg-player" style="padding-bottom: %s%%;">',
+			(float) $player_settings['ratio']
+		);
+
+		$wrapper_style = ! empty( $poster ) ? sprintf( ' style="background-image: url(\'%s\')"', esc_url( $poster ) ) : '';
+
+		// Restriction overlay with a lighter shade, and the cookie consent button
+		$html .= sprintf(
+			'<div class="aiovg-restrictions-wrapper"%s><div class="aiovg-restrictions-overlay" style="background: rgba( 0, 0, 0, 0.5 );"><div class="aiovg-restrictions-message"><a href="%s" class="aiovg-privacy-consent-button" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">%s</a></div></div></div>',
+			$wrapper_style,
+			esc_url( aiovg_get_dailymotion_watch_url( $videos['dailymotion'] ) ),
+			esc_html__( 'Watch on Dailymotion', 'all-in-one-video-gallery' )
+		);
+
+		$html .= '</div>';
+		$html .= '</div>';
+
+		return $html;
+	}
+
 	/**
 	 * Get the raw player embedcode.
 	 *
@@ -994,19 +1042,22 @@ class AIOVG_Player_Base {
 		$privacy_settings = $this->get_privacy_settings();
 
 		$videos = $this->get_videos();
-		$poster = $this->get_poster();				
+		$poster = $this->get_poster();
+
+		// Dailymotion refuses embeds without a Player ID, so link to the video instead.
+		if ( ! empty( $videos['dailymotion'] ) && '' == aiovg_get_dailymotion_player_id() ) {
+			return $this->get_player_dailymotion_link();
+		}
 
 		// Enqueue dependencies
 		wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-embed' );
-		
+
 		// Vars
 		$provider = 'embed';
 		if ( ! empty( $videos['youtube'] ) || false !== strpos( $videos['iframe'], 'youtube.com' ) || false !== strpos( $videos['iframe'], 'youtu.be' ) ) {					
 			$provider = 'youtube';
 		} elseif ( ! empty( $videos['vimeo'] ) || false !== strpos( $videos['iframe'], 'vimeo.com' ) ) {
 			$provider = 'vimeo';
-		} elseif ( ! empty( $videos['dailymotion'] ) ) {
-			$provider = 'dailymotion';
 		}
 
 		$attributes = array(
@@ -1347,19 +1398,16 @@ class AIOVG_Player_Base {
 	 */
 	public function get_dailymotion_embed_url( $url ) {
 		$player_settings = $this->get_player_settings();
+		$player_id       = aiovg_get_dailymotion_player_id();
 
-		$url = 'https://www.dailymotion.com/embed/video/' . aiovg_get_dailymotion_id_from_url( $url ) . '?queue-autoplay-next=0&queue-enable=0&sharing-enable=0&ui-logo=0&ui-start-screen-info=0';
+		// Without a Player ID Dailymotion answers 403, and the players show a link instead.
+		$player_file = ! empty( $player_id ) ? 'player/' . $player_id . '.html' : 'player.html';
 
-		if ( ! empty( $player_settings['autoplay'] ) ) {
-			$url = add_query_arg( 'autoplay', 1, $url );
-		}
+		$url = 'https://geo.dailymotion.com/' . $player_file . '?video=' . aiovg_get_dailymotion_id_from_url( $url );
 
+		// The iframe player only reads "loop"; the rest is set on the player in Dailymotion Studio.
 		if ( ! empty( $player_settings['loop'] ) ) {
-			$url = add_query_arg( 'loop', 1, $url );
-		}
-
-		if ( ! empty( $player_settings['muted'] ) ) {
-			$url = add_query_arg( 'mute', 1, $url );
+			$url = add_query_arg( 'loop', 'true', $url );
 		}
 
 		$url = apply_filters( 'aiovg_dailymotion_embed_url', $url, $this->post_id );

@@ -168,24 +168,29 @@ class AIOVG_Public_Rank_Math {
 		// Category Page
 		if ( $this->is_plugin_page( 'category' ) && ( $slug = get_query_var( 'aiovg_category' ) ) ) {
 			if ( $term = get_term_by( 'slug', $slug, 'aiovg_categories' ) ) {
-				$canonical_url = aiovg_get_category_page_url( $term );
+				$canonical_url = aiovg_add_page_number_to_url( aiovg_get_category_page_url( $term ) );
 			}
 		}				
 
 		// Tag Page
 		if ( $this->is_plugin_page( 'tag' ) && ( $slug = get_query_var( 'aiovg_tag' ) ) ) {
 			if ( $term = get_term_by( 'slug', $slug, 'aiovg_tags' ) ) {
-				$canonical_url = aiovg_get_tag_page_url( $term );
+				$canonical_url = aiovg_add_page_number_to_url( aiovg_get_tag_page_url( $term ) );
 			}
 		}				
 		
 		// User Videos Page
 		if ( $this->is_plugin_page( 'user_videos' ) && ( $slug = get_query_var( 'aiovg_user' ) ) ) {
 			if ( $user = get_user_by( 'slug', $slug ) ) {
-				$canonical_url = aiovg_get_user_videos_page_url( $user->ID );
+				$canonical_url = aiovg_add_page_number_to_url( aiovg_get_user_videos_page_url( $user->ID ) );
 			}
 		}			
 		
+		// Video Archive Page, from page 2 onwards
+		if ( aiovg_is_video_archive_page( get_queried_object_id() ) ) {
+			$canonical_url = aiovg_add_page_number_to_url( $canonical_url );
+		}
+
 		return $canonical_url;	
 	}
 
@@ -245,6 +250,8 @@ class AIOVG_Public_Rank_Math {
 
 			// A valid custom archive page disables has_archive, so Rank Math adds no archive crumb
 			if ( $page_id > 0 && ! $post_type_object->has_archive ) {
+				$page_id = (int) apply_filters( 'aiovg_object_id', $page_id, 'page' );
+
 				$page_ids   = array_reverse( get_post_ancestors( $page_id ) );
 				$page_ids[] = $page_id;
 
@@ -315,13 +322,35 @@ class AIOVG_Public_Rank_Math {
 	}
 
 	/**
+	 * Set thumbnailUrl field in VideoObject Schema.
+	 *
+	 * @since  2.4.3
+	 * @param  array $entity Snippet Data
+	 * @return array
+	 */
+	public function videoobject_entity( $entity ) {
+		if ( is_singular( 'aiovg_videos' ) ) {
+			global $post;
+		   
+			$image_data = aiovg_get_image( $post->ID, 'large' );
+			$image = $image_data['src'];
+	
+			if ( ! empty( $image ) ) {
+				$entity['thumbnailUrl'] = $image;
+			}      
+		}
+	   
+		return $entity;
+	}
+
+	/**
 	 * Checks whether the current page is the given plugin page.
 	 *
 	 * @since  4.9.4
-	 * @param  string $page Page settings key: "category", "tag" or "user_videos".
+	 * @param  string $page Page settings key: "category", "tag", "user_videos" or "playlist".
 	 * @return bool         True if the current page is that plugin page.
 	 */
-	private function is_plugin_page( $page ) {
+	protected function is_plugin_page( $page ) {
 		$page_settings = aiovg_get_option( 'aiovg_page_settings' );
 
 		// Our query vars are public, so any URL can carry them

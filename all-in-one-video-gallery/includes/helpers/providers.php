@@ -218,18 +218,23 @@ function aiovg_get_dailymotion_id_from_url( $url ) {
 	$id = '';
 	
 	if ( preg_match( '!^.+dailymotion\.com/(video|hub)/([^_]+)[^#]*(#video=([^_&]+))?|(dai\.ly/([^_]+))!', $url, $m ) ) {
-        if ( isset( $m[6] ) ) {
+        if ( ! empty( $m[6] ) ) { // dai.ly/{id}
             $id = $m[6];
-        }
-		
-        if ( isset( $m[4] ) ) {
+        } elseif ( ! empty( $m[4] ) ) { // hub/...#video={id}
             $id = $m[4];
+        } else {
+            $id = $m[2];
         }
-		
-        $id = $m[2];
-    }
 
-	return $id;	
+		// IDs are alphanumeric; drop any query string or path after them.
+		$id = preg_replace( '/[^a-zA-Z0-9].*$/', '', $id );
+    } elseif ( preg_match( '!dailymotion\.com/embed/video/([a-zA-Z0-9]+)!', $url, $m ) ) { // Old embed code
+		$id = $m[1];
+	} elseif ( preg_match( '!geo\.dailymotion\.com/player[^?]*\?(?:.*[&;])?video=([a-zA-Z0-9]+)!', $url, $m ) ) { // Player Embed code
+		$id = $m[1];
+	}
+
+	return $id;
 }
 
 /**
@@ -280,7 +285,7 @@ function aiovg_get_dailymotion_oembed_data( $url, $force_refresh = false ) {
 
 			if ( isset( $api_response->thumbnail_large_url ) ) {
 				$response['thumbnail_url'] = $api_response->thumbnail_large_url;
-			} else {
+			} elseif ( isset( $api_response->thumbnail_medium_url ) ) { // An unknown video returns an error object
 				$response['thumbnail_url'] = $api_response->thumbnail_medium_url;
 			}
 
@@ -300,15 +305,43 @@ function aiovg_get_dailymotion_oembed_data( $url, $force_refresh = false ) {
 }
 
 /**
+ * Get the Dailymotion Player ID from the plugin settings.
+ *
+ * @since  4.9.6
+ * @return string Player ID, or empty when not set.
+ */
+function aiovg_get_dailymotion_player_id() {
+	$api_settings = aiovg_get_option( 'aiovg_api_settings' );
+	$player_id    = isset( $api_settings['dailymotion_player_id'] ) ? $api_settings['dailymotion_player_id'] : '';
+
+	// The ID goes into the embed URL path.
+	return preg_replace( '/[^a-zA-Z0-9]/', '', $player_id );
+}
+
+/**
  * Get Dailymotion video duration from URL.
  *
  * @since  3.8.4
  * @param  string $url Dailymotion video URL.
  * @return string      Video duration.
  */
-function aiovg_get_dailymotion_video_duration( $url ) {	
-	$data = aiovg_get_dailymotion_oembed_data( $url );		
+function aiovg_get_dailymotion_video_duration( $url ) {
+	$data = aiovg_get_dailymotion_oembed_data( $url );
 	return $data['duration'];
+}
+
+/**
+ * Get the URL that opens a Dailymotion video on dailymotion.com.
+ *
+ * @since  4.9.6
+ * @param  string $url Dailymotion video URL.
+ * @return string      Watch page URL.
+ */
+function aiovg_get_dailymotion_watch_url( $url ) {
+	$id = aiovg_get_dailymotion_id_from_url( $url );
+
+	// Fall back to the stored URL when no ID can be read from it.
+	return ! empty( $id ) ? 'https://www.dailymotion.com/video/' . $id : $url;
 }
 
 /**

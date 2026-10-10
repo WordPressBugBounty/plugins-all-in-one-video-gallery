@@ -355,9 +355,11 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 
 		if ( isset( $sources['youtube'] ) ) { // YouTube
 			$settings['player']['techOrder'] = array( 'youtube' );
-			$settings['player']['youtube'] = array( 
+			
+			$settings['player']['youtube'] = array(
 				'iv_load_policy' => 3,
-				'playsinline'    => ( ! empty( $player_settings['playsinline'] ) ? 1 : 0 )
+				'playsinline'    => ( ! empty( $player_settings['playsinline'] ) ? 1 : 0 ),
+				'cc_load_policy' => ( ! empty( $player_settings['cc_load_policy'] ) ? 1 : 0 )
 			);
 
 			parse_str( $sources['youtube']['src'], $queries );

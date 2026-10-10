@@ -1115,6 +1115,10 @@
 	box-shadow: 0 0 0 1px #ff7854;
 }
 
+.aiovg-media-uploader .aiovg-bunny-stream-upload-button .dashicons {
+	line-height: 1;
+}
+
 .aiovg-uploading .aiovg-bunny-stream-upload-button .dashicons,
 .aiovg-uploading .aiovg-bunny-stream-upload-button .dashicons:before {
 	width: 16px;

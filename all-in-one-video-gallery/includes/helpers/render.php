@@ -367,7 +367,7 @@ function the_aiovg_content_after_player( $post_id, $attributes ) {
 	$content = apply_filters( 'aiovg_content_after_player', $content, $post_id, $attributes );
 
 	if ( ! empty( $content ) ) {
-		echo '<div class="aiovg-content-after-player aiovg-margin-top">';
+		echo '<div class="aiovg-content-after-player aiovg-margin-top aiovg-hide-if-empty">';
 		echo $content;
 		echo '</div>';
 	}
@@ -505,7 +505,7 @@ function the_aiovg_pagination( $numpages = '', $pagerange = '', $paged = '', $at
     	$format = $prefix . 'paged=%#%';
     } else {
 		$prefix = ( '/' == substr( $base, -1 ) ) ? '' : '/';
-    	$format = $prefix . 'page/%#%';
+    	$format = $prefix . user_trailingslashit( 'page/%#%', 'paged' );
 	} 
 	
   	$pagination_args = array(

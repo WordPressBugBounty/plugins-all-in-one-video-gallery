@@ -43,13 +43,7 @@ class AIOVG_Public_Yoast {
 
 		$wpseo_titles = get_option( 'wpseo_titles' );
 
-		$sep_options = WPSEO_Option_Titles::get_instance()->get_separator_options();
-
-		if ( isset( $wpseo_titles['separator'] ) && isset( $sep_options[ $wpseo_titles['separator'] ] ) ) {
-			$sep = $sep_options[ $wpseo_titles['separator'] ];
-		} else {
-			$sep = '-'; // Setting default separator if Admin didn't set it from backed
-		}
+		$sep = $this->get_separator( $wpseo_titles );
 
 		$replacements = array(
 			'%%sep%%'              => $sep,						
@@ -159,13 +153,7 @@ class AIOVG_Public_Yoast {
 
 		$wpseo_titles = get_option( 'wpseo_titles' );
 
-		$sep_options = WPSEO_Option_Titles::get_instance()->get_separator_options();
-
-		if ( isset( $wpseo_titles['separator'] ) && isset( $sep_options[ $wpseo_titles['separator'] ] ) ) {
-			$sep = $sep_options[ $wpseo_titles['separator'] ];
-		} else {
-			$sep = '-'; // Setting default separator if Admin didn't set it from backed
-		}
+		$sep = $this->get_separator( $wpseo_titles );
 
 		$replacements = array(
 			'%%sep%%'              => $sep,						
@@ -274,7 +262,7 @@ class AIOVG_Public_Yoast {
 		if ( $post->ID == $page_settings['category'] ) {			
 			if ( $slug = get_query_var( 'aiovg_category' ) ) {
 				if ( $term = get_term_by( 'slug', $slug, 'aiovg_categories' ) ) {
-					$url = aiovg_get_category_page_url( $term );
+					$url = aiovg_add_page_number_to_url( aiovg_get_category_page_url( $term ) );
 				}
 			}				
 		}
@@ -283,7 +271,7 @@ class AIOVG_Public_Yoast {
 		if ( $post->ID == $page_settings['tag'] ) {			
 			if ( $slug = get_query_var( 'aiovg_tag' ) ) {
 				if ( $term = get_term_by( 'slug', $slug, 'aiovg_tags' ) ) {
-					$url = aiovg_get_tag_page_url( $term );
+					$url = aiovg_add_page_number_to_url( aiovg_get_tag_page_url( $term ) );
 				}
 			}				
 		}
@@ -291,10 +279,15 @@ class AIOVG_Public_Yoast {
 		// User videos page
 		if ( $post->ID == $page_settings['user_videos'] ) {		
 			if ( ( $slug = get_query_var( 'aiovg_user' ) ) && ( $user = get_user_by( 'slug', $slug ) ) ) {
-				$url = aiovg_get_user_videos_page_url( $user->ID );
+				$url = aiovg_add_page_number_to_url( aiovg_get_user_videos_page_url( $user->ID ) );
 			}			
 		}
 		
+		// Video archive page, from page 2 onwards
+		if ( aiovg_is_video_archive_page( $post->ID ) ) {
+			$url = aiovg_add_page_number_to_url( $url );
+		}
+
 		// Return
 		return $url;	
 	}
@@ -501,6 +494,8 @@ class AIOVG_Public_Yoast {
 
 			// A valid custom archive page disables has_archive, so Yoast adds no archive crumb
 			if ( $page_id > 0 && ! $post_type_object->has_archive ) {
+				$page_id = (int) apply_filters( 'aiovg_object_id', $page_id, 'page' );
+
 				$page_ids   = array_reverse( get_post_ancestors( $page_id ) );
 				$page_ids[] = $page_id;
 
@@ -585,6 +580,46 @@ class AIOVG_Public_Yoast {
 	}
 
 	/**
+	 * Point Yoast's schema graph at the category, tag, user or playlist URL, as the canonical does.
+	 *
+	 * @since  4.9.6
+	 * @param  array  $graph   Schema graph pieces.
+	 * @param  object $context Yoast's meta tags context.
+	 * @return array           Filtered graph.
+	 */
+	public function wpseo_schema_graph( $graph, $context ) {
+		$from = is_object( $context ) ? (string) $context->permalink : '';
+		$to   = '' === $from ? '' : (string) $this->wpseo_canonical( $from );
+
+		if ( '' === $to || $to === $from ) {
+			return $graph;
+		}
+
+		// The page's own ids and URLs only: breadcrumb items rightly link to the plugin page
+		$swap = function ( $value ) use ( $from, $to ) {
+			if ( ! is_string( $value ) ) {
+				return $value;
+			}
+
+			if ( $value === $from ) {
+				return $to;
+			}
+
+			return 0 === strpos( $value, $from . '#' ) ? $to . substr( $value, strlen( $from ) ) : $value;
+		};
+
+		foreach ( $graph as $index => $piece ) {
+			if ( isset( $piece['@id'], $piece['name'] ) && $piece['@id'] === $from ) {
+				$piece['name'] = $this->wpseo_title( $piece['name'] );
+			}
+
+			$graph[ $index ] = $this->swap_schema_urls( $piece, $swap );
+		}
+
+		return $graph;
+	}
+
+	/**
 	 * Filter Yoast video sitemap entry details.
 	 *
 	 * @since  3.9.5
@@ -606,6 +641,47 @@ class AIOVG_Public_Yoast {
 		}
 	
 		return $details;
+	}
+
+	/**
+	 * Get Yoast SEO's title separator.
+	 *
+	 * @since  4.9.6
+	 * @access protected
+	 * @param  array     $wpseo_titles Yoast SEO's title settings.
+	 * @return string                  Separator.
+	 */
+	protected function get_separator( $wpseo_titles ) {
+		$sep_options = WPSEO_Option_Titles::get_instance()->get_separator_options();
+
+		if ( isset( $wpseo_titles['separator'] ) && isset( $sep_options[ $wpseo_titles['separator'] ] ) ) {
+			return $sep_options[ $wpseo_titles['separator'] ];
+		}
+
+		return '-'; // Setting default separator if Admin didn't set it from backed
+	}
+
+	/**
+	 * Replace the page's own "@id", "url" and "target" values in a schema piece.
+	 *
+	 * @since  4.9.6
+	 * @access private
+	 * @param  array    $data Schema piece.
+	 * @param  callable $swap Maps one value to its replacement.
+	 * @return array          Filtered schema piece.
+	 */
+	private function swap_schema_urls( $data, $swap ) {
+		foreach ( $data as $key => $value ) {
+			if ( 'target' === $key ) {
+				$data[ $key ] = is_array( $value ) ? array_map( $swap, $value ) : $swap( $value );
+			} elseif ( is_array( $value ) ) {
+				$data[ $key ] = $this->swap_schema_urls( $value, $swap );
+			} elseif ( '@id' === $key || 'url' === $key ) {
+				$data[ $key ] = $swap( $value );
+			}
+		}
+
+		return $data;
 	}
 
 }
