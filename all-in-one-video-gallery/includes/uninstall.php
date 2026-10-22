@@ -100,6 +100,7 @@ class AIOVG_Uninstall {
             'aiovg_api_settings',
             'aiovg_bunny_stream_settings',
             'aiovg_page_settings',
+            'aiovg_publish_caps_restricted',
             'aiovg_rewrite_rules_flushed',
             'aiovg_version'
         );

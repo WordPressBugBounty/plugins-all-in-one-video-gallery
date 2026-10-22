@@ -180,7 +180,7 @@ $search_page_url = aiovg_get_search_page_url( $search_page_id );
 		
 		<?php if ( $has_reset_button ) : ?>
 			<div class="aiovg-form-group aiovg-field-reset"<?php if ( 'ajax' === $search_form_mode ) echo ' hidden'; ?>>
-				<input type="button" class="aiovg-button aiovg-button-reset" onclick="location.href='<?php echo esc_url( $search_page_url ); ?>';" value="<?php esc_attr_e( 'Reset', 'all-in-one-video-gallery' ); ?>" />
+				<input type="button" class="aiovg-button aiovg-button-reset" onclick="location.href=<?php echo aiovg_esc_js_url( $search_page_url ); ?>;" value="<?php esc_attr_e( 'Reset', 'all-in-one-video-gallery' ); ?>" />
 			</div>
 		<?php endif; ?> 
 

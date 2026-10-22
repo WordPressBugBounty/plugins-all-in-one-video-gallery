@@ -201,6 +201,10 @@
 	background-color: #25d366;
 }  
 
+.aiovg-player .plyr__share-button-email {
+	background-color: #6E6E6E;
+}
+
 .aiovg-player .plyr__share-button span {	
 	line-height: 40px;
 	color: #fff;
@@ -592,6 +596,42 @@
 
 .aiovg-player .aiovg-privacy-consent-button:hover {
 	opacity: 0.85;
+}
+
+/* "Watch on Dailymotion": neutral, so it reads as a link off the site */
+.aiovg-player .aiovg-dailymotion-button,
+.aiovg-player .aiovg-dailymotion-button:hover,
+.aiovg-player .aiovg-dailymotion-button:focus {
+	display: inline-flex;
+	gap: 8px;
+	align-items: center;
+	justify-content: center;
+	border: 0;
+	border-radius: 3px;
+	box-shadow: none;
+	background: rgba( 0, 0, 0, 0.5 );
+	padding: 0 20px;
+	min-height: 48px;
+	line-height: 1;
+	text-decoration: none;
+	color: #fff;
+	font-family: inherit;
+	font-size: 1em;
+	font-weight: 600;
+}
+
+.aiovg-player .aiovg-dailymotion-button:hover,
+.aiovg-player .aiovg-dailymotion-button:focus {
+	background: rgba( 0, 0, 0, 0.7 );
+}
+
+.aiovg-player .aiovg-dailymotion-button:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: 2px;
+}
+
+.aiovg-player .aiovg-dailymotion-button svg {
+	flex-shrink: 0;
 }
 
 /* Restrictions */

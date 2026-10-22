@@ -548,6 +548,12 @@ class AIOVG_Blocks {
 				$value = implode( ',', $value );
 			}
 
+			// A raw quote or bracket would end the attribute or the shortcode early.
+			// Core's stripcslashes() on parsed values turns these escapes back into the characters.
+			if ( is_string( $value ) ) {
+				$value = str_replace( array( '"', '[', ']' ), array( '\x22', '\x5b', '\x5d' ), $value );
+			}
+
 			$attributes[] = sprintf( '%s="%s"', $key, $value );
 		}
 		

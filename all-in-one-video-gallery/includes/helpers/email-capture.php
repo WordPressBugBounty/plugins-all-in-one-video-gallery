@@ -112,6 +112,7 @@ function aiovg_email_capture_generate_csv( $leads, $file_name = 'aiovg-emails.cs
 	// UTF-8 BOM so Excel opens the file correctly.
 	fputs( $output, "\xEF\xBB\xBF" );
 
+	// Pass $escape explicitly; PHP 8.4 deprecates relying on its default.
 	fputcsv( $output, array(
 		__( 'Email Address', 'all-in-one-video-gallery' ),
 		__( 'Name', 'all-in-one-video-gallery' ),
@@ -120,7 +121,7 @@ function aiovg_email_capture_generate_csv( $leads, $file_name = 'aiovg-emails.cs
 		__( 'Video ID', 'all-in-one-video-gallery' ),
 		__( 'Page URL', 'all-in-one-video-gallery' ),
 		__( 'Date', 'all-in-one-video-gallery' )
-	) );
+	), ',', '"', '\\' );
 
 	foreach ( $leads as $lead ) {
 		$video_id = absint( $lead->video_id );
@@ -141,7 +142,7 @@ function aiovg_email_capture_generate_csv( $leads, $file_name = 'aiovg-emails.cs
 			$video_id,
 			$lead->page_url,
 			$lead->created_at
-		) );
+		), ',', '"', '\\' );
 	}
 
 	fclose( $output );

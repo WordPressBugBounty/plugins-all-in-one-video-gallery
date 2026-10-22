@@ -388,19 +388,7 @@ if ( isset( $sources['youtube'] ) ) {
 	// off the captions YouTube may turn on by itself.
 	$settings['player']['youtube']['cc_load_policy'] = ! empty( $cc_load_policy ) ? 1 : 0;
 
-	parse_str( $sources['youtube']['src'], $queries );
-
-	if ( isset( $queries['start'] ) ) {
-		$settings['player']['youtube']['start'] = (int) $queries['start'];
-	}
-
-	if ( isset( $queries['t'] ) ) {
-		$settings['player']['youtube']['start'] = (int) $queries['t'];
-	}
-
-	if ( isset( $queries['end'] ) ) {
-		$settings['player']['youtube']['end'] = (int) $queries['end'];
-	}
+	$settings['player']['youtube'] = array_merge( $settings['player']['youtube'], aiovg_get_youtube_time_offsets( $sources['youtube']['src'] ) );
 }
 
 // Vimeo
@@ -444,9 +432,9 @@ if ( $has_share ) {
 	$share_url = $post_url;
 	$share_url_encoded = rawurlencode( $share_url );
 
-	$share_title = rawurlencode( $post_title );
+	$share_title = rawurlencode( html_entity_decode( $post_title, ENT_QUOTES, 'UTF-8' ) );
 
-	$share_image = isset( $attributes['data-poster'] ) ? $attributes['data-poster'] : '';
+	$share_image = isset( $attributes['data-poster'] ) ? rawurlencode( $attributes['data-poster'] ) : '';
 
 	$share_buttons = array();
 		

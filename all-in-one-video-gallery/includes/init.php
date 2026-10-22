@@ -171,6 +171,7 @@ class AIOVG_Init {
 				
 		$this->loader->add_action( 'admin_init', $admin, 'insert_missing_options', 1 );		
 		$this->loader->add_action( 'admin_init', $admin, 'handle_form_actions' );
+		$this->loader->add_action( 'admin_init', $admin, 'restrict_publish_caps' );
 		$this->loader->add_action( 'admin_menu', $admin, 'admin_menu' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $admin, 'enqueue_scripts' );
@@ -191,6 +192,7 @@ class AIOVG_Init {
 		
 		$this->loader->add_action( 'admin_menu', $videos, 'admin_menu' );
 		$this->loader->add_action( 'init', $videos, 'register_post_type' );
+		$this->loader->add_action( 'init', $videos, 'register_post_meta' );
 		$this->loader->add_action( 'before_delete_post', $videos, 'before_delete_post' );
 
 		if ( is_admin() ) {		

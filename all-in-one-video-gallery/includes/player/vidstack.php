@@ -393,19 +393,7 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 			// the captions YouTube may turn on by itself.
 			$settings['player']['youtube']['cc_load_policy'] = ! empty( $player_settings['cc_load_policy'] ) ? 1 : 0;
 
-			parse_str( $sources['youtube']['src'], $queries );
-
-			if ( isset( $queries['start'] ) ) {
-				$settings['player']['youtube']['start'] = (int) $queries['start'];
-			}
-
-			if ( isset( $queries['t'] ) ) {
-				$settings['player']['youtube']['start'] = (int) $queries['t'];
-			}
-
-			if ( isset( $queries['end'] ) ) {
-				$settings['player']['youtube']['end'] = (int) $queries['end'];
-			}
+			$settings['player']['youtube'] = array_merge( $settings['player']['youtube'], aiovg_get_youtube_time_offsets( $sources['youtube']['src'] ) );
 		}
 
 		if ( isset( $sources['vimeo'] ) ) { // Vimeo

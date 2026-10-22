@@ -61,14 +61,12 @@ class AIOVG_Roles {
 			
 			// Add the "contributor" capabilities
 			$wp_roles->add_cap( 'contributor', 'edit_aiovg_videos' );						
-			$wp_roles->add_cap( 'contributor', 'publish_aiovg_videos' );
 			$wp_roles->add_cap( 'contributor', 'delete_aiovg_videos' );
 			$wp_roles->add_cap( 'contributor', 'delete_published_aiovg_videos' );
 			$wp_roles->add_cap( 'contributor', 'edit_published_aiovg_videos' );
 			
 			// Add the "subscriber" capabilities
 			$wp_roles->add_cap( 'subscriber', 'edit_aiovg_videos' );						
-			$wp_roles->add_cap( 'subscriber', 'publish_aiovg_videos' );
 			$wp_roles->add_cap( 'subscriber', 'delete_aiovg_videos' );
 			$wp_roles->add_cap( 'subscriber', 'delete_published_aiovg_videos' );
 			$wp_roles->add_cap( 'subscriber', 'edit_published_aiovg_videos' );			

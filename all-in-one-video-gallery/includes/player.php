@@ -129,8 +129,15 @@ class AIOVG_Player {
  	 * @return string        Player type.
 	 */
 	private function get_player_type( $args ) {
+		// "player" can come from a shortcode attribute, so unknown types get the iframe player
 		if ( isset( $args['player'] ) && ! empty( $args['player'] ) ) {
-			return $args['player'];
+			$allowed_types = array( 'iframe', 'videojs', 'vidstack', 'popup' );
+
+			if ( in_array( $args['player'], $allowed_types, true ) || ( 'amp' === $args['player'] && $this->is_amp_request() ) ) {
+				return $args['player'];
+			}
+
+			return 'iframe';
 		}
 
 		$player_settings = aiovg_get_option( 'aiovg_player_settings' );
@@ -141,16 +148,31 @@ class AIOVG_Player {
 			$player_type = 'iframe';
 		}
 
-		if ( function_exists( 'ampforwp_is_amp_endpoint' ) && ampforwp_is_amp_endpoint() ) {
-			$player_type = 'amp';
-		}
-
-		if ( function_exists( 'amp_is_request' ) && amp_is_request() ) {
+		if ( $this->is_amp_request() ) {
 			$player_type = 'amp';
 		}
 
 		// Output
 		return $player_type;
+	}
+
+	/**
+	 * Check if the current request is an AMP request.
+	 *
+	 * @since  5.0.0
+	 * @access private
+	 * @return bool    True on an AMP request.
+	 */
+	private function is_amp_request() {
+		if ( function_exists( 'ampforwp_is_amp_endpoint' ) && ampforwp_is_amp_endpoint() ) {
+			return true;
+		}
+
+		if ( function_exists( 'amp_is_request' ) && amp_is_request() ) {
+			return true;
+		}
+
+		return false;
 	}
 		
 }

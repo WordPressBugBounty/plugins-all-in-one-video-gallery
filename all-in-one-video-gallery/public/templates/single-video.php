@@ -61,7 +61,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
         </svg>';
 
-        $views_count = get_post_meta( get_the_ID(), 'views', true );
+        $views_count = (int) get_post_meta( get_the_ID(), 'views', true );
 
         $meta['views'] = sprintf(
             '%s<span class="aiovg-views-count">%s</span><span class="aiovg-views-label">%s</span>',

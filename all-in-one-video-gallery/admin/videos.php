@@ -152,9 +152,40 @@ class AIOVG_Admin_Videos {
 			}
 		}
 		
-		register_post_type( 'aiovg_videos', $args );	
+		register_post_type( 'aiovg_videos', $args );
 	}
-	
+
+	/**
+	 * Register the meta fields printed as raw HTML, so every write is sanitized,
+	 * including XML-RPC, REST and direct update_post_meta() calls.
+	 *
+	 * @since 5.0.0
+	 */
+	public function register_post_meta() {
+		$args = array(
+			'type'              => 'string',
+			'single'            => true,
+			'sanitize_callback' => array( $this, 'sanitize_embedcode_meta' )
+		);
+
+		register_post_meta( 'aiovg_videos', 'embedcode', $args );
+		register_post_meta( 'aiovg_videos', 'trailer_src', $args );
+	}
+
+	/**
+	 * Sanitize the "embedcode" and "trailer_src" meta values.
+	 *
+	 * WordPress passes the meta key as the second argument, so the helper is not
+	 * registered directly.
+	 *
+	 * @since  5.0.0
+	 * @param  mixed  $value Meta value.
+	 * @return string        Sanitized meta value.
+	 */
+	public function sanitize_embedcode_meta( $value ) {
+		return aiovg_sanitize_embedcode( $value );
+	}
+
 	/**
 	 * Adds custom meta fields in the "Publish" meta box.
 	 *
@@ -392,10 +423,8 @@ class AIOVG_Admin_Videos {
 					}
 				}
 
-				add_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
-				$embedcode = ! empty( $embedcode ) ? wp_kses_post( $embedcode ) : '';
+				$embedcode = aiovg_sanitize_embedcode( $embedcode );
 				update_post_meta( $post_id, 'embedcode', $embedcode );
-				remove_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
 				
 				$duration = '';
 
@@ -592,9 +621,7 @@ class AIOVG_Admin_Videos {
 								}
 							}
 
-							add_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
-							$trailer_src = ! empty( $trailer_src ) ? wp_kses_post( $trailer_src ) : '';
-							remove_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
+							$trailer_src = aiovg_sanitize_embedcode( $trailer_src );
 
 							$trailer_src_id = 0;
 						} else {
@@ -1090,7 +1117,7 @@ class AIOVG_Admin_Videos {
 	 * @return array          Filtered sortable columns array.
 	 */
 	public function sortable_columns( $columns ) {			
-		$columns['post_id'] = 'post_id';
+		$columns['post_id'] = 'ID'; // WP_Query sorts by "ID", not "post_id"
 		return $columns;		
 	}
 	

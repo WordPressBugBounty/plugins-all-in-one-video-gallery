@@ -6,7 +6,7 @@ Tags: video gallery, video player, youtube, vimeo, html5 video
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 5.6.20
-Stable tag: 4.9.7
+Stable tag: 5.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -193,6 +193,31 @@ This protects the player, not the video file itself: anyone who already has a se
 25. Premium: Front-end video submission form.
 
 == Changelog ==
+
+= 5.0.0 =
+
+* Security Fix: "Authenticated (Subscriber+) Stored Cross-Site Scripting via YouTube URL" issue that was discovered by [beopseong.kim](https://patchstack.com/database/researchers/4517a6a9-7a98-4a99-bb56-ffb7a3961d86), and reported responsibly to us by [Patchstack](https://patchstack.com/).
+* Security Fix: "Authenticated (Contributor+) Stored Cross-Site Scripting via 'more_link' Shortcode Attribute" issue that was discovered by [Wordfence PRISM](https://www.wordfence.com/threat-intel/vulnerabilities/researchers/id/6344), and reported responsibly to us by [Wordfence](https://www.wordfence.com/).
+* Security Fix: "Authenticated (Subscriber+) Stored Cross-Site Scripting via 'embedcode' Post Meta via XML-RPC" issue that was discovered by [poiri3r](https://www.wordfence.com/threat-intel/vulnerabilities/researchers/id/8302), and reported responsibly to us by [Wordfence](https://www.wordfence.com/).
+* Security Fix: Draft, pending and private videos could be played through the player page URL.
+* Tweak: Subscribers and Contributors can no longer publish videos through XML-RPC or the REST API. The front-end video submission form is unaffected.
+* Tweak: The "Watch on Dailymotion" button is now a neutral link with an external-link icon, over an undimmed poster.
+* Tweak: CSV import pre-selects the fields that match the CSV's column headers, e.g. when importing our own export.
+* Fix: PHP 8 fatal error on the single video page of videos added outside the video editor, e.g. through the REST API.
+* Fix: Self-hosted videos on AMP pages showed no playback controls.
+* Fix: CSV import extracted the ZIP file again for every batch, slowing down large imports.
+* Fix: Re-running a CSV + ZIP import created duplicates of the uploaded videos.
+* Fix: Video.js did not play YouTube /shorts/ and /live/ links, or youtu.be links ending with a slash.
+* Fix: Video.js ignored a YouTube start time unless an end time was also set, and logged an error when both were set.
+* Fix: YouTube start times written as 1m30s, or placed first in a youtu.be link, were ignored or misread.
+* Fix: Premium - HTML entities such as `&#038;` in the video schema's name and description.
+* Fix: Social sharing - HTML entities in shared titles, and Pinterest image URLs with query strings.
+* Fix: The Email share button was missing from the player in JavaScript mode.
+* Fix: Blocks - a quote or square bracket in a block setting broke the block's output.
+* Fix: Blocks - category and tag lists were empty in the editor for users other than Administrators.
+* Fix: All Videos - sorting by the ID column did not work.
+* Fix: PHP 8.4 and 8.5 deprecation notices.
+* Fix: Various performance and security improvements.
 
 = 4.9.7 =
 
@@ -724,6 +749,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 4.9.7 =
+= 5.0.0 =
 
-Dailymotion now needs a Player ID (Settings → Advanced → API Keys), plus WPML, Polylang and SEO fixes. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)
+Security release: fixes three stored XSS issues and playback of unpublished videos. Subscribers and Contributors can no longer publish via XML-RPC or the REST API. Plus YouTube and CSV import fixes. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

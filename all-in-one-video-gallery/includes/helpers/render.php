@@ -355,8 +355,8 @@ function the_aiovg_content_after_player( $post_id, $attributes ) {
             </svg>';
 
 			$content .= sprintf(
-				'<button type="button" onclick="location.href=\'%s\'">%s %s</button>',
-				esc_url( get_comments_link( $post_id ) ),
+				'<button type="button" onclick="location.href=%s">%s %s</button>',
+				aiovg_esc_js_url( get_comments_link( $post_id ) ),
 				$icon,
 				esc_html__( 'Leave a Comment', 'all-in-one-video-gallery' )
 			);
@@ -454,8 +454,8 @@ function the_aiovg_more_button( $numpages = '', $atts = array() ) {
 	} else {
 		echo '<aiovg-pagination class="aiovg-more aiovg-text-center">';
 		echo sprintf( 
-			'<button type="button" onclick="location.href=\'%s\'" class="aiovg-link-more">%s</button>', 
-			esc_url( $atts['more_link'] ), 
+			'<button type="button" onclick="location.href=%s" class="aiovg-link-more">%s</button>',
+			aiovg_esc_js_url( $atts['more_link'] ),
 			esc_html( $atts['more_label'] ) 
 		);
 		echo '</aiovg-pagination>';
@@ -632,11 +632,11 @@ function the_aiovg_socialshare_buttons() {
 	$url_encoded = rawurlencode( $url );
 
 	// Get current page title
-	$title = rawurlencode( get_the_title() );
+	$title = rawurlencode( html_entity_decode( get_the_title(), ENT_QUOTES, 'UTF-8' ) );
 
 	// Get image
 	$image_data = aiovg_get_image( $post->ID, 'large' );
-	$image = $image_data['src'];
+	$image = rawurlencode( $image_data['src'] );
 
 	// Build sharing buttons
 	$buttons = array();

@@ -76,20 +76,12 @@ if ( ! empty( $embed_url ) ) {
         $is_youtube             = true;
         $enable_referrer_policy = true;
 
-        parse_str( $embed_url, $queries );
+        $times = aiovg_get_youtube_time_offsets( $embed_url );
                     
         $embed_url = 'https://www.youtube.com/embed/' . aiovg_get_youtube_id_from_url( $embed_url ) . '?iv_load_policy=3&modestbranding=1&rel=0&showinfo=0&enablejsapi=1';	                    
         
-        if ( isset( $queries['start'] ) ) {
-            $embed_url = add_query_arg( 'start', (int) $queries['start'], $embed_url );
-        }
-
-        if ( isset( $queries['t'] ) ) {
-            $embed_url = add_query_arg( 'start', (int) $queries['t'], $embed_url );
-        }
-        
-        if ( isset( $queries['end'] ) ) {
-            $embed_url = add_query_arg( 'end', (int) $queries['end'], $embed_url );
+        foreach ( $times as $name => $time ) {
+            $embed_url = add_query_arg( $name, $time, $embed_url );
         } 
 
         $autoplay = isset( $_GET['autoplay'] ) ? $_GET['autoplay'] : $player_settings['autoplay'];
@@ -258,7 +250,7 @@ if ( ! empty( $embed_url ) ) {
     if ( ! empty( $dailymotion_watch_url ) ) {
         // "Watch on Dailymotion" link over the poster
         $player_html = sprintf(
-            '<a id="aiovg-dailymotion-link" href="%s" target="_blank" rel="noopener noreferrer"%s><span id="aiovg-dailymotion-button">%s</span></a>',
+            '<a id="aiovg-dailymotion-link" href="%s" target="_blank" rel="noopener noreferrer"%s><span id="aiovg-dailymotion-button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>%s</span></a>',
             esc_url( $dailymotion_watch_url ),
             ( ! empty( $dailymotion_image ) ? sprintf( ' style="background-image: url(\'%s\')"', esc_url( $dailymotion_image ) ) : '' ),
             esc_html__( 'Watch on Dailymotion', 'all-in-one-video-gallery' )
@@ -314,23 +306,17 @@ if ( ! empty( $embed_url ) ) {
                 text-decoration: none;
             }
 
-            #aiovg-dailymotion-link:before {
-                position: absolute;
-                inset: 0;
-                background-color: rgba( 0, 0, 0, 0.5 );
-                content: "";
-            }
-
-            /* Same button as the cookie consent and email capture overlays */
+            /* Neutral, so it reads as a link off the site, not the site's own button */
             #aiovg-dailymotion-button {
                 display: inline-flex;
                 position: relative;
+                gap: 8px;
                 align-items: center;
                 justify-content: center;
                 border-radius: 3px;
-                background-color: <?php echo esc_attr( $primary_color ); ?>;
+                background-color: rgba( 0, 0, 0, 0.5 );
                 padding: 0 20px;
-                min-height: 44px;
+                min-height: 48px;
                 line-height: 1;
                 color: #fff;
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -340,7 +326,16 @@ if ( ! empty( $embed_url ) ) {
 
             #aiovg-dailymotion-link:hover #aiovg-dailymotion-button,
             #aiovg-dailymotion-link:focus #aiovg-dailymotion-button {
-                opacity: 0.85;
+                background-color: rgba( 0, 0, 0, 0.7 );
+            }
+
+            #aiovg-dailymotion-link:focus-visible {
+                outline: none;
+            }
+
+            #aiovg-dailymotion-link:focus-visible #aiovg-dailymotion-button {
+                outline: 2px solid #fff;
+                outline-offset: 2px;
             }
         </style>
     <?php endif; ?>

@@ -272,8 +272,12 @@ class AIOVG_Player_AMP extends AIOVG_Player_Base {
 			'width'  => $width,
 			'height' => $height,
 			'layout' => 'responsive'
-		);   
-		
+		);
+
+		if ( ! empty( $player_settings['controls'] ) ) {
+			$attributes['controls'] = '';
+		}
+
 		if ( ! empty( $player_settings['autoplay'] ) ) {
 			$attributes['autoplay'] = '';
 		}

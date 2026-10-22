@@ -282,6 +282,7 @@
 			const limit  = 20;
 			
 			let offset   = 0;
+			let folder   = '';
 			let imported = [];
 			let updated  = [];
 			let skipped  = [];
@@ -295,13 +296,22 @@
 			formArray.push({ name: 'action', value: 'aiovg_import_csv' });
 			formArray.push({ name: 'security', value: aiovg_admin.ajax_nonce });
 			formArray.push({ name: 'limit', value: limit });
-			formArray.push({ name: 'offset', value: offset });			
+			formArray.push({ name: 'offset', value: offset });	
+			formArray.push({ name: 'folder', value: folder });		
 
 			// Recursive import function
 			const importBatch = function() {
-				// Update offset in formArray
+				// Update offset and folder in formArray
 				formArray = formArray.map(( field ) => {
-					return ( field.name === 'offset' ) ? { name: 'offset', value: offset } : field;
+					if ( field.name === 'offset' ) {
+						return { name: 'offset', value: offset };
+					}
+
+					if ( field.name === 'folder' ) {
+						return { name: 'folder', value: folder };
+					}
+
+					return field;
 				});
 
 				$.ajax({
@@ -318,6 +328,7 @@
 						}
 
 						offset   = parseInt( response.data.offset );
+						folder   = response.data.folder || ''; // Lets the next batch skip the unzip
 						imported = imported.concat( response.data.imported );
 						updated  = updated.concat( response.data.updated );
 						skipped  = skipped.concat( response.data.skipped );

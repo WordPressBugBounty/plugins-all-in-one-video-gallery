@@ -333,19 +333,11 @@ if ( isset( $sources['youtube'] ) ) {
 		'cc_load_policy' => ( ! empty( $settings['cc_load_policy'] ) ? 1 : 0 )
 	);
 
-	parse_str( $sources['youtube']['src'], $queries );
+	// Video.js's YouTube plugin can't read /shorts/, /live/ or "youtu.be/ID/" links
+	$sources['youtube']['src'] = aiovg_resolve_youtube_url( $sources['youtube']['src'] );
 
-	if ( isset( $queries['start'] ) ) {
-		$settings['start'] = (int) $queries['start'];
-	}
-
-	if ( isset( $queries['t'] ) ) {
-		$settings['start'] = (int) $queries['t'];
-	}
-
-	if ( isset( $queries['end'] ) ) {
-		$settings['end'] = (int) $queries['end'];
-	}
+	// YouTube's own start/end: the offset plugin loops on YouTube's synchronous seek events
+	$settings['player']['youtube'] = array_merge( $settings['player']['youtube'], aiovg_get_youtube_time_offsets( $sources['youtube']['src'] ) );
 
 	// Hide YouTube Logo
 	if ( ! empty( $player_settings['hide_youtube_logo'] ) ) {
@@ -374,9 +366,10 @@ if ( $has_share ) {
 	$share_url = $post_url;
 	$share_url_encoded = rawurlencode( $share_url );
 
-	$share_title = rawurlencode( $post_title );
+	$share_title = rawurlencode( html_entity_decode( $post_title, ENT_QUOTES, 'UTF-8' ) );
 
-	$share_image = isset( $attributes['poster'] ) ? $attributes['poster'] : '';
+	// Not $attributes['poster']: esc_url() has already turned its & into &#038;
+	$share_image = isset( $attributes['poster'] ) ? rawurlencode( aiovg_sanitize_url( aiovg_make_url_absolute( $poster ) ) ) : '';
 
 	$share_buttons = array();
 		

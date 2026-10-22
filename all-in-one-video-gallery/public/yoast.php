@@ -632,7 +632,7 @@ class AIOVG_Public_Yoast {
 			$post_type = get_post_type( $post_id );
 	
 			if ( 'aiovg_videos' == $post_type ) {
-				$thumbnail_loc = get_post_meta(  $post_id, 'image', true );
+				$thumbnail_loc = aiovg_sanitize_url( get_post_meta(  $post_id, 'image', true ) );
 	
 				if ( ! empty( $thumbnail_loc ) ) {
 					$details['thumbnail_loc'] = $thumbnail_loc;

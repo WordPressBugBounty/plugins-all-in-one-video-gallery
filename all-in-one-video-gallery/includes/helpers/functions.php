@@ -137,17 +137,24 @@ function aiovg_can_filter_page_settings( $can_filter = null ) {
  * Combine video attributes as a string.
  * 
  * @since 2.0.0
- * @param array  $atts Array of video attributes.
- * @param string       Combined attributes string.
+ * @param  array  $atts Array of video attributes.
+ * @return string       Combined attributes string.
  */
 function aiovg_combine_video_attributes( $atts ) {
 	$attributes = array();
-	
+
 	foreach ( $atts as $key => $value ) {
+		// Drop the characters HTML forbids in an attribute name.
+		$key = preg_replace( '/[\x00-\x20\x7f"\'<>\/=]/', '', $key );
+		if ( '' === $key ) {
+			continue;
+		}
+
+		// Already-escaped values come out unchanged: esc_attr() does not double-encode.
 		if ( '' === $value ) {
 			$attributes[] = $key;
 		} else {
-			$attributes[] = sprintf( '%s="%s"', $key, $value );
+			$attributes[] = sprintf( '%s="%s"', $key, esc_attr( $value ) );
 		}
 	}
 	
@@ -493,6 +500,29 @@ function aiovg_delete_video_attachments( $post_id ) {
 		$trailer_src_id = get_post_meta( $post_id, 'trailer_src_id', true );
 		if ( ! empty( $trailer_src_id ) && ! aiovg_is_media_in_use( $trailer_src_id, 'attachment', $post_id ) ) wp_delete_attachment( $trailer_src_id, true );
 	}
+}
+
+/**
+ * Escape a URL as a JavaScript string for an inline event handler,
+ * e.g. onclick="location.href=%s".
+ *
+ * Only for a double-quoted HTML attribute, not a <script> block. The hex flags
+ * leave no "&", so no entity can be decoded into a quote before the handler runs.
+ *
+ * @since  5.0.0
+ * @param  string $url The URL.
+ * @return string      Quoted JavaScript string, escaped for the attribute.
+ */
+function aiovg_esc_js_url( $url ) {
+	// Kses stores "&" as "&amp;"; the browser used to decode it from esc_url() output
+	$url  = html_entity_decode( (string) $url, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	$json = wp_json_encode( esc_url_raw( $url ), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT );
+
+	if ( false === $json ) {
+		$json = '""';
+	}
+
+	return esc_attr( $json );
 }
 
 /**
@@ -3114,6 +3144,38 @@ function aiovg_resolve_url( $url ) {
  */
 function aiovg_sanitize_array( $value ) {
 	return ! empty( $value ) ? array_map( 'sanitize_text_field', $value ) : array();
+}
+
+/**
+ * Sanitize a "Third-Party Player Code" value before it is stored.
+ *
+ * Iframe and script tags are kept only for users with the "unfiltered_html" capability.
+ *
+ * @since  5.0.0
+ * @param  string $value The player code.
+ * @return string        Sanitized player code.
+ */
+function aiovg_sanitize_embedcode( $value ) {
+	if ( ! is_scalar( $value ) ) {
+		return '';
+	}
+
+	$value = (string) $value;
+
+	// Without markup the value prints as text; kses would only encode the "&" in URLs.
+	if ( false === strpos( $value, '<' ) ) {
+		return $value;
+	}
+
+	add_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
+
+	try {
+		$value = wp_kses_post( $value );
+	} finally {
+		remove_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
+	}
+
+	return $value;
 }
 
 /**

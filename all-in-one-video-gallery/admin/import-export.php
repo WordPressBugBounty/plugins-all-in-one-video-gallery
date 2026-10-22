@@ -362,10 +362,22 @@ class AIOVG_Admin_Import_Export {
 				);
 			}
 
+			// Sent back by the next batch, so the ZIP is not extracted again
+			$folder_relative = '';
+
+			if ( ! empty( $folder ) ) {
+				$folder_path = wp_normalize_path( $folder );
+				$abspath     = wp_normalize_path( ABSPATH );
+
+				if ( 0 === stripos( $folder_path, $abspath ) ) {
+					$folder_relative = ltrim( substr( $folder_path, strlen( $abspath ) ), '/' );
+				}
+			}
+
 			$response = array(
 				'step'     => 'process',
 				'message'  => $message,
-				'folder'   => $folder,	
+				'folder'   => $folder_relative,	
 				'offset'   => $new_offset,				
 				'imported' => $imported_data['imported'],
 				'updated'  => $imported_data['updated'],
@@ -464,6 +476,25 @@ class AIOVG_Admin_Import_Export {
 		$csv_columns = $this->get_csv_column_mapping_fields();
 		$html        = '';
 
+		// Pre-select the field a header names, as our own export's headers do. Each field once,
+		// and never "post_id": on another site it would update unrelated videos.
+		$selected_fields = array();
+
+		foreach ( $csv_headers as $index => $header ) {
+			$header = strtolower( preg_replace( '/^\xEF\xBB\xBF/', '', $header ) ); // Excel's BOM
+
+			foreach ( $csv_columns as $value => $label ) {
+				if ( 'post_id' == $value || in_array( $value, $selected_fields, true ) ) {
+					continue;
+				}
+
+				if ( $header === strtolower( $value ) || $header === strtolower( $label ) ) {
+					$selected_fields[ $index ] = $value;
+					break;
+				}
+			}
+		}
+
 		foreach ( $csv_headers as $index => $header ) {
 			$html .= '<div class="aiovg-form-control">';
 
@@ -490,8 +521,9 @@ class AIOVG_Admin_Import_Export {
 				}
 
 				$html .= sprintf(
-					'<option value="%s">%s</option>',
+					'<option value="%s"%s>%s</option>',
 					esc_attr( $value ),
+					selected( isset( $selected_fields[ $index ] ) && $selected_fields[ $index ] === $value, true, false ),
 					esc_html( $label )
 				);
 			}
@@ -632,12 +664,7 @@ class AIOVG_Admin_Import_Export {
 
 							$row[] = $src;
 						} elseif ( 'embedcode' == $type ) {
-							try {
-								add_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
-								$row[] = isset( $post_meta['embedcode'] ) ? wp_kses_post( $post_meta['embedcode'][0] ) : '';
-							} finally {
-								remove_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
-							}
+							$row[] = isset( $post_meta['embedcode'] ) ? aiovg_sanitize_embedcode( $post_meta['embedcode'][0] ) : '';
 						} else {
 							$mp4     = isset( $post_meta['mp4'] ) ? aiovg_sanitize_url( $post_meta['mp4'][0] ) : '';
 							$sources = isset( $post_meta['sources'] ) ? maybe_unserialize( $post_meta['sources'][0] ) : array();
@@ -779,13 +806,14 @@ class AIOVG_Admin_Import_Export {
 		}
 
 		// Write header row only for first batch
+		// $escape stays "\\": imports of older exports depend on it, and PHP 8.4 deprecates its default
 		if ( $offset === 0 ) {
-			fputcsv( $handle, array_values( $csv_columns ) );
+			fputcsv( $handle, array_values( $csv_columns ), ',', '"', '\\' );
 		}
 
 		// Write CSV rows
 		foreach ( $csv_rows as $row ) {
-			fputcsv( $handle, $row );
+			fputcsv( $handle, $row, ',', '"', '\\' );
 		}
 
 		fclose( $handle );
@@ -1205,7 +1233,8 @@ class AIOVG_Admin_Import_Export {
 		}
 
 		// Get headers
-		$headers = fgetcsv( $handle, 0, $attributes['columns_separator'] );
+		// $escape must match the export's fputcsv() calls
+		$headers = fgetcsv( $handle, 0, $attributes['columns_separator'], '"', '\\' );
 		$csv_row_number++;
 
 		if ( empty( $headers ) || ! is_array( $headers ) ) {
@@ -1224,7 +1253,7 @@ class AIOVG_Admin_Import_Export {
 		for ( $i = 0; $i < $attributes['offset']; $i++ ) {
 			if ( feof( $handle ) ) break;
 
-			fgetcsv( $handle, 0, $attributes['columns_separator'] );
+			fgetcsv( $handle, 0, $attributes['columns_separator'], '"', '\\' );
 			$csv_row_number++;
 		}
 
@@ -1235,7 +1264,7 @@ class AIOVG_Admin_Import_Export {
 				break;
 			}
 
-			$row = fgetcsv( $handle, 0, $attributes['columns_separator'] );
+			$row = fgetcsv( $handle, 0, $attributes['columns_separator'], '"', '\\' );
 			$csv_row_number++;
 
 			if ( $row === false ) {
@@ -1282,7 +1311,7 @@ class AIOVG_Admin_Import_Export {
 
 		// Peek one extra row to set has_more if needed
 		if ( ! feof( $handle ) && $attributes['limit'] > 0 ) {
-			while ( ( $next_row = fgetcsv( $handle, 0, $attributes['columns_separator'] ) ) !== false ) {
+			while ( ( $next_row = fgetcsv( $handle, 0, $attributes['columns_separator'], '"', '\\' ) ) !== false ) {
 				if ( array_filter( $next_row, 'strlen' ) ) {
 					$response['has_more'] = true;
 					break;
@@ -1656,6 +1685,17 @@ class AIOVG_Admin_Import_Export {
 			$type    = $this->resolve_video_type( $video['src'] );
 			$post_id = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
 
+			// Our export names the local copy in "file". Resolve it before the duplicate check,
+			// which a re-run would otherwise make against the old site's URL.
+			$original_src = $video['src'];
+
+			if ( 'default' == $type && ! empty( $attributes['folder'] ) && ! empty( $video['file'] ) ) {
+				$local_file_path = $attributes['folder'] . '/' . sanitize_file_name( $video['file'] );
+				if ( file_exists( $local_file_path ) ) {
+					$video['src'] = $this->make_absolute_url( $local_file_path );
+				}
+			}
+
 			if ( $post_id > 0 ) {
 				unset( $row['post_id'] );
 
@@ -1667,6 +1707,11 @@ class AIOVG_Admin_Import_Export {
 
 			if ( ! isset( $row['post_id'] ) ) {
 				$post_id = $this->is_video_exists( $video['src'], $type );
+
+				// Re-imported into the site it came from: the original URL is the stored one
+				if ( empty( $post_id ) && $original_src !== $video['src'] ) {
+					$post_id = $this->is_video_exists( $original_src, $type );
+				}
 
 				if ( ! empty( $post_id ) ) {
 					$response['skipped'][] = $csv_row_number;
@@ -1882,23 +1927,9 @@ class AIOVG_Admin_Import_Export {
 					$meta['type']  = 'adaptive';
 					$meta[ $type ] = aiovg_sanitize_url( $video['src'] );
 				} elseif ( 'embedcode' == $type ) {
-					try {
-						add_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
-						$meta[ $type ] = wp_kses_post( $video['src'] );
-					} finally {
-						remove_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
-					}
+					$meta[ $type ] = aiovg_sanitize_embedcode( $video['src'] );
 				} else {
-					$src = $video['src'];
-
-					if ( ! empty( $attributes['folder'] ) && isset( $video['file'] ) && ! empty( $video['file'] ) ) {
-						$local_file_path = $attributes['folder'] . '/' . sanitize_file_name( $video['file'] );
-						if ( file_exists( $local_file_path ) ) {
-							$src = $this->make_absolute_url( $local_file_path );
-						}
-					}
-
-					$meta['mp4'] = aiovg_sanitize_url( $src );
+					$meta['mp4'] = aiovg_sanitize_url( $video['src'] );
 
 					// Quality level
 					if ( isset( $video['quality'] ) && ! empty( $video['quality'] ) ) {
@@ -2153,17 +2184,12 @@ class AIOVG_Admin_Import_Export {
 
 		// Match by source URL
 		if ( 'embedcode' === $type ) {
-			try {
-				add_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
-
-				$meta_queries[] = array(
-					'key'     => 'embedcode',
-					'value'   => wp_kses_post( $src ),
-					'compare' => '='
-				);
-			} finally {
-				remove_filter( 'wp_kses_allowed_html', 'aiovg_allow_iframe_script_tags' );
-			}
+			// Same helper as the import storage, so a re-import matches the stored value.
+			$meta_queries[] = array(
+				'key'     => 'embedcode',
+				'value'   => aiovg_sanitize_embedcode( $src ),
+				'compare' => '='
+			);
 		} else {
 			$meta_queries[] = array(
 				'key'     => ( 'default' == $type ? 'mp4' : $type ),

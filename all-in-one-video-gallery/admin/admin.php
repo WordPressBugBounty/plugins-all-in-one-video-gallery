@@ -465,6 +465,29 @@ class AIOVG_Admin {
 	}
 
 	/**
+	 * Remove the "publish_aiovg_videos" capability from contributors and subscribers.
+	 *
+	 * Runs once, so a site owner who gives the capability back keeps it.
+	 *
+	 * @since 5.0.0
+	 */
+	public function restrict_publish_caps() {
+		if ( get_option( 'aiovg_publish_caps_restricted' ) ) {
+			return;
+		}
+
+		foreach ( array( 'contributor', 'subscriber' ) as $role_name ) {
+			$role = get_role( $role_name );
+
+			if ( $role && $role->has_cap( 'publish_aiovg_videos' ) ) {
+				$role->remove_cap( 'publish_aiovg_videos' );
+			}
+		}
+
+		update_option( 'aiovg_publish_caps_restricted', 1 );
+	}
+
+	/**
 	 * Add plugin's main menu and "Dashboard" menu.
 	 *
 	 * @since 1.6.5
@@ -1108,7 +1131,10 @@ class AIOVG_Admin {
 		if ( function_exists( 'finfo_open' ) ) {
 			$finfo     = finfo_open( FILEINFO_MIME_TYPE );
 			$real_mime = finfo_file( $finfo, $file['tmp_name'] );
-			finfo_close( $finfo );
+			// A no-op since PHP 8.1, deprecated in 8.5
+			if ( PHP_VERSION_ID < 80100 ) {
+				finfo_close( $finfo );
+			}
 
 			$allowed_mimes = array(
 				'text/vtt',

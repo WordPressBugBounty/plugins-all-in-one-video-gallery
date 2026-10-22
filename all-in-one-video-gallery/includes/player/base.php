@@ -774,9 +774,9 @@ class AIOVG_Player_Base {
 		$share_url = get_permalink( $this->post_id );
 		$share_url_encoded = rawurlencode( $share_url );
 
-		$share_title = rawurlencode( $this->post_title );
-	
-		$share_image = $this->get_poster();
+		$share_title = rawurlencode( html_entity_decode( $this->post_title, ENT_QUOTES, 'UTF-8' ) );
+
+		$share_image = rawurlencode( $this->get_poster() );
 	
 		$share_buttons = array();
 			
@@ -852,6 +852,24 @@ class AIOVG_Player_Base {
 				'url'     => $whatsapp_url,
 				'icon'    => 'aiovg-icon-whatsapp',
 				'text'    => __( 'WhatsApp', 'all-in-one-video-gallery' )
+			);
+		}
+
+		if ( isset( $socialshare_settings['services']['email'] ) ) {
+			$email_title = html_entity_decode( $this->post_title, ENT_QUOTES, 'UTF-8' );
+
+			// Encoded in full: esc_url() on output strips raw quotes
+			/* translators: %s: Video title */
+			$email_subject = rawurlencode( sprintf( __( 'Check out the "%s"', 'all-in-one-video-gallery' ), $email_title ) );
+			/* translators: 1: Video title, 2: Video URL */
+			$email_body    = rawurlencode( sprintf( __( 'Check out the "%s" at %s', 'all-in-one-video-gallery' ), $email_title, $share_url ) );
+			$email_url     = "mailto:?subject={$email_subject}&amp;body={$email_body}";
+
+			$share_buttons[] = array(
+				'service' => 'email',
+				'url'     => $email_url,
+				'icon'    => 'aiovg-icon-email',
+				'text'    => __( 'Email', 'all-in-one-video-gallery' )
 			);
 		}
 
@@ -994,9 +1012,9 @@ class AIOVG_Player_Base {
 
 		$wrapper_style = ! empty( $poster ) ? sprintf( ' style="background-image: url(\'%s\')"', esc_url( $poster ) ) : '';
 
-		// Restriction overlay with a lighter shade, and the cookie consent button
+		// Restriction overlay without its dimming: the button carries the contrast
 		$html .= sprintf(
-			'<div class="aiovg-restrictions-wrapper"%s><div class="aiovg-restrictions-overlay" style="background: rgba( 0, 0, 0, 0.5 );"><div class="aiovg-restrictions-message"><a href="%s" class="aiovg-privacy-consent-button" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">%s</a></div></div></div>',
+			'<div class="aiovg-restrictions-wrapper"%s><div class="aiovg-restrictions-overlay" style="background: none;"><div class="aiovg-restrictions-message"><a href="%s" class="aiovg-dailymotion-button" target="_blank" rel="noopener noreferrer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>%s</a></div></div></div>',
 			$wrapper_style,
 			esc_url( aiovg_get_dailymotion_watch_url( $videos['dailymotion'] ) ),
 			esc_html__( 'Watch on Dailymotion', 'all-in-one-video-gallery' )
@@ -1294,20 +1312,12 @@ class AIOVG_Player_Base {
 	public function get_youtube_embed_url( $url ) {
 		$player_settings = $this->get_player_settings();
 
-		parse_str( $url, $queries );
+		$times = aiovg_get_youtube_time_offsets( $url );
 
 		$url = 'https://www.youtube.com/embed/' . aiovg_get_youtube_id_from_url( $url ) . '?iv_load_policy=3&modestbranding=1&rel=0&showinfo=0&enablejsapi=1';									
 		
-		if ( isset( $queries['start'] ) ) {
-			$url = add_query_arg( 'start', (int) $queries['start'], $url );
-		}
-
-		if ( isset( $queries['t'] ) ) {
-			$url = add_query_arg( 'start', (int) $queries['t'], $url );
-		}
-
-		if ( isset( $queries['end'] ) ) {
-			$url = add_query_arg( 'end', (int) $queries['end'], $url );
+		foreach ( $times as $name => $time ) {
+			$url = add_query_arg( $name, $time, $url );
 		}
 
 		if ( ! empty( $player_settings['autoplay'] ) ) {

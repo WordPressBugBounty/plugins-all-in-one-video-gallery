@@ -680,27 +680,39 @@ function aiovg_get_vimeo_video_duration( $url ) {
  */
 function aiovg_get_youtube_id_from_url( $url ) {	
 	$id  = '';
-    $url = parse_url( $url );
-		
-    if ( 0 === strcasecmp( $url['host'], 'youtu.be' ) ) {
-       	$id = substr( $url['path'], 1 );
-    } elseif ( 0 === strcasecmp( $url['host'], 'www.youtube.com' ) || 0 === strcasecmp( $url['host'], 'youtube.com' ) ) {
-       	if ( isset( $url['query'] ) ) {
-       		parse_str( $url['query'], $url['query'] );
-           	if ( isset( $url['query']['v'] ) ) {
-           		$id = $url['query']['v'];
-           	}
-       	}
-			
-       	if ( empty( $id ) ) {
-           	$url['path'] = explode( '/', substr( $url['path'], 1 ) );
-           	if ( in_array( $url['path'][0], array( 'e', 'embed', 'v', 'shorts', 'live' ) ) ) {
-               	$id = $url['path'][1];
-           	}
-       	}
-    }
-    	
-	return $id;	
+	$url = parse_url( $url );
+
+	if ( empty( $url['host'] ) ) {
+		return $id;
+	}
+
+	if ( 0 === strcasecmp( $url['host'], 'youtu.be' ) ) {
+		if ( isset( $url['path'] ) ) {
+			$segments = explode( '/', trim( $url['path'], '/' ) );
+			$id = $segments[0];
+		}
+	} elseif ( 0 === strcasecmp( $url['host'], 'www.youtube.com' ) || 0 === strcasecmp( $url['host'], 'youtube.com' ) ) {
+		if ( isset( $url['query'] ) ) {
+			parse_str( $url['query'], $url['query'] );
+			if ( isset( $url['query']['v'] ) ) {
+				$id = $url['query']['v'];
+			}
+		}
+
+		if ( empty( $id ) && isset( $url['path'] ) ) {
+			$url['path'] = explode( '/', substr( $url['path'], 1 ) );
+			if ( isset( $url['path'][1] ) && in_array( $url['path'][0], array( 'e', 'embed', 'v', 'shorts', 'live' ) ) ) {
+				$id = $url['path'][1];
+			}
+		}
+	}
+
+	// parse_str() URL-decodes the value, so anything but a plain ID is rejected.
+	if ( ! is_string( $id ) || ! preg_match( '/^[A-Za-z0-9_-]{6,20}$/', $id ) ) {
+		$id = '';
+	}
+
+	return $id;
 }
 
 /**
@@ -722,8 +734,53 @@ function aiovg_get_youtube_image_url( $url ) {
 			$url = "https://img.youtube.com/vi/$id/mqdefault.jpg"; 
 		}
 	}
-	   	
-	return $url;	
+
+	return $url;
+}
+
+/**
+ * Get the start and end times from a YouTube URL.
+ *
+ * @since  5.0.0
+ * @param  string $url YouTube video URL.
+ * @return array  $times "start" and/or "end" in seconds, only those above zero.
+ */
+function aiovg_get_youtube_time_offsets( $url ) {
+	$times = array();
+
+	$query = parse_url( $url, PHP_URL_QUERY );
+	if ( empty( $query ) ) {
+		return $times;
+	}
+
+	parse_str( $query, $queries );
+
+	// "t" comes after "start", so it wins, as before
+	foreach ( array( 'start' => 'start', 't' => 'start', 'end' => 'end' ) as $key => $name ) {
+		if ( ! isset( $queries[ $key ] ) || ! is_string( $queries[ $key ] ) ) {
+			continue;
+		}
+
+		$value = trim( $queries[ $key ] );
+
+		if ( is_numeric( $value ) ) {
+			$times[ $name ] = (int) $value;
+		} elseif ( preg_match( '/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$/i', $value, $matches ) ) { // 90s, 1m30s, 1h2m3s
+			$hours   = ! empty( $matches[1] ) ? (int) $matches[1] : 0;
+			$minutes = ! empty( $matches[2] ) ? (int) $matches[2] : 0;
+			$seconds = ! empty( $matches[3] ) ? (int) $matches[3] : 0;
+
+			$times[ $name ] = ( $hours * 3600 ) + ( $minutes * 60 ) + $seconds;
+		}
+	}
+
+	foreach ( $times as $name => $time ) {
+		if ( $time <= 0 ) {
+			unset( $times[ $name ] );
+		}
+	}
+
+	return $times;
 }
 
 /**
@@ -760,9 +817,17 @@ function aiovg_resolve_youtube_url( $url ) {
 		$id = aiovg_get_youtube_id_from_url( $url );
 
 		if ( ! empty( $id ) ) {
+			$query = parse_url( $url, PHP_URL_QUERY ); // Keeps "t", e.g. from a live replay's "Start at" link
+
 			$url = 'https://www.youtube.com/watch?v=' . $id;
+			if ( ! empty( $query ) ) {
+				$url .= '&' . $query;
+			}
 		}
 	}
+
+	// Video.js's YouTube plugin can't read the ID from "youtu.be/ID/"
+	$url = preg_replace( '#^(https?://youtu\.be/[^/?\#]+)/+(?=$|[?\#])#i', '$1', $url );
 
 	return $url;
 }

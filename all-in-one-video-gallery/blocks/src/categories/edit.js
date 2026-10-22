@@ -47,7 +47,8 @@ function Edit( { attributes, setAttributes } ) {
 
 	const terms = useSelect( ( select ) => {
 		return select( 'core' ).getEntityRecords( 'taxonomy', 'aiovg_categories', {
-			'per_page': -1
+			'per_page': -1,
+			'context': 'view' // "edit" needs manage_aiovg_options, which only Administrators have
 		});
 	});
 

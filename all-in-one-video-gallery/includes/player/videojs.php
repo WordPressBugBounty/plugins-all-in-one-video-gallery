@@ -362,19 +362,11 @@ class AIOVG_Player_VideoJS extends AIOVG_Player_Base {
 				'cc_load_policy' => ( ! empty( $player_settings['cc_load_policy'] ) ? 1 : 0 )
 			);
 
-			parse_str( $sources['youtube']['src'], $queries );
+			// Video.js's YouTube plugin can't read /shorts/, /live/ or "youtu.be/ID/" links
+			$sources['youtube']['src'] = aiovg_resolve_youtube_url( $sources['youtube']['src'] );
 
-			if ( isset( $queries['start'] ) ) {
-				$settings['start'] = (int) $queries['start'];
-			}
-
-			if ( isset( $queries['t'] ) ) {
-				$settings['start'] = (int) $queries['t'];
-			}
-
-			if ( isset( $queries['end'] ) ) {
-				$settings['end'] = (int) $queries['end'];
-			}
+			// YouTube's own start/end: the offset plugin loops on YouTube's synchronous seek events
+			$settings['player']['youtube'] = array_merge( $settings['player']['youtube'], aiovg_get_youtube_time_offsets( $sources['youtube']['src'] ) );
 
 			// Hide YouTube Logo
 			if ( ! empty( $player_settings['hide_youtube_logo'] ) ) {

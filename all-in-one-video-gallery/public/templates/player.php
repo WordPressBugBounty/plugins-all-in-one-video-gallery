@@ -38,6 +38,30 @@ if ( $post_id > 0 ) {
     $post_url   = get_permalink( $post_id );
 		
 	if ( 'aiovg_videos' == $post_type ) {
+		// Same status rule as the [aiovg_video] shortcode, plus previews by users who can edit the video.
+		$post_status    = get_post_status( $post_id );
+		$has_permission = true;
+
+		if ( 'publish' != $post_status ) {
+			$has_permission = false;
+
+			if ( 'private' == $post_status ) {
+				if ( current_user_can( 'read_private_aiovg_videos' ) ) {
+					$has_permission = true;
+				}
+			}
+		}
+
+		$has_permission = apply_filters( 'aiovg_read_private_videos', $has_permission, array( 'id' => $post_id ), null );
+
+		if ( ! $has_permission && ! aiovg_current_user_can( 'edit_aiovg_video', $post_id ) ) {
+			status_header( 404 );
+			nocache_headers();
+
+			esc_html_e( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' );
+			return false;
+		}
+
 		$post_meta = get_post_meta( $post_id );		
 		
 		// Determine the video provider based on the post meta.
