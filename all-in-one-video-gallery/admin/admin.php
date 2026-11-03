@@ -428,6 +428,11 @@ class AIOVG_Admin {
 		if ( 'POST' == $_SERVER['REQUEST_METHOD'] && ! empty( $_POST['issues'] ) && isset( $_POST['aiovg_issues_nonce'] ) ) {
 			// Verify that the nonce is valid
     		if ( wp_verify_nonce( $_POST['aiovg_issues_nonce'], 'aiovg_fix_ignore_issues' ) ) {
+				// The nonce proves intent, not permission
+				if ( ! current_user_can( 'manage_aiovg_options' ) ) {
+					return;
+				}
+
 				$action_type  = isset( $_POST['action_type'] ) ? sanitize_text_field( wp_unslash( $_POST['action_type'] ) ) : '';
 				$redirect_url = admin_url( 'admin.php?page=all-in-one-video-gallery&tab=issues' );
 
@@ -963,7 +968,7 @@ class AIOVG_Admin {
 						'import_folder_failed_status_heading' => __( 'Sorry, some videos could not be imported. Please try again later.', 'all-in-one-video-gallery' ),
 						'import_csv_error_status_heading'     => __( 'Some items could not be imported from the CSV. Please review the details below.', 'all-in-one-video-gallery' ),
 						'export_zip_success_status_heading'   => __( 'Your export is ready. Download the ZIP files below.', 'all-in-one-video-gallery' ),
-						'export_zip_failed_status_heading'    => __( 'Sorry, the following videos could not be exported because their file size exceeds the maximum allowed ZIP size.', 'all-in-one-video-gallery' ),
+						'export_zip_failed_status_heading'    => __( 'Sorry, the following files could not be exported. Each one is either larger than the maximum ZIP size or not a media file on this site.', 'all-in-one-video-gallery' ),
 						'export_zip_empty_status'             => sprintf(
 							__( 'Your export is complete. %s video records processed, and %s skipped. However, no ZIP file was created because no files were found.', 'all-in-one-video-gallery' ),
 							'%%exported%%',

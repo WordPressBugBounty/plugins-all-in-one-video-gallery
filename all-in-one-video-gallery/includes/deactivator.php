@@ -34,6 +34,10 @@ class AIOVG_Deactivator {
 		if ( wp_next_scheduled( 'aiovg_schedule_every_five_minutes' ) ) {
 			wp_clear_scheduled_hook( 'aiovg_schedule_every_five_minutes' );
 		}
+
+		if ( wp_next_scheduled( 'aiovg_cleanup_export_directory' ) ) {
+			wp_clear_scheduled_hook( 'aiovg_cleanup_export_directory' );
+		}
 	}
 
 }

@@ -638,6 +638,15 @@ if ( ! empty( $is_trailer ) ) {
 		$settings['player']['controls'] = array_values( array_diff( $settings['player']['controls'], array( 'download' ) ) );
 	}
 }
+
+// After the settings filter: Plyr.js inserts chapter labels as HTML
+if ( ! empty( $settings['player']['markers']['points'] ) && is_array( $settings['player']['markers']['points'] ) ) {
+	foreach ( $settings['player']['markers']['points'] as $index => $point ) {
+		if ( isset( $point['label'] ) ) {
+			$settings['player']['markers']['points'][ $index ]['label'] = aiovg_esc_vidstack_label( $point['label'] );
+		}
+	}
+}
 ?>
 <!DOCTYPE html>
 <html translate="no">
@@ -1335,11 +1344,14 @@ if ( ! empty( $is_trailer ) ) {
 
 		// Video Tracks		
 		foreach ( $tracks as $index => $track ) {
+			// Plyr.js throws on a track that has a language but no label
+			$track_label = ( '' !== (string) $track['label'] ) ? $track['label'] : strtoupper( (string) $track['srclang'] );
+
         	printf( 
 				'<track kind="captions" src="%s" label="%s" srclang="%s" />', 
 				esc_url( aiovg_make_url_absolute( $track['src'] ) ), 				
-				esc_attr( $track['label'] ),
-				esc_attr( $track['srclang'] )
+				esc_attr( aiovg_esc_vidstack_label( $track_label, true ) ),
+				esc_attr( aiovg_esc_vidstack_label( strtolower( (string) $track['srclang'] ), true ) ) // Plyr.js matches languages in lowercase
 			);
 		}
 

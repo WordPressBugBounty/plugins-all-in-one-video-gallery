@@ -60,6 +60,9 @@ class AIOVG_Uninstall {
                     $wpdb->delete( $wpdb->terms, array(
                         'term_id' => $term->term_id,
                     ) );
+                    $wpdb->delete( $wpdb->termmeta, array(
+                        'term_id' => $term->term_id,
+                    ) );
                 }
             }
             // Delete taxonomies
@@ -100,6 +103,7 @@ class AIOVG_Uninstall {
             'aiovg_api_settings',
             'aiovg_bunny_stream_settings',
             'aiovg_page_settings',
+            'aiovg_issues',
             'aiovg_publish_caps_restricted',
             'aiovg_rewrite_rules_flushed',
             'aiovg_version'
@@ -107,9 +111,52 @@ class AIOVG_Uninstall {
         foreach ( $aiovg_settings as $settings ) {
             delete_option( $settings );
         }
+        // Delete the plugin transients
+        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s", $wpdb->esc_like( '_transient_aiovg_' ) . '%', $wpdb->esc_like( '_transient_timeout_aiovg_' ) . '%' ) );
+        // Delete the plugin user meta
+        $aiovg_user_meta = array(
+            'aiovg_videos_likes',
+            'aiovg_videos_dislikes',
+            'aiovg_email_captured',
+            'aiovg_video_form_tour',
+            'aiovg_automation_form_tour'
+        );
+        foreach ( $aiovg_user_meta as $meta_key ) {
+            delete_metadata(
+                'user',
+                0,
+                $meta_key,
+                '',
+                true
+            );
+        }
+        // Delete the email leads table
+        $wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $wpdb->prefix . 'aiovg_email_leads' ) );
+        // Delete the scheduled events, in case deactivation didn't clear them
+        wp_clear_scheduled_hook( 'aiovg_hourly_scheduled_events' );
+        wp_clear_scheduled_hook( 'aiovg_schedule_every_five_minutes' );
+        wp_clear_scheduled_hook( 'aiovg_cleanup_export_directory' );
         // Delete capabilities
         $roles = new AIOVG_Roles();
         $roles->remove_caps();
+        // Delete the plugin's working folders; "imports" holds Media Library files, so it stays
+        require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
+        require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
+        $upload_dir = wp_upload_dir();
+        $dir = trailingslashit( $upload_dir['basedir'] ) . 'all-in-one-video-gallery';
+        $fileSystemDirect = new WP_Filesystem_Direct(false);
+        foreach ( array('exports', 'temp') as $folder ) {
+            $fileSystemDirect->rmdir( $dir . '/' . $folder, true );
+        }
+        // Remove folders left empty; rmdir() without recursion never deletes a file
+        $import_dirs = glob( $dir . '/imports/*', GLOB_ONLYDIR );
+        if ( is_array( $import_dirs ) ) {
+            foreach ( $import_dirs as $import_dir ) {
+                $fileSystemDirect->rmdir( $import_dir );
+            }
+        }
+        $fileSystemDirect->rmdir( $dir . '/imports' );
+        $fileSystemDirect->rmdir( $dir );
     }
 
 }

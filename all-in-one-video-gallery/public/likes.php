@@ -89,7 +89,12 @@ class AIOVG_Public_Likes {
 		);
 		
 		$post_id = isset( $_REQUEST['post_id'] ) ? (int) $_REQUEST['post_id'] : 0;
-		$user_id = isset( $_REQUEST['user_id'] ) ? (int) $_REQUEST['user_id'] : 0;
+		$user_id = get_current_user_id(); // Never the posted "user_id"
+
+		// Only a video this visitor can see; 0 gives the error response
+		if ( ! aiovg_current_user_can( 'view_aiovg_video', $post_id ) ) {
+			$post_id = 0;
+		}
 			
 		if ( $post_id > 0 ) {
 			$response['status']   = 'success';
@@ -149,7 +154,13 @@ class AIOVG_Public_Likes {
  		);
 		
 		$post_id = isset( $_REQUEST['post_id'] ) ? (int) $_REQUEST['post_id'] : 0;
-		$user_id = isset( $_REQUEST['user_id'] ) ? (int) $_REQUEST['user_id'] : 0;
+		$user_id = get_current_user_id(); // Never the posted "user_id"
+
+		// Only a video this visitor can see; 0 gives the error response
+		if ( ! aiovg_current_user_can( 'view_aiovg_video', $post_id ) ) {
+			$post_id = 0;
+		}
+
 		$action  = isset( $_REQUEST['context'] ) ? sanitize_text_field( $_REQUEST['context'] ) : '';		
 			
 		if ( $post_id > 0 ) {			
@@ -207,7 +218,13 @@ class AIOVG_Public_Likes {
 		);
 		
 		$post_id = isset( $_REQUEST['post_id'] ) ? (int) $_REQUEST['post_id'] : 0;
-		$user_id = isset( $_REQUEST['user_id'] ) ? (int) $_REQUEST['user_id'] : 0;
+		$user_id = get_current_user_id(); // Never the posted "user_id"
+
+		// Only a video this visitor can see; 0 gives the error response
+		if ( ! aiovg_current_user_can( 'view_aiovg_video', $post_id ) ) {
+			$post_id = 0;
+		}
+
 		$action  = isset( $_REQUEST['context'] ) ? sanitize_text_field( $_REQUEST['context'] ) : '';	
 
 		if ( $post_id > 0 ) {			

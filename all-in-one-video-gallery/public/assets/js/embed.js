@@ -360,14 +360,14 @@
                 opacity: 0;
             }
         </style>
-        <div id="root">
-            <img id="posterimage" src="data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=" alt="" referrerpolicy="origin" />
-            <button type="button" id="playbutton" aria-label="Play Video"></button>
+        <div id="root" part="root">
+            <img id="posterimage" part="posterimage" src="data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=" alt="" referrerpolicy="origin" />
+            <button type="button" id="playbutton" part="playbutton" aria-label="Play Video"></button>
             <div id="cookieconsent-modal">
                 <div class="cookieconsent-block">
                     <div><slot name="cookieconsent-message"></slot></div>
                     <div>
-                        <button type="button" id="cookieconsent-button" class="cookieconsent-button">
+                        <button type="button" id="cookieconsent-button" class="cookieconsent-button" part="cookieconsent-button">
                             <slot name="cookieconsent-button-label">I Agree</slot>
                         </button>
                     </div>

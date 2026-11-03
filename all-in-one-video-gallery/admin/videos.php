@@ -156,12 +156,13 @@ class AIOVG_Admin_Videos {
 	}
 
 	/**
-	 * Register the meta fields printed as raw HTML, so every write is sanitized,
-	 * including XML-RPC, REST and direct update_post_meta() calls.
+	 * Register the meta fields sanitized on every write, including XML-RPC, REST
+	 * and direct update_post_meta() calls.
 	 *
 	 * @since 5.0.0
 	 */
 	public function register_post_meta() {
+		// Embed codes, printed as raw HTML
 		$args = array(
 			'type'              => 'string',
 			'single'            => true,
@@ -170,6 +171,26 @@ class AIOVG_Admin_Videos {
 
 		register_post_meta( 'aiovg_videos', 'embedcode', $args );
 		register_post_meta( 'aiovg_videos', 'trailer_src', $args );
+
+		// Poster image URL
+		register_post_meta( 'aiovg_videos', 'image', array(
+			'type'              => 'string',
+			'single'            => true,
+			'sanitize_callback' => array( $this, 'sanitize_url_meta' )
+		) );
+
+		// Subtitles and chapters, one row per item
+		register_post_meta( 'aiovg_videos', 'track', array(
+			'type'              => 'array',
+			'single'            => false,
+			'sanitize_callback' => array( $this, 'sanitize_track_meta' )
+		) );
+
+		register_post_meta( 'aiovg_videos', 'chapter', array(
+			'type'              => 'array',
+			'single'            => false,
+			'sanitize_callback' => array( $this, 'sanitize_chapter_meta' )
+		) );
 	}
 
 	/**
@@ -184,6 +205,64 @@ class AIOVG_Admin_Videos {
 	 */
 	public function sanitize_embedcode_meta( $value ) {
 		return aiovg_sanitize_embedcode( $value );
+	}
+
+	/**
+	 * Sanitize the "image" meta value.
+	 *
+	 * @since  5.1.0
+	 * @param  mixed  $value Meta value.
+	 * @return string        Sanitized meta value.
+	 */
+	public function sanitize_url_meta( $value ) {
+		// trim() on an array is a fatal error under PHP 8.
+		if ( ! is_scalar( $value ) ) {
+			return '';
+		}
+
+		return aiovg_sanitize_url( (string) $value );
+	}
+
+	/**
+	 * Sanitize a "track" meta value.
+	 *
+	 * @since  5.1.0
+	 * @param  mixed $value Meta value.
+	 * @return array        Sanitized meta value.
+	 */
+	public function sanitize_track_meta( $value ) {
+		// Every reader indexes these keys directly, so a malformed row still gets them all
+		$value = is_array( $value ) ? $value : array();
+
+		$track = array(
+			'src' => ( isset( $value['src'] ) && is_scalar( $value['src'] ) ) ? aiovg_sanitize_url( (string) $value['src'] ) : ''
+		);
+
+		// Only the video form stores an attachment ID
+		if ( isset( $value['src_id'] ) ) {
+			$track['src_id'] = is_scalar( $value['src_id'] ) ? (int) $value['src_id'] : 0;
+		}
+
+		$track['label']   = isset( $value['label'] ) ? sanitize_text_field( $value['label'] ) : '';
+		$track['srclang'] = isset( $value['srclang'] ) ? sanitize_text_field( $value['srclang'] ) : '';
+
+		return $track;
+	}
+
+	/**
+	 * Sanitize a "chapter" meta value.
+	 *
+	 * @since  5.1.0
+	 * @param  mixed $value Meta value.
+	 * @return array        Sanitized meta value.
+	 */
+	public function sanitize_chapter_meta( $value ) {
+		$value = is_array( $value ) ? $value : array();
+
+		return array(
+			'time'  => isset( $value['time'] ) ? sanitize_text_field( $value['time'] ) : '',
+			'label' => isset( $value['label'] ) ? sanitize_text_field( $value['label'] ) : ''
+		);
 	}
 
 	/**
@@ -1135,7 +1214,7 @@ class AIOVG_Admin_Videos {
 
 				printf(
 					'<img src="%s" alt="" style="width: 75px;" />',
-					$image_data['src']
+					esc_url( $image_data['src'] )
 				);
 				break;
 			case 'post_meta':

@@ -581,6 +581,11 @@ class AIOVG_Admin_Import_Export {
 			}
 		}		
 
+		// Stop the folder being listed
+		if ( ! file_exists( $export_dir . 'index.html' ) ) {
+			@file_put_contents( $export_dir . 'index.html', '' );
+		}
+
 		// Query videos
 		$args = array(
 			'post_type'      => 'aiovg_videos',
@@ -908,6 +913,11 @@ class AIOVG_Admin_Import_Export {
 			}
 		}		
 
+		// Stop the folder being listed
+		if ( ! file_exists( $export_dir . 'index.html' ) ) {
+			@file_put_contents( $export_dir . 'index.html', '' );
+		}
+
 		// Query videos
 		$args = array(
 			'post_type'              => 'aiovg_videos',
@@ -1007,6 +1017,11 @@ class AIOVG_Admin_Import_Export {
 				}
 
 				if ( ! file_exists( $file_path ) ) {
+					continue;
+				}
+
+				if ( ! $this->is_exportable_file( $file_path ) ) {
+					$skipped[] = $file_url;
 					continue;
 				}
 
@@ -2668,6 +2683,59 @@ class AIOVG_Admin_Import_Export {
 
 		// Compare the hostnames (case-insensitive).
 		return strcasecmp( $site_host, $file_host ) === 0;
+	}
+
+	/**
+	 * Check if a local file may be packed into the export ZIP: a media or subtitle
+	 * file inside the WordPress install.
+	 *
+	 * @since  5.1.0
+	 * @access private
+	 * @param  string $file_path Absolute path of the file.
+	 * @return bool              True if the file can be exported.
+	 */
+	private function is_exportable_file( $file_path ) {
+		$real_path = realpath( $file_path );
+
+		if ( false === $real_path ) {
+			return false;
+		}
+
+		$real_path = wp_normalize_path( $real_path );
+
+		// wp-content and uploads can live outside ABSPATH, e.g. on Bedrock
+		$upload_dir = wp_upload_dir();
+		$roots      = array( ABSPATH, WP_CONTENT_DIR, $upload_dir['basedir'] );
+		$is_inside  = false;
+
+		foreach ( $roots as $root ) {
+			$root = realpath( $root );
+
+			if ( false !== $root && 0 === strpos( $real_path, trailingslashit( wp_normalize_path( $root ) ) ) ) {
+				$is_inside = true;
+				break;
+			}
+		}
+
+		if ( ! $is_inside ) {
+			return false;
+		}
+
+		// Media and subtitle types only, whatever the current user may upload
+		$mimes = array(
+			'vtt' => 'text/vtt',
+			'srt' => 'application/x-subrip'
+		);
+
+		foreach ( wp_get_mime_types() as $extensions => $mime_type ) {
+			if ( preg_match( '#^(video|audio|image)/#', $mime_type ) ) {
+				$mimes[ $extensions ] = $mime_type;
+			}
+		}
+
+		$filetype = wp_check_filetype( $real_path, $mimes );
+
+		return ! empty( $filetype['ext'] );
 	}
 
 	/**

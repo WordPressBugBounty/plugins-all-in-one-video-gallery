@@ -119,6 +119,17 @@ class AIOVG_Roles {
 		if ( empty( $args ) ) {
 			return $caps;
 		}
+
+		// Video meta written through XML-RPC or REST needs the "edit others" capability
+		if ( 'add_post_meta' == $cap || 'edit_post_meta' == $cap || 'delete_post_meta' == $cap ) {
+			$post = get_post( $args[0] );
+
+			if ( $post && 'aiovg_videos' == $post->post_type ) {
+				$caps[] = 'edit_others_aiovg_videos';
+			}
+
+			return $caps;
+		}
 				
 		// If editing, deleting, or reading a listing, get the post and post type object
 		if ( 'edit_aiovg_video' == $cap || 'delete_aiovg_video' == $cap || 'read_aiovg_video' == $cap ) {

@@ -326,10 +326,50 @@ function aiovg_current_user_can( $capability, $post_id = 0 ) {
 		return apply_filters( 'aiovg_current_user_can', $has_access, $capability, $post_id );
 	}
 
+	// If viewing a video: its status only, as on the player page. Guests can view
+	// published videos; role restrictions are "play_aiovg_video".
+	if ( 'view_aiovg_video' == $capability ) {
+		// get_post( 0 ) falls back to the global post
+		if ( (int) $post_id <= 0 ) {
+			return false;
+		}
+
+		if ( 'aiovg_videos' != get_post_type( $post_id ) ) {
+			return false;
+		}
+
+		$post_status    = get_post_status( $post_id );
+		$has_permission = true;
+
+		if ( 'publish' != $post_status ) {
+			$has_permission = false;
+
+			if ( 'private' == $post_status ) {
+				if ( current_user_can( 'read_private_aiovg_videos' ) ) {
+					$has_permission = true;
+				}
+			}
+		}
+
+		$has_permission = apply_filters( 'aiovg_read_private_videos', $has_permission, array( 'id' => $post_id ), null );
+
+		// Users who can edit the video may preview it
+		if ( ! $has_permission && ! aiovg_current_user_can( 'edit_aiovg_video', $post_id ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
 	// If editing, deleting, or reading a video, get the post and post type object
 	if ( 'edit_aiovg_video' == $capability || 'delete_aiovg_video' == $capability || 'read_aiovg_video' == $capability ) {
 		$post = get_post( $post_id );
-		$post_type = get_post_type_object( $post->post_type );
+		$post_type = $post ? get_post_type_object( $post->post_type ) : null;
+
+		// Only videos and automations use these capabilities
+		if ( ! $post_type || 'aiovg_video' != $post_type->capability_type ) {
+			return false;
+		}
 
 		// If editing a video, assign the required capability
 		if ( 'edit_aiovg_video' == $capability ) {
@@ -349,15 +389,9 @@ function aiovg_current_user_can( $capability, $post_id = 0 ) {
 			}
 		}
 		
-		// If reading a private video, assign the required capability
+		// If reading a video, defer to core: guests never pass, drafts need edit rights
 		elseif ( 'read_aiovg_video' == $capability ) {
-			if ( 'private' != $post->post_status ) {
-				$capability = 'read';
-			} elseif ( $user_id == $post->post_author ) {
-				$capability = 'read';
-			} else {
-				$capability = 'read_private_aiovg_videos';
-			}
+			return current_user_can( 'read_post', $post_id );
 		}		
 	}
 		
@@ -523,6 +557,30 @@ function aiovg_esc_js_url( $url ) {
 	}
 
 	return esc_attr( $json );
+}
+
+/**
+ * Escape a caption or chapter label for the Plyr.js player, which inserts labels as HTML.
+ *
+ * Pass $in_attribute for a value the browser decodes once before Plyr.js reads it,
+ * e.g. <track label="%s"> or data-params. esc_attr() alone never double-encodes.
+ * Quotes are left alone, so the result still goes through esc_attr().
+ *
+ * @since  5.1.0
+ * @param  string $label        The label.
+ * @param  bool   $in_attribute Whether the value is printed inside an HTML attribute.
+ * @return string               Escaped label.
+ */
+function aiovg_esc_vidstack_label( $label, $in_attribute = false ) {
+	// Existing entities are kept, but no raw "<" survives
+	$label = htmlspecialchars( (string) $label, ENT_NOQUOTES, 'UTF-8', false );
+
+	if ( $in_attribute ) {
+		// An encoded quote would decode into the JSON of data-params and break it
+		$label = htmlspecialchars( $label, ENT_NOQUOTES, 'UTF-8', true );
+	}
+
+	return $label;
 }
 
 /**

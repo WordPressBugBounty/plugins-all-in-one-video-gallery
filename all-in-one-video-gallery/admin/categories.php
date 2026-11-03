@@ -191,7 +191,7 @@ class AIOVG_Admin_Categories {
 
 				$content = sprintf(
 					'<img src="%s" alt="" style="width: 75px;" />',
-					$image_data['src']
+					esc_url( $image_data['src'] )
 				);
 				break;
 

@@ -1135,6 +1135,14 @@ class AIOVG_Public {
 	public function save_email_lead() {
 		check_ajax_referer( 'aiovg_public_ajax_nonce', 'security' );
 
+		// While email capture is off site-wide, no player shows the form.
+		$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
+
+		if ( empty( $email_capture_settings['enable_email_capture'] ) ) {
+			wp_send_json_error();
+			return;
+		}
+
 		// Never accept from a visitor the form would not have been shown to.
 		if ( ! aiovg_can_show_email_capture_to_user() ) {
 			wp_send_json_error();
@@ -1144,6 +1152,11 @@ class AIOVG_Public {
 		// Read before the skip branch below, which returns early and needs them too.
 		$video_id  = isset( $_POST['video_id'] ) ? absint( $_POST['video_id'] ) : 0;
 		$video_url = isset( $_POST['video_url'] ) ? esc_url_raw( $_POST['video_url'] ) : '';
+
+		// Only a video this visitor can see; otherwise the lead is saved without one.
+		if ( $video_id > 0 && ! aiovg_current_user_can( 'view_aiovg_video', $video_id ) ) {
+			$video_id = 0;
+		}
 
 		// Recomputed server-side, never trusted from the client.
 		$capture_key = aiovg_get_email_capture_key( $video_id, $video_id > 0 ? 'aiovg_videos' : '', $video_url );
@@ -1218,8 +1231,6 @@ class AIOVG_Public {
 		$page_url = isset( $_POST['page_url'] ) ? esc_url_raw( $_POST['page_url'] ) : '';
 
 		// Server-side blocked domain check.
-		$email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
-
 		$blocked_domains = isset( $email_capture_settings['blocked_email_domains'] ) ? $email_capture_settings['blocked_email_domains'] : '';
 
 		if ( ! empty( $blocked_domains ) ) {

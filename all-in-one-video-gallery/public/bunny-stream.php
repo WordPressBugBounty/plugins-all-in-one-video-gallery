@@ -87,10 +87,18 @@ class AIOVG_Public_Bunny_Stream {
 			}
 		}
 
+		// Read before the updates below, so the post's previous GUIDs still count as its own
+		$stored_video_ids = array(
+			get_post_meta( $post_id, 'bunny_stream_video_id', true ),
+			get_post_meta( $post_id, 'trailer_bunny_stream_video_id', true )
+		);
+
 		$bunny_stream_video_id = isset( $_POST['bunny_stream_video_id'] ) ? sanitize_text_field( $_POST['bunny_stream_video_id'] ) : 0;
 
 		if ( ! empty( $bunny_stream_video_id ) ) {
-			if ( 'default' != $type ) {
+			if ( ! $this->user_can_manage_bunny_stream_video( $bunny_stream_video_id, $post_id, $stored_video_ids ) ) {
+				$bunny_stream_video_id = 0; // Not this user's to store or delete
+			} elseif ( 'default' != $type ) {
 				$this->delete_unused_bunny_stream_video( $bunny_stream_video_id, $post_id );
 				$bunny_stream_video_id = 0;
 			} elseif ( ! empty( $mp4 ) ) {
@@ -109,7 +117,9 @@ class AIOVG_Public_Bunny_Stream {
 
 			if ( ! empty( $deletable_bunny_stream_video_ids ) ) {
 				foreach ( $deletable_bunny_stream_video_ids as $bunny_stream_video_id ) {
-					$this->delete_unused_bunny_stream_video( $bunny_stream_video_id, $post_id );
+					if ( $this->user_can_manage_bunny_stream_video( $bunny_stream_video_id, $post_id, $stored_video_ids ) ) {
+						$this->delete_unused_bunny_stream_video( $bunny_stream_video_id, $post_id );
+					}
 				}
 			}
  		}
@@ -122,7 +132,9 @@ class AIOVG_Public_Bunny_Stream {
 			$trailer_bunny_stream_video_id = isset( $_POST['trailer_bunny_stream_video_id'] ) ? sanitize_text_field( $_POST['trailer_bunny_stream_video_id'] ) : '';
 
 			if ( ! empty( $trailer_bunny_stream_video_id ) ) {
-				if ( 'embedcode' === $trailer_type ) {
+				if ( ! $this->user_can_manage_bunny_stream_video( $trailer_bunny_stream_video_id, $post_id, $stored_video_ids ) ) {
+					$trailer_bunny_stream_video_id = ''; // Not this user's to store or delete
+				} elseif ( 'embedcode' === $trailer_type ) {
 					$this->delete_unused_bunny_stream_video( $trailer_bunny_stream_video_id, $post_id );
 					$trailer_bunny_stream_video_id = '';
 				} elseif ( ! empty( $trailer_src ) ) {
@@ -141,7 +153,9 @@ class AIOVG_Public_Bunny_Stream {
 
 				if ( ! empty( $deletable_trailer_bunny_stream_video_ids ) ) {
 					foreach ( $deletable_trailer_bunny_stream_video_ids as $deletable_trailer_id ) {
-						$this->delete_unused_bunny_stream_video( $deletable_trailer_id, $post_id );
+						if ( $this->user_can_manage_bunny_stream_video( $deletable_trailer_id, $post_id, $stored_video_ids ) ) {
+							$this->delete_unused_bunny_stream_video( $deletable_trailer_id, $post_id );
+						}
 					}
 				}
 			}
@@ -289,6 +303,9 @@ class AIOVG_Public_Bunny_Stream {
 
 		$video_id = $json['guid'];
 
+		// Remember the uploader; outlives the 24-hour nonces that gate every cleanup route
+		set_transient( $this->get_bunny_stream_upload_key( $video_id ), 1, 2 * DAY_IN_SECONDS );
+
 		// Build the final response with token and metadata		
 		$response = array(
 			'token'         => hash( 'sha256', $library_id . $api_key . $expires . $video_id ), // Upload token for Bunny's direct-to-cloud
@@ -353,6 +370,11 @@ class AIOVG_Public_Bunny_Stream {
 
 		if ( empty( $video_id ) ) {
 			$response['error'] = __( 'Invalid Video ID.', 'all-in-one-video-gallery' );
+			wp_send_json_error( $response );
+		}
+
+		if ( ! $this->user_can_manage_bunny_stream_video( $video_id, $post_id ) ) {
+			$response['error'] = __( 'You do not have sufficient permissions to do this action.', 'all-in-one-video-gallery' );
 			wp_send_json_error( $response );
 		}
 
@@ -446,7 +468,13 @@ class AIOVG_Public_Bunny_Stream {
 			wp_send_json_error( $response );
 		}
 
+		if ( ! $this->user_can_manage_bunny_stream_video( $video_id, $post_id ) ) {
+			$response['error'] = __( 'You do not have sufficient permissions to do this action.', 'all-in-one-video-gallery' );
+			wp_send_json_error( $response );
+		}
+
 		$this->delete_unused_bunny_stream_video( $video_id, $post_id );
+		delete_transient( $this->get_bunny_stream_upload_key( $video_id ) );
 		
 		wp_send_json_success(); // Send successful JSON response
 	}
@@ -508,6 +536,58 @@ class AIOVG_Public_Bunny_Stream {
 		if ( ! aiovg_is_media_in_use( $video_id, 'bunny_stream', $post_id ) ) {
 			$this->delete_bunny_stream_video( $video_id );
 		}
+	}
+
+	/**
+	 * Whether the current user may act on a Bunny Stream video.
+	 *
+	 * @since  5.1.0
+	 * @access private
+	 * @param  string $video_id         Bunny Stream video ID.
+	 * @param  int    $post_id          The video post being edited, or 0 when there is none yet.
+	 * @param  array  $stored_video_ids Optional. The post's GUIDs as stored before a save. Read from the post when omitted.
+	 * @return bool                     True if the user uploaded it, it is stored on the post, or the user manages the plugin.
+	 */
+	private function user_can_manage_bunny_stream_video( $video_id, $post_id, $stored_video_ids = null ) {
+		if ( empty( $video_id ) ) {
+			return false;
+		}
+
+		if ( current_user_can( 'manage_aiovg_options' ) ) {
+			return true;
+		}
+
+		if ( get_transient( $this->get_bunny_stream_upload_key( $video_id ) ) ) {
+			return true;
+		}
+
+		// The callers have already checked the user's permission on this post
+		if ( $post_id > 0 ) {
+			if ( null === $stored_video_ids ) {
+				$stored_video_ids = array(
+					get_post_meta( $post_id, 'bunny_stream_video_id', true ),
+					get_post_meta( $post_id, 'trailer_bunny_stream_video_id', true )
+				);
+			}
+
+			if ( in_array( $video_id, $stored_video_ids, true ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the transient name that records who uploaded a Bunny Stream video.
+	 *
+	 * @since  5.1.0
+	 * @access private
+	 * @param  string $video_id Bunny Stream video ID.
+	 * @return string           Transient name, unique to the current user and video.
+	 */
+	private function get_bunny_stream_upload_key( $video_id ) {
+		return 'aiovg_bunny_' . md5( get_current_user_id() . '|' . $video_id );
 	}
 
 	/**

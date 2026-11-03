@@ -6,7 +6,7 @@ Tags: video gallery, video player, youtube, vimeo, html5 video
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 5.6.20
-Stable tag: 5.0.0
+Stable tag: 5.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -164,6 +164,9 @@ Visitors without a required level see the Paid Memberships Pro membership messag
 
 This protects the player, not the video file itself: anyone who already has a self-hosted file's URL can still open it. For stronger protection, use Bunny Stream with token authentication, or Paid Memberships Pro's own file protection.
 
+= 13. Where do I report security bugs found in this plugin? =
+Please report security bugs found in the source code of the All-in-One Video Gallery plugin through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/f6cdb560-024c-4cbc-8f6b-c1d4f1ee54e0). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
+
 == Screenshots ==
 
 1. Video Gallery — "Classic" Template.
@@ -193,6 +196,16 @@ This protects the player, not the video file itself: anyone who already has a se
 25. Premium: Front-end video submission form.
 
 == Changelog ==
+
+= 5.1.0 =
+
+* Security Fix: "Authenticated (Subscriber+) Stored Cross-Site Scripting via 'image' Post Meta via XML-RPC" issue that was discovered by [Kevin Whelan](https://patchstack.com/database/researchers/3361ccff-fee2-4a62-9b3e-1a6c78e5ef57), and reported responsibly to us by [Patchstack](https://patchstack.com/).
+* Security Fix: "Authenticated (Subscriber+) Stored DOM-Based Cross-Site Scripting via 'track' Post Meta 'label' Field" issue that was discovered by [jiahao](https://www.wordfence.com/threat-intel/vulnerabilities/researchers/id/8523), and reported responsibly to us by [Wordfence](https://www.wordfence.com/).
+* Security Fix: "Unauthenticated Post Meta Update via 'aiovg_update_views_count' AJAX Action" issue that was discovered by Naoki Kawahigashi, and reported responsibly to us by [WPScan](https://wpscan.com/).
+* Tweak: Only Administrators can set video fields through XML-RPC custom fields.
+* Tweak: Premium - Only Administrators can create and edit automations.
+* Fix: "Remove Data on Uninstall" now also deletes the email leads table, likes, export files and other leftover plugin data.
+* Fix: Various security improvements.
 
 = 5.0.0 =
 
@@ -749,6 +762,6 @@ For the changelog of earlier versions, please refer to the [changelog on plugins
 
 == Upgrade Notice ==
 
-= 5.0.0 =
+= 5.1.0 =
 
-Security release: fixes three stored XSS issues and playback of unpublished videos. Subscribers and Contributors can no longer publish via XML-RPC or the REST API. Plus YouTube and CSV import fixes. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)
+Security release: fixes two stored XSS issues and an unauthenticated post meta update via the views counter, plus further hardening. "Remove Data on Uninstall" now removes all plugin data. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

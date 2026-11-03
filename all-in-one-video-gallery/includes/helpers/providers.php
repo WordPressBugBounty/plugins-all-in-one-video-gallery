@@ -541,10 +541,10 @@ function aiovg_get_vimeo_image_url( $url, $force_refresh = false ) {
 	}
 
 	// Find large thumbnail using the Vimeo API v2
-	$api_response = wp_remote_get( 'https://vimeo.com/api/v2/video/' . $data['video_id'] . '.php' );
+	$api_response = wp_remote_get( 'https://vimeo.com/api/v2/video/' . $data['video_id'] . '.json' );
 
 	if ( ! is_wp_error( $api_response ) ) {
-		$api_response = maybe_unserialize( $api_response['body'] );
+		$api_response = json_decode( wp_remote_retrieve_body( $api_response ), true );
 
 		if ( is_array( $api_response ) && isset( $api_response[0]['thumbnail_large'] ) ) {
 			$data['thumbnail_url'] = $api_response[0]['thumbnail_large'];

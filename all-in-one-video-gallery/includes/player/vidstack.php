@@ -445,6 +445,15 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 			}
 		}
 		
+		// After the settings filter: Plyr.js inserts chapter labels as HTML, and the browser decodes data-params once
+		if ( ! empty( $settings['player']['markers']['points'] ) && is_array( $settings['player']['markers']['points'] ) ) {
+			foreach ( $settings['player']['markers']['points'] as $index => $point ) {
+				if ( isset( $point['label'] ) ) {
+					$settings['player']['markers']['points'][ $index ]['label'] = aiovg_esc_vidstack_label( $point['label'], true );
+				}
+			}
+		}
+
 		// Include Dependencies
 		wp_enqueue_style( 
 			AIOVG_PLUGIN_SLUG . '-plyr', 
@@ -550,11 +559,14 @@ class AIOVG_Player_Vidstack extends AIOVG_Player_Base {
 			}		
 			
 			foreach ( $tracks as $index => $track ) { // Tracks
+				// Plyr.js throws on a track that has a language but no label
+				$track_label = ( '' !== (string) $track['label'] ) ? $track['label'] : strtoupper( (string) $track['srclang'] );
+
 				$player_html .= sprintf( 
 					'<track kind="captions" src="%s" label="%s" srclang="%s" />', 
 					esc_url( $track['src'] ),						 
-					esc_attr( $track['label'] ),
-					esc_attr( $track['srclang'] )
+					esc_attr( aiovg_esc_vidstack_label( $track_label, true ) ),
+					esc_attr( aiovg_esc_vidstack_label( strtolower( (string) $track['srclang'] ), true ) ) // Plyr.js matches languages in lowercase
 				);
 			}
 

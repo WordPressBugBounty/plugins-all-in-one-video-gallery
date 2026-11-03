@@ -449,7 +449,14 @@ class AIOVG_Public_Video {
 		}
 
 		$mp4_src = $sources['mp4']['src'];
-		if ( strpos( $mp4_src, 'videos.files.wordpress.com' ) === false || strpos( $mp4_src, '.mp4' ) === false ) {
+		$mp4_url = wp_parse_url( $mp4_src );
+
+		// Exact host, never a substring: the source can come from the player URL's query string
+		if ( ! is_array( $mp4_url ) || empty( $mp4_url['scheme'] ) || empty( $mp4_url['host'] ) || empty( $mp4_url['path'] ) ) {
+			return $sources;
+		}
+
+		if ( 'https' !== strtolower( $mp4_url['scheme'] ) || 'videos.files.wordpress.com' !== strtolower( $mp4_url['host'] ) || false === strpos( $mp4_url['path'], '.mp4' ) ) {
 			return $sources;
 		}
 
@@ -457,13 +464,15 @@ class AIOVG_Public_Video {
 		$hls_src = str_replace( '.mp4', '.master.m3u8', $mp4_src );
 		$has_hls = 0;
 
-		$query = parse_url( $mp4_src, PHP_URL_QUERY );
-		parse_str( $query, $parsed_url );
+		$parsed_url = array();
+		if ( ! empty( $mp4_url['query'] ) ) {
+			parse_str( $mp4_url['query'], $parsed_url );
+		}
 
 		if ( isset( $parsed_url['isnew'] ) ) {
 			$has_hls = (int) $parsed_url['isnew'];
 		} else {
-			$hls_response = wp_remote_get( $hls_src, array( 'timeout' => 5 ) );
+			$hls_response = wp_safe_remote_get( $hls_src, array( 'timeout' => 5 ) );
 
 			if ( ! is_wp_error( $hls_response ) && 200 === wp_remote_retrieve_response_code( $hls_response ) ) {
 				$has_hls = 1;
@@ -664,6 +673,12 @@ class AIOVG_Public_Video {
 						
 			if ( $post_id > 0 ) {
 				check_ajax_referer( 'aiovg_public_ajax_nonce', 'security' );
+
+				// Only a video this visitor can see and play
+				if ( ! aiovg_current_user_can( 'view_aiovg_video', $post_id ) || ! aiovg_current_user_can( 'play_aiovg_video', $post_id ) ) {
+					wp_send_json_error();
+				}
+
 				aiovg_update_views_count( $post_id );
 
 				// Update video duration if applicable
