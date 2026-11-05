@@ -502,6 +502,22 @@ class AIOVG_Public_Video {
 	}
 
 	/**
+	 * Hides the description of a password-protected video, as WordPress does on its page.
+	 *
+	 * @since  5.1.1
+	 * @param  string $content The video description.
+	 * @param  int    $post_id Video post ID.
+	 * @return string          The description, or an empty string while the password is needed.
+	 */
+	public function hide_password_protected_description( $content, $post_id = 0 ) {
+		if ( aiovg_is_video_password_required( $post_id ) ) {
+			return '';
+		}
+
+		return $content;
+	}
+
+	/**
 	 * Filters timestamps in the video description and wraps them with links.
 	 *
 	 * @since  3.9.7

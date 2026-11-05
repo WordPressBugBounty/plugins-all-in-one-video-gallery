@@ -322,6 +322,11 @@ function aiovg_current_user_can( $capability, $post_id = 0 ) {
 	
 	// If playing a video
 	if ( 'play_aiovg_video' == $capability ) {
+		// Before the filter, so no integration can open a password-protected video
+		if ( aiovg_is_video_password_required( $post_id ) ) {
+			return false;
+		}
+
 		$has_access = aiovg_current_user_has_video_access( $post_id );
 		return apply_filters( 'aiovg_current_user_can', $has_access, $capability, $post_id );
 	}
@@ -366,8 +371,11 @@ function aiovg_current_user_can( $capability, $post_id = 0 ) {
 		$post = get_post( $post_id );
 		$post_type = $post ? get_post_type_object( $post->post_type ) : null;
 
-		// Only videos and automations use these capabilities
-		if ( ! $post_type || 'aiovg_video' != $post_type->capability_type ) {
+		// Only videos and automations use these capabilities. Plugins such as Groups
+		// may turn capability_type into array( singular, plural ), as core allows.
+		$capability_type = $post_type ? (array) $post_type->capability_type : array();
+
+		if ( 'aiovg_video' != reset( $capability_type ) ) {
 			return false;
 		}
 
@@ -1086,7 +1094,12 @@ function aiovg_get_excerpt( $post_id = 0 , $char_length = 55, $append = '...', $
 		$post = get_post( $post_id );
 	} else {
 		global $post;
-	}	
+	}
+
+	// Core hides a protected post's excerpt too
+	if ( ! empty( $post ) && aiovg_is_video_password_required( $post->ID ) ) {
+		return $content;
+	}
 
 	if ( ! empty( $post->post_excerpt ) ) {
 		$content = ( $allow_html == false ) ? wp_strip_all_tags( $post->post_excerpt, true ) : $post->post_excerpt;
@@ -1501,6 +1514,15 @@ function aiovg_get_restricted_message( $post_id, $context, $content = '' ) {
 	$restricted_message = $restrictions_settings['restricted_message'];
 	if ( empty( $restricted_message ) ) {
 		$restricted_message = __( 'Sorry, but you do not have permission to view this video.', 'all-in-one-video-gallery' );
+	}
+
+	// The password is entered on the video page; "_top" leaves the player iframe
+	if ( aiovg_is_video_password_required( $post_id ) ) {
+		$restricted_message = sprintf(
+			/* translators: %s: URL of the video page */
+			__( 'This video is password protected. <a href="%s" target="_top">Enter the password</a> to watch it.', 'all-in-one-video-gallery' ),
+			esc_url( get_permalink( $post_id ) )
+		);
 	}
 
 	// The single video page has never trimmed the message, the players always have
@@ -2876,6 +2898,20 @@ function aiovg_is_video_archive_page( $post_id ) {
 	$page_id = (int) apply_filters( 'aiovg_object_id', (int) $permalink_settings['video_archive_page'], 'page' );
 
 	return (int) $post_id === $page_id;
+}
+
+/**
+ * Check whether a video still needs its password from the current user.
+ *
+ * @since  5.1.1
+ * @param  int  $post_id Video post ID.
+ * @return bool          True if the video has a password the visitor has not entered.
+ */
+function aiovg_is_video_password_required( $post_id ) {
+	$post_id = (int) $post_id;
+
+	// No exemption for any role, as on the single video page
+	return $post_id > 0 && post_password_required( $post_id );
 }
 
 /**

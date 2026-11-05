@@ -134,7 +134,8 @@ class AIOVG_Player_Base {
 				$this->has_access = aiovg_current_user_can( 'play_aiovg_video', $this->post_id );
 
 				// If the user doesn't have access, check if there's a trailer configured and use that for the player instead.
-				if ( ! $this->has_access ) {
+				// A password hides everything, the trailer included
+				if ( ! $this->has_access && ! aiovg_is_video_password_required( $this->post_id ) ) {
 					$trailer_settings = $this->get_trailer_settings();
 					if ( ! empty( $trailer_settings['enable_trailers'] ) ) {
 						$this->is_trailer = true;

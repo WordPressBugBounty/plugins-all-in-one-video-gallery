@@ -72,7 +72,8 @@ if ( $post_id > 0 ) {
 
 		// If the user doesn't have access, check if there's a trailer configured and use that 
 		// for the player instead.
-		if ( ! $has_access && ! empty( $trailer_settings['enable_trailers'] ) ) {
+		// A password hides everything, the trailer included
+		if ( ! $has_access && ! empty( $trailer_settings['enable_trailers'] ) && ! aiovg_is_video_password_required( $post_id ) ) {
 			$trailer_type = isset( $post_meta['trailer_type'] ) ? $post_meta['trailer_type'][0] : '';
 			$trailer_src  = isset( $post_meta['trailer_src'] ) ? $post_meta['trailer_src'][0] : '';
 

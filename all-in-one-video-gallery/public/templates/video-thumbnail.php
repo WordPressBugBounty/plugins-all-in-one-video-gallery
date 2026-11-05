@@ -23,7 +23,8 @@ $image_alt   = ! empty( $image_data['alt'] ) ? $image_data['alt'] : $post->post_
 $has_access  = aiovg_current_user_can( 'play_aiovg_video', $post->ID );
 $has_trailer = false;
 
-if ( ! $has_access && ! empty( $trailer_settings['enable_trailers'] ) ) {
+// A password-protected video plays no trailer, so it shows the lock
+if ( ! $has_access && ! empty( $trailer_settings['enable_trailers'] ) && ! aiovg_is_video_password_required( $post->ID ) ) {
 	$trailer_src = get_post_meta( $post->ID, 'trailer_src', true );
 	$has_trailer = ! empty( $trailer_src );
 }
