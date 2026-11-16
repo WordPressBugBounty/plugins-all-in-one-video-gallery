@@ -144,12 +144,12 @@ class AIOVG_Admin_Categories {
 		// Check if "aiovg_category_fields_nonce" nonce is set
     	if ( isset( $_POST['aiovg_category_fields_nonce'] ) ) {		
 			// Verify that the nonce is valid
-    		if ( wp_verify_nonce( $_POST['aiovg_category_fields_nonce'], 'aiovg_save_category_fields' ) ) {			
+    		if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['aiovg_category_fields_nonce'] ) ), 'aiovg_save_category_fields' ) ) {			
 				// OK to save meta data
 				$image_id = isset( $_POST['image_id'] ) ? (int) $_POST['image_id'] : 0;
 				update_term_meta( $term_id, 'image_id', $image_id );
 
-				$image = isset( $_POST['image'] ) ? aiovg_sanitize_url( $_POST['image'] ) : '';
+				$image = isset( $_POST['image'] ) ? aiovg_sanitize_url( wp_unslash( $_POST['image'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by aiovg_sanitize_url().
 				update_term_meta( $term_id, 'image', $image );
 				
 				$exclude_search_form = isset( $_POST['exclude_search_form'] ) ? 1 : 0;

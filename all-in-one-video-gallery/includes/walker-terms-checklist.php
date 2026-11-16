@@ -14,9 +14,6 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// This is required to be sure Walker_Category_Checklist class is available
-require_once ABSPATH . 'wp-admin/includes/template.php';
-
 /**
  * AIOVG_Walker_Terms_Checklist class.
  *
@@ -67,7 +64,7 @@ class AIOVG_Walker_Terms_Checklist extends Walker_Category_Checklist {
 			'<label class="selectit"><input value="' . $category->term_id . '" type="checkbox" name="'.$name.'[]" id="in-'.$taxonomy.'-' . $category->term_id . '"' .
 			checked( in_array( $category->term_id, $args['selected_cats'] ), true, false ) .
 			disabled( empty( $args['disabled'] ), false, false ) . ' /> ' .
-			esc_html( apply_filters( 'the_category', $category->name, '', '' ) ) . '</label>';		
+			esc_html( apply_filters( 'the_category', $category->name, '', '' ) ) . '</label>'; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core hook, as in Walker_Category_Checklist.		
 	}
 
 }

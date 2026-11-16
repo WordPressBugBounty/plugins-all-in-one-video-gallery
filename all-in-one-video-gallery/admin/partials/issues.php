@@ -9,12 +9,17 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $sections = array(
     'found'   => __( 'Issues', 'all-in-one-video-gallery' ),
     'ignored' => __( 'Ignored', 'all-in-one-video-gallery' )
 );
 
-$active_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : 'found';
+$active_section = isset( $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['section'] ) ) : 'found';
 ?>
 
 <div id="aiovg-issues" class="aiovg-flex aiovg-flex-col aiovg-gap-4 aiovg-padding-top">
@@ -23,7 +28,7 @@ $active_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['sectio
     if ( isset( $_GET['success'] ) && 1 == $_GET['success'] ) {
         printf( 
             '<div class="aiovg-notice aiovg-notice-success">%s</div>',
-            ( 'found' == $active_section ? __( 'Congrats! Issues solved.', 'all-in-one-video-gallery' ) : __( 'Issues ignored.', 'all-in-one-video-gallery' ) )
+            ( 'found' == $active_section ? esc_html__( 'Congrats! Issues solved.', 'all-in-one-video-gallery' ) : esc_html__( 'Issues ignored.', 'all-in-one-video-gallery' ) )
         );
     }
 
@@ -43,7 +48,7 @@ $active_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['sectio
         );
     }
     ?>
-    <ul class="aiovg-no-margin subsubsub"><li><?php echo implode( ' | </li><li>', $section_links ); ?></li></ul>
+    <ul class="aiovg-no-margin subsubsub"><li><?php echo wp_kses_post( implode( ' | </li><li>', $section_links ) ); ?></li></ul>
     
     <!-- Issues List -->
     <form id="aiovg-issues-form" action="<?php echo esc_url( admin_url( 'admin.php?page=all-in-one-video-gallery&tab=issues&section=' . $active_section ) ); ?>" method="post">

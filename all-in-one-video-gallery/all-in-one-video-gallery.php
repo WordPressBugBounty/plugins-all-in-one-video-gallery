@@ -11,7 +11,9 @@
  * Plugin Name:     All-in-One Video Gallery
  * Plugin URI:      https://plugins360.com/all-in-one-video-gallery/
  * Description:     An ultimate video player and video gallery plugin – no coding required. Suitable for YouTubers, Video Bloggers, Course Creators, Podcasters, Sales & Marketing Professionals, and anyone using video on a website.
- * Version:         5.1.1
+ * Version:         5.2.0
+ * Requires at least: 6.3
+ * Requires PHP:    7.4
  * Author:          Team Plugins360
  * Author URI:      https://plugins360.com
  * License:         GPL-2.0+
@@ -35,10 +37,11 @@ if ( !function_exists( 'aiovg_fs' ) ) {
         if ( !isset( $aiovg_fs ) ) {
             // Activate multisite network integration
             if ( !defined( 'WP_FS__PRODUCT_3213_MULTISITE' ) ) {
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Name required by the Freemius SDK.
                 define( 'WP_FS__PRODUCT_3213_MULTISITE', true );
             }
             // Include Freemius SDK
-            require_once dirname( __FILE__ ) . '/freemius/start.php';
+            require_once dirname( __FILE__ ) . '/vendor/freemius/start.php';
             $aiovg_fs = fs_dynamic_init( array(
                 'id'               => '3213',
                 'slug'             => 'all-in-one-video-gallery',
@@ -69,7 +72,7 @@ if ( !function_exists( 'aiovg_fs' ) ) {
 }
 // The current version of the plugin
 if ( !defined( 'AIOVG_PLUGIN_VERSION' ) ) {
-    define( 'AIOVG_PLUGIN_VERSION', '5.1.1' );
+    define( 'AIOVG_PLUGIN_VERSION', '5.2.0' );
 }
 // The unique identifier of the plugin
 if ( !defined( 'AIOVG_PLUGIN_SLUG' ) ) {
@@ -101,7 +104,7 @@ if ( !function_exists( 'aiovg_activate' ) ) {
     function aiovg_activate(  $network_wide  ) {
         if ( is_multisite() && $network_wide ) {
             deactivate_plugins( AIOVG_PLUGIN_FILE_NAME );
-            wp_die( __( 'Sorry, this plugin cannot be activated network-wide. Please activate it individually on each site where it is needed.', 'all-in-one-video-gallery' ), __( 'Network Activation Not Allowed', 'all-in-one-video-gallery' ), array(
+            wp_die( esc_html__( 'Sorry, this plugin cannot be activated network-wide. Please activate it individually on each site where it is needed.', 'all-in-one-video-gallery' ), esc_html__( 'Network Activation Not Allowed', 'all-in-one-video-gallery' ), array(
                 'back_link' => true,
             ) );
         }

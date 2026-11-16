@@ -748,34 +748,79 @@
 	padding: 0.75em;
 }
 
-.mfp-fade.mfp-bg {
-	-webkit-transition: all 0.15s ease-out;
-	   -moz-transition: all 0.15s ease-out;
-	        transition: all 0.15s ease-out;
-	opacity: 0;
+/* Dialog: native <dialog>; overrides the Magnific modal rules above */
+dialog.aiovg-modal {
+	box-sizing: border-box;
+	position: fixed;
+	margin: auto;
+	border: none;
+	border-radius: 2px;
+	padding: 0;
+	width: calc( 100% - 2rem );
+	max-width: 640px;
+	max-height: calc( 100vh - 2rem );
+	overflow-y: auto;
+	animation: aiovg-fade-in 0.15s ease-out;
 }
 
-.mfp-fade.mfp-bg.mfp-ready {
-	opacity: 0.8;
+dialog.aiovg-modal::backdrop {
+	background: rgba( 0, 0, 0, 0.8 );
+	animation: aiovg-fade-in 0.15s ease-out;
 }
 
-.mfp-fade.mfp-bg.mfp-removing {
-	opacity: 0;
+dialog.aiovg-modal .aiovg-modal-header {
+	display: flex;
+	gap: 1em;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px solid #eee;
+	padding: 1em 1.5em;
 }
 
-.mfp-fade.mfp-wrap .mfp-content {
-	-webkit-transition: all 0.15s ease-out;
-	-moz-transition: all 0.15s ease-out;
-			transition: all 0.15s ease-out;
-	opacity: 0;
+dialog.aiovg-modal .aiovg-modal-title {
+	margin: 0;
+	padding: 0;
+	font-size: 1.15em;
+	font-weight: 600;
 }
 
-.mfp-fade.mfp-wrap.mfp-ready .mfp-content {
-	opacity: 1;
+dialog.aiovg-modal .aiovg-modal-close {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	margin: 0 -0.5em 0 0;
+	border: none;
+	background: none;
+	cursor: pointer;
+	padding: 0;
+	width: 1.5em;
+	height: 1.5em;
+	line-height: 1.5em;
+	color: #666;
+	font-size: 1.5em;
 }
 
-.mfp-fade.mfp-wrap.mfp-removing .mfp-content {
-	opacity: 0;
+dialog.aiovg-modal .aiovg-modal-close:hover {
+	color: #000;
+}
+
+dialog.aiovg-modal .aiovg-modal-body {
+	padding: 1.5em;
+}
+
+dialog.aiovg-modal .aiovg-modal-body p:first-child {
+	margin-top: 0;
+}
+
+@keyframes aiovg-fade-in {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
 }
 
 /* Driver.js */

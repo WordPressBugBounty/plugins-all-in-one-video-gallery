@@ -38,7 +38,6 @@ class AIOVG_Init {
 	 */
 	public function __construct() {
 		$this->load_dependencies();
-		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
 		$this->blocks_init();
@@ -63,21 +62,10 @@ class AIOVG_Init {
 		require_once AIOVG_PLUGIN_DIR . 'includes/loader.php';
 
 		/**
-		 * The class responsible for defining internationalization functionality
-		 * of the plugin.
-		 */
-		require_once AIOVG_PLUGIN_DIR . 'includes/i18n.php';
-		
-		/**
 		 * The class responsibe for defining custom capabilities.
 		 */
 		 require_once AIOVG_PLUGIN_DIR . 'includes/roles.php';
 		
-		/**
-		 * The custom walker class for the 'wp_terms_checklist' function.
-		 */
-		require_once AIOVG_PLUGIN_DIR . 'includes/walker-terms-checklist.php';
-
 		/**
 		 * The custom walker classes for the 'wp_dropdown_categories' function.
 		 */
@@ -148,17 +136,6 @@ class AIOVG_Init {
 	}
 
 	/**
-	 * Define the locale for this plugin for internationalization.
-	 *
-	 * @since  1.0.0
-	 * @access private
-	 */
-	private function set_locale() {
-		$i18n = new AIOVG_i18n();
-		$this->loader->add_action( 'plugins_loaded', $i18n, 'load_plugin_textdomain' );
-	}
-
-	/**
 	 * Register all of the hooks related to the admin area functionality
 	 * of the plugin.
 	 *
@@ -202,10 +179,10 @@ class AIOVG_Init {
 			$this->loader->add_action( 'save_post', $videos, 'save_meta_data', 10, 2 );
 			$this->loader->add_action( 'restrict_manage_posts', $videos, 'restrict_manage_posts' );
 			$this->loader->add_action( 'manage_aiovg_videos_posts_custom_column', $videos, 'custom_column_content', 10, 2 );
-			$this->loader->add_action( 'admin_print_footer_scripts', $videos, 'print_footer_scripts', 99 );
-			$this->loader->add_action( 'admin_print_footer_scripts', $videos, 'print_editor_placeholder_script', 99 );
+			$this->loader->add_action( 'admin_enqueue_scripts', $videos, 'enqueue_form_scripts' );
+			$this->loader->add_action( 'admin_enqueue_scripts', $videos, 'enqueue_editor_placeholder_script' );
 
-			$this->loader->add_filter( 'parent_file', $videos, 'parent_file' );
+			$this->loader->add_filter( 'parent_file', $videos, 'parent_file', 20 );
 			$this->loader->add_filter( 'parse_query', $videos, 'parse_query' );
 			$this->loader->add_filter( 'post_row_actions', $videos, 'row_actions', 10, 2 );
 			$this->loader->add_filter( 'manage_edit-aiovg_videos_columns', $videos, 'get_columns' );
@@ -225,7 +202,7 @@ class AIOVG_Init {
 		$this->loader->add_action( 'edited_aiovg_categories', $categories, 'save_form_fields' );		
 		$this->loader->add_action( 'pre_delete_term', $categories, 'pre_delete_term', 10, 2 );	
 		
-		$this->loader->add_filter( 'parent_file', $categories, 'parent_file' );
+		$this->loader->add_filter( 'parent_file', $categories, 'parent_file', 20 );
 		$this->loader->add_filter( "manage_edit-aiovg_categories_columns", $categories, 'get_columns' );
 		$this->loader->add_filter( "manage_edit-aiovg_categories_sortable_columns", $categories, 'get_columns' );
 		$this->loader->add_filter( "manage_aiovg_categories_custom_column", $categories, 'custom_column_content', 10, 3 );		
@@ -236,7 +213,7 @@ class AIOVG_Init {
 		$this->loader->add_action( 'admin_menu', $tags, 'admin_menu' );
 		$this->loader->add_action( 'init', $tags, 'register_taxonomy' );
 		
-		$this->loader->add_filter( 'parent_file', $tags, 'parent_file' );
+		$this->loader->add_filter( 'parent_file', $tags, 'parent_file', 20 );
 		$this->loader->add_filter( "manage_edit-aiovg_tags_columns", $tags, 'get_columns' );
 		$this->loader->add_filter( "manage_edit-aiovg_tags_sortable_columns", $tags, 'get_columns' );
 		$this->loader->add_filter( "manage_aiovg_tags_custom_column", $tags, 'custom_column_content', 10, 3 );
@@ -276,6 +253,7 @@ class AIOVG_Init {
 		$this->loader->add_action( 'init', $public, 'register_styles' );
 		$this->loader->add_action( 'init', $public, 'register_scripts' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $public, 'enqueue_assets', 99 );
+		$this->loader->add_action( 'wp_enqueue_scripts', $public, 'enqueue_common_css', 99 );
 		$this->loader->add_action( 'enqueue_block_assets', $public, 'enqueue_block_assets', 99 );	
 		$this->loader->add_action( 'elementor/editor/after_enqueue_scripts', $public, 'enqueue_editor_assets', 99 );
 		$this->loader->add_action( 'elementor/preview/enqueue_scripts', $public, 'enqueue_editor_assets', 99 );

@@ -8,6 +8,11 @@
  *
  * @package All_In_One_Video_Gallery
  */
+
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 ?>
     
 <?php if ( current_user_can( 'manage_aiovg_options' ) ) : ?>

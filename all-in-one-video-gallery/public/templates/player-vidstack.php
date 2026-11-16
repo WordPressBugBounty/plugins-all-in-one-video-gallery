@@ -9,8 +9,13 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $settings = array(
-	'uid'        => isset( $_GET['uid'] ) ? sanitize_text_field( $_GET['uid'] ) : 0,
+	'uid'        => isset( $_GET['uid'] ) ? sanitize_text_field( wp_unslash( $_GET['uid'] ) ) : 0,
 	'post_id'    => $post_id,
 	'post_type'  => $post_type,
 	'is_trailer' => $is_trailer,
@@ -126,7 +131,7 @@ if ( ! empty( $post_meta ) ) {
 					$mime_type = "video/{$type}";
 			}
 
-			$src = aiovg_base64_decode( $_GET[ $type ] );
+			$src = aiovg_base64_decode( sanitize_text_field( wp_unslash( $_GET[ $type ] ) ) );
 			$src = aiovg_sanitize_url( aiovg_make_url_absolute( $src ) );
 
 			$sources[ $type ] = array(
@@ -224,7 +229,7 @@ if ( $playsinline ) {
 
 $poster = '';
 if ( isset( $_GET['poster'] ) ) {
-	$poster = aiovg_base64_decode( $_GET['poster'] );
+	$poster = aiovg_base64_decode( sanitize_text_field( wp_unslash( $_GET['poster'] ) ) );
 } elseif ( ! empty( $post_meta ) ) {
 	$image_data = aiovg_get_image( $post_id, 'large' );
 	$poster = $image_data['src'];
@@ -514,8 +519,10 @@ if ( $has_share ) {
 	}
 
 	if ( isset( $socialshare_settings['services']['email'] ) ) {
+		/* translators: %s: Video title. */
 		$email_subject = sprintf( __( 'Check out the "%s"', 'all-in-one-video-gallery' ), $share_title );
-		$email_body    = sprintf( __( 'Check out the "%s" at %s', 'all-in-one-video-gallery' ), $share_title, $share_url );
+		/* translators: 1: Video title, 2: Video URL. */
+		$email_body    = sprintf( __( 'Check out the "%1$s" at %2$s', 'all-in-one-video-gallery' ), $share_title, $share_url );
 		$email_url     = "mailto:?subject={$email_subject}&amp;body={$email_body}";
 
 		$share_buttons[] = array(
@@ -535,9 +542,7 @@ if ( $has_share ) {
 // Embed
 $has_embed = isset( $_GET['embed'] ) ? (int) $_GET['embed'] : isset( $player_settings['controls']['embed'] );
 if ( $has_embed ) {
-	$protocol = ( ( ! empty( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ) || $_SERVER['SERVER_PORT'] == 443 ) ? 'https://' : 'http://';
-	$current_url = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-	$current_url = aiovg_remove_query_arg( array( 'uid', 'autoadvance' ), $current_url );
+	$current_url = aiovg_remove_query_arg( array( 'uid', 'autoadvance' ), aiovg_get_current_url() );
 
 	$embed_code = sprintf(
 		'<div style="position:relative;padding-bottom:%s;height:0;overflow:hidden;"><iframe src="%s" title="%s" width="100%%" height="100%%" style="position:absolute;width:100%%;height:100%%;top:0px;left:0px;overflow:hidden" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>',
@@ -602,7 +607,7 @@ if ( ! isset( $_GET['nocapture'] ) ) {
 		'post_id'   => $post_id,
 		'post_type' => $post_type,
 		'post_meta' => $post_meta,
-		'override'  => isset( $_GET['email_capture'] ) ? $_GET['email_capture'] : null,
+		'override'  => isset( $_GET['email_capture'] ) ? (int) $_GET['email_capture'] : null,
 		'rolls'     => 'midpost',
 		'video_url' => $email_capture_video_url
 	) );
@@ -660,9 +665,15 @@ if ( ! empty( $settings['player']['markers']['points'] ) && is_array( $settings[
         <link rel="canonical" href="<?php echo esc_url( $post_url ); ?>" />
     <?php endif; ?>
 
-	<link rel="stylesheet" href="<?php echo AIOVG_PLUGIN_URL; ?>vendor/vidstack/plyr.css?v=3.7.8" />
+	<?php
+	// Same handle as the JavaScript player; printed with the inline styles below.
+	wp_register_style( AIOVG_PLUGIN_SLUG . '-plyr', AIOVG_PLUGIN_URL . 'vendor/vidstack/plyr.css', array(), '3.7.8' );
 
-	<style type="text/css">
+	// No file: carries the inline styles, after the stylesheet it depends on.
+	wp_register_style( AIOVG_PLUGIN_SLUG . '-iframe-player', false, array( AIOVG_PLUGIN_SLUG . '-plyr' ), AIOVG_PLUGIN_VERSION );
+
+	ob_start();
+	?>
 		html,
         body {
             margin: 0 !important;
@@ -679,11 +690,11 @@ if ( ! empty( $settings['player']['markers']['points'] ) && is_array( $settings[
 		/* Icons */
 		@font-face {
 			font-family: 'aiovg-icons';
-			src: url('<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.eot?tx9c7f');
-			src: url('<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.eot?tx9c7f#iefix') format('embedded-opentype'),
-				url('<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.ttf?tx9c7f') format('truetype'),
-				url('<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.woff?tx9c7f') format('woff'),
-				url('<?php echo AIOVG_PLUGIN_URL; ?>public/assets/fonts/aiovg-icons.svg?tx9c7f#aiovg-icons') format('svg');
+			src: url('<?php echo esc_url( AIOVG_PLUGIN_URL . 'public/assets/fonts/aiovg-icons.eot?tx9c7f' ); ?>');
+			src: url('<?php echo esc_url( AIOVG_PLUGIN_URL . 'public/assets/fonts/aiovg-icons.eot?tx9c7f#iefix' ); ?>') format('embedded-opentype'),
+				url('<?php echo esc_url( AIOVG_PLUGIN_URL . 'public/assets/fonts/aiovg-icons.ttf?tx9c7f' ); ?>') format('truetype'),
+				url('<?php echo esc_url( AIOVG_PLUGIN_URL . 'public/assets/fonts/aiovg-icons.woff?tx9c7f' ); ?>') format('woff'),
+				url('<?php echo esc_url( AIOVG_PLUGIN_URL . 'public/assets/fonts/aiovg-icons.svg?tx9c7f#aiovg-icons' ); ?>') format('svg');
 			font-weight: normal;
 			font-style: normal;
 			font-display: swap;
@@ -1285,14 +1296,16 @@ if ( ! empty( $settings['player']['markers']['points'] ) && is_array( $settings[
 			color: #fff;
             font-size: 11px;
         }
-    </style>
-	
-	<?php if ( isset( $general_settings['custom_css'] ) && ! empty( $general_settings['custom_css'] ) ) : ?>
-        <style type="text/css">
-		    <?php echo esc_html( $general_settings['custom_css'] ); ?>
-        </style>
-	<?php endif; ?>
-	
+	<?php
+	wp_add_inline_style( AIOVG_PLUGIN_SLUG . '-iframe-player', ob_get_clean() );
+
+	if ( isset( $general_settings['custom_css'] ) && ! empty( $general_settings['custom_css'] ) ) {
+		wp_add_inline_style( AIOVG_PLUGIN_SLUG . '-iframe-player', wp_strip_all_tags( $general_settings['custom_css'] ) );
+	}
+
+	wp_print_styles( AIOVG_PLUGIN_SLUG . '-iframe-player' );
+	?>
+
 	<?php do_action( 'aiovg_iframe_vidstack_player_head', $settings, $attributes, $sources, $tracks ); ?>
 </head>
 <body class="aiovg-player aiovg-player-theme-<?php echo esc_attr( $player_theme ); ?><?php if ( ! empty( $player_settings['hide_youtube_logo'] ) ) : ?> aiovg-hide-youtube-logo<?php endif; ?><?php if ( ! empty( $is_trailer ) ) : ?> aiovg-is-trailer<?php endif; ?>">
@@ -1325,12 +1338,12 @@ if ( ! empty( $settings['player']['markers']['points'] ) && is_array( $settings[
 
 	// HLS or Dash
 	elseif ( isset( $sources['hls'] ) || isset( $sources['dash'] ) ) {
-		printf( '<video %s></video>', aiovg_combine_video_attributes( $attributes ) );
+		printf( '<video %s></video>', aiovg_combine_video_attributes( $attributes ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in aiovg_combine_video_attributes().
 	}
 
 	// HTML5 Video
 	elseif ( ! empty( $sources ) ) {
-		printf( '<video %s>', aiovg_combine_video_attributes( $attributes ) );
+		printf( '<video %s>', aiovg_combine_video_attributes( $attributes ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in aiovg_combine_video_attributes().
 
 		// Video Sources
 		foreach ( $sources as $source ) {
@@ -1435,26 +1448,26 @@ if ( ! empty( $settings['player']['markers']['points'] ) && is_array( $settings[
         </div>
 	<?php endif; ?>
 
-	<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/vidstack/plyr.polyfilled.js?v=3.7.8" type="text/javascript" defer></script>
+	<?php wp_print_script_tag( array( 'src' => AIOVG_PLUGIN_URL . 'vendor/vidstack/plyr.polyfilled.js?v=3.7.8', 'defer' => true ) ); ?>
 
 	<?php if ( isset( $sources['hls'] ) ) : ?>
-		<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/vidstack/hls.min.js?v=1.5.17" type="text/javascript" defer></script>
+		<?php wp_print_script_tag( array( 'src' => AIOVG_PLUGIN_URL . 'vendor/vidstack/hls.min.js?v=1.5.17', 'defer' => true ) ); ?>
 	<?php endif; ?>
 
 	<?php if ( isset( $sources['dash'] ) ) : ?>
-		<script src="<?php echo AIOVG_PLUGIN_URL; ?>vendor/vidstack/dash.all.min.js?v=4.7.4" type="text/javascript" defer></script>
+		<?php wp_print_script_tag( array( 'src' => AIOVG_PLUGIN_URL . 'vendor/vidstack/dash.all.min.js?v=4.7.4', 'defer' => true ) ); ?>
 	<?php endif; ?>
 
 	<?php do_action( 'aiovg_iframe_vidstack_player_footer', $settings, $attributes, $sources, $tracks ); ?>
 
-    <script type="text/javascript">
-		'use strict';			
-			
+    <?php ob_start(); ?>
+		'use strict';
+
 		/**
 		 * Vars
-		 */ 
+		 */
 
-		var settings = <?php echo json_encode( $settings ); ?>;	
+		var settings = <?php echo wp_json_encode( $settings ); ?>;	
 		var emailCaptureEl = null;
 
 		/**
@@ -1717,7 +1730,7 @@ if ( ! empty( $settings['player']['markers']['points'] ) && is_array( $settings[
 
 			var duration = player.duration || 0;
 
-			xmlhttp.open( 'GET', '<?php echo esc_js( admin_url( 'admin-ajax.php' ) ); ?>?action=aiovg_update_views_count&post_id=<?php echo $post_id; ?>&duration=' + duration + '&security=<?php echo esc_js( wp_create_nonce( 'aiovg_public_ajax_nonce' ) ); ?>', true );
+			xmlhttp.open( 'GET', '<?php echo esc_js( admin_url( 'admin-ajax.php' ) ); ?>?action=aiovg_update_views_count&post_id=<?php echo (int) $post_id; ?>&duration=' + duration + '&security=<?php echo esc_js( wp_create_nonce( 'aiovg_public_ajax_nonce' ) ); ?>', true );
 			xmlhttp.send();							
 		}
 
@@ -2030,6 +2043,6 @@ if ( ! empty( $settings['player']['markers']['points'] ) && is_array( $settings[
 		document.addEventListener( 'DOMContentLoaded', function() {
 			initPlayer();
 		});
-    </script>	
+	<?php wp_print_inline_script_tag( ob_get_clean() ); ?>
 </body>
 </html>

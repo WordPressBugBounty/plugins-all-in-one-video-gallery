@@ -9,8 +9,13 @@
  * @package All_In_One_Video_Gallery
  */
 
-$active_tab     = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'display';
-$active_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : '';
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+$active_tab     = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : 'display';
+$active_section = isset( $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['section'] ) ) : '';
 
 $sections = array();
 foreach ( $this->sections as $section ) {
@@ -49,8 +54,8 @@ foreach ( $this->sections as $section ) {
             
             printf( 
                 '<a href="%s" class="%s">%s</a>', 
-                esc_url( $url ), 
-                implode( ' ', $classes ), 
+                esc_url( $url ),
+                esc_attr( implode( ' ', $classes ) ),
                 esc_html( $title )
             );
         }
@@ -82,7 +87,7 @@ foreach ( $this->sections as $section ) {
 	}
 
 	if ( count( $section_links ) > 1 ) : ?>
-		<ul class="subsubsub"><li><?php echo implode( ' | </li><li>', $section_links ); ?></li></ul>
+		<ul class="subsubsub"><li><?php echo wp_kses_post( implode( ' | </li><li>', $section_links ) ); ?></li></ul>
 		<div class="clear"></div>
 	<?php endif; ?>
     

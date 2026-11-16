@@ -14,9 +14,6 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// This is required to be sure Walker_CategoryDropdown class is available
-require_once ABSPATH . 'wp-includes/class-walker-category-dropdown.php';
-
 /**
  * AIOVG_Walker_Terms_Dropdown class.
  *
@@ -39,7 +36,7 @@ class AIOVG_Walker_Terms_Dropdown extends Walker_CategoryDropdown {
 		$pad = str_repeat( '&nbsp;', $depth * 3 );
  
 		/** This filter is documented in wp-includes/category-template.php */
-		$cat_name = apply_filters( 'list_cats', $category->name, $category );
+		$cat_name = apply_filters( 'list_cats', $category->name, $category ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core hook, as in Walker_CategoryDropdown.
  
 		if ( isset( $args['value_field'] ) && isset( $category->{$args['value_field']} ) ) {
 			$value_field = $args['value_field'];

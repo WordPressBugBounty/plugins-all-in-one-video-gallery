@@ -9,6 +9,11 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $general_settings = aiovg_get_option( 'aiovg_general_settings' );
 $images_settings  = aiovg_get_option( 'aiovg_images_settings' );
 
@@ -51,7 +56,7 @@ $image_alt  = ! empty( $image_data['alt'] ) ? $image_data['alt'] : $term->name;
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" />
                 </svg>
-                <?php printf( _n( '%s video', '%s videos', $term->count, 'all-in-one-video-gallery' ), number_format_i18n( $term->count ) ); ?>
+                <?php printf( esc_html( /* translators: %s: Number of videos. */ _n( '%s video', '%s videos', $term->count, 'all-in-one-video-gallery' ) ), esc_html( number_format_i18n( $term->count ) ) ); ?>
             </div>
         <?php endif; ?> 
         

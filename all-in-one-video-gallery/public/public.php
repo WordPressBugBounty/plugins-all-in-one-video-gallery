@@ -55,7 +55,7 @@ class AIOVG_Public {
 
 				if ( $page_url ) {
 					// Avoid redirect loop if already on the custom archive page
-					$current_url = ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+					$current_url = aiovg_get_current_url();
 
 					if ( untrailingslashit( $current_url ) !== untrailingslashit( $page_url ) ) {
 						wp_safe_redirect( $page_url, 301 );
@@ -135,16 +135,8 @@ class AIOVG_Public {
 	public function register_styles() {
 		$player_settings = aiovg_get_option( 'aiovg_player_settings' );
 
-		wp_register_style( 
-			AIOVG_PLUGIN_SLUG . '-magnific-popup', 
-			AIOVG_PLUGIN_URL . 'vendor/magnific-popup/magnific-popup.min.css', 
-			array(), 
-			'1.2.0', 
-			'all' 
-		);
-		
-		wp_register_style( 
-			AIOVG_PLUGIN_SLUG . '-icons', 
+		wp_register_style(
+			AIOVG_PLUGIN_SLUG . '-icons',
 			AIOVG_PLUGIN_URL . 'public/assets/css/icons.min.css', 
 			array(), 
 			AIOVG_PLUGIN_VERSION, 
@@ -198,16 +190,8 @@ class AIOVG_Public {
 		$scroll_to_top_offset = apply_filters( 'aiovg_scroll_to_top_offset', $scroll_to_top_offset );
 
 		// Register the dependencies
-		wp_register_script( 
-			AIOVG_PLUGIN_SLUG . '-magnific-popup', 
-			AIOVG_PLUGIN_URL . 'vendor/magnific-popup/magnific-popup.min.js', 
-			array( 'jquery' ), 
-			'1.2.0', 
-			array( 'strategy' => 'defer' ) 
-		);		
-		
-		wp_register_script( 
-			AIOVG_PLUGIN_SLUG . '-categories', 
+		wp_register_script(
+			AIOVG_PLUGIN_SLUG . '-categories',
 			AIOVG_PLUGIN_URL . 'public/assets/js/categories.min.js', 
 			array( 'jquery' ), 
 			AIOVG_PLUGIN_VERSION, 
@@ -413,6 +397,18 @@ class AIOVG_Public {
 
 			wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-public' );
 		}
+	}
+
+	/**
+	 * Enqueue the common inline CSS in the head of every frontend page.
+	 *
+	 * @since 5.2.0
+	 */
+	public function enqueue_common_css() {
+		// Every page, not only where "-public" loads: iframe players need it too.
+		wp_register_style( AIOVG_PLUGIN_SLUG . '-common', false, array(), AIOVG_PLUGIN_VERSION );
+		wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-common' );
+		wp_add_inline_style( AIOVG_PLUGIN_SLUG . '-common', $this->get_inline_css() );
 	}
 
 	/**
@@ -653,7 +649,7 @@ class AIOVG_Public {
 	}
 
 	/**
-	 * Adds the custom common CSS code, Facebook OG tags, and Twitter Cards.
+	 * Adds the Facebook OG tags and Twitter Cards.
 	 *
 	 * @since 1.0.0
 	 */
@@ -723,16 +719,13 @@ class AIOVG_Public {
 					printf( '<meta name="twitter:player" content="%s" />', esc_url( $video_url ) );
 					echo '<meta name="twitter:player:width" content="1280">';
 					echo '<meta name="twitter:player:height" content="720">';
-				}				
-			}				
+				}
+			}
 		}
-		
-		// Custom common CSS code
-		echo '<style type="text/css">' . $this->get_inline_css() . '</style>';
 	}
 
 	/**
-	 * Builds the common inline CSS string used in both wp_head and the block editor iframe.
+	 * Builds the common inline CSS string used on the frontend and in the block editor iframe.
 	 *
 	 * @since  4.7.6
 	 * @return string Unescaped CSS string.
@@ -782,9 +775,9 @@ class AIOVG_Public {
 	 *
 	 * @since 3.9.5
 	 */
-	public function wp_print_footer_scripts() {	
+	public function wp_print_footer_scripts() {
+		ob_start();
 		?>
-        <script type='text/javascript'>
 			(function() {
 				'use strict';
 				
@@ -833,8 +826,8 @@ class AIOVG_Public {
 				});
 
 			})();
-		</script>
-        <?php
+		<?php
+		wp_print_inline_script_tag( ob_get_clean() );
 	}
 	
 	/**
@@ -883,7 +876,7 @@ class AIOVG_Public {
 			$queries = array();
 			
 			if ( ! empty( $_GET['vi'] ) ) {
-				$queries[] = sanitize_text_field( stripslashes( $_GET['vi'] ) );				
+				$queries[] = sanitize_text_field( wp_unslash( $_GET['vi'] ) );				
 			}
 			
 			if ( ! empty( $_GET['ca'] ) ) {
@@ -914,7 +907,7 @@ class AIOVG_Public {
 
 			if ( ! empty( $_GET['sort'] ) ) {
 				$sort_options = aiovg_get_search_form_sort_options();
-				$sort = sanitize_text_field( $_GET['sort'] );
+				$sort = sanitize_text_field( wp_unslash( $_GET['sort'] ) );
 
 				if ( isset( $sort_options[ $sort ] ) ) {
 					$queries[] = $sort_options[ $sort ];
@@ -922,7 +915,7 @@ class AIOVG_Public {
 			}
 			
 			if ( ! empty( $queries ) ) {
-				$title = sprintf( __( 'Showing results for "%s"', 'all-in-one-video-gallery' ), implode( ', ', $queries ) );	
+				$title = sprintf( /* translators: %s: Search terms. */ __( 'Showing results for "%s"', 'all-in-one-video-gallery' ), implode( ', ', $queries ) );	
 			}			
 		}
 		
@@ -1025,7 +1018,7 @@ class AIOVG_Public {
 					$alt  = get_post_field( 'post_title', $post_id );
 
 					$attr = array( 'alt' => $alt );
-					$attr = apply_filters( 'wp_get_attachment_image_attributes', $attr, NULL, $size );
+					$attr = apply_filters( 'wp_get_attachment_image_attributes', $attr, NULL, $size ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core hook, so image plugins can act on our images.
 					$attr = array_map( 'esc_attr', $attr );
 
 					$_html = sprintf( '<img src="%s"', esc_url( $image_url ) );
@@ -1151,7 +1144,7 @@ class AIOVG_Public {
 
 		// Read before the skip branch below, which returns early and needs them too.
 		$video_id  = isset( $_POST['video_id'] ) ? absint( $_POST['video_id'] ) : 0;
-		$video_url = isset( $_POST['video_url'] ) ? esc_url_raw( $_POST['video_url'] ) : '';
+		$video_url = isset( $_POST['video_url'] ) ? esc_url_raw( wp_unslash( $_POST['video_url'] ) ) : '';
 
 		// Only a video this visitor can see; otherwise the lead is saved without one.
 		if ( $video_id > 0 && ! aiovg_current_user_can( 'view_aiovg_video', $video_id ) ) {
@@ -1178,7 +1171,7 @@ class AIOVG_Public {
 		$rate_limit_enabled = apply_filters( 'aiovg_email_capture_rate_limit_enabled', true );
 
 		if ( $rate_limit_enabled ) {
-			$ip_hash = wp_hash( isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : '' );
+			$ip_hash = wp_hash( isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '' );
 
 			// Two counters: one video can be hammered, but a genuine visitor may submit
 			// once per video across a large gallery.
@@ -1218,7 +1211,7 @@ class AIOVG_Public {
 		}
 
 		// Sanitize and validate email.
-		$email = isset( $_POST['email'] ) ? sanitize_email( $_POST['email'] ) : '';
+		$email = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
 
 		if ( ! is_email( $email ) ) {
 			wp_send_json_error( __( 'Please enter a valid email address.', 'all-in-one-video-gallery' ) );
@@ -1226,9 +1219,9 @@ class AIOVG_Public {
 		}
 
 		// Sanitize optional fields.
-		$name     = isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : '';
-		$phone    = isset( $_POST['phone'] ) ? sanitize_text_field( $_POST['phone'] ) : '';
-		$page_url = isset( $_POST['page_url'] ) ? esc_url_raw( $_POST['page_url'] ) : '';
+		$name     = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
+		$phone    = isset( $_POST['phone'] ) ? sanitize_text_field( wp_unslash( $_POST['phone'] ) ) : '';
+		$page_url = isset( $_POST['page_url'] ) ? esc_url_raw( wp_unslash( $_POST['page_url'] ) ) : '';
 
 		// Server-side blocked domain check.
 		$blocked_domains = isset( $email_capture_settings['blocked_email_domains'] ) ? $email_capture_settings['blocked_email_domains'] : '';

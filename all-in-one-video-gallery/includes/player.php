@@ -79,6 +79,14 @@ class AIOVG_Player {
 
 		require_once AIOVG_PLUGIN_DIR . 'includes/player/base.php';
 
+		// Lets premium supply a player of its own, such as the popup.
+		$player = apply_filters( 'aiovg_player_instance', null, $post_id, $args, $this->player_uid );
+
+		if ( $player instanceof AIOVG_Player_Base ) {
+			$html = $player->get_player();
+			return apply_filters( 'aiovg_player_html', $html, $player->get_params() );
+		}
+
 		switch ( $player_type ) {
 			case 'videojs':
 				require_once AIOVG_PLUGIN_DIR . 'includes/player/videojs.php';
@@ -101,13 +109,6 @@ class AIOVG_Player {
 				$html = $player->get_player();
 				break;
 
-			case 'popup':
-				require_once AIOVG_PLUGIN_DIR . 'includes/player/popup.php';
-
-				$player = new AIOVG_Player_Popup( $post_id, $args, $this->player_uid );
-				$html = $player->get_player();
-				break;
-
 			default:
 				require_once AIOVG_PLUGIN_DIR . 'includes/player/iframe.php';
 
@@ -116,8 +117,7 @@ class AIOVG_Player {
 		}
 
 		// Output
-		$params = $player->get_params();
-		return apply_filters( 'aiovg_player_html', $html, $params ); 
+		return apply_filters( 'aiovg_player_html', $html, $player->get_params() ); 
 	}
 
 	/**
@@ -131,7 +131,7 @@ class AIOVG_Player {
 	private function get_player_type( $args ) {
 		// "player" can come from a shortcode attribute, so unknown types get the iframe player
 		if ( isset( $args['player'] ) && ! empty( $args['player'] ) ) {
-			$allowed_types = array( 'iframe', 'videojs', 'vidstack', 'popup' );
+			$allowed_types = array( 'iframe', 'videojs', 'vidstack' );
 
 			if ( in_array( $args['player'], $allowed_types, true ) || ( 'amp' === $args['player'] && $this->is_amp_request() ) ) {
 				return $args['player'];

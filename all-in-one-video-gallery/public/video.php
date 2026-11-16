@@ -48,7 +48,7 @@ class AIOVG_Public_Video {
 		}
 
 		// Extra fallback: match requests to /player-embed/
-		if ( strpos( $_SERVER['REQUEST_URI'], 'player-embed' ) !== false ) {
+		if ( strpos( aiovg_get_request_uri(), 'player-embed' ) !== false ) {
 			return AIOVG_PLUGIN_DIR . 'public/templates/player.php';
 		}
 		
@@ -320,7 +320,7 @@ class AIOVG_Public_Video {
 			$attributes['description'] = get_the_content( null, false, $post_id );
 		}
 
-		$attributes = apply_filters( 'shortcode_atts_aiovg_video', $attributes, $content );
+		$attributes = apply_filters( 'shortcode_atts_aiovg_video', $attributes, $content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- The core shortcode_atts_{$shortcode} filter for [aiovg_video].
 		
 		$player_html = aiovg_get_player_html( $post_id, $attributes );
 
@@ -754,7 +754,9 @@ class AIOVG_Public_Video {
 			$file = get_post_meta( $post_id, 'mp4', true );
 			$file = aiovg_make_url_absolute( $file );
 		} else {
-			$file = get_transient( sanitize_text_field( $_GET['vdl'] ) );
+			// Only our own download transients, never any transient by name
+			$download_id = sanitize_text_field( wp_unslash( $_GET['vdl'] ) );
+			$file        = preg_match( '/^[a-f0-9]{32}$/', $download_id ) ? get_transient( 'aiovg_download_' . $download_id ) : '';
 		}
 
 		$file = remove_query_arg( 'isnew', $file );
@@ -832,6 +834,7 @@ class AIOVG_Public_Video {
                	// If get_headers fails then try to fetch fileSize with curl. ext/curl is
                	// missing or disabled on some hosts, and PHP 8 raises a fatal Error on a
                	// call to an undefined function, so the extension has to be checked first.
+               	// phpcs:disable WordPress.WP.AlternativeFunctions -- HEAD to the pinned IP; the WP HTTP API would resolve the host again.
                	$ch = function_exists( 'curl_init' ) ? @curl_init() : false;
 
                	if ( false !== $ch ) {
@@ -873,13 +876,14 @@ class AIOVG_Public_Video {
                			@curl_close( $ch );
                		}
                	}
+               	// phpcs:enable WordPress.WP.AlternativeFunctions
           	}          
 		} elseif ( $formatted_path == 'filepath' ) {		   
 		    $file_size = (int) @filesize( $file );			   			   
        	}
           
 		// Get the extension of the file
-		$path = @parse_url( $file, PHP_URL_PATH ); 
+		$path = wp_parse_url( $file, PHP_URL_PATH ); 
 		$ext  = @pathinfo( $path, PATHINFO_EXTENSION );
 
 		switch ( $ext ) {          
@@ -993,7 +997,7 @@ class AIOVG_Public_Video {
         @ob_end_clean();
         
         if ( ini_get( 'zlib.output_compression' ) ) {
-        	ini_set( 'zlib.output_compression', 'Off' );
+        	ini_set( 'zlib.output_compression', 'Off' ); // phpcs:ignore WordPress.PHP.IniSet.Risky, Squiz.PHP.DiscouragedFunctions.Discouraged -- This request only; compression would buffer the whole video.
         }
         
         header( 'Content-Description: File Transfer' );
@@ -1015,14 +1019,16 @@ class AIOVG_Public_Video {
         // Will Download 1 MB in chunkwise
         $chunk = 1 * ( 1024 * 1024 );
 
+        // phpcs:disable WordPress.WP.AlternativeFunctions -- Streams the file in 1 MB chunks; WP_Filesystem can't stream.
         if ( $nfile = @fopen( $file, 'rb' ) ) {
 			while ( ! feof( $nfile ) ) {
-				print( @fread( $nfile, $chunk ) );
+				print( @fread( $nfile, $chunk ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Raw file bytes; escaping would corrupt the download.
 				@ob_flush();
 				@flush();
 			}
 			@fclose( $nfile );
 		}
+		// phpcs:enable WordPress.WP.AlternativeFunctions
 
 		// Clear the Host header that aiovg_resolve_safe_url() pinned into PHP's default
 		// stream context, so it can't be sent to an unrelated host by anything else that

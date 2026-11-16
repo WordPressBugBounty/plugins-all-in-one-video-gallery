@@ -9,10 +9,15 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $image = '';
 
 if ( isset( $_GET['poster'] ) ) {
-	$image = aiovg_base64_decode( $_GET['poster'] );
+	$image = aiovg_base64_decode( sanitize_text_field( wp_unslash( $_GET['poster'] ) ) );
 } elseif ( ! empty( $post_meta ) ) {
     $image_data = aiovg_get_image( $post_id, 'large' );
 	$image = $image_data['src'];
@@ -23,25 +28,25 @@ if ( ! empty( $image ) ) {
 } else {
     // YouTube
     if ( isset( $_GET['youtube'] ) ) {
-        $src = aiovg_base64_decode( $_GET['youtube'] );
+        $src = aiovg_base64_decode( sanitize_text_field( wp_unslash( $_GET['youtube'] ) ) );
         $image = aiovg_get_youtube_image_url( $src );	
     }
 
     // Vimeo
     if ( isset( $_GET['vimeo'] ) ) {
-        $src = aiovg_base64_decode( $_GET['vimeo'] );
+        $src = aiovg_base64_decode( sanitize_text_field( wp_unslash( $_GET['vimeo'] ) ) );
         $image = aiovg_get_vimeo_image_url( $src );
     }
 
     // Dailymotion
     if ( isset( $_GET['dailymotion'] ) ) {
-        $src = aiovg_base64_decode( $_GET['dailymotion'] );
+        $src = aiovg_base64_decode( sanitize_text_field( wp_unslash( $_GET['dailymotion'] ) ) );
         $image = aiovg_get_dailymotion_image_url( $src );
     }
 
     // Rumble
     if ( isset( $_GET['rumble'] ) ) {
-        $src = aiovg_base64_decode( $_GET['rumble'] );
+        $src = aiovg_base64_decode( sanitize_text_field( wp_unslash( $_GET['rumble'] ) ) );
         $image = aiovg_get_rumble_image_url( $src );
     }
 }
@@ -61,7 +66,12 @@ $consent_button_label = apply_filters( 'aiovg_translate_strings', $privacy_setti
         <link rel="canonical" href="<?php echo esc_url( get_permalink( $post_id ) ); ?>" />
     <?php endif; ?>
 
-	<style type="text/css">
+	<?php
+	// No file: carries the inline styles.
+	wp_register_style( AIOVG_PLUGIN_SLUG . '-iframe-player', false, array(), AIOVG_PLUGIN_VERSION );
+
+	ob_start();
+	?>
         html,
         body {
             margin: 0 !important;
@@ -154,13 +164,15 @@ $consent_button_label = apply_filters( 'aiovg_translate_strings', $privacy_setti
             height: 36px;
             animation: aiovg-spin 0.7s linear infinite;
         }
-    </style>
+	<?php
+	wp_add_inline_style( AIOVG_PLUGIN_SLUG . '-iframe-player', ob_get_clean() );
 
-    <?php if ( isset( $general_settings['custom_css'] ) && ! empty( $general_settings['custom_css'] ) ) : ?>
-        <style type="text/css">
-		    <?php echo esc_html( $general_settings['custom_css'] ); ?>
-        </style>
-	<?php endif; ?>
+	if ( isset( $general_settings['custom_css'] ) && ! empty( $general_settings['custom_css'] ) ) {
+		wp_add_inline_style( AIOVG_PLUGIN_SLUG . '-iframe-player', wp_strip_all_tags( $general_settings['custom_css'] ) );
+	}
+
+	wp_print_styles( AIOVG_PLUGIN_SLUG . '-iframe-player' );
+	?>
 </head>
 <body>    
 	<div id="aiovg-privacy-wrapper"<?php if ( ! empty( $image ) ) : ?> style="background-image: url('<?php echo esc_url( $image ); ?>')"<?php endif; ?>>
@@ -174,7 +186,7 @@ $consent_button_label = apply_filters( 'aiovg_translate_strings', $privacy_setti
 		</div>
 	</div>
 				
-	<script type="text/javascript">
+	<?php ob_start(); ?>
         /**
          * Reload the page with query parameters to bypass cookies and prevent showing the consent message again.
          *
@@ -249,6 +261,6 @@ $consent_button_label = apply_filters( 'aiovg_translate_strings', $privacy_setti
                     break;
             }
         });
-	</script>
+	<?php wp_print_inline_script_tag( ob_get_clean() ); ?>
 </body>
 </html>

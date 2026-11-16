@@ -62,7 +62,7 @@ class AIOVG_Blocks {
 				}
 
 				if ( isset( $field['description'] ) ) {
-					$videos[ $key ]['fields'][ $_key ]['description'] = strip_tags( $field['description'] );
+					$videos[ $key ]['fields'][ $_key ]['description'] = wp_strip_all_tags( $field['description'] );
 				}
 			}
 		}
@@ -413,19 +413,10 @@ class AIOVG_Blocks {
 	 * @return string       HTML output.
 	 */
 	public function render_categories_block( $atts ) {
-		$style = '';
-
-		if ( ! empty( $atts['style']['css'] ) ) {
-			$css = wp_strip_all_tags( $atts['style']['css'] );
-			if ( '' !== trim( $css ) ) {
-				$style = '<style>' . $css . '</style>';
-			}
-		}
-
+		// Custom CSS ("style.css") is printed by core, scoped to the wrapper.
 		unset( $atts['style'] );
 
-		$output  = $style;
-		$output .= '<div ' . get_block_wrapper_attributes() . '>';
+		$output  = '<div ' . get_block_wrapper_attributes() . '>';
 		$output .= do_shortcode( '[aiovg_categories ' . $this->build_shortcode_attributes( $atts ) . ']' );
 		$output .= '</div>';
 
@@ -440,19 +431,10 @@ class AIOVG_Blocks {
 	 * @return string       HTML output.
 	 */
 	public function render_search_block( $atts ) {
-		$style = '';
-
-		if ( ! empty( $atts['style']['css'] ) ) {
-			$css = wp_strip_all_tags( $atts['style']['css'] );
-			if ( '' !== trim( $css ) ) {
-				$style = '<style>' . $css . '</style>';
-			}
-		}
-
+		// Custom CSS ("style.css") is printed by core, scoped to the wrapper.
 		unset( $atts['style'] );
 
-		$output  = $style;
-		$output .= '<div ' . get_block_wrapper_attributes() . '>';
+		$output  = '<div ' . get_block_wrapper_attributes() . '>';
 		$output .= do_shortcode( '[aiovg_search_form ' . $this->build_shortcode_attributes( $atts ) . ']' );
 		$output .= '</div>';
 
@@ -471,21 +453,12 @@ class AIOVG_Blocks {
 			$atts['player'] = 'iframe';
 		}
 
-		$style = '';
-
-		if ( ! empty( $atts['style']['css'] ) ) {
-			$css = wp_strip_all_tags( $atts['style']['css'] );
-			if ( '' !== trim( $css ) ) {
-				$style = '<style>' . $css . '</style>';
-			}
-		}
-
+		// Custom CSS ("style.css") is printed by core, scoped to the wrapper.
 		unset( $atts['blob'] );
 		unset( $atts['id'] );
 		unset( $atts['style'] );
 
-		$output  = $style;
-		$output .= '<div ' . get_block_wrapper_attributes() . '>';
+		$output  = '<div ' . get_block_wrapper_attributes() . '>';
 		$output .= do_shortcode( '[aiovg_video ' . $this->build_shortcode_attributes( $atts ) . ']' );
 		$output .= '</div>';
 
@@ -500,24 +473,15 @@ class AIOVG_Blocks {
 	 * @return string       HTML output.
 	 */
 	public function render_videos_block( $atts ) {
-		$style = '';
-
-		if ( ! empty( $atts['style']['css'] ) ) {
-			$css = wp_strip_all_tags( $atts['style']['css'] );
-			if ( '' !== trim( $css ) ) {
-				$style = '<style>' . $css . '</style>';
-			}
-		}
-
 		// Always get ratio from the global settings
 		if ( isset( $atts['ratio'] ) ) {
 			unset( $atts['ratio'] );
 		}
 
+		// Custom CSS ("style.css") is printed by core, scoped to the wrapper.
 		unset( $atts['style'] );
 
-		$output  = $style;
-		$output .= '<div ' . get_block_wrapper_attributes() . '>';
+		$output  = '<div ' . get_block_wrapper_attributes() . '>';
 		$output .= do_shortcode( '[aiovg_videos ' . $this->build_shortcode_attributes( $atts ) . ']' );
 		$output .= '</div>';
 

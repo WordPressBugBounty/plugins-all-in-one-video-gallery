@@ -8,6 +8,15 @@
  *
  * @package All_In_One_Video_Gallery
  */
+
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+// For wp_terms_checklist() below; not loaded outside wp-admin, e.g. block editor widget forms
+require_once ABSPATH . 'wp-admin/includes/template.php';
+require_once AIOVG_PLUGIN_DIR . 'includes/walker-terms-checklist.php';
 ?>
 
 <div class="aiovg aiovg-widget-form aiovg-widget-form-videos aiovg-template-<?php echo esc_attr( $instance['template'] ); ?>">

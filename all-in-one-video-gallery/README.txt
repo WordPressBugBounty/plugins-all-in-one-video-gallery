@@ -5,8 +5,8 @@ Donate link: https://plugins360.com
 Tags: video gallery, video player, youtube, vimeo, html5 video
 Requires at least: 6.3
 Tested up to: 7.1
-Requires PHP: 5.6.20
-Stable tag: 5.1.1
+Requires PHP: 7.4
+Stable tag: 5.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -167,6 +167,38 @@ This protects the player, not the video file itself: anyone who already has a se
 = 13. Where do I report security bugs found in this plugin? =
 Please report security bugs found in the source code of the All-in-One Video Gallery plugin through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/f6cdb560-024c-4cbc-8f6b-c1d4f1ee54e0). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
 
+== External Services ==
+
+The plugin connects to the services below only in the cases described. To hold back third-party players until the visitor agrees, turn on "Cookie Consent" (Settings → Advanced → GDPR & Cookie Consent). To serve thumbnails from your own site, turn on "Download External Images" (Settings → Display → Featured Images).
+
+**Video providers (YouTube, Vimeo, Dailymotion, Rumble, Facebook):** used only for videos you add from them. When you save a video, your server sends its URL or ID to the provider to get its thumbnail, duration and embed code; if you set a Vimeo Access Token, it is sent to Vimeo for private videos. When a visitor views the video, their browser loads the provider's player and thumbnail, which sends the visitor's IP address and browser details to the provider and may set cookies. For YouTube, the browser also connects early to Google's servers (google.com, doubleclick.net) so the player starts faster.
+
+**Bunny Stream:** only if you set it up. Your server sends your API key, library ID, video titles and video IDs to Bunny when videos are uploaded, checked or deleted, and the uploader's browser sends the video file. Visitors' browsers load the videos from Bunny's CDN.
+
+**WordPress.com:** for MP4 files hosted on videos.files.wordpress.com, your server checks once whether an HLS version exists. No visitor data is sent.
+
+**Remote thumbnails:** with "Download External Images" on, or when importing with "Set Featured Images", your server downloads each thumbnail from its URL. No visitor data is sent.
+
+**Share buttons (Facebook, X, LinkedIn, Pinterest, Tumblr, WhatsApp):** only when a visitor clicks one, the video's title and page URL (and, for Pinterest, its image) are sent to that service.
+
+**Freemius:** licensing, upgrades and opt-in usage data. Only if an administrator opts in, it sends the site URL, WordPress, PHP and plugin versions, language, the administrator's name and email and, where allowed, the active plugins and themes. The Upgrade, Account and Contact Us pages load from Freemius.
+
+Terms and privacy policies:
+
+* YouTube: [Terms](https://www.youtube.com/t/terms) | [Privacy](https://policies.google.com/privacy)
+* Vimeo: [Terms](https://vimeo.com/terms) | [Privacy](https://vimeo.com/privacy)
+* Dailymotion: [Terms](https://legal.dailymotion.com/en/terms-of-use/) | [Privacy](https://legal.dailymotion.com/en/privacy-policy/)
+* Rumble: [Terms](https://rumble.com/s/terms) | [Privacy](https://rumble.com/s/privacy)
+* Facebook: [Terms](https://www.facebook.com/legal/terms) | [Privacy](https://www.facebook.com/privacy/policy/)
+* Bunny Stream: [Terms](https://bunny.net/tos/) | [Privacy](https://bunny.net/privacy/)
+* WordPress.com: [Terms](https://wordpress.com/tos/) | [Privacy](https://automattic.com/privacy/)
+* X: [Terms](https://x.com/en/tos) | [Privacy](https://x.com/en/privacy)
+* LinkedIn: [Terms](https://www.linkedin.com/legal/user-agreement) | [Privacy](https://www.linkedin.com/legal/privacy-policy)
+* Pinterest: [Terms](https://policy.pinterest.com/en/terms-of-service) | [Privacy](https://policy.pinterest.com/en/privacy-policy)
+* Tumblr: [Terms](https://www.tumblr.com/policy/en/terms-of-service) | [Privacy](https://www.tumblr.com/policy/en/privacy)
+* WhatsApp: [Terms](https://www.whatsapp.com/legal/terms-of-service) | [Privacy](https://www.whatsapp.com/legal/privacy-policy)
+* Freemius: [Terms](https://freemius.com/terms/) | [Privacy](https://freemius.com/privacy/)
+
 == Screenshots ==
 
 1. Video Gallery — "Classic" Template.
@@ -196,6 +228,20 @@ Please report security bugs found in the source code of the All-in-One Video Gal
 25. Premium: Front-end video submission form.
 
 == Changelog ==
+
+= 5.2.0 =
+
+* Tweak: PHP 7.4 or later is now required.
+* Tweak: Code updated to the latest WordPress.org plugin guidelines and coding standards, with stricter escaping and input sanitization throughout.
+* Tweak: The shortcode builder now opens in a native dialog, and libraries used only by premium features are no longer bundled with the free plugin.
+* Tweak: The "Video Gallery" admin menu now appears below "Comments".
+* Tweak: Developers - the `the_aiovg_*` template tags are deprecated, replaced by `aiovg_the_*`; the `the_aiovg_socialshare_buttons` filter is replaced by `aiovg_socialshare_buttons_html`.
+* Tweak: Developers - Magnific Popup is no longer bundled with the free plugin. Code that used the `all-in-one-video-gallery-magnific-popup` handle should enqueue its own copy.
+* Fix: With "Remove Data on Uninstall" and "Delete Media Files on Delete" on, uninstalling now also removes imported video files and category images.
+* Fix: The "Video Gallery" admin menu stays open on the Categories, Tags, Automations and Playlists screens when Paid Memberships Pro is active.
+* Fix: Video pages no longer return a 404 error after the plugin is deactivated and activated again.
+* Fix: Views of Dailymotion, Rumble, Facebook and native-controls YouTube/Vimeo videos are no longer counted again on every page reload.
+* Fix: Various performance and security improvements.
 
 = 5.1.1 =
 
@@ -312,120 +358,12 @@ Please report security bugs found in the source code of the All-in-One Video Gal
 * Fix: Categories grid layout did not respect the configured "Order By" / "Order" settings when a third-party custom term ordering plugin was active.
 * Fix: Various performance and security improvements.
 
-= 4.8.5 =
-
-* New: Added Trailers / Teaser feature — display a trailer clip to restricted (non-access) users instead of the locked screen.
-* New: Added Email & Lead Capture — display an email collection form over your video to capture leads before, during, or after playback.
-* New: Added the ability to search videos by ID using the "id:123" format in the back-end "All Videos" search box (e.g., id:42).
-* New: Introduced a "Primary Color" setting under "Video Gallery => Settings => Advanced => General", replacing the former "Player Theme Color" setting and applying the color consistently across the plugin UI.
-* Tweak: Completely restructured the plugin's settings menu for improved clarity and navigation.
-* Tweak: Rewrote the categories list template in the front-end using a custom hierarchical function to avoid conflicts with third-party templates or plugins.
-* Tweak: Updated Freemius SDK to version 2.13.1.
-* Fix: WordPress 7.0 compatibility issues.
-* Fix: Various performance and security improvements.
-
-= 4.7.5 = 
-
-* Security Fix: "Reflected Cross-Site Scripting via 'vi' Parameter" issue that was discovered by [Muhammad Yudha - DJ](https://www.wordfence.com/threat-intel/vulnerabilities/researchers/yudha), and reported responsibly to us by [Wordfence](https://www.wordfence.com/).
-* New: Added an option to enable or disable video view counting for improved performance control.
-* New: Enhanced chapters support for native YouTube and Vimeo embeds.
-* New: Added support for displaying descriptions in the single video shortcode using show_description="1".
-* Tweak: Improved popup player behavior — the player now consistently fits within the viewport.
-* Tweak: Updated default slider settings.
-* Fix: Registered custom query variables to prevent conflicts with SEO and optimization plugins that may remove unrecognized query vars.
-* Fix: Improved rewrite rules handling — rewrite rules are now safely refreshed when assigned pages or permalink-related settings change, improving reliability and preventing 404 errors.
-* Fix: Various minor bug fixes and performance improvements.
-
-= 4.7.1 = 
-
-* Security Fix: "Missing Authorization to Unauthenticated Bunny Stream Video Creation/Deletion" issue that was discovered by [andrea bocchetti](https://www.wordfence.com/threat-intel/vulnerabilities/researchers/andrea-bocchetti), and reported responsibly to us by [Wordfence](https://www.wordfence.com/).
-* Security Fix: "Missing Authorization to Authenticated (Subscriber+) Limited User Meta Update" issue that was discovered by [kr0d](https://www.wordfence.com/threat-intel/vulnerabilities/researchers/kr0d), and reported responsibly to us by [Wordfence](https://www.wordfence.com/).
-* Tweak: Added options to force-load the plugin's CSS (recommended) and JavaScript (advanced) on all front-end pages to resolve layout or functionality issues caused by themes, page builders, or optimization plugins.
-* Tweak: Added an option during folder bulk import to control video page URL slug generation, including support for random slugs to prevent direct video URL guessing.
-* Tweak: Video URLs are now made private when using the front-end video submission feature to prevent URL guessing and misuse.
-* Tweak: Improved slider dots behavior by limiting the maximum number of dots to 5 and automatically enabling dots during navigation when using the slider template.
-* Fix: Various minor bug fixes and performance improvements.
-
-= 4.6.4 = 
-
-* Security Fix: "Authenticated (Author+) Arbitrary File Upload via VTT Upload Bypass" issue that was discovered by [mikemyers](https://www.wordfence.com/threat-intel/vulnerabilities/researchers/michael-mazzolini), and reported responsibly to us by Peter Greaves (Customer Support Engineer) from [Wordfence](https://www.wordfence.com/).
-* Security Fix: "Authenticated (Author+) Arbitrary File Upload via Import ZIP" issue that was discovered by [kr0d](https://www.wordfence.com/threat-intel/vulnerabilities/researchers/kr0d), and reported responsibly to us by Alex Thomas (Wordfence Vulnerability Researcher) from [Wordfence](https://www.wordfence.com/).
-* Tweak: Replaced the deprecated WordPress core function get_page_title() with an internal equivalent for improved compatibility.
-* Tweak: Updated the Freemius SDK to version 2.13.0.
-* Fix: Improved compatibility with the Divi page builder.
-* Fix: Resolved several minor issues and improved overall plugin stability and reliability.
-
-= 4.5.7 =
-
-* New: Introduced an experimental option to hide the YouTube logo when using our custom video player.
-* New: Added a setting to customize the "Related Videos" heading directly from the plugin options.
-* Fix: Resolved the YouTube "Error 153 – Video player configuration error" by implementing a referrer policy for embeds.
-* Fix: Addressed an issue where the popup on the Single Video shortcode did not function properly when the shortcode element was dynamically added.
-
-= 4.5.4 =
-
-* New: Added the ability to bulk import videos from a CSV file or folder.
-* New: Introduced a video export feature to easily back up or migrate content.
-* New: Added deeplinking support for popup templates, allowing direct links to individual videos.
-* Tweak: Updated the Freemius SDK to version 2.12.2.
-* Tweak: Improved overall performance and stability.
-* Fix: Addressed several minor bugs and enhanced plugin reliability.
-
-= 4.5.1 =
-
-* Security Hardening: Removed "unfiltered_html" capability from Editor role to reduce potential risk e.g. Stored XSS in certain configurations. Thanks to Mohamad Nour Almujarkesh for reporting.
-* Tweak: The previous version forced a short number format, which isn't supported in regions like Europe. This update adds an option to choose the number format, with the full format now set as the default.
-* Fix: Various minor bug fixes and performance improvements.
-
-= 4.4.0 =
-
-* New: Added an option to display the comments count in the grid view, with a link to the comment form in the player view.
-* New: Introduced a setting to configure a custom videos archive page for better SEO.
-* New: Added a reset button to allow users to clear filters easily.
-* New: Introduced a developer filter hook "the_aiovg_socialshare_buttons" to customize the social sharing buttons output.
-* Tweak: Restricted back-end access for the Editor role due to the "unfiltered_html" capability.
-* Tweak: Improved the HTML output for video thumbnails.
-* Tweak: Added a custom theme option for the Vidstack player.
-* Tweak: Enhanced the front-end playlist layout for better usability.
-* Tweak: Updated the Freemius SDK to version 2.12.1.
-* Fix: Resolved an issue where Vimeo tags were not imported when using Video Automations to import from Vimeo folders.
-* Fix: Fixed compatibility issues with the Oxygen page builder.
-* Fix: Various minor bug fixes and performance improvements.
-
-= 4.3.6 =
-
-* Tweak: Updated Freemius SDK (2.12.0).
-* Fix: Gallery thumbnails not showing in some WordPress environments after the last update due to a conflict with optimization plugins like Smush.
-
-= 4.3.2 =
-
-* New: Added Bunny Stream integration for seamless video hosting and playback.
-* Enhancement: Redesigned the admin UI with a modern, tabbed metabox for easier management of video details, captions, chapters, restrictions, and more.
-* Enhancement: Improved the custom multi-select dropdown by adding a search feature when the list contains more than 20 items.
-* Fix: Resolved compatibility issues with WordPress 6.8.
-* Fix: Various minor bug fixes and performance improvements.
-
-= 4.1.0 =
-
-* New: Added filtering options to the gallery, allowing users to filter videos on the same page using keywords, categories, tags, and sort by title, date, popularity, etc.
-* New: Introduced a guided user tour for first-time users to enhance onboarding.
-* Tweak: Improved the plugin dashboard with a new "Help & Tutorials" section for better accessibility.
-* Tweak: Optimized the plugin's JavaScript files for improved performance.
-* Fix: Various minor bug fixes and improvements.
-
-= 4.0.0 =
-
-* New: Added an option to configure the player theme color when using the Vidstack player library.
-* Tweak: Enhanced video restrictions by adding an option to display a restricted access label on gallery thumbnails.
-* Tweak: Extended the chapters feature to allow chapter configuration directly within the video description field.
-* Fix: Various minor bug fixes and improvements.
-
 = EARLIER VERSIONS =
 
 For the changelog of earlier versions, please refer to the [changelog on plugins360.com](https://plugins360.com/all-in-one-video-gallery/changelog/).
 
 == Upgrade Notice ==
 
-= 5.1.1 =
+= 5.2.0 =
 
-Security release: password-protected videos now require their password in every player and for downloads, as on the video page. Also fixes video details not saving with the Groups plugin. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)
+Security, performance and code quality improvements. After updating, we recommend clearing your site and CDN caches so your visitors get the latest files. [See changelog](https://wordpress.org/plugins/all-in-one-video-gallery/#developers)

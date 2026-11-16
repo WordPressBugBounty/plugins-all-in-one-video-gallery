@@ -141,7 +141,7 @@ function aiovg_get_bunny_stream_signed_url( $url, $video_id ) {
 	}
 
 	// Parse the URL components
-	$parsed = parse_url( $url );
+	$parsed = wp_parse_url( $url );
 	if ( ! is_array( $parsed ) ) {
 		return $url;
 	}
@@ -278,7 +278,7 @@ function aiovg_get_dailymotion_oembed_data( $url, $force_refresh = false ) {
 	$id = aiovg_get_dailymotion_id_from_url( $url );
 
 	if ( ! empty( $id ) ) {
-		$api_response = wp_remote_get( 'https://api.dailymotion.com/video/' . $id . '?fields=thumbnail_large_url,thumbnail_medium_url,duration', array( 'sslverify' => false ) );
+		$api_response = wp_remote_get( 'https://api.dailymotion.com/video/' . $id . '?fields=thumbnail_large_url,thumbnail_medium_url,duration' );
 
 		if ( ! is_wp_error( $api_response ) ) {
 			$api_response = json_decode( $api_response['body'] );
@@ -680,7 +680,7 @@ function aiovg_get_vimeo_video_duration( $url ) {
  */
 function aiovg_get_youtube_id_from_url( $url ) {	
 	$id  = '';
-	$url = parse_url( $url );
+	$url = wp_parse_url( $url );
 
 	if ( empty( $url['host'] ) ) {
 		return $id;
@@ -748,7 +748,7 @@ function aiovg_get_youtube_image_url( $url ) {
 function aiovg_get_youtube_time_offsets( $url ) {
 	$times = array();
 
-	$query = parse_url( $url, PHP_URL_QUERY );
+	$query = wp_parse_url( $url, PHP_URL_QUERY );
 	if ( empty( $query ) ) {
 		return $times;
 	}
@@ -817,7 +817,7 @@ function aiovg_resolve_youtube_url( $url ) {
 		$id = aiovg_get_youtube_id_from_url( $url );
 
 		if ( ! empty( $id ) ) {
-			$query = parse_url( $url, PHP_URL_QUERY ); // Keeps "t", e.g. from a live replay's "Start at" link
+			$query = wp_parse_url( $url, PHP_URL_QUERY ); // Keeps "t", e.g. from a live replay's "Start at" link
 
 			$url = 'https://www.youtube.com/watch?v=' . $id;
 			if ( ! empty( $query ) ) {

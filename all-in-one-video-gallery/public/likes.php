@@ -112,12 +112,12 @@ class AIOVG_Public_Likes {
 
 				if ( empty( $likes_settings['login_required_to_vote'] ) ) {
 					if ( isset( $_COOKIE['aiovg_videos_likes'] ) ) {
-						$liked = explode( '|', $_COOKIE['aiovg_videos_likes'] );
+						$liked = explode( '|', sanitize_text_field( wp_unslash( $_COOKIE['aiovg_videos_likes'] ) ) );
 						$liked = array_map( 'intval', $liked );
 					}
 		
 					if ( isset( $_COOKIE['aiovg_videos_dislikes'] ) ) {
-						$disliked = explode( '|', $_COOKIE['aiovg_videos_dislikes'] );
+						$disliked = explode( '|', sanitize_text_field( wp_unslash( $_COOKIE['aiovg_videos_dislikes'] ) ) );
 						$disliked = array_map( 'intval', $disliked );
 					}
 				}
@@ -161,7 +161,7 @@ class AIOVG_Public_Likes {
 			$post_id = 0;
 		}
 
-		$action  = isset( $_REQUEST['context'] ) ? sanitize_text_field( $_REQUEST['context'] ) : '';		
+		$action  = isset( $_REQUEST['context'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['context'] ) ) : '';		
 			
 		if ( $post_id > 0 ) {			
 			$response['likes']    = (int) get_post_meta( $post_id, 'likes', true );
@@ -225,7 +225,7 @@ class AIOVG_Public_Likes {
 			$post_id = 0;
 		}
 
-		$action  = isset( $_REQUEST['context'] ) ? sanitize_text_field( $_REQUEST['context'] ) : '';	
+		$action  = isset( $_REQUEST['context'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['context'] ) ) : '';	
 
 		if ( $post_id > 0 ) {			
 			$response['likes']    = (int) get_post_meta( $post_id, 'likes', true );
@@ -290,7 +290,7 @@ class AIOVG_Public_Likes {
 				$liked = array();
 
 				if ( isset( $_COOKIE['aiovg_videos_likes'] ) ) {
-					$liked = explode( '|', $_COOKIE['aiovg_videos_likes'] );
+					$liked = explode( '|', sanitize_text_field( wp_unslash( $_COOKIE['aiovg_videos_likes'] ) ) );
 					$liked = array_map( 'intval', $liked );
 				}
 
@@ -335,7 +335,7 @@ class AIOVG_Public_Likes {
 				$disliked = array();
 
 				if ( isset( $_COOKIE['aiovg_videos_dislikes'] ) ) {
-					$disliked = explode( '|', $_COOKIE['aiovg_videos_dislikes'] );
+					$disliked = explode( '|', sanitize_text_field( wp_unslash( $_COOKIE['aiovg_videos_dislikes'] ) ) );
 					$disliked = array_map( 'intval', $disliked );
 				}
 
@@ -380,7 +380,7 @@ class AIOVG_Public_Likes {
 				$liked = array();
 
 				if ( isset( $_COOKIE['aiovg_videos_likes'] ) ) {
-					$liked = explode( '|', $_COOKIE['aiovg_videos_likes'] );
+					$liked = explode( '|', sanitize_text_field( wp_unslash( $_COOKIE['aiovg_videos_likes'] ) ) );
 					$liked = array_map( 'intval', $liked );
 				}
 
@@ -428,7 +428,7 @@ class AIOVG_Public_Likes {
 				$disliked = array();
 
 				if ( isset( $_COOKIE['aiovg_videos_dislikes'] ) ) {
-					$disliked = explode( '|', $_COOKIE['aiovg_videos_dislikes'] );
+					$disliked = explode( '|', sanitize_text_field( wp_unslash( $_COOKIE['aiovg_videos_dislikes'] ) ) );
 					$disliked = array_map( 'intval', $disliked );
 				}
 

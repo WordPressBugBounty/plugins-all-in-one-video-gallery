@@ -33,7 +33,7 @@ class AIOVG_Public_Conflict {
 		if ( $page_settings['player'] > 0 ) {
 			$post = get_post( $page_settings['player'] );
 			
-			if ( strpos( $_SERVER['REQUEST_URI'], $post->post_name ) !== false ) {
+			if ( strpos( aiovg_get_request_uri(), $post->post_name ) !== false ) {
 				return true;
 			}
 		}

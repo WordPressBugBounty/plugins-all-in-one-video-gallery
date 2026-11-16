@@ -9,6 +9,11 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $featured_images_settings = aiovg_get_option( 'aiovg_featured_images_settings' );
 
 $image              = isset( $post_meta['image'] ) ? $post_meta['image'][0] : '';

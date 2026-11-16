@@ -8,6 +8,11 @@
  *
  * @package All_In_One_Video_Gallery
  */
+
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 ?>
 
 <div id="aiovg-<?php echo esc_attr( $attributes['uid'] ); ?>" class="aiovg aiovg-videos aiovg-videos-template-classic">
@@ -24,7 +29,7 @@
         <div class="aiovg-count">
             <?php 
             $videos_count = (int) $attributes['count'];
-            printf( _n( '%s video found', '%s videos found', $videos_count, 'all-in-one-video-gallery' ), number_format_i18n( $videos_count ) );
+            printf( esc_html( /* translators: %s: Number of videos found. */ _n( '%s video found', '%s videos found', $videos_count, 'all-in-one-video-gallery' ) ), esc_html( number_format_i18n( $videos_count ) ) );
             ?>
         </div>
     <?php endif; ?>
@@ -46,8 +51,8 @@
             if ( $columns > 3 ) $classes[] = 'aiovg-col-sm-3';
             if ( $columns > 2 ) $classes[] = 'aiovg-col-xs-2';
             ?>            
-            <div class="<?php echo implode( ' ', $classes ); ?>" data-id="<?php echo esc_attr( $post->ID ); ?>">
-                <?php the_aiovg_video_thumbnail( $post, $attributes ); ?>            
+            <div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" data-id="<?php echo esc_attr( $post->ID ); ?>">
+                <?php aiovg_the_video_thumbnail( $post, $attributes ); ?>            
             </div>                
             <?php 
         endwhile;
@@ -59,9 +64,9 @@
     
     <?php    
     if ( ! empty( $attributes['show_pagination'] ) ) { // Pagination        
-        the_aiovg_pagination( $aiovg_query->max_num_pages, '', $attributes['paged'], $attributes );
+        aiovg_the_pagination( $aiovg_query->max_num_pages, '', $attributes['paged'], $attributes );
     } elseif ( ! empty( $attributes['show_more'] ) ) { // More button         
-        the_aiovg_more_button( $aiovg_query->max_num_pages, $attributes );
+        aiovg_the_more_button( $aiovg_query->max_num_pages, $attributes );
     }
     ?>
 </div>

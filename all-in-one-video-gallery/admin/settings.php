@@ -237,7 +237,7 @@ class AIOVG_Admin_Settings {
                 'id'          => 'aiovg_permalink_settings',
                 'title'       => __( 'Permalinks & Archive Settings', 'all-in-one-video-gallery' ),
 				'description' => sprintf(
-                    __( 'After updating the fields in this section, please visit <a href="%s">Settings → Permalinks</a> and simply save the page without making any changes to flush rewrite rules. Otherwise, you might still see old links.', 'all-in-one-video-gallery' ),
+                    /* translators: %s: Permalinks settings URL. */ __( 'After updating the fields in this section, please visit <a href="%s">Settings → Permalinks</a> and simply save the page without making any changes to flush rewrite rules. Otherwise, you might still see old links.', 'all-in-one-video-gallery' ),
                     esc_url( admin_url( 'options-permalink.php' ) )
                 ),
                 'tab'         => 'advanced',
@@ -257,7 +257,7 @@ class AIOVG_Admin_Settings {
                     '<div class="aiovg-notice aiovg-notice-info aiovg-margin-bottom"><strong>%s:</strong> %s</div>%s <a href="%s" target="_blank" rel="noopener noreferrer"><strong>%s</strong></a>',
                     __( 'Important', 'all-in-one-video-gallery' ),
                     sprintf(
-                        __( 'Modifying your Bunny Stream settings (API Key, Library ID, or CDN Hostname) after your site is live may cause videos to stop functioning or result in data loss. <a href="%s">Contact us</a> if you want to make any changes after your site is live.', 'all-in-one-video-gallery' ),
+                        /* translators: %s: Contact page URL. */ __( 'Modifying your Bunny Stream settings (API Key, Library ID, or CDN Hostname) after your site is live may cause videos to stop functioning or result in data loss. <a href="%s">Contact us</a> if you want to make any changes after your site is live.', 'all-in-one-video-gallery' ),
                         esc_url( admin_url( 'admin.php?page=all-in-one-video-gallery-contact' ) )
                     ),
                     __( 'Set up Bunny Stream to easily upload, store, and securely deliver your video content with optimal performance. Simply configure the necessary settings below to get started.', 'all-in-one-video-gallery' ),
@@ -414,7 +414,7 @@ class AIOVG_Admin_Settings {
                     'name'              => 'controls',
                     'label'             => __( 'Player Controls', 'all-in-one-video-gallery' ),
                     'description'       => sprintf( 
-                        __( '<a href="%s">Click here</a> to configure your share buttons.', 'all-in-one-video-gallery' ), 
+                        /* translators: %s: Share buttons settings URL. */ __( '<a href="%s">Click here</a> to configure your share buttons.', 'all-in-one-video-gallery' ), 
                         esc_url( admin_url( 'admin.php?page=aiovg_settings&tab=seo&section=aiovg_socialshare_settings' ) ) 
                     ),
                     'type'              => 'multicheck',
@@ -772,7 +772,7 @@ class AIOVG_Admin_Settings {
                 array(
                     'name'              => 'template',
                     'label'             => __( 'Select Template', 'all-in-one-video-gallery' ),
-                    'description'       => ( aiovg_fs()->is_not_paying() ? sprintf( __( '<a href="%s" target="_blank">Upgrade Pro</a> for more templates (Popup, Inline, Slider, Playlist, Compact, etc.)', 'all-in-one-video-gallery' ), esc_url( aiovg_fs()->get_upgrade_url() ) ) : '' ),
+                    'description'       => ( aiovg_fs()->is_not_paying() ? sprintf( /* translators: %s: Upgrade page URL. */ __( '<a href="%s" target="_blank">Upgrade Pro</a> for more templates (Popup, Inline, Slider, Playlist, Compact, etc.)', 'all-in-one-video-gallery' ), esc_url( aiovg_fs()->get_upgrade_url() ) ) : '' ),
                     'type'              => 'select',
 					'options'           => aiovg_get_video_templates(),
 					'sanitize_callback' => 'sanitize_key'
@@ -980,7 +980,7 @@ class AIOVG_Admin_Settings {
                     'name'              => 'display',
                     'label'             => __( 'Show / Hide', 'all-in-one-video-gallery' ),
                     'description'       => sprintf( 
-                        __( '<a href="%s">Click here</a> to configure your share buttons.', 'all-in-one-video-gallery' ), 
+                        /* translators: %s: Share buttons settings URL. */ __( '<a href="%s">Click here</a> to configure your share buttons.', 'all-in-one-video-gallery' ), 
                         esc_url( admin_url( 'admin.php?page=aiovg_settings&tab=seo&section=aiovg_socialshare_settings' ) ) 
                     ),
                     'type'              => 'multicheck',
@@ -1344,14 +1344,14 @@ class AIOVG_Admin_Settings {
                 array(
                     'name'              => 'youtube_api_key',
                     'label'             => __( 'YouTube API Key', 'all-in-one-video-gallery' ),
-                    'description'       => sprintf( __( 'Follow <a href="%s" target="_blank" rel="noopener noreferrer">this guide</a> to get your own API key.', 'all-in-one-video-gallery' ), 'https://plugins360.com/all-in-one-video-gallery/how-to-get-youtube-api-key/' ),
+                    'description'       => sprintf( /* translators: %s: Guide URL. */ __( 'Follow <a href="%s" target="_blank" rel="noopener noreferrer">this guide</a> to get your own API key.', 'all-in-one-video-gallery' ), 'https://plugins360.com/all-in-one-video-gallery/how-to-get-youtube-api-key/' ),
                     'type'              => 'text',
                     'sanitize_callback' => 'sanitize_text_field'
                 ),
                 array(
                     'name'              => 'vimeo_access_token',
                     'label'             => __( 'Vimeo Access Token', 'all-in-one-video-gallery' ),
-                    'description'       => sprintf( __( 'Follow <a href="%s" target="_blank" rel="noopener noreferrer">this guide</a> to get your own access token.', 'all-in-one-video-gallery' ), 'https://plugins360.com/all-in-one-video-gallery/how-to-get-vimeo-access-token/' ),
+                    'description'       => sprintf( /* translators: %s: Guide URL. */ __( 'Follow <a href="%s" target="_blank" rel="noopener noreferrer">this guide</a> to get your own access token.', 'all-in-one-video-gallery' ), 'https://plugins360.com/all-in-one-video-gallery/how-to-get-vimeo-access-token/' ),
                     'type'              => 'text',
                     'sanitize_callback' => 'sanitize_text_field'
                 ),
@@ -1587,7 +1587,7 @@ class AIOVG_Admin_Settings {
 	public function settings_section_callback( $args ) {
         foreach ( $this->sections as $section ) {
             if ( $section['id'] == $args['id'] ) {
-                printf( '<div class="inside"><em>%s</em></div>', $section['description'] ); 
+                printf( '<div class="inside"><em>%s</em></div>', wp_kses_post( $section['description'] ) ); 
                 break;
             }
         }
@@ -1603,12 +1603,12 @@ class AIOVG_Admin_Settings {
         $value       = esc_attr( $this->get_option( $args['id'], $args['section'], '' ) );
         $size        = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular-text';
         $type        = isset( $args['type'] ) ? $args['type'] : 'text';
-        $placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . $args['placeholder'] . '"';
+        $placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . esc_attr( $args['placeholder'] ) . '"';
 		
-        $html        = sprintf( '<input type="%1$s" class="%2$s widefat" id="%3$s[%4$s]" name="%3$s[%4$s]" value="%5$s"%6$s/>', $type, $size, $args['section'], $args['id'], $value, $placeholder );
+        $html        = sprintf( '<input type="%1$s" class="%2$s widefat" id="%3$s[%4$s]" name="%3$s[%4$s]" value="%5$s"%6$s/>', esc_attr( $type ), esc_attr( $size ), esc_attr( $args['section'] ), esc_attr( $args['id'] ), $value, $placeholder );
         $html       .= $this->get_field_description( $args );
 		
-        echo $html;		
+        echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped while building.		
     }
 	
 	/**
@@ -1631,15 +1631,15 @@ class AIOVG_Admin_Settings {
         $value       = esc_attr( $this->get_option( $args['id'], $args['section'], 0 ) );
         $size        = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular-text';
         $type        = isset( $args['type'] ) ? $args['type'] : 'number';
-        $placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . $args['placeholder'] . '"';
-        $min         = empty( $args['min'] ) ? '' : ' min="' . $args['min'] . '"';
-        $max         = empty( $args['max'] ) ? '' : ' max="' . $args['max'] . '"';
-        $step        = empty( $args['max'] ) ? '' : ' step="' . $args['step'] . '"';
+        $placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . esc_attr( $args['placeholder'] ) . '"';
+        $min         = empty( $args['min'] ) ? '' : ' min="' . esc_attr( $args['min'] ) . '"';
+        $max         = empty( $args['max'] ) ? '' : ' max="' . esc_attr( $args['max'] ) . '"';
+        $step        = empty( $args['step'] ) ? '' : ' step="' . esc_attr( $args['step'] ) . '"';
 		
-        $html        = sprintf( '<input type="%1$s" class="%2$s widefat" id="%3$s[%4$s]" name="%3$s[%4$s]" value="%5$s"%6$s%7$s%8$s%9$s/>', $type, $size, $args['section'], $args['id'], $value, $placeholder, $min, $max, $step );
+        $html        = sprintf( '<input type="%1$s" class="%2$s widefat" id="%3$s[%4$s]" name="%3$s[%4$s]" value="%5$s"%6$s%7$s%8$s%9$s/>', esc_attr( $type ), esc_attr( $size ), esc_attr( $args['section'] ), esc_attr( $args['id'] ), $value, $placeholder, $min, $max, $step );
         $html       .= $this->get_field_description( $args );
 		
-        echo $html;		
+        echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped while building.		
     }
 	
 	/**
@@ -1652,13 +1652,13 @@ class AIOVG_Admin_Settings {
         $value = esc_attr( $this->get_option( $args['id'], $args['section'], 0 ) );
 		
         $html  = '<fieldset>';
-        $html  .= sprintf( '<label for="%1$s[%2$s]">', $args['section'], $args['id'] );
-        $html  .= sprintf( '<input type="hidden" name="%1$s[%2$s]" value="0" />', $args['section'], $args['id'] );
-        $html  .= sprintf( '<input type="checkbox" class="checkbox" id="%1$s[%2$s]" name="%1$s[%2$s]" value="1" %3$s />', $args['section'], $args['id'], checked( $value, 1, false ) );
-        $html  .= sprintf( '%1$s</label>', $args['description'] );
+        $html  .= sprintf( '<label for="%1$s[%2$s]">', esc_attr( $args['section'] ), esc_attr( $args['id'] ) );
+        $html  .= sprintf( '<input type="hidden" name="%1$s[%2$s]" value="0" />', esc_attr( $args['section'] ), esc_attr( $args['id'] ) );
+        $html  .= sprintf( '<input type="checkbox" class="checkbox" id="%1$s[%2$s]" name="%1$s[%2$s]" value="1" %3$s />', esc_attr( $args['section'] ), esc_attr( $args['id'] ), checked( $value, 1, false ) );
+        $html  .= sprintf( '%1$s</label>', wp_kses_post( $args['description'] ) );
         $html  .= '</fieldset>';
 		
-        echo $html;		
+        echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped while building.		
     }
 	
 	/**
@@ -1671,17 +1671,17 @@ class AIOVG_Admin_Settings {
         $value = $this->get_option( $args['id'], $args['section'], array() );
 		
         $html  = '<fieldset>';
-        $html .= sprintf( '<input type="hidden" name="%1$s[%2$s]" value="" />', $args['section'], $args['id'] );
+        $html .= sprintf( '<input type="hidden" name="%1$s[%2$s]" value="" />', esc_attr( $args['section'] ), esc_attr( $args['id'] ) );
         foreach ( $args['options'] as $key => $label ) {
             $checked  = in_array( $key, $value ) ? 'checked="checked"' : '';
-            $html    .= sprintf( '<label for="%1$s[%2$s][%3$s]">', $args['section'], $args['id'], $key );
-            $html    .= sprintf( '<input type="checkbox" class="checkbox" id="%1$s[%2$s][%3$s]" name="%1$s[%2$s][%3$s]" value="%3$s" %4$s />', $args['section'], $args['id'], $key, $checked );
-            $html    .= sprintf( '%1$s</label><br>',  $label );
+            $html    .= sprintf( '<label for="%1$s[%2$s][%3$s]">', esc_attr( $args['section'] ), esc_attr( $args['id'] ), esc_attr( $key ) );
+            $html    .= sprintf( '<input type="checkbox" class="checkbox" id="%1$s[%2$s][%3$s]" name="%1$s[%2$s][%3$s]" value="%3$s" %4$s />', esc_attr( $args['section'] ), esc_attr( $args['id'] ), esc_attr( $key ), $checked );
+            $html    .= sprintf( '%1$s</label><br>', wp_kses( $label, array( 'em' => array(), 'strong' => array(), 'code' => array() ) ) );
         }
         $html .= '</fieldset>';
         $html .= $this->get_field_description( $args );
 		
-        echo $html;		
+        echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped while building.		
     }
 	
 	/**
@@ -1695,14 +1695,14 @@ class AIOVG_Admin_Settings {
 		
         $html  = '<fieldset>';
         foreach ( $args['options'] as $key => $label ) {
-            $html .= sprintf( '<label for="%1$s[%2$s][%3$s]">',  $args['section'], $args['id'], $key );
-            $html .= sprintf( '<input type="radio" class="radio" id="%1$s[%2$s][%3$s]" name="%1$s[%2$s]" value="%3$s" %4$s />', $args['section'], $args['id'], $key, checked( $value, $key, false ) );
-            $html .= sprintf( '%1$s</label><br>', $label );
+            $html .= sprintf( '<label for="%1$s[%2$s][%3$s]">', esc_attr( $args['section'] ), esc_attr( $args['id'] ), esc_attr( $key ) );
+            $html .= sprintf( '<input type="radio" class="radio" id="%1$s[%2$s][%3$s]" name="%1$s[%2$s]" value="%3$s" %4$s />', esc_attr( $args['section'] ), esc_attr( $args['id'] ), esc_attr( $key ), checked( $value, $key, false ) );
+            $html .= sprintf( '%1$s</label><br>', wp_kses( $label, array( 'em' => array(), 'strong' => array(), 'code' => array() ) ) );
         }
         $html .= $this->get_field_description( $args );
         $html .= '</fieldset>';
 		
-        echo $html;		
+        echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped while building.		
     }
 	
 	/**
@@ -1715,14 +1715,14 @@ class AIOVG_Admin_Settings {
         $value = esc_attr( $this->get_option( $args['id'], $args['section'], '' ) );
         $size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular-text';
 		
-        $html  = sprintf( '<select class="%1$s" name="%2$s[%3$s]" id="%2$s[%3$s]">', $size, $args['section'], $args['id'] );
+        $html  = sprintf( '<select class="%1$s" name="%2$s[%3$s]" id="%2$s[%3$s]">', esc_attr( $size ), esc_attr( $args['section'] ), esc_attr( $args['id'] ) );
         foreach ( $args['options'] as $key => $label ) {
-            $html .= sprintf( '<option value="%s"%s>%s</option>', $key, selected( $value, $key, false ), $label );
+            $html .= sprintf( '<option value="%s"%s>%s</option>', esc_attr( $key ), selected( $value, $key, false ), esc_html( $label ) );
         }
         $html .= sprintf( '</select>' );
         $html .= $this->get_field_description( $args );
 		
-        echo $html;		
+        echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped while building.		
     }
 	
 	/**
@@ -1734,12 +1734,12 @@ class AIOVG_Admin_Settings {
     public function callback_textarea( $args ) {	
         $value       = esc_textarea( $this->get_option( $args['id'], $args['section'], '' ) );
         $size        = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular-text';
-        $placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="'.$args['placeholder'].'"';
+        $placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . esc_attr( $args['placeholder'] ) . '"';
 		
-        $html        = sprintf( '<textarea rows="5" cols="55" class="%1$s" id="%2$s[%3$s]" name="%2$s[%3$s]"%4$s>%5$s</textarea>', $size, $args['section'], $args['id'], $placeholder, $value );
+        $html        = sprintf( '<textarea rows="5" cols="55" class="%1$s" id="%2$s[%3$s]" name="%2$s[%3$s]"%4$s>%5$s</textarea>', esc_attr( $size ), esc_attr( $args['section'] ), esc_attr( $args['id'] ), $placeholder, $value );
         $html       .= $this->get_field_description( $args );
 		
-        echo $html;		
+        echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped while building.		
     }
 	
 	/**
@@ -1749,7 +1749,7 @@ class AIOVG_Admin_Settings {
      * @param array $args Settings field args.
      */
     public function callback_html( $args ) {
-        echo $this->get_field_description( $args );
+        echo $this->get_field_description( $args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in get_field_description().
     }
 	
 	 /**
@@ -1762,7 +1762,7 @@ class AIOVG_Admin_Settings {
         $value = $this->get_option( $args['id'], $args['section'], '' );
         $size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : '500px';
 		
-        echo '<div style="max-width: ' . $size . ';">';
+        echo '<div style="max-width: ' . esc_attr( $size ) . ';">';
         $editor_settings = array(
             'teeny'         => true,
             'textarea_name' => $args['section'] . '[' . $args['id'] . ']',
@@ -1773,7 +1773,7 @@ class AIOVG_Admin_Settings {
         }
         wp_editor( $value, $args['section'] . '-' . $args['id'], $editor_settings );
         echo '</div>';
-        echo $this->get_field_description( $args );		
+        echo $this->get_field_description( $args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in get_field_description().		
     }
 	
 	/**
@@ -1789,12 +1789,12 @@ class AIOVG_Admin_Settings {
         $label = isset( $args['options']['button_label'] ) ? $args['options']['button_label'] : __( 'Choose File', 'all-in-one-video-gallery' );
 		
         $html  = '<div class="aiovg-media-uploader"> ';
-        $html .= sprintf( '<input type="text" class="%1$s" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s"/>', $size, $args['section'], $args['id'], $value );
-        $html .= '<input type="button" class="aiovg-upload-media button" value="' . $label . '" />';
+        $html .= sprintf( '<input type="text" class="%1$s" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s"/>', esc_attr( $size ), esc_attr( $args['section'] ), esc_attr( $args['id'] ), $value );
+        $html .= '<input type="button" class="aiovg-upload-media button" value="' . esc_attr( $label ) . '" />';
         $html .= '</div> ';
         $html .= $this->get_field_description( $args );
 		
-        echo $html;		
+        echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped while building.		
     }
 	
 	/**
@@ -1807,10 +1807,10 @@ class AIOVG_Admin_Settings {
         $value = esc_attr( $this->get_option( $args['id'], $args['section'], '' ) );
         $size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular-text';
 		
-        $html  = sprintf( '<input type="password" class="%1$s" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s"/>', $size, $args['section'], $args['id'], $value );
+        $html  = sprintf( '<input type="password" class="%1$s" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s"/>', esc_attr( $size ), esc_attr( $args['section'] ), esc_attr( $args['id'] ), $value );
         $html .= $this->get_field_description( $args );
 		
-        echo $html;		
+        echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped while building.		
     }
 	
 	/**
@@ -1823,10 +1823,10 @@ class AIOVG_Admin_Settings {
         $value = esc_attr( $this->get_option( $args['id'], $args['section'], '#ffffff' ) );
         $size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular-text';
 		
-        $html  = sprintf( '<input type="text" class="%1$s aiovg-color-picker" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s" data-default-color="%5$s" />', $size, $args['section'], $args['id'], $value, '#ffffff' );
+        $html  = sprintf( '<input type="text" class="%1$s aiovg-color-picker" id="%2$s[%3$s]" name="%2$s[%3$s]" value="%4$s" data-default-color="%5$s" />', esc_attr( $size ), esc_attr( $args['section'] ), esc_attr( $args['id'] ), $value, '#ffffff' );
         $html .= $this->get_field_description( $args );
 		
-        echo $html;		
+        echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped while building.		
     }
 	
 	/**
@@ -1845,10 +1845,10 @@ class AIOVG_Admin_Settings {
             'echo'              => 0			
         );
 		
-        $html  = wp_dropdown_pages( $dropdown_args );
+        $html  = wp_dropdown_pages( $dropdown_args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- 'echo' => 0 returns the markup.
 		$html .= $this->get_field_description( $args );
 		
-        echo $html;		
+        echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped while building.		
     }
 	
 	/**
@@ -1859,7 +1859,7 @@ class AIOVG_Admin_Settings {
      */
     public function get_field_description( $args ) {	
         if ( ! empty( $args['description'] ) ) {
-            $description = sprintf( '<p class="description">%s</p>', $args['description'] );
+            $description = sprintf( '<p class="description">%s</p>', wp_kses_post( $args['description'] ) );
         } else {
             $description = '';
         }

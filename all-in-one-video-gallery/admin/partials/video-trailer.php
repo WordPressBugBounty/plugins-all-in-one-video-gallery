@@ -9,6 +9,11 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $trailer_type = isset( $post_meta['trailer_type'] ) ? $post_meta['trailer_type'][0] : '';
 $trailer_src  = isset( $post_meta['trailer_src'] ) ? $post_meta['trailer_src'][0] : '';
 

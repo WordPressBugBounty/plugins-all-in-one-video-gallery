@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: All-in-One Video Gallery\n"
-"POT-Creation-Date: 2026-11-04 18:41+0530\n"
-"PO-Revision-Date: 2026-11-04 18:41+0530\n"
+"POT-Creation-Date: 2026-11-10 20:14+0530\n"
+"PO-Revision-Date: 2026-11-10 20:14+0530\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en_US\n"
@@ -21,12 +21,12 @@ msgstr ""
 msgid "You may also like"
 msgstr ""
 
-#: admin/admin.php:502 admin/partials/dashboard.php:14 blocks/blocks.php:37
+#: admin/admin.php:502 admin/partials/dashboard.php:19 blocks/blocks.php:37
 msgid "All-in-One Video Gallery"
 msgstr ""
 
-#: admin/admin.php:503 admin/videos.php:77 includes/helpers/functions.php:1807
-#: widgets/videos.php:542
+#: admin/admin.php:503 admin/videos.php:77 includes/helpers/functions.php:1814
+#: widgets/videos.php:540
 msgid "Video Gallery"
 msgstr ""
 
@@ -50,11 +50,11 @@ msgstr ""
 msgid "Issues Found"
 msgstr ""
 
-#: admin/admin.php:770
+#: admin/admin.php:768
 msgid "Pages Misconfigured"
 msgstr ""
 
-#: admin/admin.php:772
+#: admin/admin.php:771
 #, php-format
 msgid ""
 "During activation, our plugin adds few <a href=\"%s\" "
@@ -63,40 +63,40 @@ msgid ""
 "missing, misconfigured or having a wrong shortcode."
 msgstr ""
 
-#: admin/admin.php:925
+#: admin/admin.php:908
 msgid "Copied!"
 msgstr ""
 
-#: admin/admin.php:926
+#: admin/admin.php:909
 msgid "Please select at least one issue."
 msgstr ""
 
-#: admin/admin.php:927 widgets/forms/video.php:34
+#: admin/admin.php:910 widgets/forms/video.php:39
 msgid "No video selected. The last added video will be displayed."
 msgstr ""
 
-#: admin/admin.php:928
+#: admin/admin.php:911
 msgid "Sorry, there is already a video with this quality level."
 msgstr ""
 
-#: admin/admin.php:929 blocks/blocks.php:126 widgets/forms/video.php:31
+#: admin/admin.php:912 blocks/blocks.php:126 widgets/forms/video.php:36
 msgid "Remove"
 msgstr ""
 
-#: admin/admin.php:930 premium/public/public.php:225
+#: admin/admin.php:913 premium/public/public.php:241
 msgid "Preparing upload"
 msgstr ""
 
-#: admin/admin.php:931 premium/public/public.php:226
-#: premium/public/templates/video-form.php:334
+#: admin/admin.php:914 premium/public/public.php:242
+#: premium/public/templates/video-form.php:340
 msgid "Cancel"
 msgstr ""
 
-#: admin/admin.php:932 premium/public/public.php:227
+#: admin/admin.php:916 premium/public/public.php:243
 msgid "Uploaded %d%"
 msgstr ""
 
-#: admin/admin.php:933 premium/public/public.php:228
+#: admin/admin.php:917 premium/public/public.php:244
 #: public/bunny-stream.php:404
 msgid ""
 "<strong>Processing:</strong> Your video is being processed. This usually "
@@ -105,110 +105,110 @@ msgid ""
 "automatically become playable once processing is complete."
 msgstr ""
 
-#: admin/admin.php:934 admin/settings.php:1204
-#: includes/helpers/functions.php:1033 includes/player/base.php:744
-#: public/templates/player-videojs.php:542
-#: public/templates/player-vidstack.php:579
+#: admin/admin.php:918 admin/settings.php:1204
+#: includes/helpers/functions.php:1041 includes/player/base.php:744
+#: public/templates/player-videojs.php:547
+#: public/templates/player-vidstack.php:584
 msgid "Trailer"
 msgstr ""
 
-#: admin/admin.php:963
+#: admin/admin.php:947
 msgid "Please fill in all required fields."
 msgstr ""
 
-#: admin/admin.php:964
+#: admin/admin.php:948
 msgid "Preparing import."
 msgstr ""
 
-#: admin/admin.php:965
+#: admin/admin.php:949
 msgid "Preparing export."
 msgstr ""
 
-#: admin/admin.php:966
+#: admin/admin.php:950
 msgid "Please wait while we fetch the column headers from your CSV file."
 msgstr ""
 
-#: admin/admin.php:967
+#: admin/admin.php:951
 msgid "CSV columns loaded successfully. You can proceed with the import now."
 msgstr ""
 
-#: admin/admin.php:968
+#: admin/admin.php:952
 msgid "Sorry, some videos could not be imported. Please try again later."
 msgstr ""
 
-#: admin/admin.php:969
+#: admin/admin.php:953
 msgid ""
 "Some items could not be imported from the CSV. Please review the details "
 "below."
 msgstr ""
 
-#: admin/admin.php:970
+#: admin/admin.php:954
 msgid "Your export is ready. Download the ZIP files below."
 msgstr ""
 
-#: admin/admin.php:971
+#: admin/admin.php:955
 msgid ""
 "Sorry, the following files could not be exported. Each one is either larger "
 "than the maximum ZIP size or not a media file on this site."
 msgstr ""
 
-#: admin/admin.php:973
+#: admin/admin.php:958
 #, php-format
 msgid ""
-"Your export is complete. %s video records processed, and %s skipped. "
+"Your export is complete. %1$s video records processed, and %2$s skipped. "
 "However, no ZIP file was created because no files were found."
 msgstr ""
 
-#: admin/admin.php:977
+#: admin/admin.php:962
 msgid "Something went wrong. Please check your server or try again."
 msgstr ""
 
-#: admin/admin.php:1009
+#: admin/admin.php:994
 msgid "Video Category Page"
 msgstr ""
 
-#: admin/admin.php:1013
+#: admin/admin.php:998
 msgid "Video Tag Page"
 msgstr ""
 
-#: admin/admin.php:1017 blocks/blocks.php:108
-#: includes/helpers/functions.php:2350 widgets/forms/search.php:84
+#: admin/admin.php:1002 blocks/blocks.php:108
+#: includes/helpers/functions.php:2357 widgets/forms/search.php:89
 msgid "Search Results Page"
 msgstr ""
 
-#: admin/admin.php:1021 admin/settings.php:1394
+#: admin/admin.php:1006 admin/settings.php:1394
 msgid "User Videos Page"
 msgstr ""
 
-#: admin/admin.php:1025 admin/settings.php:1401
+#: admin/admin.php:1010 admin/settings.php:1401
 msgid "Player Page"
 msgstr ""
 
-#: admin/admin.php:1029
+#: admin/admin.php:1014
 msgid "User Dashboard Page"
 msgstr ""
 
-#: admin/admin.php:1033
+#: admin/admin.php:1018
 msgid "Video Form Page"
 msgstr ""
 
-#: admin/admin.php:1037
+#: admin/admin.php:1022
 msgid "My Playlists Page"
 msgstr ""
 
-#: admin/admin.php:1054 admin/settings.php:60
+#: admin/admin.php:1039 admin/settings.php:60
 msgid "Settings"
 msgstr ""
 
-#: admin/admin.php:1152
+#: admin/admin.php:1137
 msgid "Upload blocked — file MIME type is not a valid subtitle format."
 msgstr ""
 
-#: admin/admin.php:1166
+#: admin/admin.php:1151
 msgid "Invalid WebVTT file — must start with \"WEBVTT\"."
 msgstr ""
 
-#: admin/admin.php:1181
+#: admin/admin.php:1166
 msgid "Invalid SRT file — does not follow standard SubRip formatting."
 msgstr ""
 
@@ -216,15 +216,15 @@ msgstr ""
 msgid "All-in-One Video Gallery - Categories"
 msgstr ""
 
-#: admin/categories.php:33 admin/categories.php:66 admin/import-export.php:2641
-#: admin/partials/import-export.php:144 admin/videos.php:849
-#: premium/admin/partials/automations-video-options.php:61
+#: admin/categories.php:33 admin/categories.php:66 admin/import-export.php:2659
+#: admin/partials/import-export.php:149 admin/videos.php:853
+#: premium/admin/partials/automations-video-options.php:66
 #: widgets/categories.php:54
 msgid "Video Categories"
 msgstr ""
 
-#: admin/categories.php:67 admin/videos.php:1025
-#: premium/admin/automations.php:227 public/videos.php:99
+#: admin/categories.php:67 admin/videos.php:1048
+#: premium/admin/automations.php:228 public/videos.php:99
 msgid "All Categories"
 msgstr ""
 
@@ -276,7 +276,7 @@ msgstr ""
 msgid "Search Categories"
 msgstr ""
 
-#: admin/categories.php:80 includes/helpers/functions.php:1312
+#: admin/categories.php:80 includes/helpers/functions.php:1321
 msgid "No categories found"
 msgstr ""
 
@@ -293,8 +293,8 @@ msgid "Categories list navigation"
 msgstr ""
 
 #: admin/categories.php:175 admin/settings.php:907 admin/tags.php:125
-#: admin/videos.php:1182 blocks/blocks.php:82
-#: includes/helpers/functions.php:2231 widgets/forms/categories.php:76
+#: admin/videos.php:1205 blocks/blocks.php:82
+#: includes/helpers/functions.php:2238 widgets/forms/categories.php:81
 msgid "ID"
 msgstr ""
 
@@ -302,20 +302,20 @@ msgstr ""
 msgid "All-in-One Video Gallery - Import / Export"
 msgstr ""
 
-#: admin/import-export.php:33 admin/partials/import-export.php:18
+#: admin/import-export.php:33 admin/partials/import-export.php:23
 msgid "Bulk Import / Export"
 msgstr ""
 
-#: admin/import-export.php:77 admin/import-export.php:284
-#: admin/import-export.php:459 admin/import-export.php:556
-#: admin/import-export.php:883 admin/import-export.php:1138
-#: premium/admin/thumbnail-generator.php:141 premium/public/playlists.php:590
+#: admin/import-export.php:77 admin/import-export.php:286
+#: admin/import-export.php:465 admin/import-export.php:562
+#: admin/import-export.php:891 admin/import-export.php:1148
+#: premium/admin/thumbnail-generator.php:142 premium/public/playlists.php:590
 #: premium/public/playlists.php:648 premium/public/playlists.php:682
 #: premium/public/playlists.php:709 premium/public/playlists.php:722
 #: premium/public/playlists.php:749 premium/public/playlists.php:762
-#: premium/public/templates/single-playlist.php:15
-#: premium/public/templates/user-playlists.php:16 premium/public/user.php:360
-#: premium/public/user.php:373 public/bunny-stream.php:217
+#: premium/public/templates/single-playlist.php:20
+#: premium/public/templates/user-playlists.php:21 premium/public/user.php:344
+#: premium/public/user.php:357 public/bunny-stream.php:217
 #: public/bunny-stream.php:227 public/bunny-stream.php:231
 #: public/bunny-stream.php:235 public/bunny-stream.php:335
 #: public/bunny-stream.php:345 public/bunny-stream.php:349
@@ -326,391 +326,393 @@ msgstr ""
 msgid "You do not have sufficient permissions to do this action."
 msgstr ""
 
-#: admin/import-export.php:223 admin/import-export.php:243
-#: admin/import-export.php:358 admin/import-export.php:422
+#: admin/import-export.php:224 admin/import-export.php:245
+#: admin/import-export.php:362 admin/import-export.php:428
 #, php-format
-msgid "%s videos imported, %s excluded as duplicates, and %s failed to import."
+msgid ""
+"%1$s videos imported, %2$s excluded as duplicates, and %3$s failed to import."
 msgstr ""
 
-#: admin/import-export.php:252 admin/import-export.php:418
-#: admin/import-export.php:431
+#: admin/import-export.php:254 admin/import-export.php:423
+#: admin/import-export.php:437
 msgid "Click here to view the imported videos"
 msgstr ""
 
-#: admin/import-export.php:350 admin/import-export.php:408
+#: admin/import-export.php:353 admin/import-export.php:413
 #, php-format
 msgid ""
-"%s videos imported, %s updated, %s excluded as duplicates, and %s failed to "
-"import."
+"%1$s videos imported, %2$s updated, %3$s excluded as duplicates, and %4$s "
+"failed to import."
 msgstr ""
 
-#: admin/import-export.php:515
+#: admin/import-export.php:521
 msgid "Select Field"
 msgstr ""
 
-#: admin/import-export.php:580 admin/import-export.php:912
+#: admin/import-export.php:586 admin/import-export.php:920
 msgid ""
 "Sorry, we were unable to create the export directory. Please check folder "
 "permissions and try again."
 msgstr ""
 
-#: admin/import-export.php:606
+#: admin/import-export.php:612
 msgid "Sorry, no videos were found to export."
 msgstr ""
 
-#: admin/import-export.php:810
+#: admin/import-export.php:816
 msgid ""
 "Sorry, we were unable to open the CSV file for writing. Please check file "
 "permissions and try again."
 msgstr ""
 
-#: admin/import-export.php:829 admin/import-export.php:1083
+#: admin/import-export.php:836 admin/import-export.php:1092
 #, php-format
-msgid "%d out of %d videos processed"
+msgid "%1$d out of %2$d videos processed"
 msgstr ""
 
-#: admin/import-export.php:850
+#: admin/import-export.php:858
 #, php-format
 msgid ""
-"Your CSV export is complete. %s video records processed successfully. <a "
-"href=\"%s\" target=\"_blank\">Click here to download the CSV file</a>."
+"Your CSV export is complete. %1$s video records processed successfully. <a "
+"href=\"%2$s\" target=\"_blank\">Click here to download the CSV file</a>."
 msgstr ""
 
-#: admin/import-export.php:887
+#: admin/import-export.php:895
 msgid ""
 "ZIP creation is not supported on your server. This feature requires the PHP "
 "\"ZipArchive\" class. Please ask your hosting provider to enable the PHP ZIP "
 "extension, or upgrade PHP to a version that includes it."
 msgstr ""
 
-#: admin/import-export.php:941
+#: admin/import-export.php:949
 msgid ""
 "Sorry, no videos were found to export. Please check your selection and try "
 "again."
 msgstr ""
 
-#: admin/import-export.php:959 admin/import-export.php:1055
+#: admin/import-export.php:967 admin/import-export.php:1063
 msgid ""
 "Sorry, we were unable to create the ZIP file. Please check folder "
 "permissions and try again."
 msgstr ""
 
-#: admin/import-export.php:1103
+#: admin/import-export.php:1113
 #, php-format
 msgid ""
-"Your ZIP export is complete. %s video records processed, and %s skipped."
+"Your ZIP export is complete. %1$s video records processed, and %2$s skipped."
 msgstr ""
 
-#: admin/import-export.php:1203 admin/import-export.php:1229
+#: admin/import-export.php:1213 admin/import-export.php:1239
 msgid ""
 "Sorry, the selected file is not a valid CSV. Please upload a valid CSV file."
 msgstr ""
 
-#: admin/import-export.php:1235
+#: admin/import-export.php:1243
 msgid ""
 "Sorry, we could not read the selected CSV file. Please check the file and "
 "try again."
 msgstr ""
 
-#: admin/import-export.php:1242
+#: admin/import-export.php:1249
 msgid "Sorry, this file type is not supported. Please upload a valid CSV file."
 msgstr ""
 
-#: admin/import-export.php:1247
+#: admin/import-export.php:1254
 msgid ""
 "Sorry, we were unable to open the selected CSV file. Please check the file "
 "and try again."
 msgstr ""
 
-#: admin/import-export.php:1257
+#: admin/import-export.php:1264
 msgid ""
 "Sorry, the CSV file does not contain the required column headers. Please "
 "check the file and try again."
 msgstr ""
 
-#: admin/import-export.php:1290
+#: admin/import-export.php:1297
 msgid "Malformed CSV row"
 msgstr ""
 
-#: admin/import-export.php:1355
+#: admin/import-export.php:1362
 msgid ""
 "Sorry, no ZIP file or folder path was provided. Please select a ZIP file or "
 "enter a folder path to continue."
 msgstr ""
 
-#: admin/import-export.php:1377
+#: admin/import-export.php:1384
 msgid ""
 "Sorry, the selected ZIP file could not be found or read. Please check the "
 "file and try again."
 msgstr ""
 
-#: admin/import-export.php:1394
+#: admin/import-export.php:1401
 msgid ""
 "Sorry, we were unable to create the import directory. Please check your "
 "folder permissions and try again."
 msgstr ""
 
-#: admin/import-export.php:1411 admin/import-export.php:1415
+#: admin/import-export.php:1419 admin/import-export.php:1423
 msgid ""
 "We were unable to complete a required file operation. Please make sure your "
 "server allows writing files."
 msgstr ""
 
-#: admin/import-export.php:1478 admin/import-export.php:1485
+#: admin/import-export.php:1487 admin/import-export.php:1494
 msgid ""
 "Sorry, the folder path provided is invalid. Please check the path and try "
 "again."
 msgstr ""
 
-#: admin/import-export.php:1493
+#: admin/import-export.php:1502
 msgid ""
 "Sorry, the folder must be located inside your WordPress directory. Please "
 "choose a valid folder and try again."
 msgstr ""
 
-#: admin/import-export.php:1644
+#: admin/import-export.php:1654
 #, php-format
-msgid "<strong>Line #%d:</strong> %s"
+msgid "<strong>Line #%1$d:</strong> %2$s"
 msgstr ""
 
-#: admin/import-export.php:1656
+#: admin/import-export.php:1667
 #, php-format
 msgid "<strong>Line #%d:</strong> Invalid video title or source."
 msgstr ""
 
-#: admin/import-export.php:1683
+#: admin/import-export.php:1695
 #, php-format
-msgid "<strong>Line #%d:</strong> %s - Invalid video source."
+msgid "<strong>Line #%1$d:</strong> %2$s - Invalid video source."
 msgstr ""
 
-#: admin/import-export.php:1735
+#: admin/import-export.php:1748
 #, php-format
-msgid "<strong>Line #%d:</strong> %s - Video already exists."
+msgid "<strong>Line #%1$d:</strong> %2$s - Video already exists."
 msgstr ""
 
-#: admin/import-export.php:1778 admin/import-export.php:1825
-#: admin/import-export.php:1847 admin/import-export.php:2150
+#: admin/import-export.php:1792 admin/import-export.php:1840
+#: admin/import-export.php:1863 admin/import-export.php:2167
 #, php-format
-msgid "<strong>Line #%d:</strong> %s - %s"
+msgid "<strong>Line #%1$d:</strong> %2$s - %3$s"
 msgstr ""
 
-#: admin/import-export.php:2353
+#: admin/import-export.php:2371
 #, php-format
-msgid "Failed to create term \"%s\" in taxonomy \"%s\"."
+msgid "Failed to create term \"%1$s\" in taxonomy \"%2$s\"."
 msgstr ""
 
-#: admin/import-export.php:2365
+#: admin/import-export.php:2384
 #, php-format
 msgid ""
-"Term \"%s\" not found in taxonomy \"%s\" and adding new terms is disabled."
+"Term \"%1$s\" not found in taxonomy \"%2$s\" and adding new terms is "
+"disabled."
 msgstr ""
 
-#: admin/import-export.php:2394
+#: admin/import-export.php:2413
 msgid "No username or email provided."
 msgstr ""
 
-#: admin/import-export.php:2407
+#: admin/import-export.php:2426
 msgid "User ID does not exist."
 msgstr ""
 
-#: admin/import-export.php:2430
+#: admin/import-export.php:2450
 #, php-format
 msgid "User with email \"%s\" does not exist."
 msgstr ""
 
-#: admin/import-export.php:2440
+#: admin/import-export.php:2461
 #, php-format
 msgid "User \"%s\" does not exist."
 msgstr ""
 
-#: admin/import-export.php:2635
+#: admin/import-export.php:2653
 msgid "Video ID (existing video)"
 msgstr ""
 
-#: admin/import-export.php:2636 admin/settings.php:842 admin/videos.php:811
-#: includes/helpers/email-capture.php:120 includes/helpers/functions.php:1955
-#: premium/admin/partials/automations-video-options.php:21
+#: admin/import-export.php:2654 admin/settings.php:842 admin/videos.php:814
+#: includes/helpers/email-capture.php:120 includes/helpers/functions.php:1962
+#: premium/admin/partials/automations-video-options.php:26
 #: premium/admin/slider.php:61 premium/public/slider.php:81
-#: premium/public/templates/video-form.php:40
+#: premium/public/templates/video-form.php:45
 msgid "Video Title"
 msgstr ""
 
-#: admin/import-export.php:2637 admin/partials/video-sources.php:60
-#: premium/public/templates/video-form.php:70
+#: admin/import-export.php:2655 admin/partials/video-sources.php:65
+#: premium/public/templates/video-form.php:75
 msgid "Video File"
 msgstr ""
 
-#: admin/import-export.php:2638 admin/partials/video-image.php:34
-#: admin/videos.php:839 blocks/blocks.php:124
+#: admin/import-export.php:2656 admin/partials/video-image.php:39
+#: admin/videos.php:842 blocks/blocks.php:124
 msgid "Poster Image"
 msgstr ""
 
-#: admin/import-export.php:2639 admin/videos.php:113 admin/videos.php:818
-#: premium/admin/partials/automations-video-options.php:33
+#: admin/import-export.php:2657 admin/videos.php:113 admin/videos.php:821
+#: premium/admin/partials/automations-video-options.php:38
 #: premium/admin/slider.php:62 premium/public/slider.php:89
-#: premium/public/templates/video-form.php:229
+#: premium/public/templates/video-form.php:235
 msgid "Video Description"
 msgstr ""
 
-#: admin/import-export.php:2640
+#: admin/import-export.php:2658
 msgid "Video Excerpt"
 msgstr ""
 
-#: admin/import-export.php:2642 admin/partials/import-export.php:167
-#: admin/tags.php:33 admin/tags.php:75 admin/videos.php:856
-#: premium/admin/partials/automations-video-options.php:83
+#: admin/import-export.php:2660 admin/partials/import-export.php:172
+#: admin/tags.php:33 admin/tags.php:75 admin/videos.php:860
+#: premium/admin/partials/automations-video-options.php:88
 msgid "Video Tags"
 msgstr ""
 
-#: admin/import-export.php:2643 admin/partials/video-metabox.php:33
-#: admin/settings.php:426 includes/helpers/functions.php:1734
-#: widgets/forms/video.php:142
+#: admin/import-export.php:2661 admin/partials/video-metabox.php:38
+#: admin/settings.php:426 includes/helpers/functions.php:1741
+#: widgets/forms/video.php:147
 msgid "Subtitles"
 msgstr ""
 
-#: admin/import-export.php:2644 admin/partials/video-metabox.php:39
-#: admin/settings.php:427 includes/helpers/functions.php:1741
-#: widgets/forms/video.php:149
+#: admin/import-export.php:2662 admin/partials/video-metabox.php:44
+#: admin/settings.php:427 includes/helpers/functions.php:1748
+#: widgets/forms/video.php:154
 msgid "Chapters"
 msgstr ""
 
-#: admin/import-export.php:2645 admin/partials/video-additional-info.php:20
-#: admin/settings.php:851 includes/helpers/functions.php:2018
+#: admin/import-export.php:2663 admin/partials/video-additional-info.php:25
+#: admin/settings.php:851 includes/helpers/functions.php:2025
 msgid "Video Duration"
 msgstr ""
 
-#: admin/import-export.php:2646 admin/partials/video-additional-info.php:25
+#: admin/import-export.php:2664 admin/partials/video-additional-info.php:30
 #: admin/settings.php:805 admin/settings.php:847 admin/settings.php:992
-#: admin/settings.php:1046 includes/helpers/functions.php:1863
-#: includes/helpers/functions.php:1990
-#: premium/admin/partials/automations-sources.php:189
+#: admin/settings.php:1046 includes/helpers/functions.php:1870
+#: includes/helpers/functions.php:1997
+#: premium/admin/partials/automations-sources.php:194
 msgid "Views Count"
 msgstr ""
 
-#: admin/import-export.php:2647 admin/partials/video-additional-info.php:30
+#: admin/import-export.php:2665 admin/partials/video-additional-info.php:35
 #: admin/settings.php:806 admin/settings.php:848 admin/settings.php:1047
-#: includes/helpers/functions.php:1864 includes/helpers/functions.php:1997
+#: includes/helpers/functions.php:1871 includes/helpers/functions.php:2004
 msgid "Likes Count"
 msgstr ""
 
-#: admin/import-export.php:2648 admin/partials/video-additional-info.php:35
+#: admin/import-export.php:2666 admin/partials/video-additional-info.php:40
 #: admin/settings.php:807 admin/settings.php:849 admin/settings.php:1048
-#: includes/helpers/functions.php:1865 includes/helpers/functions.php:2004
+#: includes/helpers/functions.php:1872 includes/helpers/functions.php:2011
 msgid "Dislikes Count"
 msgstr ""
 
-#: admin/import-export.php:2649
+#: admin/import-export.php:2667
 msgid "Enable Download"
 msgstr ""
 
-#: admin/import-export.php:2650 admin/partials/video-submitbox.php:18
-#: admin/videos.php:1256
+#: admin/import-export.php:2668 admin/partials/video-submitbox.php:23
+#: admin/videos.php:1279
 msgid "Featured"
 msgstr ""
 
-#: admin/import-export.php:2651 admin/partials/import-export.php:227
-#: admin/partials/video-metabox.php:47 admin/settings.php:183
-#: blocks/blocks.php:141 includes/helpers/functions.php:2370
-#: premium/admin/partials/automations-video-options.php:189
-#: widgets/forms/video.php:212
+#: admin/import-export.php:2669 admin/partials/import-export.php:232
+#: admin/partials/video-metabox.php:52 admin/settings.php:183
+#: blocks/blocks.php:141 includes/helpers/functions.php:2377
+#: premium/admin/partials/automations-video-options.php:194
+#: widgets/forms/video.php:217
 msgid "Email & Lead Capture"
 msgstr ""
 
-#: admin/import-export.php:2652
+#: admin/import-export.php:2670
 msgid "Lead Notification Email"
 msgstr ""
 
-#: admin/import-export.php:2653 admin/partials/import-export.php:258
-#: admin/partials/video-restrictions.php:18 admin/settings.php:1110
-#: premium/admin/partials/automations-video-options.php:223
+#: admin/import-export.php:2671 admin/partials/import-export.php:263
+#: admin/partials/video-restrictions.php:23 admin/settings.php:1110
+#: premium/admin/partials/automations-video-options.php:228
 msgid "Access Control"
 msgstr ""
 
-#: admin/import-export.php:2654 admin/partials/import-export.php:288
-#: admin/partials/video-restrictions.php:46 admin/settings.php:1122
-#: premium/admin/partials/automations-video-options.php:256
+#: admin/import-export.php:2672 admin/partials/import-export.php:293
+#: admin/partials/video-restrictions.php:51 admin/settings.php:1122
+#: premium/admin/partials/automations-video-options.php:261
 msgid "Allowed User Roles"
 msgstr ""
 
-#: admin/import-export.php:2655
+#: admin/import-export.php:2673
 msgid "Comment Status"
 msgstr ""
 
-#: admin/import-export.php:2656
-#: premium/admin/partials/automations-video-options.php:160
+#: admin/import-export.php:2674
+#: premium/admin/partials/automations-video-options.php:165
 msgid "Video Status"
 msgstr ""
 
-#: admin/import-export.php:2657
-#: premium/admin/partials/automations-video-options.php:141
+#: admin/import-export.php:2675
+#: premium/admin/partials/automations-video-options.php:146
 msgid "Video Author"
 msgstr ""
 
-#: admin/import-export.php:2658
+#: admin/import-export.php:2676
 msgid "Published Date"
 msgstr ""
 
-#: admin/partials/category-fields.php:15 admin/partials/category-fields.php:42
-#: includes/helpers/functions.php:1659
+#: admin/partials/category-fields.php:20 admin/partials/category-fields.php:47
+#: includes/helpers/functions.php:1666
 msgid "Image"
 msgstr ""
 
-#: admin/partials/category-fields.php:24 admin/partials/category-fields.php:56
+#: admin/partials/category-fields.php:29 admin/partials/category-fields.php:61
 msgid "Upload Image"
 msgstr ""
 
-#: admin/partials/category-fields.php:25 admin/partials/category-fields.php:57
+#: admin/partials/category-fields.php:30 admin/partials/category-fields.php:62
 msgid "Remove Image"
 msgstr ""
 
-#: admin/partials/category-fields.php:32 admin/partials/category-fields.php:63
+#: admin/partials/category-fields.php:37 admin/partials/category-fields.php:68
 msgid "Exclude in Search Form"
 msgstr ""
 
-#: admin/partials/category-fields.php:36 admin/partials/category-fields.php:68
+#: admin/partials/category-fields.php:41 admin/partials/category-fields.php:73
 msgid "Exclude this category in the front-end search form."
 msgstr ""
 
-#: admin/partials/dashboard.php:17
+#: admin/partials/dashboard.php:22
 msgid ""
 "An ultimate video player and video gallery plugin - no coding required. "
 "Suitable for YouTubers, Video Bloggers, Course Creators, Podcasters, Sales & "
 "Marketing Professionals, and anyone using video on a website."
 msgstr ""
 
-#: admin/partials/dashboard.php:23 admin/videos.php:40 admin/videos.php:41
-#: admin/videos.php:83 premium/public/templates/user-dashboard.php:84
+#: admin/partials/dashboard.php:28 admin/videos.php:40 admin/videos.php:41
+#: admin/videos.php:83 premium/public/templates/user-dashboard.php:89
 msgid "Add New Video"
 msgstr ""
 
-#: admin/partials/dashboard.php:27
+#: admin/partials/dashboard.php:32
 msgid "Bulk Import / Export Videos"
 msgstr ""
 
-#: admin/partials/dashboard.php:32 admin/partials/import-export.php:43
+#: admin/partials/dashboard.php:37 admin/partials/import-export.php:48
 msgid "Need help?"
 msgstr ""
 
-#: admin/partials/dashboard.php:34
+#: admin/partials/dashboard.php:39
 msgid "Start with our Quick Start Guide →"
 msgstr ""
 
-#: admin/partials/dashboard.php:39
+#: admin/partials/dashboard.php:44
 #, php-format
 msgid "Version %s"
 msgstr ""
 
-#: admin/partials/help.php:16
+#: admin/partials/help.php:21
 msgid "Frequently Asked Questions"
 msgstr ""
 
-#: admin/partials/help.php:21
+#: admin/partials/help.php:26
 msgid ""
 "Does the plugin work with page builders like Elementor, Divi, WPBakery, and "
 "others?"
 msgstr ""
 
-#: admin/partials/help.php:27
+#: admin/partials/help.php:32
 #, php-format
 msgid ""
 "Absolutely! Simply use our <a href=\"%s\">Shortcode Builder</a> to generate "
@@ -718,11 +720,11 @@ msgid ""
 "builders fully support shortcodes, so you're good to go."
 msgstr ""
 
-#: admin/partials/help.php:36
+#: admin/partials/help.php:41
 msgid "The plugin isn't working for me. What should I do?"
 msgstr ""
 
-#: admin/partials/help.php:42
+#: admin/partials/help.php:47
 #, php-format
 msgid ""
 "No worries — we're just an email away! Please <a href=\"%s\">contact us "
@@ -731,11 +733,11 @@ msgid ""
 "helps us understand what's happening and get you the right solution faster."
 msgstr ""
 
-#: admin/partials/help.php:53
+#: admin/partials/help.php:58
 msgid "Looking for Detailed Tutorials?"
 msgstr ""
 
-#: admin/partials/help.php:59
+#: admin/partials/help.php:64
 #, php-format
 msgid ""
 "Visit our <a href=\"%s\" target=\"_blank\" rel=\"noopener "
@@ -743,43 +745,43 @@ msgid ""
 "helpful tips."
 msgstr ""
 
-#: admin/partials/import-export.php:19
+#: admin/partials/import-export.php:24
 msgid ""
 "Quickly import videos in bulk from folders, CSV files, YouTube, or Vimeo—and "
 "export your existing videos or email leads to a CSV file."
 msgstr ""
 
-#: admin/partials/import-export.php:28
+#: admin/partials/import-export.php:33
 msgid "Auto Import from YouTube / Vimeo"
 msgstr ""
 
-#: admin/partials/import-export.php:36
+#: admin/partials/import-export.php:41
 msgid ""
 "Automatically import videos from your YouTube or Vimeo account. Ideal for "
 "syncing entire channels or playlists with your website."
 msgstr ""
 
-#: admin/partials/import-export.php:45
+#: admin/partials/import-export.php:50
 msgid "YouTube Import Tutorial"
 msgstr ""
 
-#: admin/partials/import-export.php:47
+#: admin/partials/import-export.php:52
 msgid "Vimeo Import Tutorial"
 msgstr ""
 
-#: admin/partials/import-export.php:55
+#: admin/partials/import-export.php:60
 msgid "Upgrade to PRO"
 msgstr ""
 
-#: admin/partials/import-export.php:59
+#: admin/partials/import-export.php:64
 msgid "Import from YouTube / Vimeo"
 msgstr ""
 
-#: admin/partials/import-export.php:71
+#: admin/partials/import-export.php:76
 msgid "Import from Folder"
 msgstr ""
 
-#: admin/partials/import-export.php:81
+#: admin/partials/import-export.php:86
 msgid ""
 "Import videos from a folder within your website. Supported formats: "
 "<strong>mp4</strong>, <strong>webm</strong>, <strong>ogv</strong>, "
@@ -789,586 +791,591 @@ msgid ""
 "autogenerated from the file names."
 msgstr ""
 
-#: admin/partials/import-export.php:87
+#: admin/partials/import-export.php:92
 msgid "Folder Path"
 msgstr ""
 
-#: admin/partials/import-export.php:91 admin/partials/import-export.php:386
+#: admin/partials/import-export.php:96 admin/partials/import-export.php:391
 #, php-format
 msgid "Example: %s"
 msgstr ""
 
-#: admin/partials/import-export.php:94
+#: admin/partials/import-export.php:99
 msgid ""
 "Enter a folder path within your WordPress directory. For example: <strong>wp-"
 "content/uploads/my-videos/</strong>"
 msgstr ""
 
-#: admin/partials/import-export.php:102
-#: premium/admin/partials/automations-sources.php:397
+#: admin/partials/import-export.php:107
+#: premium/admin/partials/automations-sources.php:402
 msgid "Include Subfolders"
 msgstr ""
 
-#: admin/partials/import-export.php:106
-#: premium/admin/partials/automations-sources.php:401
+#: admin/partials/import-export.php:111
+#: premium/admin/partials/automations-sources.php:406
 msgid ""
 "Check this option to also import videos from subfolders inside the selected "
 "folder."
 msgstr ""
 
-#: admin/partials/import-export.php:113
+#: admin/partials/import-export.php:118
 msgid "Video Page Slug"
 msgstr ""
 
-#: admin/partials/import-export.php:119
+#: admin/partials/import-export.php:124
 msgid "Use File Name"
 msgstr ""
 
-#: admin/partials/import-export.php:120
+#: admin/partials/import-export.php:125
 msgid "Generate Secure Random Slug (Recommended)"
 msgstr ""
 
-#: admin/partials/import-export.php:137
+#: admin/partials/import-export.php:142
 msgid ""
 "Choose how the video page URL slug should be generated. Using a random slug "
 "helps prevent users from guessing direct video file URLs."
 msgstr ""
 
-#: admin/partials/import-export.php:160
-#: premium/admin/partials/automations-video-options.php:77
+#: admin/partials/import-export.php:165
+#: premium/admin/partials/automations-video-options.php:82
 msgid "Assign categories to the imported videos."
 msgstr ""
 
-#: admin/partials/import-export.php:183
-#: premium/admin/partials/automations-video-options.php:108
+#: admin/partials/import-export.php:188
+#: premium/admin/partials/automations-video-options.php:113
 msgid "Assign tags to the imported videos."
 msgstr ""
 
-#: admin/partials/import-export.php:191 admin/partials/import-export.php:457
+#: admin/partials/import-export.php:196 admin/partials/import-export.php:462
 msgid "Set Featured Images"
 msgstr ""
 
-#: admin/partials/import-export.php:195
+#: admin/partials/import-export.php:200
 msgid ""
 "Check this option to set matching images as featured images for your videos. "
 "This works only if the folder already contains image files with the same "
 "names as your videos."
 msgstr ""
 
-#: admin/partials/import-export.php:203
+#: admin/partials/import-export.php:208
 msgid "Enable Downloads"
 msgstr ""
 
-#: admin/partials/import-export.php:207
+#: admin/partials/import-export.php:212
 msgid "Check this option to allow users to download the imported video files."
 msgstr ""
 
-#: admin/partials/import-export.php:215
+#: admin/partials/import-export.php:220
 msgid "Allow Comments"
 msgstr ""
 
-#: admin/partials/import-export.php:219
+#: admin/partials/import-export.php:224
 msgid ""
 "Check this option to allow users to post comments on the imported videos."
 msgstr ""
 
-#: admin/partials/import-export.php:233
-#: admin/partials/video-email-capture.php:27 blocks/blocks.php:146
-#: includes/helpers/functions.php:2378
-#: premium/admin/partials/automations-video-options.php:195
-#: widgets/forms/video.php:221
+#: admin/partials/import-export.php:238
+#: admin/partials/video-email-capture.php:32 blocks/blocks.php:146
+#: includes/helpers/functions.php:2385
+#: premium/admin/partials/automations-video-options.php:200
+#: widgets/forms/video.php:226
 msgid "Default"
 msgstr ""
 
-#: admin/partials/import-export.php:234
-#: admin/partials/video-email-capture.php:28 blocks/blocks.php:147
-#: includes/helpers/functions.php:2379
-#: premium/admin/partials/automations-video-options.php:196
-#: widgets/forms/video.php:222
+#: admin/partials/import-export.php:239
+#: admin/partials/video-email-capture.php:33 blocks/blocks.php:147
+#: includes/helpers/functions.php:2386
+#: premium/admin/partials/automations-video-options.php:201
+#: widgets/forms/video.php:227
 msgid "Enable"
 msgstr ""
 
-#: admin/partials/import-export.php:235
-#: admin/partials/video-email-capture.php:29 blocks/blocks.php:148
-#: includes/helpers/functions.php:2380
-#: premium/admin/partials/automations-video-options.php:197
-#: widgets/forms/video.php:223
+#: admin/partials/import-export.php:240
+#: admin/partials/video-email-capture.php:34 blocks/blocks.php:148
+#: includes/helpers/functions.php:2387
+#: premium/admin/partials/automations-video-options.php:202
+#: widgets/forms/video.php:228
 msgid "Disable"
 msgstr ""
 
-#: admin/partials/import-export.php:249
-#: premium/admin/partials/automations-video-options.php:212
+#: admin/partials/import-export.php:254
+#: premium/admin/partials/automations-video-options.php:217
 msgid "Show an email collection form on the imported videos to capture leads."
 msgstr ""
 
-#: admin/partials/import-export.php:264
-#: admin/partials/video-restrictions.php:23
-#: premium/admin/partials/automations-video-options.php:229
+#: admin/partials/import-export.php:269
+#: admin/partials/video-restrictions.php:28
+#: premium/admin/partials/automations-video-options.php:234
 msgid "Global"
 msgstr ""
 
-#: admin/partials/import-export.php:265
-#: admin/partials/video-restrictions.php:24 admin/settings.php:1114
-#: premium/admin/partials/automations-video-options.php:230
+#: admin/partials/import-export.php:270
+#: admin/partials/video-restrictions.php:29 admin/settings.php:1114
+#: premium/admin/partials/automations-video-options.php:235
 msgid "Everyone"
 msgstr ""
 
-#: admin/partials/import-export.php:266
-#: admin/partials/video-restrictions.php:25 admin/settings.php:1115
-#: premium/admin/partials/automations-video-options.php:231
+#: admin/partials/import-export.php:271
+#: admin/partials/video-restrictions.php:30 admin/settings.php:1115
+#: premium/admin/partials/automations-video-options.php:236
 msgid "Logged out users"
 msgstr ""
 
-#: admin/partials/import-export.php:267
-#: admin/partials/video-restrictions.php:26 admin/settings.php:1116
-#: premium/admin/partials/automations-video-options.php:232
+#: admin/partials/import-export.php:272
+#: admin/partials/video-restrictions.php:31 admin/settings.php:1116
+#: premium/admin/partials/automations-video-options.php:237
 msgid "Logged in users"
 msgstr ""
 
-#: admin/partials/import-export.php:281
-#: premium/admin/partials/automations-video-options.php:247
+#: admin/partials/import-export.php:286
+#: premium/admin/partials/automations-video-options.php:252
 msgid "Select who can access the imported videos."
 msgstr ""
 
-#: admin/partials/import-export.php:306
-#: admin/partials/video-restrictions.php:63
-#: premium/admin/partials/automations-video-options.php:274
+#: admin/partials/import-export.php:311
+#: admin/partials/video-restrictions.php:68
+#: premium/admin/partials/automations-video-options.php:279
 msgid ""
 "If no roles are selected, the global setting will be used. Users with "
 "editing permissions will always have access, regardless of role selection."
 msgstr ""
 
-#: admin/partials/import-export.php:314
+#: admin/partials/import-export.php:319
 msgid "Scan & Import"
 msgstr ""
 
-#: admin/partials/import-export.php:329
+#: admin/partials/import-export.php:334
 msgid "Import from CSV File"
 msgstr ""
 
-#: admin/partials/import-export.php:339
+#: admin/partials/import-export.php:344
 msgid ""
 "Upload a CSV file to bulk import videos with titles, descriptions, file "
 "URLs, and more. You can also include video and image files in a ZIP archive "
 "or reference them from a folder on your website."
 msgstr ""
 
-#: admin/partials/import-export.php:345
+#: admin/partials/import-export.php:350
 msgid "CSV File"
 msgstr ""
 
-#: admin/partials/import-export.php:350
+#: admin/partials/import-export.php:355
 msgid "Upload your file using the button here"
 msgstr ""
 
-#: admin/partials/import-export.php:352 admin/partials/import-export.php:371
-#: admin/partials/shortcode-builder.php:151 admin/partials/video-image.php:38
-#: admin/partials/video-sources.php:105 admin/partials/video-sources.php:160
-#: admin/partials/video-sources.php:185 admin/partials/video-sources.php:200
-#: admin/partials/video-sources.php:309 admin/partials/video-tracks.php:48
-#: admin/partials/video-tracks.php:93 admin/partials/video-trailer.php:54
-#: premium/public/templates/video-form.php:90
-#: premium/public/templates/video-form.php:112
-#: premium/public/templates/video-form.php:134
-#: premium/public/templates/video-form.php:213
+#: admin/partials/import-export.php:357 admin/partials/import-export.php:376
+#: admin/partials/shortcode-builder.php:156 admin/partials/video-image.php:43
+#: admin/partials/video-sources.php:110 admin/partials/video-sources.php:165
+#: admin/partials/video-sources.php:190 admin/partials/video-sources.php:205
+#: admin/partials/video-sources.php:314 admin/partials/video-tracks.php:53
+#: admin/partials/video-tracks.php:98 admin/partials/video-trailer.php:59
+#: premium/public/templates/video-form.php:96
+#: premium/public/templates/video-form.php:118
+#: premium/public/templates/video-form.php:140
+#: premium/public/templates/video-form.php:219
 msgid "Upload File"
 msgstr ""
 
-#: admin/partials/import-export.php:357
+#: admin/partials/import-export.php:362
 msgid "Download sample file:"
 msgstr ""
 
-#: admin/partials/import-export.php:365
+#: admin/partials/import-export.php:370
 msgid "ZIP File (Optional)"
 msgstr ""
 
-#: admin/partials/import-export.php:369
+#: admin/partials/import-export.php:374
 msgid "Enter your folder path or upload your ZIP file using the button here"
 msgstr ""
 
-#: admin/partials/import-export.php:376
+#: admin/partials/import-export.php:381
 msgid "Download sample ZIP:"
 msgstr ""
 
-#: admin/partials/import-export.php:383
+#: admin/partials/import-export.php:388
 msgid ""
 "If your ZIP is too large, upload your files to a folder inside your website "
 "and enter the folder path here."
 msgstr ""
 
-#: admin/partials/import-export.php:389
+#: admin/partials/import-export.php:394
 msgid ""
 "Uploaded CSV/ZIP files will be removed from your Media Library after the "
 "import. Files linked from a folder path will not be deleted."
 msgstr ""
 
-#: admin/partials/import-export.php:397
+#: admin/partials/import-export.php:402
 msgid "Columns Separator"
 msgstr ""
 
-#: admin/partials/import-export.php:407
+#: admin/partials/import-export.php:412
 msgid "Multi Values Separator"
 msgstr ""
 
-#: admin/partials/import-export.php:416
+#: admin/partials/import-export.php:421
 msgid ""
 "<strong>Multi Values</strong> - are fields that may contain more than one "
 "value, for example, categories, tags, and user roles. Separate them in one "
 "CSV column with the special delimiter in this field."
 msgstr ""
 
-#: admin/partials/import-export.php:420
+#: admin/partials/import-export.php:425
 msgid ""
 "Use this to separate multiple categories or tags in a single field. Example: "
 "\"<strong>Action ; Comedy ; Drama</strong>\"."
 msgstr ""
 
-#: admin/partials/import-export.php:424
+#: admin/partials/import-export.php:429
 msgid ""
 "Use \">\" to define subcategory hierarchy. Example: \"<strong>Sports > "
 "Football ; Movies > English > Comedy</strong>\"."
 msgstr ""
 
-#: admin/partials/import-export.php:433
+#: admin/partials/import-export.php:438
 msgid "Create Missing Categories / Tags"
 msgstr ""
 
-#: admin/partials/import-export.php:437
+#: admin/partials/import-export.php:442
 msgid "Create categories or tags if they do not already exist."
 msgstr ""
 
-#: admin/partials/import-export.php:445
+#: admin/partials/import-export.php:450
 msgid "Create Missing Authors"
 msgstr ""
 
-#: admin/partials/import-export.php:449
+#: admin/partials/import-export.php:454
 msgid "Create a new user if the author’s email in the CSV file is not found."
 msgstr ""
 
-#: admin/partials/import-export.php:461
+#: admin/partials/import-export.php:466
 msgid ""
 "Check this option to set the imported images as featured images for your "
 "videos. This works only if your CSV file includes an image column."
 msgstr ""
 
-#: admin/partials/import-export.php:471
+#: admin/partials/import-export.php:476
 msgid "Map CSV Columns to Video Fields"
 msgstr ""
 
-#: admin/partials/import-export.php:476
+#: admin/partials/import-export.php:481
 msgid ""
 "Match each column in your CSV file to the corresponding video field below. "
 "You must configure a \"Video Title\" and \"Video File\" field to proceed."
 msgstr ""
 
-#: admin/partials/import-export.php:485
+#: admin/partials/import-export.php:490
 msgid "Import Videos"
 msgstr ""
 
-#: admin/partials/import-export.php:500
+#: admin/partials/import-export.php:505
 msgid "Export Videos"
 msgstr ""
 
-#: admin/partials/import-export.php:509
+#: admin/partials/import-export.php:514
 msgid ""
 "Use the buttons below to export your existing video posts. You can download "
 "a structured CSV file or a ZIP archive separately. These exports are useful "
 "for creating backups, migrating content, or editing data offline."
 msgstr ""
 
-#: admin/partials/import-export.php:516 admin/partials/import-export.php:568
+#: admin/partials/import-export.php:521 admin/partials/import-export.php:573
 msgid "Export CSV"
 msgstr ""
 
-#: admin/partials/import-export.php:520
+#: admin/partials/import-export.php:525
 msgid "Export ZIP (Media Files)"
 msgstr ""
 
-#: admin/partials/import-export.php:536
+#: admin/partials/import-export.php:541
 msgid "Export Email Leads"
 msgstr ""
 
-#: admin/partials/import-export.php:544
+#: admin/partials/import-export.php:549
 msgid ""
 "Download a CSV file of the email leads captured from your videos. Use the "
 "date range filter to narrow the export."
 msgstr ""
 
-#: admin/partials/import-export.php:551
+#: admin/partials/import-export.php:556
 msgid "Start Date"
 msgstr ""
 
-#: admin/partials/import-export.php:559
+#: admin/partials/import-export.php:564
 msgid "End Date"
 msgstr ""
 
-#: admin/partials/import-export.php:575
+#: admin/partials/import-export.php:580
 msgid ""
 "We recommend validating your exported emails with a verification service "
 "before importing them into your email marketing platform."
 msgstr ""
 
-#: admin/partials/issues.php:13
+#: admin/partials/issues.php:18
 msgid "Issues"
 msgstr ""
 
-#: admin/partials/issues.php:14
+#: admin/partials/issues.php:19
 msgid "Ignored"
 msgstr ""
 
-#: admin/partials/issues.php:26
+#: admin/partials/issues.php:31
 msgid "Congrats! Issues solved."
 msgstr ""
 
-#: admin/partials/issues.php:26
+#: admin/partials/issues.php:31
 msgid "Issues ignored."
 msgstr ""
 
-#: admin/partials/issues.php:54
+#: admin/partials/issues.php:59
 msgid "Issue"
 msgstr ""
 
-#: admin/partials/issues.php:55
+#: admin/partials/issues.php:60
 msgid "Description"
 msgstr ""
 
-#: admin/partials/issues.php:74
+#: admin/partials/issues.php:79
 msgid "Ignore"
 msgstr ""
 
-#: admin/partials/issues.php:77
+#: admin/partials/issues.php:82
 msgid "Apply Fix"
 msgstr ""
 
-#: admin/partials/issues.php:86
+#: admin/partials/issues.php:91
 msgid "You have no ignored issues."
 msgstr ""
 
-#: admin/partials/issues.php:88
+#: admin/partials/issues.php:93
 msgid "You have no issues."
 msgstr ""
 
-#: admin/partials/settings.php:28
+#: admin/partials/settings.php:33
 msgid "Plugin Settings"
 msgstr ""
 
-#: admin/partials/settings.php:136 premium/public/templates/video-form.php:331
+#: admin/partials/settings.php:141 premium/public/templates/video-form.php:337
 msgid "Save Changes"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:53
+#: admin/partials/shortcode-builder.php:58
 msgid "Select a shortcode type"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:86
+#: admin/partials/shortcode-builder.php:91
 #, php-format
 msgid "No videos found. <a href=\"%s\">Add your first video</a>"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:95
+#: admin/partials/shortcode-builder.php:100
 #, php-format
 msgid "No categories found. <a href=\"%s\">Add your first category</a>"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:158 blocks/blocks.php:74
-#: includes/helpers/functions.php:2178 widgets/forms/categories.php:43
-#: widgets/forms/categories.php:46
+#: admin/partials/shortcode-builder.php:163 blocks/blocks.php:74
+#: includes/helpers/functions.php:2185 widgets/forms/categories.php:48
+#: widgets/forms/categories.php:51
 msgid "Select Parent"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:213
+#: admin/partials/shortcode-builder.php:218
+#: admin/partials/shortcode-builder.php:435
 msgid "Generate Shortcode"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:221
+#: admin/partials/shortcode-builder.php:226
 msgid "How to Add a Single Video"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:225
+#: admin/partials/shortcode-builder.php:230
 msgid ""
 "You can add a single video to any post or page using one of the following "
 "methods:"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:232
+#: admin/partials/shortcode-builder.php:237
 #, php-format
 msgid ""
 "Go to <a href=\"%s\">Add New Video</a> under the \"All Videos\" menu, upload "
 "or embed your video, copy its shortcode, and paste it into your post or page."
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:239
-#: admin/partials/shortcode-builder.php:304
-#: admin/partials/shortcode-builder.php:362
-#: admin/partials/shortcode-builder.php:399
+#: admin/partials/shortcode-builder.php:244
+#: admin/partials/shortcode-builder.php:309
+#: admin/partials/shortcode-builder.php:367
+#: admin/partials/shortcode-builder.php:404
 msgid "Shortcode Builder:"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:240
+#: admin/partials/shortcode-builder.php:245
 msgid ""
 "Use the form on this page to build your shortcode, then copy and paste it "
 "wherever you want the video to appear."
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:244
-#: admin/partials/shortcode-builder.php:309
-#: admin/partials/shortcode-builder.php:367
-#: admin/partials/shortcode-builder.php:404
+#: admin/partials/shortcode-builder.php:249
+#: admin/partials/shortcode-builder.php:314
+#: admin/partials/shortcode-builder.php:372
+#: admin/partials/shortcode-builder.php:409
 msgid "Gutenberg Block:"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:247
+#: admin/partials/shortcode-builder.php:252
 #, php-format
 msgid ""
 "Use the <a href=\"%s\">AIOVG - Video Player</a> block directly in the "
 "WordPress block editor to embed a video in your post or page."
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:254
-#: admin/partials/shortcode-builder.php:320
-#: admin/partials/shortcode-builder.php:377
-#: admin/partials/shortcode-builder.php:414
+#: admin/partials/shortcode-builder.php:259
+#: admin/partials/shortcode-builder.php:325
+#: admin/partials/shortcode-builder.php:382
+#: admin/partials/shortcode-builder.php:419
 msgid "Widget:"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:257
+#: admin/partials/shortcode-builder.php:262
 #, php-format
 msgid ""
 "Go to \"Appearance → Widgets\" and add the <a href=\"%s\">AIOVG - Video "
 "Player</a> widget to your sidebar or footer area."
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:267
+#: admin/partials/shortcode-builder.php:272
 msgid "How to Create or Add a Video Gallery"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:271
+#: admin/partials/shortcode-builder.php:276
 msgid "Follow these simple steps to create and display your video gallery:"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:274
+#: admin/partials/shortcode-builder.php:279
 msgid "Add Videos"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:280
+#: admin/partials/shortcode-builder.php:285
 #, php-format
 msgid ""
 "Go to <a href=\"%s\">Add New Video</a> to upload or embed videos from "
 "YouTube, Vimeo, Dailymotion, or any external sources."
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:289
+#: admin/partials/shortcode-builder.php:294
 #, php-format
 msgid ""
 "Use the <a href=\"%s\">Bulk Import / Export</a> option to quickly import "
 "videos from a \"CSV file\" or a \"Folder\"."
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:296
+#: admin/partials/shortcode-builder.php:301
 msgid "Display Your Videos"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:299
+#: admin/partials/shortcode-builder.php:304
 msgid ""
 "Choose one of the following methods to display your gallery on your website:"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:305
-#: admin/partials/shortcode-builder.php:363
-#: admin/partials/shortcode-builder.php:400
+#: admin/partials/shortcode-builder.php:310
+#: admin/partials/shortcode-builder.php:368
+#: admin/partials/shortcode-builder.php:405
 msgid ""
 "Use the form on this page to build your shortcode, then copy and paste it "
 "into any \"post\", \"page\", or \"template\"."
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:313
+#: admin/partials/shortcode-builder.php:318
 #, php-format
 msgid ""
 "Use the <a href=\"%s\">AIOVG - Video Gallery</a> block directly in the "
 "WordPress block editor."
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:324
+#: admin/partials/shortcode-builder.php:329
 #, php-format
 msgid ""
 "Go to \"Appearance → Widgets\" and add the <a href=\"%s\">AIOVG - Video "
 "Gallery</a> widget to your sidebar or footer area."
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:334
+#: admin/partials/shortcode-builder.php:339
 msgid "How to Create and Display Video Categories"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:338
+#: admin/partials/shortcode-builder.php:343
 msgid "Follow these simple steps to create and display your video categories:"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:341
+#: admin/partials/shortcode-builder.php:346
 msgid "Add Categories"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:347
+#: admin/partials/shortcode-builder.php:352
 #, php-format
 msgid ""
 "Go to <a href=\"%s\">Video Categories</a> under the main \"Video Gallery\" "
 "menu to create and manage your categories."
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:354
+#: admin/partials/shortcode-builder.php:359
 msgid "Display Video Categories"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:357
+#: admin/partials/shortcode-builder.php:362
 msgid ""
 "Choose one of the following methods to display your video categories on your "
 "website:"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:370
+#: admin/partials/shortcode-builder.php:375
 #, php-format
 msgid ""
 "Use the <a href=\"%s\">AIOVG - Video Categories</a> block directly in the "
 "WordPress block editor."
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:380
+#: admin/partials/shortcode-builder.php:385
 #, php-format
 msgid ""
 "Go to \"Appearance → Widgets\" and add the <a href=\"%s\">AIOVG - Video "
 "Categories</a> widget to your sidebar or footer area."
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:390
+#: admin/partials/shortcode-builder.php:395
 msgid "How to Create and Add a Video Search Form"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:394
+#: admin/partials/shortcode-builder.php:399
 msgid ""
 "Choose one of the following methods to add the video search form to your "
 "website:"
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:407
+#: admin/partials/shortcode-builder.php:412
 #, php-format
 msgid ""
 "Use the <a href=\"%s\">AIOVG - Search Form</a> block directly in the "
 "WordPress block editor."
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:417
+#: admin/partials/shortcode-builder.php:422
 #, php-format
 msgid ""
 "Go to \"Appearance → Widgets\" and add the <a href=\"%s\">AIOVG - Search "
 "Form</a> widget to your sidebar or footer area."
 msgstr ""
 
-#: admin/partials/shortcode-builder.php:430
+#: admin/partials/shortcode-builder.php:436
+msgid "Close"
+msgstr ""
+
+#: admin/partials/shortcode-builder.php:439
 msgid ""
 "Congrats! copy the shortcode below and paste it in your POST or PAGE where "
 "you need the gallery,"
 msgstr ""
 
-#: admin/partials/video-chapters.php:23
+#: admin/partials/video-chapters.php:28
 #, php-format
 msgid ""
 "The chapters can also be included in the video description. Kindly <a "
@@ -1376,307 +1383,307 @@ msgid ""
 "a>."
 msgstr ""
 
-#: admin/partials/video-chapters.php:36 admin/partials/video-chapters.php:70
+#: admin/partials/video-chapters.php:41 admin/partials/video-chapters.php:75
 msgid "Time"
 msgstr ""
 
-#: admin/partials/video-chapters.php:37 admin/partials/video-chapters.php:71
+#: admin/partials/video-chapters.php:42 admin/partials/video-chapters.php:76
 msgid "HH:MM:SS"
 msgstr ""
 
-#: admin/partials/video-chapters.php:41 admin/partials/video-chapters.php:75
-#: admin/partials/video-tracks.php:37 admin/partials/video-tracks.php:82
+#: admin/partials/video-chapters.php:46 admin/partials/video-chapters.php:80
+#: admin/partials/video-tracks.php:42 admin/partials/video-tracks.php:87
 msgid "Label"
 msgstr ""
 
-#: admin/partials/video-chapters.php:42 admin/partials/video-chapters.php:76
+#: admin/partials/video-chapters.php:47 admin/partials/video-chapters.php:81
 msgid "Chapter Title"
 msgstr ""
 
-#: admin/partials/video-chapters.php:46 admin/partials/video-chapters.php:80
-#: admin/partials/video-tracks.php:52 admin/partials/video-tracks.php:97
-#: premium/public/templates/user-dashboard.php:255
+#: admin/partials/video-chapters.php:51 admin/partials/video-chapters.php:85
+#: admin/partials/video-tracks.php:57 admin/partials/video-tracks.php:102
+#: premium/public/templates/user-dashboard.php:260
 msgid "Delete"
 msgstr ""
 
-#: admin/partials/video-chapters.php:58
+#: admin/partials/video-chapters.php:63
 msgid "Add New Chapter"
 msgstr ""
 
-#: admin/partials/video-email-capture.php:22 admin/settings.php:486
-#: admin/videos.php:1280 blocks/blocks.php:142
-#: includes/helpers/functions.php:2374 widgets/forms/video.php:217
+#: admin/partials/video-email-capture.php:27 admin/settings.php:486
+#: admin/videos.php:1303 blocks/blocks.php:142
+#: includes/helpers/functions.php:2381 widgets/forms/video.php:222
 msgid "Email Capture"
 msgstr ""
 
-#: admin/partials/video-email-capture.php:47
+#: admin/partials/video-email-capture.php:52
 #, php-format
 msgid ""
 "Show an email collection form on this video to capture leads. Choose "
 "\"Default\" to follow the site-wide Email Capture setting, currently %s."
 msgstr ""
 
-#: admin/partials/video-email-capture.php:48
+#: admin/partials/video-email-capture.php:53
 msgid "On"
 msgstr ""
 
-#: admin/partials/video-email-capture.php:48
+#: admin/partials/video-email-capture.php:53
 msgid "Off"
 msgstr ""
 
-#: admin/partials/video-email-capture.php:55 admin/settings.php:615
+#: admin/partials/video-email-capture.php:60 admin/settings.php:615
 msgid "Notification Email"
 msgstr ""
 
-#: admin/partials/video-email-capture.php:61
+#: admin/partials/video-email-capture.php:66
 msgid ""
 "Send the leads captured on this video to these addresses instead of the site-"
 "wide ones. Separate multiple addresses with commas."
 msgstr ""
 
-#: admin/partials/video-email-capture.php:67
+#: admin/partials/video-email-capture.php:72
 #, php-format
 msgid "Leave empty to use the site-wide address, currently %s."
 msgstr ""
 
-#: admin/partials/video-email-capture.php:71
+#: admin/partials/video-email-capture.php:76
 msgid ""
 "Leave empty to use the site-wide address, which is not set at the moment — "
 "so leads from this video would be emailed only to the video's author."
 msgstr ""
 
-#: admin/partials/video-email-capture.php:73
+#: admin/partials/video-email-capture.php:78
 msgid ""
 "Leave empty to use the site-wide address, which is not set at the moment — "
 "so leads from this video would be saved, but not emailed to anyone."
 msgstr ""
 
-#: admin/partials/video-image.php:36 admin/partials/video-sources.php:103
-#: admin/partials/video-sources.php:158 admin/partials/video-sources.php:183
-#: admin/partials/video-sources.php:198 admin/partials/video-sources.php:307
-#: premium/public/templates/video-form.php:88
-#: premium/public/templates/video-form.php:111
-#: premium/public/templates/video-form.php:133
-#: premium/public/templates/video-form.php:212
+#: admin/partials/video-image.php:41 admin/partials/video-sources.php:108
+#: admin/partials/video-sources.php:163 admin/partials/video-sources.php:188
+#: admin/partials/video-sources.php:203 admin/partials/video-sources.php:312
+#: premium/public/templates/video-form.php:94
+#: premium/public/templates/video-form.php:117
+#: premium/public/templates/video-form.php:139
+#: premium/public/templates/video-form.php:218
 msgid "Enter your direct file URL (OR) upload your file using the button here"
 msgstr ""
 
-#: admin/partials/video-image.php:47
+#: admin/partials/video-image.php:52
 msgid "Image Alt Text"
 msgstr ""
 
-#: admin/partials/video-image.php:48
+#: admin/partials/video-image.php:53
 msgid "Optional"
 msgstr ""
 
-#: admin/partials/video-image.php:51
+#: admin/partials/video-image.php:56
 msgid "Learn how to describe the purpose of the image."
 msgstr ""
 
-#: admin/partials/video-image.php:59
+#: admin/partials/video-image.php:64
 msgid "Store this image as a featured image"
 msgstr ""
 
-#: admin/partials/video-metabox.php:27 admin/settings.php:223
-#: blocks/blocks.php:116 includes/helpers/functions.php:1580
-#: includes/helpers/functions.php:1810 includes/helpers/functions.php:2155
-#: includes/helpers/functions.php:2293
+#: admin/partials/video-metabox.php:32 admin/settings.php:223
+#: blocks/blocks.php:116 includes/helpers/functions.php:1587
+#: includes/helpers/functions.php:1817 includes/helpers/functions.php:2162
+#: includes/helpers/functions.php:2300
 msgid "General"
 msgstr ""
 
-#: admin/partials/video-metabox.php:56 admin/settings.php:202
+#: admin/partials/video-metabox.php:61 admin/settings.php:202
 msgid "Restrictions"
 msgstr ""
 
-#: admin/partials/video-metabox.php:66 admin/settings.php:209
+#: admin/partials/video-metabox.php:71 admin/settings.php:209
 msgid "Trailer / Teaser"
 msgstr ""
 
-#: admin/partials/video-metabox.php:77 admin/partials/video-trailer.php:25
-#: admin/videos.php:825 includes/helpers/functions.php:1591
-#: premium/admin/automations.php:981
-#: premium/admin/partials/automations-sources.php:52
-#: premium/admin/partials/automations-sources.php:217
-#: premium/public/templates/video-form.php:51
+#: admin/partials/video-metabox.php:82 admin/partials/video-trailer.php:30
+#: admin/videos.php:828 includes/helpers/functions.php:1598
+#: premium/admin/automations.php:986
+#: premium/admin/partials/automations-sources.php:57
+#: premium/admin/partials/automations-sources.php:222
+#: premium/public/templates/video-form.php:56
 msgid "Source Type"
 msgstr ""
 
-#: admin/partials/video-metabox.php:116
+#: admin/partials/video-metabox.php:121
 msgid "Additional Video Info"
 msgstr ""
 
-#: admin/partials/video-restrictions.php:41
+#: admin/partials/video-restrictions.php:46
 msgid "Select who can access this video."
 msgstr ""
 
-#: admin/partials/video-sources.php:77 admin/partials/video-sources.php:132
-#: admin/partials/video-sources.php:285
+#: admin/partials/video-sources.php:82 admin/partials/video-sources.php:137
+#: admin/partials/video-sources.php:290
 msgid "Select a Quality Level"
 msgstr ""
 
-#: admin/partials/video-sources.php:78
+#: admin/partials/video-sources.php:83
 msgid "Default quality"
 msgstr ""
 
-#: admin/partials/video-sources.php:86 admin/partials/video-sources.php:141
-#: admin/partials/video-sources.php:292 admin/settings.php:395
+#: admin/partials/video-sources.php:91 admin/partials/video-sources.php:146
+#: admin/partials/video-sources.php:297 admin/settings.php:395
 msgid "None"
 msgstr ""
 
-#: admin/partials/video-sources.php:113 admin/partials/video-trailer.php:62
+#: admin/partials/video-sources.php:118 admin/partials/video-trailer.php:67
 #: admin/settings.php:255 admin/settings.php:447
 msgid "Bunny Stream"
 msgstr ""
 
-#: admin/partials/video-sources.php:169
+#: admin/partials/video-sources.php:174
 msgid "Add More Quality Levels"
 msgstr ""
 
-#: admin/partials/video-sources.php:179
-#: premium/public/templates/video-form.php:105
+#: admin/partials/video-sources.php:184
+#: premium/public/templates/video-form.php:111
 msgid "WebM"
 msgstr ""
 
-#: admin/partials/video-sources.php:180 admin/partials/video-sources.php:195
-#: premium/public/templates/video-form.php:106
-#: premium/public/templates/video-form.php:128
+#: admin/partials/video-sources.php:185 admin/partials/video-sources.php:200
+#: premium/public/templates/video-form.php:112
+#: premium/public/templates/video-form.php:134
 msgid "deprecated"
 msgstr ""
 
-#: admin/partials/video-sources.php:194
-#: premium/public/templates/video-form.php:127
+#: admin/partials/video-sources.php:199
+#: premium/public/templates/video-form.php:133
 msgid "OGV"
 msgstr ""
 
-#: admin/partials/video-sources.php:207
+#: admin/partials/video-sources.php:212
 msgid "HLS URL"
 msgstr ""
 
-#: admin/partials/video-sources.php:208 admin/partials/video-sources.php:213
-#: admin/partials/video-sources.php:218 admin/partials/video-sources.php:223
-#: admin/partials/video-sources.php:228 admin/partials/video-sources.php:244
-#: admin/partials/video-sources.php:249 includes/helpers/functions.php:1607
-#: includes/helpers/functions.php:1614 includes/helpers/functions.php:1621
-#: includes/helpers/functions.php:1628 includes/helpers/functions.php:1635
-#: includes/helpers/functions.php:1646 includes/helpers/functions.php:1653
-#: premium/admin/partials/automations-sources.php:87
-#: premium/admin/partials/automations-sources.php:103
-#: premium/admin/partials/automations-sources.php:118
-#: premium/admin/partials/automations-sources.php:134
-#: premium/admin/partials/automations-sources.php:149
-#: premium/admin/partials/automations-sources.php:163
-#: premium/admin/partials/automations-sources.php:279
-#: premium/admin/partials/automations-sources.php:349
-#: premium/admin/partials/automations-sources.php:364
-#: premium/admin/partials/automations-sources.php:414
-#: premium/public/templates/video-form.php:151
-#: premium/public/templates/video-form.php:160
-#: premium/public/templates/video-form.php:169
-#: premium/public/templates/video-form.php:178
-#: premium/public/templates/video-form.php:187
-#: premium/public/templates/video-form.php:196
+#: admin/partials/video-sources.php:213 admin/partials/video-sources.php:218
+#: admin/partials/video-sources.php:223 admin/partials/video-sources.php:228
+#: admin/partials/video-sources.php:233 admin/partials/video-sources.php:249
+#: admin/partials/video-sources.php:254 includes/helpers/functions.php:1614
+#: includes/helpers/functions.php:1621 includes/helpers/functions.php:1628
+#: includes/helpers/functions.php:1635 includes/helpers/functions.php:1642
+#: includes/helpers/functions.php:1653 includes/helpers/functions.php:1660
+#: premium/admin/partials/automations-sources.php:92
+#: premium/admin/partials/automations-sources.php:108
+#: premium/admin/partials/automations-sources.php:123
+#: premium/admin/partials/automations-sources.php:139
+#: premium/admin/partials/automations-sources.php:154
+#: premium/admin/partials/automations-sources.php:168
+#: premium/admin/partials/automations-sources.php:284
+#: premium/admin/partials/automations-sources.php:354
+#: premium/admin/partials/automations-sources.php:369
+#: premium/admin/partials/automations-sources.php:419
+#: premium/public/templates/video-form.php:157
+#: premium/public/templates/video-form.php:166
+#: premium/public/templates/video-form.php:175
+#: premium/public/templates/video-form.php:184
+#: premium/public/templates/video-form.php:193
+#: premium/public/templates/video-form.php:202
 msgid "Example"
 msgstr ""
 
-#: admin/partials/video-sources.php:212
+#: admin/partials/video-sources.php:217
 msgid "MPEG-DASH URL"
 msgstr ""
 
-#: admin/partials/video-sources.php:217
-#: premium/public/templates/video-form.php:159
+#: admin/partials/video-sources.php:222
+#: premium/public/templates/video-form.php:165
 msgid "YouTube URL"
 msgstr ""
 
-#: admin/partials/video-sources.php:222
-#: premium/public/templates/video-form.php:168
+#: admin/partials/video-sources.php:227
+#: premium/public/templates/video-form.php:174
 msgid "Vimeo URL"
 msgstr ""
 
-#: admin/partials/video-sources.php:227
-#: premium/public/templates/video-form.php:177
+#: admin/partials/video-sources.php:232
+#: premium/public/templates/video-form.php:183
 msgid "Dailymotion URL"
 msgstr ""
 
-#: admin/partials/video-sources.php:234 includes/helpers/functions.php:1637
+#: admin/partials/video-sources.php:239 includes/helpers/functions.php:1644
 #, php-format
 msgid ""
 "Dailymotion videos need a Player ID to play on your site. Add it under <a "
 "href=\"%s\" target=\"_blank\">Settings → Advanced → API Keys</a>."
 msgstr ""
 
-#: admin/partials/video-sources.php:243
-#: premium/public/templates/video-form.php:186
+#: admin/partials/video-sources.php:248
+#: premium/public/templates/video-form.php:192
 msgid "Rumble URL"
 msgstr ""
 
-#: admin/partials/video-sources.php:248
-#: premium/public/templates/video-form.php:195
+#: admin/partials/video-sources.php:253
+#: premium/public/templates/video-form.php:201
 msgid "Facebook URL"
 msgstr ""
 
-#: admin/partials/video-sources.php:253
+#: admin/partials/video-sources.php:258
 msgid "Player Code"
 msgstr ""
 
-#: admin/partials/video-sources.php:254 admin/partials/video-trailer.php:72
+#: admin/partials/video-sources.php:259 admin/partials/video-trailer.php:77
 msgid "Enter your Player Code"
 msgstr ""
 
-#: admin/partials/video-sources.php:259 admin/partials/video-trailer.php:77
+#: admin/partials/video-sources.php:264 admin/partials/video-trailer.php:82
 msgid "Warning"
 msgstr ""
 
-#: admin/partials/video-sources.php:260 admin/partials/video-trailer.php:78
+#: admin/partials/video-sources.php:265 admin/partials/video-trailer.php:83
 msgid ""
 "This field allows \"iframe\" and \"script\" tags. So, make sure the code "
 "you're adding with this field is harmless to your website."
 msgstr ""
 
-#: admin/partials/video-sources.php:269
+#: admin/partials/video-sources.php:274
 msgid "Check this option to allow users to download this video."
 msgstr ""
 
-#: admin/partials/video-submitbox.php:17
+#: admin/partials/video-submitbox.php:22
 msgid "Mark as"
 msgstr ""
 
-#: admin/partials/video-submitbox.php:29
+#: admin/partials/video-submitbox.php:34
 msgid "Video Shortcode"
 msgstr ""
 
-#: admin/partials/video-tracks.php:32 admin/partials/video-tracks.php:77
+#: admin/partials/video-tracks.php:37 admin/partials/video-tracks.php:82
 msgid "File URL"
 msgstr ""
 
-#: admin/partials/video-tracks.php:38 admin/partials/video-tracks.php:83
+#: admin/partials/video-tracks.php:43 admin/partials/video-tracks.php:88
 msgid "English"
 msgstr ""
 
-#: admin/partials/video-tracks.php:42 admin/partials/video-tracks.php:87
+#: admin/partials/video-tracks.php:47 admin/partials/video-tracks.php:92
 msgid "Srclang"
 msgstr ""
 
-#: admin/partials/video-tracks.php:43 admin/partials/video-tracks.php:88
+#: admin/partials/video-tracks.php:48 admin/partials/video-tracks.php:93
 msgid "en"
 msgstr ""
 
-#: admin/partials/video-tracks.php:65
+#: admin/partials/video-tracks.php:70
 msgid "Add New Track"
 msgstr ""
 
-#: admin/partials/video-trailer.php:28
+#: admin/partials/video-trailer.php:33
 msgid "Video / Streaming URL"
 msgstr ""
 
-#: admin/partials/video-trailer.php:32 includes/helpers/functions.php:2458
+#: admin/partials/video-trailer.php:37 includes/helpers/functions.php:2467
 msgid "Third-Party Player Code"
 msgstr ""
 
-#: admin/partials/video-trailer.php:50 admin/partials/video-trailer.php:71
+#: admin/partials/video-trailer.php:55 admin/partials/video-trailer.php:76
 msgid "Trailer Source"
 msgstr ""
 
-#: admin/partials/video-trailer.php:52
+#: admin/partials/video-trailer.php:57
 msgid ""
 "Enter URL: YouTube, Vimeo, Dailymotion, Rumble, Facebook, MP4, HLS, MPEG-"
 "DASH, etc."
@@ -1719,7 +1726,7 @@ msgid "Single Video Page"
 msgstr ""
 
 #: admin/settings.php:133 admin/settings.php:993 admin/settings.php:1017
-#: includes/helpers/functions.php:1005 includes/helpers/functions.php:1891
+#: includes/helpers/functions.php:1013 includes/helpers/functions.php:1898
 msgid "Related Videos"
 msgstr ""
 
@@ -1740,7 +1747,7 @@ msgid "Featured Images"
 msgstr ""
 
 #: admin/settings.php:162 admin/settings.php:1067
-#: includes/helpers/functions.php:2046
+#: includes/helpers/functions.php:2053
 msgid "Pagination"
 msgstr ""
 
@@ -1892,26 +1899,26 @@ msgid "JavaScript"
 msgstr ""
 
 #: admin/settings.php:336 blocks/blocks.php:117
-#: includes/helpers/functions.php:1666 premium/widgets/forms/companion.php:17
-#: widgets/forms/video.php:75
+#: includes/helpers/functions.php:1673 premium/widgets/forms/companion.php:22
+#: widgets/forms/video.php:80
 msgid "Width"
 msgstr ""
 
 #: admin/settings.php:337 blocks/blocks.php:118
-#: includes/helpers/functions.php:1667
+#: includes/helpers/functions.php:1674
 msgid ""
 "In pixels. Maximum width of the player. Leave this field empty to scale 100% "
 "of its enclosing container/html element."
 msgstr ""
 
 #: admin/settings.php:343 blocks/blocks.php:119
-#: includes/helpers/functions.php:1673 includes/helpers/functions.php:1903
-#: includes/helpers/functions.php:2200 widgets/forms/video.php:80
+#: includes/helpers/functions.php:1680 includes/helpers/functions.php:1910
+#: includes/helpers/functions.php:2207 widgets/forms/video.php:85
 msgid "Height (Ratio)"
 msgstr ""
 
 #: admin/settings.php:346 blocks/blocks.php:120
-#: includes/helpers/functions.php:1674
+#: includes/helpers/functions.php:1681
 msgid ""
 "In percentage. Calculates the player’s height based on the entered ratio."
 msgstr ""
@@ -1953,7 +1960,7 @@ msgid "Vertical Classic (3:4)"
 msgstr ""
 
 #: admin/settings.php:362 blocks/blocks.php:121
-#: includes/helpers/functions.php:1680 widgets/forms/video.php:87
+#: includes/helpers/functions.php:1687 widgets/forms/video.php:92
 msgid "Autoplay"
 msgstr ""
 
@@ -1962,7 +1969,7 @@ msgid "Check this to start playing the video as soon as it is ready"
 msgstr ""
 
 #: admin/settings.php:369 blocks/blocks.php:122
-#: includes/helpers/functions.php:1687 widgets/forms/video.php:94
+#: includes/helpers/functions.php:1694 widgets/forms/video.php:99
 msgid "Loop"
 msgstr ""
 
@@ -1973,7 +1980,7 @@ msgid ""
 msgstr ""
 
 #: admin/settings.php:376 blocks/blocks.php:123
-#: includes/helpers/functions.php:1694 widgets/forms/video.php:101
+#: includes/helpers/functions.php:1701 widgets/forms/video.php:106
 msgid "Muted"
 msgstr ""
 
@@ -2005,7 +2012,7 @@ msgstr ""
 msgid "Auto"
 msgstr ""
 
-#: admin/settings.php:394 admin/videos.php:1181
+#: admin/settings.php:394 admin/videos.php:1204
 msgid "Metadata"
 msgstr ""
 
@@ -2031,7 +2038,7 @@ msgid ""
 msgstr ""
 
 #: admin/settings.php:415 blocks/blocks.php:128
-#: includes/helpers/functions.php:1702 widgets/forms/video.php:107
+#: includes/helpers/functions.php:1709 widgets/forms/video.php:112
 msgid "Player Controls"
 msgstr ""
 
@@ -2041,65 +2048,65 @@ msgid "<a href=\"%s\">Click here</a> to configure your share buttons."
 msgstr ""
 
 #: admin/settings.php:422 blocks/blocks.php:129
-#: includes/helpers/functions.php:1706 widgets/forms/video.php:114
+#: includes/helpers/functions.php:1713 widgets/forms/video.php:119
 msgid "Play / Pause"
 msgstr ""
 
 #: admin/settings.php:423 admin/settings.php:653 blocks/blocks.php:130
-#: includes/helpers/functions.php:1713 premium/admin/user.php:270
-#: premium/admin/user.php:300 widgets/forms/video.php:121
+#: includes/helpers/functions.php:1720 premium/admin/user.php:270
+#: premium/admin/user.php:300 widgets/forms/video.php:126
 msgid "Current Time"
 msgstr ""
 
 #: admin/settings.php:424 blocks/blocks.php:131
-#: includes/helpers/functions.php:1720 widgets/forms/video.php:128
+#: includes/helpers/functions.php:1727 widgets/forms/video.php:133
 msgid "Progressbar"
 msgstr ""
 
 #: admin/settings.php:425 blocks/blocks.php:132
-#: includes/helpers/functions.php:1727
+#: includes/helpers/functions.php:1734
 #: premium/includes/vimeo-api/resource-objects.php:148
-#: widgets/forms/video.php:135
+#: widgets/forms/video.php:140
 msgid "Duration"
 msgstr ""
 
 #: admin/settings.php:428 blocks/blocks.php:133
-#: includes/helpers/functions.php:1748 widgets/forms/video.php:156
+#: includes/helpers/functions.php:1755 widgets/forms/video.php:161
 msgid "Speed Control"
 msgstr ""
 
 #: admin/settings.php:429 blocks/blocks.php:134
-#: includes/helpers/functions.php:1755 widgets/forms/video.php:163
+#: includes/helpers/functions.php:1762 widgets/forms/video.php:168
 msgid "Quality Selector"
 msgstr ""
 
 #: admin/settings.php:430 blocks/blocks.php:135
-#: includes/helpers/functions.php:1762 widgets/forms/video.php:170
+#: includes/helpers/functions.php:1769 widgets/forms/video.php:175
 msgid "Volume Button"
 msgstr ""
 
 #: admin/settings.php:431 blocks/blocks.php:136
-#: includes/helpers/functions.php:1769 widgets/forms/video.php:177
+#: includes/helpers/functions.php:1776 widgets/forms/video.php:182
 msgid "Picture-in-Picture Button"
 msgstr ""
 
 #: admin/settings.php:432 blocks/blocks.php:137
-#: includes/helpers/functions.php:1776 widgets/forms/video.php:184
+#: includes/helpers/functions.php:1783 widgets/forms/video.php:189
 msgid "Fullscreen Button"
 msgstr ""
 
 #: admin/settings.php:433 admin/settings.php:994 blocks/blocks.php:138
-#: includes/helpers/functions.php:1783 widgets/forms/video.php:191
+#: includes/helpers/functions.php:1790 widgets/forms/video.php:196
 msgid "Share Buttons"
 msgstr ""
 
 #: admin/settings.php:434 blocks/blocks.php:139
-#: includes/helpers/functions.php:1790 widgets/forms/video.php:198
+#: includes/helpers/functions.php:1797 widgets/forms/video.php:203
 msgid "Embed Button"
 msgstr ""
 
 #: admin/settings.php:435 blocks/blocks.php:140
-#: includes/helpers/functions.php:1797 widgets/forms/video.php:205
+#: includes/helpers/functions.php:1804 widgets/forms/video.php:210
 msgid "Download Button"
 msgstr ""
 
@@ -2116,13 +2123,13 @@ msgid ""
 "selected sources."
 msgstr ""
 
-#: admin/settings.php:445 includes/helpers/functions.php:1620
-#: includes/helpers/functions.php:2450 premium/includes/functions.php:171
+#: admin/settings.php:445 includes/helpers/functions.php:1627
+#: includes/helpers/functions.php:2459 premium/includes/functions.php:171
 msgid "YouTube"
 msgstr ""
 
-#: admin/settings.php:446 includes/helpers/functions.php:1627
-#: includes/helpers/functions.php:2451 premium/includes/functions.php:172
+#: admin/settings.php:446 includes/helpers/functions.php:1634
+#: includes/helpers/functions.php:2460 premium/includes/functions.php:172
 msgid "Vimeo"
 msgstr ""
 
@@ -2192,7 +2199,7 @@ msgid ""
 "\"Email & Lead Capture\" tab of that video."
 msgstr ""
 
-#: admin/settings.php:490 admin/videos.php:1271 premium/admin/ads.php:90
+#: admin/settings.php:490 admin/videos.php:1294 premium/admin/ads.php:90
 msgid "Disabled"
 msgstr ""
 
@@ -2360,9 +2367,9 @@ msgstr ""
 msgid "The header text displayed above the form fields."
 msgstr ""
 
-#: admin/settings.php:577 includes/helpers/email-capture.php:538
-#: includes/helpers/functions.php:920
-#: public/templates/player-email-capture.php:63
+#: admin/settings.php:577 includes/helpers/email-capture.php:515
+#: includes/helpers/functions.php:928
+#: public/templates/player-email-capture.php:68
 msgid "Enter your email to continue watching"
 msgstr ""
 
@@ -2385,9 +2392,9 @@ msgstr ""
 msgid "The text on the submit button."
 msgstr ""
 
-#: admin/settings.php:592 includes/helpers/email-capture.php:540
-#: includes/helpers/functions.php:922
-#: public/templates/player-email-capture.php:65
+#: admin/settings.php:592 includes/helpers/email-capture.php:517
+#: includes/helpers/functions.php:930
+#: public/templates/player-email-capture.php:70
 msgid "Submit"
 msgstr ""
 
@@ -2401,9 +2408,9 @@ msgid ""
 "enabled."
 msgstr ""
 
-#: admin/settings.php:600 includes/helpers/email-capture.php:541
-#: includes/helpers/functions.php:923
-#: public/templates/player-email-capture.php:66
+#: admin/settings.php:600 includes/helpers/email-capture.php:518
+#: includes/helpers/functions.php:931
+#: public/templates/player-email-capture.php:71
 msgid "Skip"
 msgstr ""
 
@@ -2645,10 +2652,10 @@ msgstr ""
 msgid "Sharing Platforms"
 msgstr ""
 
-#: admin/settings.php:745 includes/helpers/functions.php:1652
-#: includes/helpers/functions.php:2454 includes/helpers/render.php:647
-#: includes/player/base.php:789 public/templates/player-videojs.php:381
-#: public/templates/player-vidstack.php:446
+#: admin/settings.php:745 includes/helpers/functions.php:1659
+#: includes/helpers/functions.php:2463 includes/helpers/render.php:561
+#: includes/player/base.php:789 public/templates/player-videojs.php:386
+#: public/templates/player-vidstack.php:451
 msgid "Facebook"
 msgstr ""
 
@@ -2656,33 +2663,33 @@ msgstr ""
 msgid "X (Twitter)"
 msgstr ""
 
-#: admin/settings.php:747 includes/helpers/render.php:663
-#: includes/player/base.php:807 public/templates/player-videojs.php:399
-#: public/templates/player-vidstack.php:464
+#: admin/settings.php:747 includes/helpers/render.php:577
+#: includes/player/base.php:807 public/templates/player-videojs.php:404
+#: public/templates/player-vidstack.php:469
 msgid "Linkedin"
 msgstr ""
 
 #: admin/settings.php:748 includes/player/base.php:822
-#: public/templates/player-videojs.php:414
-#: public/templates/player-vidstack.php:479
+#: public/templates/player-videojs.php:419
+#: public/templates/player-vidstack.php:484
 msgid "Pinterest"
 msgstr ""
 
-#: admin/settings.php:749 includes/helpers/render.php:688
-#: includes/player/base.php:840 public/templates/player-videojs.php:432
-#: public/templates/player-vidstack.php:497
+#: admin/settings.php:749 includes/helpers/render.php:602
+#: includes/player/base.php:840 public/templates/player-videojs.php:437
+#: public/templates/player-vidstack.php:502
 msgid "Tumblr"
 msgstr ""
 
-#: admin/settings.php:750 includes/helpers/render.php:702
-#: includes/player/base.php:855 public/templates/player-videojs.php:447
-#: public/templates/player-vidstack.php:512
+#: admin/settings.php:750 includes/helpers/render.php:616
+#: includes/player/base.php:855 public/templates/player-videojs.php:452
+#: public/templates/player-vidstack.php:517
 msgid "WhatsApp"
 msgstr ""
 
-#: admin/settings.php:751 includes/helpers/render.php:714
-#: includes/player/base.php:873 public/templates/player-videojs.php:460
-#: public/templates/player-vidstack.php:525
+#: admin/settings.php:751 includes/helpers/render.php:630
+#: includes/player/base.php:873 public/templates/player-videojs.php:467
+#: public/templates/player-vidstack.php:532
 msgid "Email"
 msgstr ""
 
@@ -2707,13 +2714,13 @@ msgid ""
 msgstr ""
 
 #: admin/settings.php:774 admin/settings.php:874 blocks/blocks.php:75
-#: includes/helpers/functions.php:1821 includes/helpers/functions.php:2166
-#: includes/helpers/functions.php:2297 widgets/forms/categories.php:21
-#: widgets/forms/search.php:21
+#: includes/helpers/functions.php:1828 includes/helpers/functions.php:2173
+#: includes/helpers/functions.php:2304 widgets/forms/categories.php:26
+#: widgets/forms/search.php:26
 msgid "Select Template"
 msgstr ""
 
-#: admin/settings.php:775 includes/helpers/functions.php:1822
+#: admin/settings.php:775 includes/helpers/functions.php:1829
 #, php-format
 msgid ""
 "<a href=\"%s\" target=\"_blank\">Upgrade Pro</a> for more templates (Popup, "
@@ -2721,8 +2728,8 @@ msgid ""
 msgstr ""
 
 #: admin/settings.php:782 admin/settings.php:886 admin/settings.php:1023
-#: blocks/blocks.php:79 includes/helpers/functions.php:1910
-#: includes/helpers/functions.php:2207 widgets/forms/categories.php:62
+#: blocks/blocks.php:79 includes/helpers/functions.php:1917
+#: includes/helpers/functions.php:2214 widgets/forms/categories.php:67
 msgid "Columns"
 msgstr ""
 
@@ -2731,8 +2738,8 @@ msgid "Enter the number of columns you like to have in the gallery view."
 msgstr ""
 
 #: admin/settings.php:792 admin/settings.php:896 admin/settings.php:1033
-#: blocks/blocks.php:80 includes/helpers/functions.php:1920
-#: includes/helpers/functions.php:2217 widgets/forms/categories.php:67
+#: blocks/blocks.php:80 includes/helpers/functions.php:1927
+#: includes/helpers/functions.php:2224 widgets/forms/categories.php:72
 msgid "Limit (per page)"
 msgstr ""
 
@@ -2742,42 +2749,42 @@ msgid ""
 msgstr ""
 
 #: admin/settings.php:799 admin/settings.php:903 admin/settings.php:1040
-#: blocks/blocks.php:81 includes/helpers/functions.php:1857
-#: includes/helpers/functions.php:2227
-#: premium/admin/partials/automations-sources.php:180
-#: widgets/forms/categories.php:72
+#: blocks/blocks.php:81 includes/helpers/functions.php:1864
+#: includes/helpers/functions.php:2234
+#: premium/admin/partials/automations-sources.php:185
+#: widgets/forms/categories.php:77
 msgid "Order By"
 msgstr ""
 
 #: admin/settings.php:803 admin/settings.php:1015 admin/settings.php:1044
-#: includes/helpers/functions.php:1814 includes/helpers/functions.php:1861
-#: includes/helpers/functions.php:2159
-#: premium/admin/partials/automations-sources.php:188
-#: widgets/forms/categories.php:16 widgets/forms/search.php:16
-#: widgets/forms/video.php:18
+#: includes/helpers/functions.php:1821 includes/helpers/functions.php:1868
+#: includes/helpers/functions.php:2166
+#: premium/admin/partials/automations-sources.php:193
+#: widgets/forms/categories.php:21 widgets/forms/search.php:21
+#: widgets/forms/video.php:23
 msgid "Title"
 msgstr ""
 
 #: admin/settings.php:804 admin/settings.php:845 admin/settings.php:990
-#: admin/settings.php:1045 includes/helpers/functions.php:1862
-#: includes/helpers/functions.php:1976
+#: admin/settings.php:1045 includes/helpers/functions.php:1869
+#: includes/helpers/functions.php:1983
 msgid "Date Added"
 msgstr ""
 
 #: admin/settings.php:808 admin/settings.php:1049
-#: includes/helpers/functions.php:1866
+#: includes/helpers/functions.php:1873
 msgid "Random"
 msgstr ""
 
 #: admin/settings.php:809 admin/settings.php:911 admin/settings.php:1050
-#: blocks/blocks.php:86 includes/helpers/functions.php:1867
-#: includes/helpers/functions.php:2235 widgets/forms/categories.php:80
+#: blocks/blocks.php:86 includes/helpers/functions.php:1874
+#: includes/helpers/functions.php:2242 widgets/forms/categories.php:85
 msgid "Menu Order"
 msgstr ""
 
 #: admin/settings.php:815 admin/settings.php:917 admin/settings.php:1056
-#: blocks/blocks.php:87 includes/helpers/functions.php:1873
-#: includes/helpers/functions.php:2241 widgets/forms/categories.php:96
+#: blocks/blocks.php:87 includes/helpers/functions.php:1880
+#: includes/helpers/functions.php:2248 widgets/forms/categories.php:101
 msgid "Order"
 msgstr ""
 
@@ -2789,52 +2796,52 @@ msgstr ""
 msgid "Descending"
 msgstr ""
 
-#: admin/settings.php:826 includes/helpers/functions.php:1930
+#: admin/settings.php:826 includes/helpers/functions.php:1937
 msgid "Image Position"
 msgstr ""
 
-#: admin/settings.php:830 includes/helpers/functions.php:1934
-#: includes/helpers/functions.php:2141
+#: admin/settings.php:830 includes/helpers/functions.php:1941
+#: includes/helpers/functions.php:2148
 msgid "Top"
 msgstr ""
 
-#: admin/settings.php:831 includes/helpers/functions.php:1935
-#: includes/helpers/functions.php:2142
+#: admin/settings.php:831 includes/helpers/functions.php:1942
+#: includes/helpers/functions.php:2149
 msgid "Left"
 msgstr ""
 
-#: admin/settings.php:837 includes/helpers/functions.php:1941
+#: admin/settings.php:837 includes/helpers/functions.php:1948
 msgid "Show / Hide (Thumbnails)"
 msgstr ""
 
-#: admin/settings.php:841 includes/helpers/functions.php:1948
+#: admin/settings.php:841 includes/helpers/functions.php:1955
 msgid "Videos Count"
 msgstr ""
 
 #: admin/settings.php:843 admin/settings.php:988
-#: includes/helpers/functions.php:1962
+#: includes/helpers/functions.php:1969
 msgid "Category Name(s)"
 msgstr ""
 
 #: admin/settings.php:844 admin/settings.php:989
-#: includes/helpers/functions.php:1969
+#: includes/helpers/functions.php:1976
 msgid "Tag Name(s)"
 msgstr ""
 
 #: admin/settings.php:846 admin/settings.php:991
-#: includes/helpers/functions.php:1983
+#: includes/helpers/functions.php:1990
 msgid "Author Name"
 msgstr ""
 
-#: admin/settings.php:850 includes/helpers/functions.php:2011
+#: admin/settings.php:850 includes/helpers/functions.php:2018
 msgid "Comments Count"
 msgstr ""
 
-#: admin/settings.php:852 includes/helpers/functions.php:2025
+#: admin/settings.php:852 includes/helpers/functions.php:2032
 msgid "Video Excerpt (Short Description)"
 msgstr ""
 
-#: admin/settings.php:858 includes/helpers/functions.php:2032
+#: admin/settings.php:858 includes/helpers/functions.php:2039
 msgid "Title Length"
 msgstr ""
 
@@ -2842,22 +2849,22 @@ msgstr ""
 msgid "Number of characters."
 msgstr ""
 
-#: admin/settings.php:865 includes/helpers/functions.php:2039
+#: admin/settings.php:865 includes/helpers/functions.php:2046
 msgid "Excerpt Length"
 msgstr ""
 
 #: admin/settings.php:878 blocks/blocks.php:76
-#: includes/helpers/functions.php:2170 widgets/forms/categories.php:25
+#: includes/helpers/functions.php:2177 widgets/forms/categories.php:30
 msgid "Grid"
 msgstr ""
 
 #: admin/settings.php:879 blocks/blocks.php:77
-#: includes/helpers/functions.php:2171 widgets/forms/categories.php:26
+#: includes/helpers/functions.php:2178 widgets/forms/categories.php:31
 msgid "List"
 msgstr ""
 
 #: admin/settings.php:880 blocks/blocks.php:78
-#: includes/helpers/functions.php:2172 widgets/forms/categories.php:27
+#: includes/helpers/functions.php:2179 widgets/forms/categories.php:32
 msgid "Dropdown"
 msgstr ""
 
@@ -2872,23 +2879,23 @@ msgid ""
 msgstr ""
 
 #: admin/settings.php:908 blocks/blocks.php:83
-#: includes/helpers/functions.php:2232 widgets/forms/categories.php:77
+#: includes/helpers/functions.php:2239 widgets/forms/categories.php:82
 msgid "Count"
 msgstr ""
 
 #: admin/settings.php:909 blocks/blocks.php:84
-#: includes/helpers/email-capture.php:118 includes/helpers/functions.php:2233
-#: widgets/forms/categories.php:78
+#: includes/helpers/email-capture.php:118 includes/helpers/functions.php:2240
+#: widgets/forms/categories.php:83
 msgid "Name"
 msgstr ""
 
 #: admin/settings.php:910 blocks/blocks.php:85
-#: includes/helpers/functions.php:2234 widgets/forms/categories.php:79
+#: includes/helpers/functions.php:2241 widgets/forms/categories.php:84
 msgid "Slug"
 msgstr ""
 
 #: admin/settings.php:928 blocks/blocks.php:90
-#: includes/helpers/functions.php:2252 widgets/forms/categories.php:119
+#: includes/helpers/functions.php:2259 widgets/forms/categories.php:124
 msgid "Show Hierarchy"
 msgstr ""
 
@@ -2897,7 +2904,7 @@ msgid "Check this to show the child categories"
 msgstr ""
 
 #: admin/settings.php:935 blocks/blocks.php:91
-#: includes/helpers/functions.php:2259 widgets/forms/categories.php:126
+#: includes/helpers/functions.php:2266 widgets/forms/categories.php:131
 msgid "Show Description"
 msgstr ""
 
@@ -2906,7 +2913,7 @@ msgid "Check this to show the categories description"
 msgstr ""
 
 #: admin/settings.php:942 blocks/blocks.php:92
-#: includes/helpers/functions.php:2266 widgets/forms/categories.php:133
+#: includes/helpers/functions.php:2273 widgets/forms/categories.php:138
 msgid "Show Videos Count"
 msgstr ""
 
@@ -2915,7 +2922,7 @@ msgid "Check this to show the videos count next to the category name"
 msgstr ""
 
 #: admin/settings.php:949 blocks/blocks.php:93
-#: includes/helpers/functions.php:2273 widgets/forms/categories.php:140
+#: includes/helpers/functions.php:2280 widgets/forms/categories.php:145
 msgid "Hide Empty Categories"
 msgstr ""
 
@@ -3066,7 +3073,7 @@ msgstr ""
 msgid "Enter the text displayed on the restricted badge in gallery thumbnails."
 msgstr ""
 
-#: admin/settings.php:1147 includes/helpers/functions.php:1024
+#: admin/settings.php:1147 includes/helpers/functions.php:1032
 msgid "Restricted"
 msgstr ""
 
@@ -3112,8 +3119,8 @@ msgid ""
 msgstr ""
 
 #: admin/settings.php:1182 includes/player/base.php:744
-#: public/templates/player-videojs.php:542
-#: public/templates/player-vidstack.php:579
+#: public/templates/player-videojs.php:547
+#: public/templates/player-vidstack.php:584
 msgid "Watch Full Video"
 msgstr ""
 
@@ -3328,7 +3335,7 @@ msgstr ""
 msgid "Vimeo Access Token"
 msgstr ""
 
-#: admin/settings.php:1354 premium/includes/vimeo-api/query.php:270
+#: admin/settings.php:1354 premium/includes/vimeo-api/query.php:271
 #, php-format
 msgid ""
 "Follow <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">this "
@@ -3580,8 +3587,8 @@ msgstr ""
 msgid "Search Tags"
 msgstr ""
 
-#: admin/tags.php:89 includes/helpers/functions.php:1315 public/public.php:267
-#: public/public.php:374
+#: admin/tags.php:89 includes/helpers/functions.php:1324 public/public.php:251
+#: public/public.php:358
 msgid "No tags found"
 msgstr ""
 
@@ -3601,12 +3608,12 @@ msgstr ""
 msgid "All-in-One Video Gallery - Videos"
 msgstr ""
 
-#: admin/videos.php:33 admin/videos.php:82 admin/videos.php:1042
+#: admin/videos.php:33 admin/videos.php:82 admin/videos.php:1065
 msgid "All Videos"
 msgstr ""
 
 #: admin/videos.php:78 admin/videos.php:112 admin/videos.php:292
-#: blocks/blocks.php:113 includes/helpers/functions.php:1599
+#: blocks/blocks.php:113 includes/helpers/functions.php:1606
 msgid "Video"
 msgstr ""
 
@@ -3622,7 +3629,7 @@ msgstr ""
 msgid "Parent Video:"
 msgstr ""
 
-#: admin/videos.php:84 premium/admin/automations.php:150
+#: admin/videos.php:84 premium/admin/automations.php:151
 msgid "Add New"
 msgstr ""
 
@@ -3650,8 +3657,8 @@ msgstr ""
 msgid "Search Video"
 msgstr ""
 
-#: admin/videos.php:91 includes/helpers/functions.php:1309
-#: premium/admin/partials/playlist-fields.php:58
+#: admin/videos.php:91 includes/helpers/functions.php:1318
+#: premium/admin/partials/playlist-fields.php:63
 msgid "No videos found"
 msgstr ""
 
@@ -3659,7 +3666,7 @@ msgstr ""
 msgid "Not found in Trash"
 msgstr ""
 
-#: admin/videos.php:93 premium/admin/partials/automations-video-options.php:50
+#: admin/videos.php:93 premium/admin/partials/automations-video-options.php:55
 msgid "Featured Image"
 msgstr ""
 
@@ -3695,49 +3702,49 @@ msgstr ""
 msgid "Filter videos list"
 msgstr ""
 
-#: admin/videos.php:752 admin/videos.php:1159
+#: admin/videos.php:754 admin/videos.php:1182
 msgid "Export Emails"
 msgstr ""
 
-#: admin/videos.php:794 premium/admin/automations.php:944
+#: admin/videos.php:796 premium/admin/automations.php:947
 msgid "Take a Guided Tour"
 msgstr ""
 
-#: admin/videos.php:795 premium/admin/automations.php:945
+#: admin/videos.php:798 premium/admin/automations.php:949
 #, php-format
-msgid "%s of %s"
+msgid "%1$s of %2$s"
 msgstr ""
 
-#: admin/videos.php:796 premium/admin/automations.php:946
+#: admin/videos.php:799 premium/admin/automations.php:950
 msgid "Next →"
 msgstr ""
 
-#: admin/videos.php:797 premium/admin/automations.php:947
+#: admin/videos.php:800 premium/admin/automations.php:951
 msgid "← Previous"
 msgstr ""
 
-#: admin/videos.php:798 premium/admin/automations.php:948
+#: admin/videos.php:801 premium/admin/automations.php:952
 msgid "Done"
 msgstr ""
 
-#: admin/videos.php:804 premium/admin/automations.php:954
+#: admin/videos.php:807 premium/admin/automations.php:958
 msgid "Welcome to the Quick Tour"
 msgstr ""
 
-#: admin/videos.php:805
+#: admin/videos.php:808
 msgid ""
 "This form lets you add or edit videos for your gallery.<br><br>Let's walk "
 "through the key steps to get your first video published."
 msgstr ""
 
-#: admin/videos.php:812
+#: admin/videos.php:815
 msgid ""
 "Start by entering a <strong>clear, descriptive title</strong> for your video."
 "<br><br>This helps visitors (and search engines) understand what your video "
 "is about."
 msgstr ""
 
-#: admin/videos.php:819
+#: admin/videos.php:822
 msgid ""
 "Next, add a <strong>description</strong> for your video.<br><br>This is "
 "optional, but highly recommended, as it helps with <strong>SEO</strong>, "
@@ -3745,30 +3752,30 @@ msgid ""
 "social media."
 msgstr ""
 
-#: admin/videos.php:819
+#: admin/videos.php:822
 msgid ""
 "<strong>Do not add your video here.</strong> You will add it in the "
 "<strong>Video</strong> box, in the next step."
 msgstr ""
 
-#: admin/videos.php:826
+#: admin/videos.php:829
 msgid ""
 "Choose where your video is hosted — <strong>YouTube</strong>, <strong>Vimeo</"
 "strong>, <strong>Self-Hosted</strong>, or another source.<br><br>This helps "
 "the plugin know how to handle your video."
 msgstr ""
 
-#: admin/videos.php:832
+#: admin/videos.php:835
 msgid "Video File Input"
 msgstr ""
 
-#: admin/videos.php:833
+#: admin/videos.php:836
 msgid ""
 "Depending on the source you selected, either <strong>upload a video file</"
 "strong> or <strong>paste the video URL</strong>."
 msgstr ""
 
-#: admin/videos.php:841
+#: admin/videos.php:845
 #, php-format
 msgid ""
 "Upload a <strong>poster image</strong> for your video.<br><br>This image "
@@ -3779,34 +3786,34 @@ msgid ""
 "target=\"_blank\" rel=\"noopener noreferrer\">Premium Add-on</a>."
 msgstr ""
 
-#: admin/videos.php:850
+#: admin/videos.php:854
 msgid ""
 "Assign your video to <strong>categories</strong> to help visitors find "
 "related content.<br><br><strong>Need a new category?</strong> Just click \"+ "
 "Add New Category\" to create one."
 msgstr ""
 
-#: admin/videos.php:857
+#: admin/videos.php:861
 msgid ""
 "Add <strong>tags</strong> to describe your video in more detail.<br><br>Tags "
 "work like keywords and help visitors find similar videos."
 msgstr ""
 
-#: admin/videos.php:863
+#: admin/videos.php:867
 msgid "Save Your Video"
 msgstr ""
 
-#: admin/videos.php:864
+#: admin/videos.php:868
 msgid ""
 "All set? Great!<br><br>Click <strong>\"Publish\"</strong> to save your video."
 "<br><br>Repeat these steps to add as many videos as you want."
 msgstr ""
 
-#: admin/videos.php:870 premium/admin/automations.php:1045
+#: admin/videos.php:874 premium/admin/automations.php:1050
 msgid "Next Steps"
 msgstr ""
 
-#: admin/videos.php:872
+#: admin/videos.php:877
 #, php-format
 msgid ""
 "That's it — you're all set!<br><br>Use the menu on the left to manage your "
@@ -3819,65 +3826,65 @@ msgid ""
 "explore all the display options."
 msgstr ""
 
-#: admin/videos.php:960
+#: admin/videos.php:966
 msgid ""
 "Video description (optional). Add the video itself in the \"Video\" box "
 "below."
 msgstr ""
 
-#: admin/videos.php:1043 includes/helpers/functions.php:1884
+#: admin/videos.php:1066 includes/helpers/functions.php:1891
 msgid "Featured Only"
 msgstr ""
 
-#: admin/videos.php:1137
+#: admin/videos.php:1160
 msgid "Copy URL"
 msgstr ""
 
-#: admin/videos.php:1146
+#: admin/videos.php:1169
 msgid "Copy Shortcode"
 msgstr ""
 
-#: admin/videos.php:1185 includes/helpers/functions.php:2152
-#: premium/admin/automations.php:319
+#: admin/videos.php:1208 includes/helpers/functions.php:2159
+#: premium/admin/automations.php:320
 msgid "Categories"
 msgstr ""
 
-#: admin/videos.php:1186 premium/admin/automations.php:320
+#: admin/videos.php:1209 premium/admin/automations.php:321
 msgid "Tags"
 msgstr ""
 
-#: admin/videos.php:1228
+#: admin/videos.php:1251
 msgid "Views"
 msgstr ""
 
-#: admin/videos.php:1237 premium/includes/vimeo-api/resource-objects.php:166
-#: public/public.php:291 public/public.php:375
+#: admin/videos.php:1260 premium/includes/vimeo-api/resource-objects.php:166
+#: public/public.php:275 public/public.php:359
 msgid "Likes"
 msgstr ""
 
-#: admin/videos.php:1246 public/public.php:292 public/public.php:376
+#: admin/videos.php:1269 public/public.php:276 public/public.php:360
 msgid "Dislikes"
 msgstr ""
 
-#: admin/videos.php:1269 premium/admin/ads.php:88
+#: admin/videos.php:1292 premium/admin/ads.php:88
 msgid "Enabled"
 msgstr ""
 
-#: admin/videos.php:1273
+#: admin/videos.php:1296
 msgid "Default (On)"
 msgstr ""
 
-#: admin/videos.php:1275
+#: admin/videos.php:1298
 msgid "Default (Off)"
 msgstr ""
 
-#: all-in-one-video-gallery.php:122
+#: all-in-one-video-gallery.php:124
 msgid ""
 "Sorry, this plugin cannot be activated network-wide. Please activate it "
 "individually on each site where it is needed."
 msgstr ""
 
-#: all-in-one-video-gallery.php:123
+#: all-in-one-video-gallery.php:125
 msgid "Network Activation Not Allowed"
 msgstr ""
 
@@ -3889,17 +3896,17 @@ msgstr ""
 msgid "Display a list of video categories."
 msgstr ""
 
-#: blocks/blocks.php:88 includes/helpers/functions.php:1877
-#: includes/helpers/functions.php:2245 widgets/forms/categories.php:100
+#: blocks/blocks.php:88 includes/helpers/functions.php:1884
+#: includes/helpers/functions.php:2252 widgets/forms/categories.php:105
 msgid "ASC"
 msgstr ""
 
-#: blocks/blocks.php:89 includes/helpers/functions.php:1878
-#: includes/helpers/functions.php:2246 widgets/forms/categories.php:101
+#: blocks/blocks.php:89 includes/helpers/functions.php:1885
+#: includes/helpers/functions.php:2253 widgets/forms/categories.php:106
 msgid "DESC"
 msgstr ""
 
-#: blocks/blocks.php:94 includes/helpers/functions.php:2280
+#: blocks/blocks.php:94 includes/helpers/functions.php:2287
 msgid "Show Pagination"
 msgstr ""
 
@@ -3923,53 +3930,53 @@ msgstr ""
 msgid "A videos search form for your site."
 msgstr ""
 
-#: blocks/blocks.php:100 includes/helpers/functions.php:2118
-#: includes/helpers/functions.php:2301 widgets/forms/search.php:25
+#: blocks/blocks.php:100 includes/helpers/functions.php:2125
+#: includes/helpers/functions.php:2308 widgets/forms/search.php:30
 msgid "Vertical"
 msgstr ""
 
-#: blocks/blocks.php:101 includes/helpers/functions.php:2119
-#: includes/helpers/functions.php:2302 widgets/forms/search.php:26
+#: blocks/blocks.php:101 includes/helpers/functions.php:2126
+#: includes/helpers/functions.php:2309 widgets/forms/search.php:31
 msgid "Horizontal"
 msgstr ""
 
-#: blocks/blocks.php:102 includes/helpers/functions.php:2315
-#: widgets/forms/search.php:51
+#: blocks/blocks.php:102 includes/helpers/functions.php:2322
+#: widgets/forms/search.php:56
 msgid "Search By Categories"
 msgstr ""
 
-#: blocks/blocks.php:103 includes/helpers/functions.php:2308
-#: widgets/forms/search.php:44
+#: blocks/blocks.php:103 includes/helpers/functions.php:2315
+#: widgets/forms/search.php:49
 msgid "Search By Video Title, Description"
 msgstr ""
 
-#: blocks/blocks.php:104 includes/helpers/functions.php:2322
-#: widgets/forms/search.php:58
+#: blocks/blocks.php:104 includes/helpers/functions.php:2329
+#: widgets/forms/search.php:63
 msgid "Search By Tags"
 msgstr ""
 
-#: blocks/blocks.php:105 includes/helpers/functions.php:2100
-#: includes/helpers/functions.php:2329 widgets/forms/search.php:65
+#: blocks/blocks.php:105 includes/helpers/functions.php:2107
+#: includes/helpers/functions.php:2336 widgets/forms/search.php:70
 msgid "Sort By Dropdown"
 msgstr ""
 
-#: blocks/blocks.php:106 includes/helpers/functions.php:2336
-#: widgets/forms/search.php:72
+#: blocks/blocks.php:106 includes/helpers/functions.php:2343
+#: widgets/forms/search.php:77
 msgid "Search Button"
 msgstr ""
 
-#: blocks/blocks.php:107 includes/helpers/functions.php:2107
-#: includes/helpers/functions.php:2343 widgets/forms/search.php:79
+#: blocks/blocks.php:107 includes/helpers/functions.php:2114
+#: includes/helpers/functions.php:2350 widgets/forms/search.php:84
 msgid "Reset Button"
 msgstr ""
 
-#: blocks/blocks.php:109 includes/helpers/functions.php:2354
-#: widgets/forms/search.php:88
+#: blocks/blocks.php:109 includes/helpers/functions.php:2361
+#: widgets/forms/search.php:93
 msgid "Use Plugin's Default Search Results Page"
 msgstr ""
 
-#: blocks/blocks.php:110 includes/helpers/functions.php:2355
-#: widgets/forms/search.php:89
+#: blocks/blocks.php:110 includes/helpers/functions.php:2362
+#: widgets/forms/search.php:94
 msgid "Display Results on Current Page"
 msgstr ""
 
@@ -3995,8 +4002,8 @@ msgstr ""
 msgid "Replace"
 msgstr ""
 
-#: blocks/blocks.php:143 includes/helpers/functions.php:2375
-#: widgets/forms/video.php:237
+#: blocks/blocks.php:143 includes/helpers/functions.php:2382
+#: widgets/forms/video.php:242
 msgid ""
 "Show an email collection form on this video to capture leads. Choose Enable "
 "or Disable to force the form on or off for this player only."
@@ -4019,39 +4026,39 @@ msgid "Page URL"
 msgstr ""
 
 #: includes/helpers/email-capture.php:123
-#: premium/admin/partials/automations-sources.php:185
+#: premium/admin/partials/automations-sources.php:190
 msgid "Date"
 msgstr ""
 
-#: includes/helpers/functions.php:804
+#: includes/helpers/functions.php:812
 msgid "Video Category"
 msgstr ""
 
-#: includes/helpers/functions.php:808
+#: includes/helpers/functions.php:816
 msgid "Video Tag"
 msgstr ""
 
-#: includes/helpers/functions.php:812
-#: public/templates/search-form-template-compact.php:33
-#: public/templates/search-form-template-horizontal.php:177
-#: public/templates/search-form-template-vertical.php:177
+#: includes/helpers/functions.php:820
+#: public/templates/search-form-template-compact.php:38
+#: public/templates/search-form-template-horizontal.php:182
+#: public/templates/search-form-template-vertical.php:182
 #: widgets/search.php:141
 msgid "Search Videos"
 msgstr ""
 
-#: includes/helpers/functions.php:816
+#: includes/helpers/functions.php:824
 msgid "User Videos"
 msgstr ""
 
-#: includes/helpers/functions.php:820
+#: includes/helpers/functions.php:828
 msgid "Player Embed"
 msgstr ""
 
-#: includes/helpers/functions.php:929
+#: includes/helpers/functions.php:937
 msgid "[{site_name}] New lead captured on \"{video_title}\""
 msgstr ""
 
-#: includes/helpers/functions.php:930
+#: includes/helpers/functions.php:938
 msgid ""
 "A new lead was captured on \"{video_title}\".\n"
 "\n"
@@ -4065,259 +4072,259 @@ msgid ""
 "Captured on {now}."
 msgstr ""
 
-#: includes/helpers/functions.php:1022 includes/helpers/functions.php:1516
-#: public/templates/player.php:61 public/video.php:751
+#: includes/helpers/functions.php:1030 includes/helpers/functions.php:1523
+#: public/templates/player.php:68 public/video.php:751
 msgid "Sorry, but you do not have permission to view this video."
 msgstr ""
 
-#: includes/helpers/functions.php:1039
+#: includes/helpers/functions.php:1047
 msgid ""
 "<strong>Please accept cookies to play this video</strong>. By accepting you "
 "will be accessing content from a service provided by an external third party."
 msgstr ""
 
-#: includes/helpers/functions.php:1040
+#: includes/helpers/functions.php:1048
 msgid "I Agree"
 msgstr ""
 
-#: includes/helpers/functions.php:1318
+#: includes/helpers/functions.php:1327
 msgid "Sorry, you need to login to view this content."
 msgstr ""
 
-#: includes/helpers/functions.php:1523
+#: includes/helpers/functions.php:1530
 #, php-format
 msgid ""
 "This video is password protected. <a href=\"%s\" target=\"_top\">Enter the "
 "password</a> to watch it."
 msgstr ""
 
-#: includes/helpers/functions.php:1547
+#: includes/helpers/functions.php:1554
 msgid "Title - Ascending"
 msgstr ""
 
-#: includes/helpers/functions.php:1548
+#: includes/helpers/functions.php:1555
 msgid "Title - Descending"
 msgstr ""
 
-#: includes/helpers/functions.php:1549
+#: includes/helpers/functions.php:1556
 msgid "Newest First"
 msgstr ""
 
-#: includes/helpers/functions.php:1550
+#: includes/helpers/functions.php:1557
 msgid "Oldest First"
 msgstr ""
 
-#: includes/helpers/functions.php:1551
+#: includes/helpers/functions.php:1558
 msgid "Most Viewed"
 msgstr ""
 
-#: includes/helpers/functions.php:1556
+#: includes/helpers/functions.php:1563
 msgid "Most Liked"
 msgstr ""
 
-#: includes/helpers/functions.php:1577
+#: includes/helpers/functions.php:1584
 msgid "Single Video"
 msgstr ""
 
-#: includes/helpers/functions.php:1584 widgets/forms/video.php:24
-#: widgets/forms/video.php:40
+#: includes/helpers/functions.php:1591 widgets/forms/video.php:29
+#: widgets/forms/video.php:45
 msgid "Select Video"
 msgstr ""
 
-#: includes/helpers/functions.php:1600 includes/helpers/functions.php:1660
+#: includes/helpers/functions.php:1607 includes/helpers/functions.php:1667
 msgid ""
 "Enter your direct file URL in the textbox above (OR) upload your file using "
 "the \"Upload File\" link."
 msgstr ""
 
-#: includes/helpers/functions.php:1606
-#: premium/public/templates/video-form.php:150
+#: includes/helpers/functions.php:1613
+#: premium/public/templates/video-form.php:156
 msgid "HLS"
 msgstr ""
 
-#: includes/helpers/functions.php:1613
-#: premium/public/templates/video-form.php:150
+#: includes/helpers/functions.php:1620
+#: premium/public/templates/video-form.php:156
 msgid "MPEG-DASH"
 msgstr ""
 
-#: includes/helpers/functions.php:1634 includes/helpers/functions.php:2452
+#: includes/helpers/functions.php:1641 includes/helpers/functions.php:2461
 msgid "Dailymotion"
 msgstr ""
 
-#: includes/helpers/functions.php:1645 includes/helpers/functions.php:2453
+#: includes/helpers/functions.php:1652 includes/helpers/functions.php:2462
 msgid "Rumble"
 msgstr ""
 
-#: includes/helpers/functions.php:1829
-#: premium/public/templates/video-form.php:236
-#: premium/public/templates/video-form.php:243
-#: public/templates/search-form-template-horizontal.php:74
-#: public/templates/search-form-template-vertical.php:74
+#: includes/helpers/functions.php:1836
+#: premium/public/templates/video-form.php:242
+#: premium/public/templates/video-form.php:249
+#: public/templates/search-form-template-horizontal.php:79
+#: public/templates/search-form-template-vertical.php:79
 msgid "Select Categories"
 msgstr ""
 
-#: includes/helpers/functions.php:1836
-#: premium/public/templates/video-form.php:278
-#: premium/public/templates/video-form.php:285
-#: public/templates/search-form-template-horizontal.php:129
-#: public/templates/search-form-template-vertical.php:129
+#: includes/helpers/functions.php:1843
+#: premium/public/templates/video-form.php:284
+#: premium/public/templates/video-form.php:291
+#: public/templates/search-form-template-horizontal.php:134
+#: public/templates/search-form-template-vertical.php:134
 msgid "Select Tags"
 msgstr ""
 
-#: includes/helpers/functions.php:1843
+#: includes/helpers/functions.php:1850
 msgid "Include Video ID(s)"
 msgstr ""
 
-#: includes/helpers/functions.php:1850
+#: includes/helpers/functions.php:1857
 msgid "Exclude Video ID(s)"
 msgstr ""
 
-#: includes/helpers/functions.php:1891
+#: includes/helpers/functions.php:1898
 msgid "Follow URL"
 msgstr ""
 
-#: includes/helpers/functions.php:1899
+#: includes/helpers/functions.php:1906
 msgid "Gallery"
 msgstr ""
 
-#: includes/helpers/functions.php:2053
+#: includes/helpers/functions.php:2060
 msgid "More Button"
 msgstr ""
 
-#: includes/helpers/functions.php:2060 widgets/forms/categories.php:152
+#: includes/helpers/functions.php:2067 widgets/forms/categories.php:157
 msgid "More Button Label"
 msgstr ""
 
-#: includes/helpers/functions.php:2063 widgets/categories.php:67
-#: widgets/videos.php:480
+#: includes/helpers/functions.php:2070 widgets/categories.php:67
+#: widgets/videos.php:478
 msgid "Show More"
 msgstr ""
 
-#: includes/helpers/functions.php:2067 widgets/forms/categories.php:157
+#: includes/helpers/functions.php:2074 widgets/forms/categories.php:162
 msgid "More Button Link"
 msgstr ""
 
-#: includes/helpers/functions.php:2068 widgets/forms/categories.php:159
+#: includes/helpers/functions.php:2075 widgets/forms/categories.php:164
 msgid "Leave this field blank to use Ajax"
 msgstr ""
 
-#: includes/helpers/functions.php:2075
+#: includes/helpers/functions.php:2082
 msgid "Filters & Search Form"
 msgstr ""
 
-#: includes/helpers/functions.php:2079
+#: includes/helpers/functions.php:2086
 msgid "Filter By Video Title, Description"
 msgstr ""
 
-#: includes/helpers/functions.php:2080
+#: includes/helpers/functions.php:2087
 msgid ""
 "Enable keyword search that allows visitors to filter videos by matching "
 "words in the title or description."
 msgstr ""
 
-#: includes/helpers/functions.php:2086
+#: includes/helpers/functions.php:2093
 msgid "Filter By Categories"
 msgstr ""
 
-#: includes/helpers/functions.php:2087
+#: includes/helpers/functions.php:2094
 msgid "Allow visitors to filter videos based on assigned categories."
 msgstr ""
 
-#: includes/helpers/functions.php:2093
+#: includes/helpers/functions.php:2100
 msgid "Filter By Tags"
 msgstr ""
 
-#: includes/helpers/functions.php:2094
+#: includes/helpers/functions.php:2101
 msgid "Allow visitors to filter videos based on assigned tags."
 msgstr ""
 
-#: includes/helpers/functions.php:2101
+#: includes/helpers/functions.php:2108
 msgid ""
 "Enable a dropdown to let visitors sort videos by options like date, title, "
 "or popularity."
 msgstr ""
 
-#: includes/helpers/functions.php:2108
+#: includes/helpers/functions.php:2115
 msgid "Show a reset button to allow visitors to clear all selected filters."
 msgstr ""
 
-#: includes/helpers/functions.php:2114
+#: includes/helpers/functions.php:2121
 msgid "Filters Template"
 msgstr ""
 
-#: includes/helpers/functions.php:2115
+#: includes/helpers/functions.php:2122
 msgid ""
 "Choose how the filters will be displayed — vertically (stacked) or "
 "horizontally (inline)."
 msgstr ""
 
-#: includes/helpers/functions.php:2125
+#: includes/helpers/functions.php:2132
 msgid "Filters Mode"
 msgstr ""
 
-#: includes/helpers/functions.php:2126
+#: includes/helpers/functions.php:2133
 msgid "How should the filter form behave when users interact with it?"
 msgstr ""
 
-#: includes/helpers/functions.php:2129
+#: includes/helpers/functions.php:2136
 msgid "Live - Update instantly"
 msgstr ""
 
-#: includes/helpers/functions.php:2130
+#: includes/helpers/functions.php:2137
 msgid "Ajax - Update instantly without page reload"
 msgstr ""
 
-#: includes/helpers/functions.php:2131
+#: includes/helpers/functions.php:2138
 msgid "Search - Update on button click"
 msgstr ""
 
-#: includes/helpers/functions.php:2137
+#: includes/helpers/functions.php:2144
 msgid "Filters Position"
 msgstr ""
 
-#: includes/helpers/functions.php:2138
+#: includes/helpers/functions.php:2145
 msgid ""
 "Decide where the filters should appear — above the gallery (Top), on the "
 "left, or on the right."
 msgstr ""
 
-#: includes/helpers/functions.php:2143 premium/admin/playlist.php:39
+#: includes/helpers/functions.php:2150 premium/admin/playlist.php:39
 #: premium/public/playlist.php:57
 msgid "Right"
 msgstr ""
 
-#: includes/helpers/functions.php:2186
+#: includes/helpers/functions.php:2193
 msgid "Include Category ID(s)"
 msgstr ""
 
-#: includes/helpers/functions.php:2193
+#: includes/helpers/functions.php:2200
 msgid "Exclude Category ID(s)"
 msgstr ""
 
-#: includes/helpers/functions.php:2290
+#: includes/helpers/functions.php:2297
 msgid "Search Form"
 msgstr ""
 
-#: includes/helpers/functions.php:2351 widgets/forms/search.php:102
+#: includes/helpers/functions.php:2358 widgets/forms/search.php:107
 msgid ""
 "The selected \"Search Results Page\" must include the [aiovg_search] "
 "shortcode, which will be replaced by the search results."
 msgstr ""
 
-#: includes/helpers/functions.php:2420
+#: includes/helpers/functions.php:2429
 #, php-format
 msgid "%s ago"
 msgstr ""
 
-#: includes/helpers/functions.php:2448
+#: includes/helpers/functions.php:2457
 msgid "Video File (mp4, webm, ogv, m4v, mov)"
 msgstr ""
 
-#: includes/helpers/functions.php:2449
+#: includes/helpers/functions.php:2458
 msgid "HLS / MPEG-DASH"
 msgstr ""
 
-#: includes/helpers/functions.php:2472
+#: includes/helpers/functions.php:2481
 msgid "Classic"
 msgstr ""
 
@@ -4335,112 +4342,108 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
-#: includes/helpers/render.php:361
-#: premium/public/templates/videos-template-compact.php:182
-#: premium/public/templates/videos-template-popup.php:140
-#: premium/public/templates/videos-template-slider-compact.php:238
-#: premium/public/templates/videos-template-slider-popup.php:195
+#: includes/helpers/render.php:275
+#: premium/public/templates/videos-template-compact.php:187
+#: premium/public/templates/videos-template-popup.php:145
+#: premium/public/templates/videos-template-slider-compact.php:243
+#: premium/public/templates/videos-template-slider-popup.php:200
 msgid "Leave a Comment"
 msgstr ""
 
-#: includes/helpers/render.php:520
+#: includes/helpers/render.php:434
 msgid "&laquo;"
 msgstr ""
 
-#: includes/helpers/render.php:521
+#: includes/helpers/render.php:435
 msgid "&raquo;"
 msgstr ""
 
-#: includes/helpers/render.php:558
+#: includes/helpers/render.php:472
 #, php-format
-msgid "Page %d of %d"
+msgid "Page %1$d of %2$d"
 msgstr ""
 
-#: includes/helpers/render.php:581
-#, php-format
-msgid ""
-"Your PHP memory limit is %dMB. It is recommended to have at least %dMB for "
-"smooth import/export operations."
-msgstr ""
-
-#: includes/helpers/render.php:589
+#: includes/helpers/render.php:495
 #, php-format
 msgid ""
-"Your PHP max execution time is %d seconds. It is recommended to have at "
-"least %d seconds to avoid timeouts during batch processing."
+"Your PHP memory limit is %1$dMB. It is recommended to have at least %2$dMB "
+"for smooth import/export operations."
 msgstr ""
 
-#: includes/helpers/render.php:655 includes/player/base.php:798
-#: public/templates/player-videojs.php:390
-#: public/templates/player-vidstack.php:455
+#: includes/helpers/render.php:503
+#, php-format
+msgid ""
+"Your PHP max execution time is %1$d seconds. It is recommended to have at "
+"least %2$d seconds to avoid timeouts during batch processing."
+msgstr ""
+
+#: includes/helpers/render.php:569 includes/player/base.php:798
+#: public/templates/player-videojs.php:395
+#: public/templates/player-vidstack.php:460
 msgid "Twitter"
 msgstr ""
 
-#: includes/helpers/render.php:671
+#: includes/helpers/render.php:585
 msgid "Pin It"
 msgstr ""
 
-#: includes/helpers/render.php:708 includes/player/base.php:864
-#: public/templates/player-videojs.php:452
-#: public/templates/player-vidstack.php:517
+#: includes/helpers/render.php:623 includes/player/base.php:864
+#: public/templates/player-videojs.php:458
+#: public/templates/player-vidstack.php:523
 #, php-format
 msgid "Check out the \"%s\""
 msgstr ""
 
-#: includes/helpers/render.php:709 includes/player/base.php:866
-#: public/templates/player-videojs.php:453
-#: public/templates/player-vidstack.php:518
+#: includes/helpers/render.php:625 includes/player/base.php:866
+#: public/templates/player-videojs.php:460
+#: public/templates/player-vidstack.php:525
 #, php-format
-msgid "Check out the \"%s\" at %s"
+msgid "Check out the \"%1$s\" at %2$s"
 msgstr ""
 
 #: includes/player/amp.php:246 includes/player/base.php:1021
-#: public/templates/player-iframe.php:256
+#: public/templates/player-iframe.php:261
 msgid "Watch on Dailymotion"
 msgstr ""
 
 #: includes/player/base.php:1155 includes/player/base.php:1259
-#: public/templates/player-email-capture.php:291
-#: public/templates/player-videojs.php:1593
-#: public/templates/player-vidstack.php:1405
+#: public/templates/player-email-capture.php:303
+#: public/templates/player-videojs.php:1611
+#: public/templates/player-vidstack.php:1418
 msgid "Your name"
 msgstr ""
 
 #: includes/player/base.php:1162 includes/player/base.php:1266
-#: public/templates/player-email-capture.php:294
-#: public/templates/player-videojs.php:1596
-#: public/templates/player-vidstack.php:1408
+#: public/templates/player-email-capture.php:306
+#: public/templates/player-videojs.php:1614
+#: public/templates/player-vidstack.php:1421
 msgid "Your email address *"
 msgstr ""
 
 #: includes/player/base.php:1170 includes/player/base.php:1274
-#: public/templates/player-email-capture.php:297
-#: public/templates/player-videojs.php:1599
-#: public/templates/player-vidstack.php:1411
+#: public/templates/player-email-capture.php:309
+#: public/templates/player-videojs.php:1617
+#: public/templates/player-vidstack.php:1424
 msgid "Your phone number"
 msgstr ""
 
 #: includes/player/base.php:1182 includes/player/base.php:1287
-#: public/public.php:1224 public/templates/player-email-capture.php:305
-#: public/templates/player-videojs.php:1607
-#: public/templates/player-vidstack.php:1419
+#: public/public.php:1217 public/templates/player-email-capture.php:317
+#: public/templates/player-videojs.php:1625
+#: public/templates/player-vidstack.php:1432
 msgid "Please enter a valid email address."
 msgstr ""
 
 #: includes/player/base.php:1183 includes/player/base.php:1288
-#: public/templates/player-email-capture.php:305
-#: public/templates/player-videojs.php:1607
-#: public/templates/player-vidstack.php:1419
+#: public/templates/player-email-capture.php:317
+#: public/templates/player-videojs.php:1625
+#: public/templates/player-vidstack.php:1432
 msgid "Something went wrong. Please try again."
 msgstr ""
 
-#: includes/player/popup.php:47
-msgid "Open Popup"
-msgstr ""
-
 #: includes/player/videojs.php:605 includes/player/vidstack.php:600
-#: public/templates/player-videojs.php:1577
-#: public/templates/player-vidstack.php:1385
+#: public/templates/player-videojs.php:1595
+#: public/templates/player-vidstack.php:1398
 msgid "Paste this code in your HTML page"
 msgstr ""
 
@@ -4479,51 +4482,51 @@ msgid ""
 "The Administrator of {site_name}"
 msgstr ""
 
-#: premium/admin/admin.php:353
+#: premium/admin/admin.php:363
 msgid "Please wait while we are loading data from the API server..."
 msgstr ""
 
-#: premium/admin/admin.php:354 premium/public/public.php:231
+#: premium/admin/admin.php:364 premium/public/public.php:247
 msgid "Sorry, the auto-thumbnail generation failed."
 msgstr ""
 
-#: premium/admin/admin.php:355 premium/public/public.php:232
+#: premium/admin/admin.php:365 premium/public/public.php:248
 msgid ""
 "Use the \"Capture Image\" button below to generate an image from your video."
 msgstr ""
 
-#: premium/admin/admin.php:356 premium/public/public.php:233
+#: premium/admin/admin.php:366 premium/public/public.php:249
 msgid "Select an image from the options below."
 msgstr ""
 
-#: premium/admin/admin.php:357 premium/public/public.php:234
+#: premium/admin/admin.php:367 premium/public/public.php:250
 msgid "Generating images"
 msgstr ""
 
-#: premium/admin/admin.php:358 premium/public/public.php:235
+#: premium/admin/admin.php:368 premium/public/public.php:251
 msgid ""
 "No video found. Add a video in the \"MP4\" video field to capture an image."
 msgstr ""
 
-#: premium/admin/admin.php:359 premium/public/public.php:236
+#: premium/admin/admin.php:369 premium/public/public.php:252
 msgid "Invalid video file."
 msgstr ""
 
-#: premium/admin/admin.php:360 premium/public/public.php:237
+#: premium/admin/admin.php:370 premium/public/public.php:253
 msgid ""
 "Sorry, your video file server doesn't give us permission to generate an "
 "image from the video."
 msgstr ""
 
-#: premium/admin/admin.php:375 premium/admin/user.php:309
+#: premium/admin/admin.php:385 premium/admin/user.php:309
 msgid "User Dashboard"
 msgstr ""
 
-#: premium/admin/admin.php:380 premium/admin/user.php:317
+#: premium/admin/admin.php:390 premium/admin/user.php:317
 msgid "Video Form"
 msgstr ""
 
-#: premium/admin/admin.php:385 premium/admin/playlists.php:87
+#: premium/admin/admin.php:395 premium/admin/playlists.php:87
 msgid "My Playlists"
 msgstr ""
 
@@ -4587,28 +4590,28 @@ msgstr ""
 msgid "Video Automations"
 msgstr ""
 
-#: premium/admin/automations.php:81 premium/admin/automations.php:146
-#: premium/admin/automations.php:148 premium/admin/automations.php:161
+#: premium/admin/automations.php:81 premium/admin/automations.php:147
+#: premium/admin/automations.php:149 premium/admin/automations.php:162
 msgid "Automations"
 msgstr ""
 
-#: premium/admin/automations.php:83
+#: premium/admin/automations.php:84
 #, php-format
 msgid ""
 "This feature also requires API keys from the services you import. Please "
 "configure your keys <a href=\"%s\">here</a>."
 msgstr ""
 
-#: premium/admin/automations.php:117
+#: premium/admin/automations.php:118
 msgid "Enable Fast Mode"
 msgstr ""
 
-#: premium/admin/automations.php:120
+#: premium/admin/automations.php:121
 #, php-format
 msgid "Increase speed by disabling %1$s calls in %2$s during import."
 msgstr ""
 
-#: premium/admin/automations.php:126
+#: premium/admin/automations.php:127
 #, php-format
 msgid ""
 "This option is for advanced users with knowledge of WordPress development. "
@@ -4617,110 +4620,110 @@ msgid ""
 "properly if you check this box."
 msgstr ""
 
-#: premium/admin/automations.php:147
+#: premium/admin/automations.php:148
 msgid "Automation"
 msgstr ""
 
-#: premium/admin/automations.php:149
+#: premium/admin/automations.php:150
 msgid "Add New Import"
 msgstr ""
 
-#: premium/admin/automations.php:151
+#: premium/admin/automations.php:152
 msgid "New Import"
 msgstr ""
 
-#: premium/admin/automations.php:152
+#: premium/admin/automations.php:153
 msgid "Edit Import"
 msgstr ""
 
-#: premium/admin/automations.php:153
+#: premium/admin/automations.php:154
 msgid "Update Import"
 msgstr ""
 
-#: premium/admin/automations.php:154
+#: premium/admin/automations.php:155
 msgid "View Import"
 msgstr ""
 
-#: premium/admin/automations.php:155
+#: premium/admin/automations.php:156
 msgid "Search Imports"
 msgstr ""
 
-#: premium/admin/automations.php:156
+#: premium/admin/automations.php:157
 msgid "No imports found"
 msgstr ""
 
-#: premium/admin/automations.php:157
+#: premium/admin/automations.php:158
 msgid "No imports found in Trash"
 msgstr ""
 
-#: premium/admin/automations.php:162
+#: premium/admin/automations.php:163
 msgid "Automations Description"
 msgstr ""
 
-#: premium/admin/automations.php:197
+#: premium/admin/automations.php:198
 msgid "Enter your import title"
 msgstr ""
 
-#: premium/admin/automations.php:211
+#: premium/admin/automations.php:212
 msgid "Imported Only"
 msgstr ""
 
-#: premium/admin/automations.php:318
+#: premium/admin/automations.php:319
 msgid "Source"
 msgstr ""
 
-#: premium/admin/automations.php:321
+#: premium/admin/automations.php:322
 msgid "Stats"
 msgstr ""
 
-#: premium/admin/automations.php:401 premium/admin/automations.php:658
+#: premium/admin/automations.php:402 premium/admin/automations.php:659
 msgid "Paused"
 msgstr ""
 
-#: premium/admin/automations.php:421
-#: premium/admin/partials/automations-statistics.php:38
+#: premium/admin/automations.php:422
+#: premium/admin/partials/automations-statistics.php:43
 msgid "videos imported"
 msgstr ""
 
-#: premium/admin/automations.php:422
-#: premium/admin/partials/automations-statistics.php:25
+#: premium/admin/automations.php:423
+#: premium/admin/partials/automations-statistics.php:30
 msgid "Import status"
 msgstr ""
 
-#: premium/admin/automations.php:424
-#: premium/admin/partials/automations-statistics.php:64
+#: premium/admin/automations.php:425
+#: premium/admin/partials/automations-statistics.php:69
 msgid "Next scheduled update"
 msgstr ""
 
-#: premium/admin/automations.php:449
+#: premium/admin/automations.php:450
 msgid "Imported"
 msgstr ""
 
-#: premium/admin/automations.php:496
+#: premium/admin/automations.php:497
 msgid "Configure Import Sources"
 msgstr ""
 
-#: premium/admin/automations.php:505
+#: premium/admin/automations.php:506
 msgid "Imported Video Options"
 msgstr ""
 
-#: premium/admin/automations.php:514 premium/admin/automations.php:1038
+#: premium/admin/automations.php:515 premium/admin/automations.php:1043
 msgid "Import Log"
 msgstr ""
 
-#: premium/admin/automations.php:866 premium/admin/automations.php:995
+#: premium/admin/automations.php:867 premium/admin/automations.php:1000
 msgid "Preview Import"
 msgstr ""
 
-#: premium/admin/automations.php:867
+#: premium/admin/automations.php:868
 msgid "Publish & Import"
 msgstr ""
 
-#: premium/admin/automations.php:867
+#: premium/admin/automations.php:868
 msgid "Import Next Batch"
 msgstr ""
 
-#: premium/admin/automations.php:956
+#: premium/admin/automations.php:961
 #, php-format
 msgid ""
 "This form lets you automatically import videos from popular platforms like "
@@ -4732,39 +4735,39 @@ msgid ""
 "\t\t\t\t\t\tLet's walk through the key steps to set up your first import."
 msgstr ""
 
-#: premium/admin/automations.php:967
+#: premium/admin/automations.php:972
 msgid "Import Title"
 msgstr ""
 
-#: premium/admin/automations.php:968
+#: premium/admin/automations.php:973
 msgid ""
 "Start by giving your import a <strong>descriptive title</strong>. This helps "
 "you identify the automation later."
 msgstr ""
 
-#: premium/admin/automations.php:974
-#: premium/admin/partials/automations-sources.php:21
+#: premium/admin/automations.php:979
+#: premium/admin/partials/automations-sources.php:26
 msgid "Video Platform"
 msgstr ""
 
-#: premium/admin/automations.php:975
+#: premium/admin/automations.php:980
 msgid ""
 "Choose the video platform you want to import from — like <strong>YouTube</"
 "strong> or <strong>Vimeo</strong>."
 msgstr ""
 
-#: premium/admin/automations.php:982
+#: premium/admin/automations.php:987
 msgid ""
 "Select the type of content you want to import — such as a <strong>Channel</"
 "strong>, <strong>Playlist</strong>, <strong>Search Results</strong>, or a "
 "custom list of video URLs."
 msgstr ""
 
-#: premium/admin/automations.php:988
+#: premium/admin/automations.php:993
 msgid "Configure Source Input"
 msgstr ""
 
-#: premium/admin/automations.php:989
+#: premium/admin/automations.php:994
 msgid ""
 "Based on the selected <strong>Source Type</strong>, you will see relevant "
 "input fields appear below.<br><br>For example, if you select "
@@ -4772,49 +4775,49 @@ msgid ""
 "all required fields are correctly filled for smooth imports."
 msgstr ""
 
-#: premium/admin/automations.php:996
+#: premium/admin/automations.php:1001
 msgid ""
 "Click <strong>Preview Import</strong> to preview videos from your source."
 "<br><br>If any errors appear, correct them before proceeding."
 msgstr ""
 
-#: premium/admin/automations.php:1002
-#: premium/admin/partials/automations-sources.php:445
+#: premium/admin/automations.php:1007
+#: premium/admin/partials/automations-sources.php:450
 msgid "Batch Limit"
 msgstr ""
 
-#: premium/admin/automations.php:1003
+#: premium/admin/automations.php:1008
 msgid ""
 "Set the maximum number of videos to import in each batch.<br><br>For optimal "
 "performance, we recommend keeping this below <strong>500</strong>."
 msgstr ""
 
-#: premium/admin/automations.php:1009
+#: premium/admin/automations.php:1014
 msgid "Schedule Frequency"
 msgstr ""
 
-#: premium/admin/automations.php:1010
+#: premium/admin/automations.php:1015
 msgid ""
 "Decide how often the plugin should check for new videos.<br><br>Options "
 "include <strong>Only Once</strong>, <strong>Every Hour</strong>, "
 "<strong>Daily</strong>, <strong>Weekly</strong>, or <strong>Monthly</strong>."
 msgstr ""
 
-#: premium/admin/automations.php:1016
+#: premium/admin/automations.php:1021
 msgid "Auto-Continue"
 msgstr ""
 
-#: premium/admin/automations.php:1017
+#: premium/admin/automations.php:1022
 msgid ""
 "Enable this option if you want the plugin to keep checking for new videos "
 "even after the initial import is complete."
 msgstr ""
 
-#: premium/admin/automations.php:1023
+#: premium/admin/automations.php:1028
 msgid "Video Settings"
 msgstr ""
 
-#: premium/admin/automations.php:1024
+#: premium/admin/automations.php:1029
 msgid ""
 "Decide how imported videos should be handled:<br><br>- Assign "
 "<strong>categories</strong> and <strong>tags</strong>.<br>- Set a "
@@ -4826,11 +4829,11 @@ msgid ""
 "<strong>Pending</strong> so the site admin gets notified by email for review."
 msgstr ""
 
-#: premium/admin/automations.php:1031
+#: premium/admin/automations.php:1036
 msgid "Start Import"
 msgstr ""
 
-#: premium/admin/automations.php:1032
+#: premium/admin/automations.php:1037
 msgid ""
 "Ready to go?<br><br>Click <strong>Publish & Import</strong> to begin "
 "importing and schedule future batches.<br><br>Once the import starts, this "
@@ -4838,13 +4841,13 @@ msgid ""
 "anytime to manually trigger the next batch ahead of schedule."
 msgstr ""
 
-#: premium/admin/automations.php:1039
+#: premium/admin/automations.php:1044
 msgid ""
 "This section logs every import batch with a timestamp.<br><br>Click any "
 "entry to view the list of videos imported during that batch."
 msgstr ""
 
-#: premium/admin/automations.php:1047
+#: premium/admin/automations.php:1053
 #, php-format
 msgid ""
 "That's it — your automation is ready!<br><br>Manage all imported videos from "
@@ -4857,263 +4860,263 @@ msgid ""
 "rel=\"noopener noreferrer\">Gallery Display Guide</a>."
 msgstr ""
 
-#: premium/admin/partials/ads.php:18
+#: premium/admin/partials/ads.php:23
 msgid "Disable Ads"
 msgstr ""
 
-#: premium/admin/partials/ads.php:23
+#: premium/admin/partials/ads.php:28
 msgid "Override VAST URL"
 msgstr ""
 
-#: premium/admin/partials/ads.php:27
+#: premium/admin/partials/ads.php:32
 msgid "Enter your VAST URL"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:82
+#: premium/admin/partials/automations-sources.php:87
 msgid "Channel URL"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:88
+#: premium/admin/partials/automations-sources.php:93
 msgid "Enter the YouTube Channel ID (or) a YouTube Video URL from the Channel."
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:99
+#: premium/admin/partials/automations-sources.php:104
 msgid "Playlist URL"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:113
-#: premium/admin/partials/automations-sources.php:345
+#: premium/admin/partials/automations-sources.php:118
+#: premium/admin/partials/automations-sources.php:350
 msgid "Search Keyword"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:119
+#: premium/admin/partials/automations-sources.php:124
 msgid "Enter search terms (space:AND, -:NOT, |:OR)"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:130
+#: premium/admin/partials/automations-sources.php:135
 #: premium/includes/functions.php:141
 msgid "Username"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:144
-#: premium/admin/partials/automations-sources.php:359
+#: premium/admin/partials/automations-sources.php:149
+#: premium/admin/partials/automations-sources.php:364
 msgid "Video URLs"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:150
-#: premium/admin/partials/automations-sources.php:365
+#: premium/admin/partials/automations-sources.php:155
+#: premium/admin/partials/automations-sources.php:370
 msgid "Enter one video per line."
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:160
-#: premium/admin/partials/automations-sources.php:411
+#: premium/admin/partials/automations-sources.php:165
+#: premium/admin/partials/automations-sources.php:416
 msgid "Exclude URLs"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:164
-#: premium/admin/partials/automations-sources.php:415
+#: premium/admin/partials/automations-sources.php:169
+#: premium/admin/partials/automations-sources.php:420
 msgid ""
 "Enter the list of video URLs those should be excluded during the import. "
 "Enter one video per line."
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:170
-#: premium/admin/partials/automations-sources.php:421
+#: premium/admin/partials/automations-sources.php:175
+#: premium/admin/partials/automations-sources.php:426
 msgid "Published After"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:174
-#: premium/admin/partials/automations-sources.php:425
+#: premium/admin/partials/automations-sources.php:179
+#: premium/admin/partials/automations-sources.php:430
 msgid ""
 "Optional. Videos published before this date will be skipped during the "
 "import. Tip: set this to today's date to import only newly published videos "
 "going forward. Leave this field empty to import the entire back catalog."
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:186
+#: premium/admin/partials/automations-sources.php:191
 msgid "Rating"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:187
+#: premium/admin/partials/automations-sources.php:192
 msgid "Relevance"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:247
+#: premium/admin/partials/automations-sources.php:252
 msgid "User ID"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:251
+#: premium/admin/partials/automations-sources.php:256
 msgid "Enter your Vimeo User ID"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:261
+#: premium/admin/partials/automations-sources.php:266
 msgid "Showcase ID"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:265
+#: premium/admin/partials/automations-sources.php:270
 msgid "Enter your Vimeo Showcase ID"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:275
+#: premium/admin/partials/automations-sources.php:280
 msgid "Category Name"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:289
+#: premium/admin/partials/automations-sources.php:294
 msgid "Channel ID"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:293
+#: premium/admin/partials/automations-sources.php:298
 msgid "Enter your Vimeo Channel ID"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:303
+#: premium/admin/partials/automations-sources.php:308
 msgid "Folder ID"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:307
+#: premium/admin/partials/automations-sources.php:312
 msgid "Enter your Vimeo Folder ID"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:317
+#: premium/admin/partials/automations-sources.php:322
 msgid "Group ID"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:321
+#: premium/admin/partials/automations-sources.php:326
 msgid "Enter your Vimeo Group ID"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:331
+#: premium/admin/partials/automations-sources.php:336
 msgid "Portfolio ID"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:335
+#: premium/admin/partials/automations-sources.php:340
 msgid "Enter your Vimeo Portfolio ID"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:375
+#: premium/admin/partials/automations-sources.php:380
 msgid "Filter by Tags"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:377
+#: premium/admin/partials/automations-sources.php:382
 msgid "Enter a comma-separated list of tags to filter on"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:386
+#: premium/admin/partials/automations-sources.php:391
 msgid "Exclude Tags"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:388
+#: premium/admin/partials/automations-sources.php:393
 msgid "Enter a comma-separated list of tags to exclude"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:405
+#: premium/admin/partials/automations-sources.php:410
 msgid "Yes"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:405
+#: premium/admin/partials/automations-sources.php:410
 msgid "No"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:438
+#: premium/admin/partials/automations-sources.php:443
 msgid "Schedule Import"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:449
+#: premium/admin/partials/automations-sources.php:454
 msgid ""
 "Enter the maximum amount of videos to be imported per batch. We recommend "
 "keeping this value less than 500."
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:455
+#: premium/admin/partials/automations-sources.php:460
 msgid "Schedule"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:461
+#: premium/admin/partials/automations-sources.php:466
 msgid "Only Once"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:462
+#: premium/admin/partials/automations-sources.php:467
 msgid "Every 1 Hour"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:463
+#: premium/admin/partials/automations-sources.php:468
 msgid "Every 1 Day"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:464
+#: premium/admin/partials/automations-sources.php:469
 msgid "Every 1 Week"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:465
+#: premium/admin/partials/automations-sources.php:470
 msgid "Every 1 Month"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:479
+#: premium/admin/partials/automations-sources.php:484
 msgid "Configure how frequent the plugin the plugin should import videos."
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:485
+#: premium/admin/partials/automations-sources.php:490
 msgid "Reschedule"
 msgstr ""
 
-#: premium/admin/partials/automations-sources.php:489
+#: premium/admin/partials/automations-sources.php:494
 msgid ""
 "Check this option if the plugin should check for new videos after the import "
 "has been completed."
 msgstr ""
 
-#: premium/admin/partials/automations-statistics.php:47
+#: premium/admin/partials/automations-statistics.php:52
 msgid "videos excluded"
 msgstr ""
 
-#: premium/admin/partials/automations-statistics.php:56
+#: premium/admin/partials/automations-statistics.php:61
 msgid "duplicate videos ignored"
 msgstr ""
 
-#: premium/admin/partials/automations-statistics.php:69
+#: premium/admin/partials/automations-statistics.php:74
 msgid "History"
 msgstr ""
 
-#: premium/admin/partials/automations-statistics.php:76
+#: premium/admin/partials/automations-statistics.php:82
 #, php-format
-msgid "Imported %d videos on %s"
+msgid "Imported %1$d videos on %2$s"
 msgstr ""
 
-#: premium/admin/partials/automations-statistics.php:84
+#: premium/admin/partials/automations-statistics.php:90
 msgid "You have not started importing videos."
 msgstr ""
 
-#: premium/admin/partials/automations-submitbox.php:16
+#: premium/admin/partials/automations-submitbox.php:21
 msgid ""
 "We are importing your videos. Please do not refresh or leave this page. This "
 "can take a few minutes."
 msgstr ""
 
-#: premium/admin/partials/automations-test-screen.php:22
+#: premium/admin/partials/automations-test-screen.php:27
 msgid ""
 "Congrats! Your configuration is working. You can publish the form and start "
 "importing videos."
 msgstr ""
 
-#: premium/admin/partials/automations-test-screen.php:41
+#: premium/admin/partials/automations-test-screen.php:46
 #, php-format
 msgid "Published on %s"
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:25
+#: premium/admin/partials/automations-video-options.php:30
 #, php-format
 msgid ""
 "<code>%%title%%</code> will be replaced by the imported YouTube / Vimeo "
 "title."
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:26
+#: premium/admin/partials/automations-video-options.php:31
 #, php-format
 msgid ""
 "<code>%%id%%</code> will be replaced by the imported YouTube / Vimeo ID."
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:27
+#: premium/admin/partials/automations-video-options.php:32
 #, php-format
 msgid ""
 "Use this field to add custom text/shortcode before or after the imported "
@@ -5121,18 +5124,18 @@ msgid ""
 "to <code>%%title%%</code>."
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:38
+#: premium/admin/partials/automations-video-options.php:43
 msgid "Check this option to import the video description."
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:42
+#: premium/admin/partials/automations-video-options.php:47
 #, php-format
 msgid ""
 "<code>%%description%%</code> will be replaced by the actual video "
 "description."
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:43
+#: premium/admin/partials/automations-video-options.php:48
 #, php-format
 msgid ""
 "Use this field to add custom text/shortcode before or after the imported "
@@ -5140,74 +5143,74 @@ msgid ""
 "description equivalent to <code>%%description%%</code>."
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:54
+#: premium/admin/partials/automations-video-options.php:59
 msgid "Check this option to set a featured image."
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:88
+#: premium/admin/partials/automations-video-options.php:93
 msgid "Check this box to automatically import tags from the Vimeo website."
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:114
+#: premium/admin/partials/automations-video-options.php:119
 msgid "Video Date"
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:120
+#: premium/admin/partials/automations-video-options.php:125
 msgid "Original date on the video service"
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:121
+#: premium/admin/partials/automations-video-options.php:126
 msgid "Date when the video is imported"
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:135
+#: premium/admin/partials/automations-video-options.php:140
 msgid ""
 "Select whether to use the original posting date on the video service, or the "
 "date when the video is imported."
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:154
+#: premium/admin/partials/automations-video-options.php:159
 msgid "Select the author to whom the video should be assigned."
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:166
+#: premium/admin/partials/automations-video-options.php:171
 msgid "Draft"
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:167
+#: premium/admin/partials/automations-video-options.php:172
 #: premium/admin/user.php:168 premium/admin/user.php:179
 msgid "Pending"
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:168
+#: premium/admin/partials/automations-video-options.php:173
 #: premium/admin/user.php:167 premium/admin/user.php:178
 msgid "Publish"
 msgstr ""
 
-#: premium/admin/partials/automations-video-options.php:182
+#: premium/admin/partials/automations-video-options.php:187
 msgid ""
 "Select the default status of the imported videos. Site admin will be "
 "notified through email when an import occurs with the \"Pending\" status."
 msgstr ""
 
-#: premium/admin/partials/category-fields.php:18
-#: premium/admin/partials/category-fields.php:28
+#: premium/admin/partials/category-fields.php:23
+#: premium/admin/partials/category-fields.php:33
 msgid "Exclude in Video Form"
 msgstr ""
 
-#: premium/admin/partials/category-fields.php:22
-#: premium/admin/partials/category-fields.php:33
+#: premium/admin/partials/category-fields.php:27
+#: premium/admin/partials/category-fields.php:38
 msgid "Exclude this category in the front-end video form."
 msgstr ""
 
-#: premium/admin/partials/playlist-fields.php:21
+#: premium/admin/partials/playlist-fields.php:26
 #: premium/includes/functions.php:142 premium/includes/functions.php:155
 #: premium/includes/vimeo-api/videos-resource.php:33
-#: premium/public/templates/user-dashboard.php:95
+#: premium/public/templates/user-dashboard.php:100
 msgid "Videos"
 msgstr ""
 
-#: premium/admin/partials/playlist-fields.php:67
+#: premium/admin/partials/playlist-fields.php:72
 #: premium/admin/playlists.php:258
 msgid "Author"
 msgstr ""
@@ -5356,7 +5359,7 @@ msgid "Search Playlists"
 msgstr ""
 
 #: premium/admin/playlists.php:161 premium/public/playlists.php:264
-#: premium/public/public.php:143
+#: premium/public/public.php:159
 msgid "No playlists found"
 msgstr ""
 
@@ -5522,7 +5525,7 @@ msgstr ""
 msgid "FFMPEG Path"
 msgstr ""
 
-#: premium/admin/thumbnail-generator.php:64
+#: premium/admin/thumbnail-generator.php:65
 #, php-format
 msgid ""
 "<a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">FFMPEG</a> is a "
@@ -5532,7 +5535,7 @@ msgid ""
 "this field."
 msgstr ""
 
-#: premium/admin/thumbnail-generator.php:66
+#: premium/admin/thumbnail-generator.php:67
 msgid ""
 "If your server does not support FFMPEG and you want to install it into the "
 "server, you need root access. If you are in a dedicated/VPS server you can "
@@ -5540,34 +5543,34 @@ msgid ""
 "contact your hosting provider for installing FFMPEG."
 msgstr ""
 
-#: premium/admin/thumbnail-generator.php:73
+#: premium/admin/thumbnail-generator.php:74
 msgid "Number of images to auto-generate"
 msgstr ""
 
-#: premium/admin/thumbnail-generator.php:74
+#: premium/admin/thumbnail-generator.php:75
 msgid ""
 "Accepted values are [0 - 10]. Leave empty or add \"0\" to not generate any "
 "image."
 msgstr ""
 
-#: premium/admin/thumbnail-generator.php:102
+#: premium/admin/thumbnail-generator.php:103
 msgid "Test FFMPEG"
 msgstr ""
 
-#: premium/admin/thumbnail-generator.php:157
+#: premium/admin/thumbnail-generator.php:158
 msgid "Congrats, FFMPEG is active in your server."
 msgstr ""
 
-#: premium/admin/thumbnail-generator.php:160
+#: premium/admin/thumbnail-generator.php:161
 msgid ""
 "FFMPEG not found in the given path. Please contact your hosting provider."
 msgstr ""
 
-#: premium/admin/thumbnail-generator.php:164
+#: premium/admin/thumbnail-generator.php:165
 msgid "FFMPEG path is empty."
 msgstr ""
 
-#: premium/admin/thumbnail-generator.php:168
+#: premium/admin/thumbnail-generator.php:169
 msgid ""
 "exec() is disabled in PHP settings. Please contact your hosting provider."
 msgstr ""
@@ -5871,21 +5874,25 @@ msgid ""
 "automatically generated and is for information purposes only."
 msgstr ""
 
-#: premium/includes/vimeo-api/query.php:270
+#: premium/includes/player/popup.php:48
+msgid "Open Popup"
+msgstr ""
+
+#: premium/includes/vimeo-api/query.php:269
 msgid "Vimeo access token not found."
 msgstr ""
 
-#: premium/includes/vimeo-api/query.php:273
+#: premium/includes/vimeo-api/query.php:277
 #, php-format
-msgid "%s: %s (error code: %s)"
+msgid "%1$s: %2$s (error code: %3$s)"
 msgstr ""
 
-#: premium/includes/vimeo-api/query.php:274
-#: premium/includes/vimeo-api/query.php:282
+#: premium/includes/vimeo-api/query.php:278
+#: premium/includes/vimeo-api/query.php:286
 msgid "Vimeo API error encountered"
 msgstr ""
 
-#: premium/includes/vimeo-api/query.php:286
+#: premium/includes/vimeo-api/query.php:290
 msgid "An unknown Vimeo API error has happened. Please try again."
 msgstr ""
 
@@ -5922,7 +5929,7 @@ msgstr ""
 msgid "Default order"
 msgstr ""
 
-#: premium/includes/vimeo-api/resource-objects.php:253
+#: premium/includes/vimeo-api/resource-objects.php:255
 #, php-format
 msgid "Resource %s is not registered."
 msgstr ""
@@ -5969,7 +5976,7 @@ msgstr ""
 msgid "Remove from Playlist"
 msgstr ""
 
-#: premium/public/playlists.php:643 premium/public/public.php:145
+#: premium/public/playlists.php:643 premium/public/public.php:161
 msgid "You have reached the maximium number of playlists allowed."
 msgstr ""
 
@@ -5977,91 +5984,92 @@ msgstr ""
 msgid "Popup"
 msgstr ""
 
-#: premium/public/public.php:140
+#: premium/public/public.php:156
 msgid "Add to Playlist"
 msgstr ""
 
-#: premium/public/public.php:141
+#: premium/public/public.php:157
 msgid "Sorry, you must login to create a playlist."
 msgstr ""
 
-#: premium/public/public.php:142
+#: premium/public/public.php:158
 msgid "Save video to..."
 msgstr ""
 
-#: premium/public/public.php:144
+#: premium/public/public.php:160
 #, php-format
 msgid "You can create up to %d playlists."
 msgstr ""
 
-#: premium/public/public.php:146 premium/public/templates/user-playlists.php:69
+#: premium/public/public.php:162 premium/public/templates/user-playlists.php:74
 msgid "Enter playlist title..."
 msgstr ""
 
-#: premium/public/public.php:147
+#: premium/public/public.php:163
 msgid "Playlist title cannot be empty."
 msgstr ""
 
-#: premium/public/public.php:148
+#: premium/public/public.php:164
 msgid "Add Playlist"
 msgstr ""
 
-#: premium/public/public.php:149 premium/public/templates/user-playlists.php:71
+#: premium/public/public.php:165 premium/public/templates/user-playlists.php:76
 msgid "Update"
 msgstr ""
 
-#: premium/public/public.php:150
+#: premium/public/public.php:166
 msgid "Added..."
 msgstr ""
 
-#: premium/public/public.php:151
+#: premium/public/public.php:167
 msgid "Removed..."
 msgstr ""
 
-#: premium/public/public.php:152
+#: premium/public/public.php:168
 msgid "Are you sure you want to remove this video from the playlist?"
 msgstr ""
 
-#: premium/public/public.php:153
+#: premium/public/public.php:169
 msgid "Are you sure you want to delete this playlist?"
 msgstr ""
 
-#: premium/public/public.php:192
+#: premium/public/public.php:208
 msgid "Are you sure you want to delete this video?"
 msgstr ""
 
-#: premium/public/public.php:220
+#: premium/public/public.php:236
 msgid "This is a required field."
 msgstr ""
 
-#: premium/public/public.php:221
+#: premium/public/public.php:237
 msgid "Allowed Files"
 msgstr ""
 
-#: premium/public/public.php:222 premium/public/user.php:378
-#: premium/public/user.php:410 premium/public/user.php:440
+#: premium/public/public.php:238 premium/public/user.php:362
+#: premium/public/user.php:366 premium/public/user.php:398
+#: premium/public/user.php:430
 msgid "Sorry, this file format is not allowed."
 msgstr ""
 
-#: premium/public/public.php:223 premium/public/user.php:425
+#: premium/public/public.php:239 premium/public/user.php:413
 msgid "Sorry, this file size is not allowed."
 msgstr ""
 
-#: premium/public/public.php:224
+#: premium/public/public.php:240
 msgid "Invalid video URL."
 msgstr ""
 
-#: premium/public/public.php:229
+#: premium/public/public.php:245
 msgid "Please wait until the upload is complete."
 msgstr ""
 
-#: premium/public/public.php:230
+#: premium/public/public.php:246
 msgid "Unknown error."
 msgstr ""
 
-#: premium/public/public.php:256 premium/public/public.php:299
-#: premium/public/public.php:317 premium/public/public.php:325
-#: public/public.php:373
+#: premium/public/public.php:272 premium/public/public.php:315
+#: premium/public/public.php:333 premium/public/public.php:341
+#: public/public.php:357
 msgid "Now Playing"
 msgstr ""
 
@@ -6073,21 +6081,21 @@ msgstr ""
 msgid "Dot Size"
 msgstr ""
 
-#: premium/public/templates/single-playlist.php:21
+#: premium/public/templates/single-playlist.php:26
 msgid "Video removed successfully from this playlist."
 msgstr ""
 
-#: premium/public/templates/thumbnail-generator.php:20
+#: premium/public/templates/thumbnail-generator.php:25
 msgid ""
 "(OR) use the \"Capture Image\" button below to generate an image from your "
 "video."
 msgstr ""
 
-#: premium/public/templates/thumbnail-generator.php:34
+#: premium/public/templates/thumbnail-generator.php:39
 msgid "Capture Image"
 msgstr ""
 
-#: premium/public/templates/thumbnail-generator.php:42
+#: premium/public/templates/thumbnail-generator.php:47
 msgid ""
 "When you submit the form, only the image you've selected will be stored in "
 "the server to keep the site clean. The other images will be deleted "
@@ -6095,206 +6103,206 @@ msgid ""
 "Image\" button."
 msgstr ""
 
-#: premium/public/templates/thumbnail-generator.php:51
+#: premium/public/templates/thumbnail-generator.php:56
 msgid "Play and capture the scene you wish as a video preview image."
 msgstr ""
 
-#: premium/public/templates/thumbnail-generator.php:60
+#: premium/public/templates/thumbnail-generator.php:65
 #, php-format
 msgid "Seek to %s seconds"
 msgstr ""
 
-#: premium/public/templates/thumbnail-generator.php:65
+#: premium/public/templates/thumbnail-generator.php:70
 msgid "Capture This Scene"
 msgstr ""
 
-#: premium/public/templates/user-dashboard.php:28
+#: premium/public/templates/user-dashboard.php:33
 #, php-format
 msgid ""
 "You do not have sufficient permissions to do this action. <a href=\"%s\">Go "
 "back</a>"
 msgstr ""
 
-#: premium/public/templates/user-dashboard.php:33
+#: premium/public/templates/user-dashboard.php:38
 msgid "Congrats, the video has been saved as a draft."
 msgstr ""
 
-#: premium/public/templates/user-dashboard.php:39
+#: premium/public/templates/user-dashboard.php:44
 msgid ""
 "Congrats, the video has been submitted, and it is pending review. This "
 "review process could take up to 48 hours. Please be patient."
 msgstr ""
 
-#: premium/public/templates/user-dashboard.php:45
+#: premium/public/templates/user-dashboard.php:50
 msgid "Congrats, the video has been updated."
 msgstr ""
 
-#: premium/public/templates/user-dashboard.php:51
+#: premium/public/templates/user-dashboard.php:56
 msgid "Congrats, the video has been published."
 msgstr ""
 
-#: premium/public/templates/user-dashboard.php:57
+#: premium/public/templates/user-dashboard.php:62
 msgid "The video has been deleted successfully."
 msgstr ""
 
-#: premium/public/templates/user-dashboard.php:69
+#: premium/public/templates/user-dashboard.php:74
 msgid "Search videos by title"
 msgstr ""
 
-#: premium/public/templates/user-dashboard.php:96
+#: premium/public/templates/user-dashboard.php:101
 msgid "Actions"
 msgstr ""
 
-#: premium/public/templates/user-dashboard.php:164
-#: premium/public/templates/videos-template-playlist.php:231
-#: public/templates/single-video.php:70
-#: public/templates/video-thumbnail-image-left.php:130
-#: public/templates/video-thumbnail.php:130
+#: premium/public/templates/user-dashboard.php:169
+#: premium/public/templates/videos-template-playlist.php:213
+#: public/templates/single-video.php:75
+#: public/templates/video-thumbnail-image-left.php:135
+#: public/templates/video-thumbnail.php:135
 msgid "views"
 msgstr ""
 
-#: premium/public/templates/user-dashboard.php:240
+#: premium/public/templates/user-dashboard.php:245
 msgid "Status"
 msgstr ""
 
-#: premium/public/templates/user-dashboard.php:249
+#: premium/public/templates/user-dashboard.php:254
 msgid "Edit"
 msgstr ""
 
-#: premium/public/templates/user-playlists.php:22
+#: premium/public/templates/user-playlists.php:27
 msgid "The playlist has been deleted successfully."
 msgstr ""
 
-#: premium/public/templates/user-playlists.php:49
+#: premium/public/templates/user-playlists.php:54
 msgid "Delete this Playlist"
 msgstr ""
 
-#: premium/public/templates/user-playlists.php:61
+#: premium/public/templates/user-playlists.php:66
 msgid "Edit this Playlist"
 msgstr ""
 
-#: premium/public/templates/user-playlists.php:82
+#: premium/public/templates/user-playlists.php:87
 #, php-format
 msgid "%d videos"
 msgstr ""
 
-#: premium/public/templates/user-playlists.php:84
+#: premium/public/templates/user-playlists.php:89
 #, php-format
 msgid "%d video"
 msgstr ""
 
-#: premium/public/templates/video-form.php:18
+#: premium/public/templates/video-form.php:23
 msgid ""
 "Aborted due to spam detection. Sorry, if you are a real user and please try "
 "again. If the issue repeats, kindly write to the site administrator."
 msgstr ""
 
-#: premium/public/templates/video-form.php:24
+#: premium/public/templates/video-form.php:29
 msgid ""
 "The form submission is too fast than we expected. So, our system has aborted "
 "the action considering a spam. Sorry, if you are a real user and please try "
 "again. If the issue repeats, kindly write to the site administrator."
 msgstr ""
 
-#: premium/public/templates/video-form.php:30
+#: premium/public/templates/video-form.php:35
 msgid "Congrats, your video has been saved as a draft."
 msgstr ""
 
-#: premium/public/templates/video-form.php:35
+#: premium/public/templates/video-form.php:40
 #, php-format
 msgid "Fields marked with an %s are required."
 msgstr ""
 
-#: premium/public/templates/video-form.php:41
+#: premium/public/templates/video-form.php:46
 msgid "Enter your video title here"
 msgstr ""
 
-#: premium/public/templates/video-form.php:72
-#: premium/public/templates/video-form.php:205
+#: premium/public/templates/video-form.php:77
+#: premium/public/templates/video-form.php:211
 msgid "Supported file formats"
 msgstr ""
 
-#: premium/public/templates/video-form.php:80
+#: premium/public/templates/video-form.php:86
 #, php-format
 msgid "Maximum upload file size: %s"
 msgstr ""
 
-#: premium/public/templates/video-form.php:95
-#: premium/public/templates/video-form.php:117
-#: premium/public/templates/video-form.php:139
-#: premium/public/templates/video-form.php:218
+#: premium/public/templates/video-form.php:101
+#: premium/public/templates/video-form.php:123
+#: premium/public/templates/video-form.php:145
+#: premium/public/templates/video-form.php:224
 msgid "Enter your direct file URL here"
 msgstr ""
 
-#: premium/public/templates/video-form.php:203
+#: premium/public/templates/video-form.php:209
 msgid "Thumbnail Image"
 msgstr ""
 
-#: premium/public/templates/video-form.php:230
+#: premium/public/templates/video-form.php:236
 msgid "Enter your video description here"
 msgstr ""
 
-#: premium/public/templates/video-form.php:314
+#: premium/public/templates/video-form.php:320
 #, php-format
 msgid ""
 "I agree to the <a href=\"%s\" target=\"_blank\">terms and conditions</a>"
 msgstr ""
 
-#: premium/public/templates/video-form.php:328
+#: premium/public/templates/video-form.php:334
 msgid "Submit Video"
 msgstr ""
 
-#: premium/public/templates/video-form.php:329 premium/public/user.php:707
+#: premium/public/templates/video-form.php:335 premium/public/user.php:715
 msgid "Save Draft"
 msgstr ""
 
-#: premium/public/templates/videos-template-compact.php:70
-#: premium/public/templates/videos-template-inline.php:64
-#: premium/public/templates/videos-template-playlist.php:95
-#: premium/public/templates/videos-template-popup.php:72
-#: premium/public/templates/videos-template-slider-classic.php:88
-#: premium/public/templates/videos-template-slider-compact.php:123
-#: premium/public/templates/videos-template-slider-inline.php:92
-#: premium/public/templates/videos-template-slider-popup.php:126
-#: public/templates/videos-template-classic.php:27
+#: premium/public/templates/videos-template-compact.php:75
+#: premium/public/templates/videos-template-inline.php:69
+#: premium/public/templates/videos-template-playlist.php:77
+#: premium/public/templates/videos-template-popup.php:77
+#: premium/public/templates/videos-template-slider-classic.php:93
+#: premium/public/templates/videos-template-slider-compact.php:128
+#: premium/public/templates/videos-template-slider-inline.php:97
+#: premium/public/templates/videos-template-slider-popup.php:131
+#: public/templates/videos-template-classic.php:32
 #, php-format
 msgid "%s video found"
 msgid_plural "%s videos found"
 msgstr[0] ""
 msgstr[1] ""
 
-#: premium/public/templates/videos-template-playlist.php:245
-#: public/templates/video-thumbnail-image-left.php:144
-#: public/templates/video-thumbnail.php:144
+#: premium/public/templates/videos-template-playlist.php:227
+#: public/templates/video-thumbnail-image-left.php:149
+#: public/templates/video-thumbnail.php:149
 msgid "likes"
 msgstr ""
 
-#: premium/public/templates/videos-template-playlist.php:259
-#: public/templates/video-thumbnail-image-left.php:158
-#: public/templates/video-thumbnail.php:158
+#: premium/public/templates/videos-template-playlist.php:241
+#: public/templates/video-thumbnail-image-left.php:163
+#: public/templates/video-thumbnail.php:163
 msgid "dislikes"
 msgstr ""
 
-#: premium/public/templates/videos-template-playlist.php:273
-#: public/templates/video-thumbnail-image-left.php:172
-#: public/templates/video-thumbnail.php:172
+#: premium/public/templates/videos-template-playlist.php:255
+#: public/templates/video-thumbnail-image-left.php:177
+#: public/templates/video-thumbnail.php:177
 msgid "comments"
 msgstr ""
 
-#: premium/public/thumbnail-generator.php:53 public/video.php:988
+#: premium/public/thumbnail-generator.php:53 public/video.php:992
 msgid "Invalid file format."
 msgstr ""
 
-#: premium/public/thumbnail-generator.php:57 premium/public/user.php:416
-#: premium/public/user.php:521
+#: premium/public/thumbnail-generator.php:59 premium/public/user.php:404
+#: premium/public/user.php:510
 msgid "Sorry, this file type is not permitted for security reasons."
 msgstr ""
 
-#: premium/public/user.php:157 premium/public/user.php:171
+#: premium/public/user.php:141 premium/public/user.php:155
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
-#: premium/public/user.php:449
+#: premium/public/user.php:439
 #, php-format
 msgid ""
 "The uploads directory (%s) is not writable (as verified by attempting to "
@@ -6310,21 +6318,21 @@ msgstr ""
 msgid "Display a companion ad."
 msgstr ""
 
-#: premium/widgets/forms/companion.php:22
+#: premium/widgets/forms/companion.php:27
 msgid "Height"
 msgstr ""
 
-#: premium/widgets/forms/companion.php:27
+#: premium/widgets/forms/companion.php:32
 msgid "Ad Unit Path"
 msgstr ""
 
-#: premium/widgets/forms/companion.php:31
+#: premium/widgets/forms/companion.php:36
 #, php-format
 msgid ""
 "Optional. Full path of the ad unit with the network code and unit code. "
-"Required only when you enable the <a href=\"%s\" target=\"_blank\" "
+"Required only when you enable the <a href=\"%1$s\" target=\"_blank\" "
 "rel=\"noopener noreferrer\">Google Publisher Tag (GPT)</a> in the <a "
-"href=\"%s\">plugin settings</a>."
+"href=\"%2$s\">plugin settings</a>."
 msgstr ""
 
 #: public/bunny-stream.php:244 public/bunny-stream.php:300
@@ -6358,52 +6366,52 @@ msgid ""
 "<strong>Congrats!</strong> Your video is ready and available for streaming."
 msgstr ""
 
-#: public/public.php:293 public/public.php:377
+#: public/public.php:277 public/public.php:361
 msgid "Sorry, you must login to vote."
 msgstr ""
 
-#: public/public.php:330 public/templates/player-videojs.php:29
+#: public/public.php:314 public/templates/player-videojs.php:34
 msgid ""
 "This stream is currently not live. Please check back or refresh your page."
 msgstr ""
 
-#: public/public.php:925
+#: public/public.php:918
 #, php-format
 msgid "Showing results for \"%s\""
 msgstr ""
 
-#: public/public.php:1207
+#: public/public.php:1200
 msgid "Too many attempts. Please try again in an hour."
 msgstr ""
 
-#: public/templates/categories-template-dropdown.php:25
+#: public/templates/categories-template-dropdown.php:30
 msgid "Select a Category"
 msgstr ""
 
-#: public/templates/category-thumbnail.php:54
+#: public/templates/category-thumbnail.php:59
 #, php-format
 msgid "%s video"
 msgid_plural "%s videos"
 msgstr[0] ""
 msgstr[1] ""
 
-#: public/templates/search-form-template-horizontal.php:44
-#: public/templates/search-form-template-vertical.php:44
+#: public/templates/search-form-template-horizontal.php:49
+#: public/templates/search-form-template-vertical.php:49
 msgid "Enter your Keyword"
 msgstr ""
 
-#: public/templates/search-form-template-horizontal.php:155
-#: public/templates/search-form-template-vertical.php:155
+#: public/templates/search-form-template-horizontal.php:160
+#: public/templates/search-form-template-vertical.php:160
 msgid "Sort By"
 msgstr ""
 
-#: public/templates/search-form-template-horizontal.php:183
-#: public/templates/search-form-template-vertical.php:183
+#: public/templates/search-form-template-horizontal.php:188
+#: public/templates/search-form-template-vertical.php:188
 msgid "Reset"
 msgstr ""
 
-#: public/video.php:747 public/video.php:763 public/video.php:803
-#: public/video.php:809 public/video.php:816 public/video.php:820
+#: public/video.php:747 public/video.php:765 public/video.php:805
+#: public/video.php:811 public/video.php:818 public/video.php:822
 msgid "File is not readable or not found."
 msgstr ""
 
@@ -6411,15 +6419,15 @@ msgstr ""
 msgid "Sub Categories"
 msgstr ""
 
-#: widgets/forms/categories.php:147
+#: widgets/forms/categories.php:152
 msgid "Show More Button"
 msgstr ""
 
-#: widgets/forms/video.php:25
+#: widgets/forms/video.php:30
 msgid "Start typing for suggestions"
 msgstr ""
 
-#: widgets/forms/video.php:42
+#: widgets/forms/video.php:47
 msgid "Latest Video"
 msgstr ""
 

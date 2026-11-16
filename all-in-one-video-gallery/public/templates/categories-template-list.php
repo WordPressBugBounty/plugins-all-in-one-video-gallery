@@ -8,6 +8,11 @@
  *
  * @package All_In_One_Video_Gallery
  */
+
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 ?>
 
 <div class="aiovg aiovg-categories aiovg-categories-template-list">
@@ -20,6 +25,6 @@
 	<?php endif; ?>
 
 	<ul class="aiovg-categories-list">
-		<?php echo $categories_li; ?>
+		<?php echo $categories_li; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Markup from wp_list_categories(). ?>
 	</ul>
 </div>

@@ -21,6 +21,8 @@ if ( ! defined( 'WPINC' ) ) {
  */
 class AIOVG_Public_WPML extends AIOVG_Multilingual {
 
+	// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML's own API hooks.
+
 	/**
 	 * Keep the category, tag, user or playlist in the hreflang links.
 	 *
@@ -314,5 +316,7 @@ class AIOVG_Public_WPML extends AIOVG_Multilingual {
 
 		return is_object( $sitepress ) && method_exists( $sitepress, 'is_display_as_translated_taxonomy' ) && $sitepress->is_display_as_translated_taxonomy( $taxonomy );
 	}
+
+	// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
 }

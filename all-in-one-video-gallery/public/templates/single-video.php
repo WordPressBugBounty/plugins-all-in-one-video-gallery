@@ -8,17 +8,22 @@
  *
  * @package All_In_One_Video_Gallery
  */
+
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 ?>
 
 <div class="aiovg aiovg-single-video">
     <!-- Player -->
-    <?php the_aiovg_player( $post->ID ); ?>
+    <?php aiovg_the_player( $post->ID ); ?>
 
     <!-- After Player -->
-    <?php the_aiovg_content_after_player( $post->ID, $attributes ); ?>
+    <?php aiovg_the_content_after_player( $post->ID, $attributes ); ?>
 
     <!-- Description -->
-    <div class="aiovg-description aiovg-margin-top aiovg-hide-if-empty"><?php echo apply_filters( 'aiovg_the_content', $content, $post->ID ); ?></div>
+    <div class="aiovg-description aiovg-margin-top aiovg-hide-if-empty"><?php echo apply_filters( 'aiovg_the_content', $content, $post->ID ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Filtered post content, as the_content() prints it. ?></div>
     
     <!-- Meta informations -->
     <?php    
@@ -140,13 +145,13 @@
     // ...
     if ( ! empty( $meta_html ) ) {
         echo '<div class="aiovg-meta aiovg-flex aiovg-flex-col aiovg-gap-1 aiovg-margin-top">';
-        echo $meta_html;
+        echo $meta_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built from escaped values above.
         echo '</div>';
     }
     ?>
     
     <!-- Share buttons -->
-    <?php if ( $attributes['share'] ) the_aiovg_socialshare_buttons(); ?>
+    <?php if ( $attributes['share'] ) aiovg_the_socialshare_buttons(); ?>
 </div>
 
 <?php
@@ -159,8 +164,8 @@ if ( $attributes['related'] ) {
 
 	$related_videos = do_shortcode( $shortcode );
 		
-	if ( strip_tags( $related_videos ) != aiovg_get_message( 'videos_empty' ) ) {
+	if ( wp_strip_all_tags( $related_videos ) != aiovg_get_message( 'videos_empty' ) ) {
         echo '<br />';
-		echo $related_videos;
+		echo $related_videos; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Shortcode output, escaped in its templates.
 	} 
 }

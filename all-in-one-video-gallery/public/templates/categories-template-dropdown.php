@@ -9,6 +9,11 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $page_settings = aiovg_get_option( 'aiovg_page_settings' );
 
 $category_url = '/';
@@ -51,6 +56,6 @@ if ( ! empty( $page_settings['category'] ) ) {
 	$query = apply_filters( 'aiovg_categories_args', $query, $attributes );
 	$dropdown_html = wp_dropdown_categories( $query );
 
-	echo $dropdown_html;
+	echo $dropdown_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Markup from wp_dropdown_categories().
 	?>
 </div>

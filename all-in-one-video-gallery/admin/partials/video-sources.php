@@ -9,6 +9,11 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $player_settings = aiovg_get_option( 'aiovg_player_settings' );
 
 $quality_levels = explode( "\n", $player_settings['quality_levels'] );
@@ -136,7 +141,7 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 
 							echo sprintf( 
 								'<label><input type="radio" name="quality_levels[%d]" value=""%s/>%s</label>',
-								$index,
+								(int) $index,
 								checked( $source['quality'], '', false ),
 								esc_html__( 'None', 'all-in-one-video-gallery' )
 							);
@@ -144,7 +149,7 @@ $bunny_stream_video_id = isset( $post_meta['bunny_stream_video_id'] ) ? $post_me
 							foreach ( $quality_levels as $quality ) {
 								echo sprintf( 
 									'<label><input type="radio" name="quality_levels[%d]" value="%s"%s/>%s</label>',
-									$index,
+									(int) $index,
 									esc_attr( $quality ),
 									checked( $source['quality'], $quality, false ),
 									esc_html( $quality )

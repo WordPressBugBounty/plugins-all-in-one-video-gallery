@@ -8,6 +8,11 @@
  *
  * @package All_In_One_Video_Gallery
  */
+
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 ?>
 
 <div id="aiovg-<?php echo esc_attr( $attributes['uid'] ); ?>" class="aiovg aiovg-categories aiovg-categories-template-grid">
@@ -33,17 +38,17 @@
             if ( $columns > 3 ) $classes[] = 'aiovg-col-sm-3';
             if ( $columns > 2 ) $classes[] = 'aiovg-col-xs-2';
             ?>            
-            <div class="<?php echo implode( ' ', $classes ); ?>" data-id="<?php echo esc_attr( $term->term_id ); ?>">		
-                <?php the_aiovg_category_thumbnail( $term, $attributes ); ?>		
+            <div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" data-id="<?php echo esc_attr( $term->term_id ); ?>">		
+                <?php aiovg_the_category_thumbnail( $term, $attributes ); ?>		
             </div> 
         <?php endforeach; ?>
     </div>
 
     <?php
     if ( ! empty( $attributes['show_pagination'] ) ) { // Pagination        
-        the_aiovg_pagination( $attributes['max_num_pages'], '', $attributes['paged'], $attributes );
+        aiovg_the_pagination( $attributes['max_num_pages'], '', $attributes['paged'], $attributes );
     } elseif ( ! empty( $attributes['show_more'] ) ) { // More button        
-        the_aiovg_more_button( $attributes['max_num_pages'], $attributes );
+        aiovg_the_more_button( $attributes['max_num_pages'], $attributes );
     }
     ?>
 </div>

@@ -863,7 +863,7 @@ class AIOVG_Player_Base {
 			/* translators: %s: Video title */
 			$email_subject = rawurlencode( sprintf( __( 'Check out the "%s"', 'all-in-one-video-gallery' ), $email_title ) );
 			/* translators: 1: Video title, 2: Video URL */
-			$email_body    = rawurlencode( sprintf( __( 'Check out the "%s" at %s', 'all-in-one-video-gallery' ), $email_title, $share_url ) );
+			$email_body    = rawurlencode( sprintf( __( 'Check out the "%1$s" at %2$s', 'all-in-one-video-gallery' ), $email_title, $share_url ) );
 			$email_url     = "mailto:?subject={$email_subject}&amp;body={$email_body}";
 
 			$share_buttons[] = array(
@@ -1365,7 +1365,7 @@ class AIOVG_Player_Base {
 
 		if ( ! empty( $oembed['html'] ) ) {
 			if ( $iframe_src = aiovg_extract_iframe_src( $oembed['html'] ) ) {
-				$parsed_url = parse_url( $iframe_src, PHP_URL_QUERY );
+				$parsed_url = wp_parse_url( $iframe_src, PHP_URL_QUERY );
 				parse_str( $parsed_url, $queries );
 
 				if ( isset( $queries['app_id'] ) ) {

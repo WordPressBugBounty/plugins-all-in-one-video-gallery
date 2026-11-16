@@ -9,6 +9,11 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $access_control   = isset( $post_meta['access_control'] ) ? $post_meta['access_control'][0] : -1;
 $restricted_roles = isset( $post_meta['restricted_roles'] ) ? maybe_unserialize( $post_meta['restricted_roles'][0] ) : array();
 ?>

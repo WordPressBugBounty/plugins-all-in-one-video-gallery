@@ -51,7 +51,7 @@ class AIOVG_Public_Bunny_Stream {
 		// Check if "aiovg_video_metabox_nonce" nonce is set
     	if ( isset( $_POST['aiovg_video_metabox_nonce'] ) ) {		
 			// Verify that the nonce is valid
-    		if ( wp_verify_nonce( $_POST['aiovg_video_metabox_nonce'], 'aiovg_save_video_metabox' ) ) {			
+    		if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['aiovg_video_metabox_nonce'] ) ), 'aiovg_save_video_metabox' ) ) {			
 				// OK to save meta data
 				$this->save_bunny_stream_data( $post_id );		
 			}
@@ -65,8 +65,8 @@ class AIOVG_Public_Bunny_Stream {
 	 * @param  int   $post_id Post ID.
 	 */
 	public function save_bunny_stream_data( $post_id ) {
-		$type = isset( $_POST['type'] ) ? sanitize_text_field( $_POST['type'] ) : 'default';
-		$mp4  = isset( $_POST['mp4'] ) ? trim( $_POST['mp4'] ) : '';
+		$type = isset( $_POST['type'] ) ? sanitize_text_field( wp_unslash( $_POST['type'] ) ) : 'default';
+		$mp4  = isset( $_POST['mp4'] ) ? trim( wp_unslash( $_POST['mp4'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized below, after decoding a masked URL.
 
 		if ( ! empty( $mp4 ) ) {
 			$private_base_url = aiovg_get_private_base_url();
@@ -93,7 +93,7 @@ class AIOVG_Public_Bunny_Stream {
 			get_post_meta( $post_id, 'trailer_bunny_stream_video_id', true )
 		);
 
-		$bunny_stream_video_id = isset( $_POST['bunny_stream_video_id'] ) ? sanitize_text_field( $_POST['bunny_stream_video_id'] ) : 0;
+		$bunny_stream_video_id = isset( $_POST['bunny_stream_video_id'] ) ? sanitize_text_field( wp_unslash( $_POST['bunny_stream_video_id'] ) ) : 0;
 
 		if ( ! empty( $bunny_stream_video_id ) ) {
 			if ( ! $this->user_can_manage_bunny_stream_video( $bunny_stream_video_id, $post_id, $stored_video_ids ) ) {
@@ -112,8 +112,8 @@ class AIOVG_Public_Bunny_Stream {
 		update_post_meta( $post_id, 'bunny_stream_video_id', $bunny_stream_video_id );
 
 		if ( ! empty( $_POST['deletable_bunny_stream_video_ids'] ) ) {
-			$deletable_bunny_stream_video_ids = explode( ',', $_POST['deletable_bunny_stream_video_ids'] );
-			$deletable_bunny_stream_video_ids = array_filter( array_map( 'sanitize_text_field', $deletable_bunny_stream_video_ids ) );
+			$deletable_bunny_stream_video_ids = explode( ',', sanitize_text_field( wp_unslash( $_POST['deletable_bunny_stream_video_ids'] ) ) );
+			$deletable_bunny_stream_video_ids = array_filter( array_map( 'trim', $deletable_bunny_stream_video_ids ) );
 
 			if ( ! empty( $deletable_bunny_stream_video_ids ) ) {
 				foreach ( $deletable_bunny_stream_video_ids as $bunny_stream_video_id ) {
@@ -125,11 +125,11 @@ class AIOVG_Public_Bunny_Stream {
  		}
 
 		// Trailer Bunny Stream
-		if ( isset( $_POST['aiovg_video_trailer_nonce'] ) && wp_verify_nonce( $_POST['aiovg_video_trailer_nonce'], 'aiovg_save_video_trailer' ) ) {
-			$trailer_type = isset( $_POST['trailer_type'] ) ? sanitize_text_field( $_POST['trailer_type'] ) : '';
-			$trailer_src  = isset( $_POST['trailer_src'] ) ? aiovg_sanitize_url( $_POST['trailer_src'] ) : '';
+		if ( isset( $_POST['aiovg_video_trailer_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['aiovg_video_trailer_nonce'] ) ), 'aiovg_save_video_trailer' ) ) {
+			$trailer_type = isset( $_POST['trailer_type'] ) ? sanitize_text_field( wp_unslash( $_POST['trailer_type'] ) ) : '';
+			$trailer_src  = isset( $_POST['trailer_src'] ) ? aiovg_sanitize_url( wp_unslash( $_POST['trailer_src'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by aiovg_sanitize_url().
 
-			$trailer_bunny_stream_video_id = isset( $_POST['trailer_bunny_stream_video_id'] ) ? sanitize_text_field( $_POST['trailer_bunny_stream_video_id'] ) : '';
+			$trailer_bunny_stream_video_id = isset( $_POST['trailer_bunny_stream_video_id'] ) ? sanitize_text_field( wp_unslash( $_POST['trailer_bunny_stream_video_id'] ) ) : '';
 
 			if ( ! empty( $trailer_bunny_stream_video_id ) ) {
 				if ( ! $this->user_can_manage_bunny_stream_video( $trailer_bunny_stream_video_id, $post_id, $stored_video_ids ) ) {
@@ -148,8 +148,8 @@ class AIOVG_Public_Bunny_Stream {
 			update_post_meta( $post_id, 'trailer_bunny_stream_video_id', $trailer_bunny_stream_video_id );
 
 			if ( ! empty( $_POST['deletable_trailer_bunny_stream_video_ids'] ) ) {
-				$deletable_trailer_bunny_stream_video_ids = explode( ',', $_POST['deletable_trailer_bunny_stream_video_ids'] );
-				$deletable_trailer_bunny_stream_video_ids = array_filter( array_map( 'sanitize_text_field', $deletable_trailer_bunny_stream_video_ids ) );
+				$deletable_trailer_bunny_stream_video_ids = explode( ',', sanitize_text_field( wp_unslash( $_POST['deletable_trailer_bunny_stream_video_ids'] ) ) );
+				$deletable_trailer_bunny_stream_video_ids = array_filter( array_map( 'trim', $deletable_trailer_bunny_stream_video_ids ) );
 
 				if ( ! empty( $deletable_trailer_bunny_stream_video_ids ) ) {
 					foreach ( $deletable_trailer_bunny_stream_video_ids as $deletable_trailer_id ) {
@@ -250,7 +250,7 @@ class AIOVG_Public_Bunny_Stream {
 		$library_id    = intval( $settings['library_id'] );
 		$cdn_hostname  = sanitize_text_field( $settings['cdn_hostname'] );
 		$collection_id = ! empty( $settings['collection_id'] ) ? sanitize_text_field( $settings['collection_id'] ) : '';
-		$title         = isset( $_POST['title'] ) ? sanitize_text_field( $_POST['title'] ) : '';
+		$title         = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
 		$expires       = time() + 3600; // Token expiration time (1 hour from now)
 
 		if ( empty( $title ) ) {
@@ -366,7 +366,7 @@ class AIOVG_Public_Bunny_Stream {
 		// Sanitize and extract parameters
 		$api_key    = sanitize_text_field( $settings['api_key'] );
 		$library_id = intval( $settings['library_id'] );
-		$video_id   = isset( $_POST['video_id'] ) ? sanitize_text_field( $_POST['video_id'] ) : '';
+		$video_id   = isset( $_POST['video_id'] ) ? sanitize_text_field( wp_unslash( $_POST['video_id'] ) ) : '';
 
 		if ( empty( $video_id ) ) {
 			$response['error'] = __( 'Invalid Video ID.', 'all-in-one-video-gallery' );
@@ -461,7 +461,7 @@ class AIOVG_Public_Bunny_Stream {
 
 		// Vars
 		$response = array();
-		$video_id = isset( $_POST['video_id'] ) ? sanitize_text_field( $_POST['video_id'] ) : '';
+		$video_id = isset( $_POST['video_id'] ) ? sanitize_text_field( wp_unslash( $_POST['video_id'] ) ) : '';
 
 		if ( empty( $video_id ) ) {
 			$response['error'] = __( 'Invalid Video ID.', 'all-in-one-video-gallery' );

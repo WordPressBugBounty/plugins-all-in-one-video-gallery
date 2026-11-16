@@ -132,7 +132,7 @@ class AIOVG_Public_PMPro {
 		$level_ids = $access['ids'];
 
 		// Levels that disallow signups are hidden, as in PMPro's own message
-		if ( ! apply_filters( 'pmpro_membership_content_filter_disallowed_levels', false, $level_ids, $access['names'] ) ) {
+		if ( ! apply_filters( 'pmpro_membership_content_filter_disallowed_levels', false, $level_ids, $access['names'] ) ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Paid Memberships Pro hook.
 			foreach ( $level_ids as $key => $level_id ) {
 				$level = pmpro_getLevel( $level_id );
 

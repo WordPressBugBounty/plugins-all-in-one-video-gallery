@@ -97,7 +97,7 @@ class AIOVG_Admin_Import_Export {
 		$enable_comments    = isset( $_POST['enable_comments'] ) ? (int) $_POST['enable_comments'] : 0;
 		$email_capture      = isset( $_POST['email_capture'] ) ? (int) $_POST['email_capture'] : -1;
 		$access_control     = isset( $_POST['access_control'] ) ? (int) $_POST['access_control'] : -1;
-		$restricted_roles   = isset( $_POST['restricted_roles'] ) ? array_map( 'sanitize_text_field', $_POST['restricted_roles'] ) : array();
+		$restricted_roles   = isset( $_POST['restricted_roles'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['restricted_roles'] ) ) : array();
 		$offset             = isset( $_POST['offset'] ) ? (int) $_POST['offset'] : 0;
 		$limit              = isset( $_POST['limit'] ) ? (int) $_POST['limit'] : 20;
 
@@ -220,7 +220,8 @@ class AIOVG_Admin_Import_Export {
 		// Batch processing
 		if ( $current_index > $new_offset ) {
 			$message = sprintf(
-				esc_html__( '%s videos imported, %s excluded as duplicates, and %s failed to import.', 'all-in-one-video-gallery' ),
+				/* translators: 1: Number of videos imported, 2: Number of duplicates, 3: Number of videos that failed. */
+				esc_html__( '%1$s videos imported, %2$s excluded as duplicates, and %3$s failed to import.', 'all-in-one-video-gallery' ),
 				'%%imported%%',
 				'%%skipped%%',
 				'%%failed%%'
@@ -240,7 +241,8 @@ class AIOVG_Admin_Import_Export {
 
 		// Build the final response
 		$message = sprintf(
-			esc_html__( '%s videos imported, %s excluded as duplicates, and %s failed to import.', 'all-in-one-video-gallery' ),
+			/* translators: 1: Number of videos imported, 2: Number of duplicates, 3: Number of videos that failed. */
+			esc_html__( '%1$s videos imported, %2$s excluded as duplicates, and %3$s failed to import.', 'all-in-one-video-gallery' ),
 			'%%imported%%',
 			'%%skipped%%',
 			'%%failed%%'
@@ -285,15 +287,15 @@ class AIOVG_Admin_Import_Export {
 		}
 
 		// Sanitize and extract parameters
-		$csv_file           = isset( $_POST['csv_file'] ) ? esc_url_raw( $_POST['csv_file'] ) : '';
+		$csv_file           = isset( $_POST['csv_file'] ) ? esc_url_raw( wp_unslash( $_POST['csv_file'] ) ) : '';
 		$zip_file           = isset( $_POST['zip_file'] ) ? sanitize_text_field( wp_unslash( $_POST['zip_file'] ) ) : '';
 		$folder             = isset( $_POST['folder'] ) ? sanitize_text_field( wp_unslash( $_POST['folder'] ) ) : '';
-		$columns_separator  = isset( $_POST['columns_separator'] ) ? sanitize_text_field( $_POST['columns_separator'] ) : ',';	
-		$values_separator   = isset( $_POST['values_separator'] ) ? sanitize_text_field( $_POST['values_separator'] ) : ';';	
+		$columns_separator  = isset( $_POST['columns_separator'] ) ? sanitize_text_field( wp_unslash( $_POST['columns_separator'] ) ) : ',';	
+		$values_separator   = isset( $_POST['values_separator'] ) ? sanitize_text_field( wp_unslash( $_POST['values_separator'] ) ) : ';';	
 		$add_new_term       = isset( $_POST['add_new_term'] ) ? (int) $_POST['add_new_term'] : 0;
 		$add_new_user       = isset( $_POST['add_new_user'] ) ? (int) $_POST['add_new_user'] : 0;
 		$set_featured_image = isset( $_POST['set_featured_image'] ) ? (int) $_POST['set_featured_image'] : 0;
-		$csv_columns        = isset( $_POST['csv_columns'] ) ? array_map( 'sanitize_text_field', $_POST['csv_columns'] ) : array();
+		$csv_columns        = isset( $_POST['csv_columns'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['csv_columns'] ) ) : array();
 		$offset             = isset( $_POST['offset'] ) ? (int) $_POST['offset'] : 0;
 		$limit              = isset( $_POST['limit'] ) ? (int) $_POST['limit'] : 20;
 
@@ -347,7 +349,8 @@ class AIOVG_Admin_Import_Export {
 		if ( $has_more ) {
 			if ( count( $imported_data['updated'] ) > 0 ) {
 				$message = sprintf(
-					esc_html__( '%s videos imported, %s updated, %s excluded as duplicates, and %s failed to import.', 'all-in-one-video-gallery' ),
+					/* translators: 1: Number of videos imported, 2: Number updated, 3: Number of duplicates, 4: Number of videos that failed. */
+					esc_html__( '%1$s videos imported, %2$s updated, %3$s excluded as duplicates, and %4$s failed to import.', 'all-in-one-video-gallery' ),
 					'%%imported%%',
 					'%%updated%%',
 					'%%skipped%%',
@@ -355,7 +358,8 @@ class AIOVG_Admin_Import_Export {
 				);
 			} else {
 				$message = sprintf(
-					esc_html__( '%s videos imported, %s excluded as duplicates, and %s failed to import.', 'all-in-one-video-gallery' ),
+					/* translators: 1: Number of videos imported, 2: Number of duplicates, 3: Number of videos that failed. */
+					esc_html__( '%1$s videos imported, %2$s excluded as duplicates, and %3$s failed to import.', 'all-in-one-video-gallery' ),
 					'%%imported%%',
 					'%%skipped%%',
 					'%%failed%%'
@@ -405,7 +409,8 @@ class AIOVG_Admin_Import_Export {
 		// Build the final response
 		if ( count( $imported_data['updated'] ) > 0 ) {
 			$message = sprintf(
-				esc_html__( '%s videos imported, %s updated, %s excluded as duplicates, and %s failed to import.', 'all-in-one-video-gallery' ),
+				/* translators: 1: Number of videos imported, 2: Number updated, 3: Number of duplicates, 4: Number of videos that failed. */
+				esc_html__( '%1$s videos imported, %2$s updated, %3$s excluded as duplicates, and %4$s failed to import.', 'all-in-one-video-gallery' ),
 				'%%imported%%',
 				'%%updated%%',
 				'%%skipped%%',
@@ -419,7 +424,8 @@ class AIOVG_Admin_Import_Export {
 			);
 		} else {
 			$message = sprintf(
-				esc_html__( '%s videos imported, %s excluded as duplicates, and %s failed to import.', 'all-in-one-video-gallery' ),
+				/* translators: 1: Number of videos imported, 2: Number of duplicates, 3: Number of videos that failed. */
+				esc_html__( '%1$s videos imported, %2$s excluded as duplicates, and %3$s failed to import.', 'all-in-one-video-gallery' ),
 				'%%imported%%',
 				'%%skipped%%',
 				'%%failed%%'
@@ -460,8 +466,8 @@ class AIOVG_Admin_Import_Export {
 		}
 
 		// Sanitize and extract parameters.
-		$csv_file          = isset( $_POST['csv_file'] ) ? esc_url_raw( $_POST['csv_file'] ) : '';
-		$columns_separator = isset( $_POST['columns_separator'] ) ? sanitize_text_field( $_POST['columns_separator'] ) : ',';
+		$csv_file          = isset( $_POST['csv_file'] ) ? esc_url_raw( wp_unslash( $_POST['csv_file'] ) ) : '';
+		$columns_separator = isset( $_POST['columns_separator'] ) ? sanitize_text_field( wp_unslash( $_POST['columns_separator'] ) ) : ',';
 
 		$response = $this->parse_csv( $csv_file, array(
 			'columns_separator' => $columns_separator,
@@ -560,7 +566,7 @@ class AIOVG_Admin_Import_Export {
 		$offset    = isset( $_POST['offset'] ) ? (int) $_POST['offset'] : 0;
 		$limit     = isset( $_POST['limit'] ) ? (int) $_POST['limit'] : 200;
 		$total     = isset( $_POST['total'] ) ? (int) $_POST['total'] : 0;
-		$timestamp = isset( $_POST['timestamp'] ) ? sanitize_text_field( $_POST['timestamp'] ) : date( 'YmdHis' );
+		$timestamp = isset( $_POST['timestamp'] ) ? sanitize_text_field( wp_unslash( $_POST['timestamp'] ) ) : gmdate( 'YmdHis' );
 		$file_name = isset( $_POST['file_name'] ) ? sanitize_file_name( wp_unslash( $_POST['file_name'] ) ) : '';
 
 		$csv_columns = $this->get_csv_column_mapping_fields();
@@ -583,7 +589,7 @@ class AIOVG_Admin_Import_Export {
 
 		// Stop the folder being listed
 		if ( ! file_exists( $export_dir . 'index.html' ) ) {
-			@file_put_contents( $export_dir . 'index.html', '' );
+			@file_put_contents( $export_dir . 'index.html', '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Empty file in our uploads folder, during AJAX; WP_Filesystem may ask for FTP credentials.
 		}
 
 		// Query videos
@@ -805,7 +811,7 @@ class AIOVG_Admin_Import_Export {
 		$file_url  = trailingslashit( $export_url ) . $file_name;
 
 		// Open file in append mode (or write mode if first batch)
-		$handle = fopen( $file_path, $offset === 0 ? 'w' : 'a' );
+		$handle = fopen( $file_path, $offset === 0 ? 'w' : 'a' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Appends each batch with fputcsv(); WP_Filesystem has no append or CSV writer.
 		if ( false === $handle ) {
 			wp_send_json_error( array( 'error' => __( 'Sorry, we were unable to open the CSV file for writing. Please check file permissions and try again.', 'all-in-one-video-gallery' ) ) );
 		}
@@ -821,12 +827,13 @@ class AIOVG_Admin_Import_Export {
 			fputcsv( $handle, $row, ',', '"', '\\' );
 		}
 
-		fclose( $handle );
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closes the CSV handle opened above.
 
 		// Batch processing
 		if ( $new_offset < $total ) {
 			$message = sprintf(
-				__( '%d out of %d videos processed', 'all-in-one-video-gallery' ),
+				/* translators: 1: Number of videos processed so far, 2: Total number of videos. */
+				__( '%1$d out of %2$d videos processed', 'all-in-one-video-gallery' ),
 				$new_offset,
 				$total
 			);
@@ -847,7 +854,8 @@ class AIOVG_Admin_Import_Export {
 
 		// Build the final response
 		$message = sprintf(
-			__( 'Your CSV export is complete. %s video records processed successfully. <a href="%s" target="_blank">Click here to download the CSV file</a>.', 'all-in-one-video-gallery' ),
+			/* translators: 1: Number of videos exported, 2: CSV file URL. */
+			__( 'Your CSV export is complete. %1$s video records processed successfully. <a href="%2$s" target="_blank">Click here to download the CSV file</a>.', 'all-in-one-video-gallery' ),
 			$new_offset,
 			esc_url( $file_url )
 		);
@@ -892,7 +900,7 @@ class AIOVG_Admin_Import_Export {
 		$limit     = isset( $_POST['limit'] ) ? (int) $_POST['limit'] : 50;
 		$total     = isset( $_POST['total'] ) ? (int) $_POST['total'] : 0;
 		$zip_index = isset( $_POST['zip_index'] ) ? (int) $_POST['zip_index'] : 1;
-		$timestamp = isset( $_POST['timestamp'] ) ? sanitize_text_field( $_POST['timestamp'] ) : date( 'YmdHis' );
+		$timestamp = isset( $_POST['timestamp'] ) ? sanitize_text_field( wp_unslash( $_POST['timestamp'] ) ) : gmdate( 'YmdHis' );
 				
 		$max_size  = apply_filters( 'aiovg_export_max_zip_size', 1024 * 1024 * 1024 ); // 1GB default
 		$zip_files = array();
@@ -915,7 +923,7 @@ class AIOVG_Admin_Import_Export {
 
 		// Stop the folder being listed
 		if ( ! file_exists( $export_dir . 'index.html' ) ) {
-			@file_put_contents( $export_dir . 'index.html', '' );
+			@file_put_contents( $export_dir . 'index.html', '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Empty file in our uploads folder, during AJAX; WP_Filesystem may ask for FTP credentials.
 		}
 
 		// Query videos
@@ -1080,7 +1088,8 @@ class AIOVG_Admin_Import_Export {
 		// Batch processing
 		if ( $new_offset < $total ) {
 			$message = sprintf(
-				__( '%d out of %d videos processed', 'all-in-one-video-gallery' ),
+				/* translators: 1: Number of videos processed so far, 2: Total number of videos. */
+				__( '%1$d out of %2$d videos processed', 'all-in-one-video-gallery' ),
 				$new_offset,
 				$total
 			);
@@ -1100,7 +1109,8 @@ class AIOVG_Admin_Import_Export {
 
 		// Build the final response
 		$message = sprintf(
-			__( 'Your ZIP export is complete. %s video records processed, and %s skipped.', 'all-in-one-video-gallery' ),
+			/* translators: 1: Number of videos exported, 2: Number of videos skipped. */
+			__( 'Your ZIP export is complete. %1$s video records processed, and %2$s skipped.', 'all-in-one-video-gallery' ),
 			'%%exported%%',
 			'%%skipped%%'
 		);
@@ -1151,9 +1161,9 @@ class AIOVG_Admin_Import_Export {
 		if ( $video_id > 0 ) {
 			$post      = get_post( $video_id );
 			$slug      = ( $post && ! empty( $post->post_name ) ) ? $post->post_name : 'video-' . $video_id;
-			$file_name = 'aiovg-emails-' . $slug . '-' . date( 'Y-m-d' ) . '.csv';
+			$file_name = 'aiovg-emails-' . $slug . '-' . gmdate( 'Y-m-d' ) . '.csv';
 		} else {
-			$file_name = 'aiovg-emails-' . date( 'Y-m-d' ) . '.csv';
+			$file_name = 'aiovg-emails-' . gmdate( 'Y-m-d' ) . '.csv';
 		}
 
 		aiovg_email_capture_generate_csv( $leads, $file_name );
@@ -1230,10 +1240,7 @@ class AIOVG_Admin_Import_Export {
 		}
 
 		if ( ! is_readable( $csv_file_path ) ) {
-			chmod( $csv_file_path, 0744 );
-			if ( ! is_readable( $csv_file_path ) ) {
-				return new WP_Error( 'csv_not_readable', __( 'Sorry, we could not read the selected CSV file. Please check the file and try again.', 'all-in-one-video-gallery' ) );
-			}
+			return new WP_Error( 'csv_not_readable', __( 'Sorry, we could not read the selected CSV file. Please check the file and try again.', 'all-in-one-video-gallery' ) );
 		}
 
 		if ( function_exists( 'wp_check_filetype' ) ) {
@@ -1243,7 +1250,7 @@ class AIOVG_Admin_Import_Export {
 			}
 		}
 
-		if ( false === ( $handle = fopen( $csv_file_path, 'r' ) ) ) {
+		if ( false === ( $handle = fopen( $csv_file_path, 'r' ) ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Reads the CSV row by row with fgetcsv(), in batches.
 			return new WP_Error( 'csv_open_failed', __( 'Sorry, we were unable to open the selected CSV file. Please check the file and try again.', 'all-in-one-video-gallery' ) );
 		}
 
@@ -1253,14 +1260,14 @@ class AIOVG_Admin_Import_Export {
 		$csv_row_number++;
 
 		if ( empty( $headers ) || ! is_array( $headers ) ) {
-			fclose( $handle );
+			fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closes the CSV handle opened above.
 			return new WP_Error( 'invalid_csv_headers', __( 'Sorry, the CSV file does not contain the required column headers. Please check the file and try again.', 'all-in-one-video-gallery' ) );
 		}
 
 		$response['headers'] = array_map( 'trim', $headers );
 
 		if ( true === $attributes['headers_only'] ) {
-			fclose( $handle );
+			fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closes the CSV handle opened above.
 			return $response;
 		}
 
@@ -1334,7 +1341,7 @@ class AIOVG_Admin_Import_Export {
 			}
 		}
 
-		fclose( $handle );
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closes the CSV handle opened above.
 
 		// Calculate next offset for batch import
 		$response['new_offset'] = $csv_row_number - 1;
@@ -1407,6 +1414,7 @@ class AIOVG_Admin_Import_Export {
 			. "\t</system.webServer>\n"
 			. "</configuration>";
 
+		// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Temporary protection files in our uploads folder, during AJAX; WP_Filesystem may ask for FTP credentials.
 		if ( false === file_put_contents( $htaccess_file, $htaccess_rules ) ) {
 			return new WP_Error( 'file_write_failed', __( 'We were unable to complete a required file operation. Please make sure your server allows writing files.', 'all-in-one-video-gallery' ) );
 		}
@@ -1414,6 +1422,7 @@ class AIOVG_Admin_Import_Export {
 		if ( false === file_put_contents( $webconfig_file, $webconfig_rules ) ) {
 			return new WP_Error( 'file_write_failed', __( 'We were unable to complete a required file operation. Please make sure your server allows writing files.', 'all-in-one-video-gallery' ) );
 		}
+		// phpcs:enable WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 
 		// Unzip
 		$unzip_result = unzip_file( $zip_file_path, $extract_path );
@@ -1421,11 +1430,11 @@ class AIOVG_Admin_Import_Export {
 		if ( is_wp_error( $unzip_result ) ) {
 			// Remove protection files before returning
 			if ( file_exists( $htaccess_file ) ) {
-				unlink( $htaccess_file );
+				wp_delete_file( $htaccess_file );
 			}
 
 			if ( file_exists( $webconfig_file ) ) {
-				unlink( $webconfig_file );
+				wp_delete_file( $webconfig_file );
 			}
 
 			return $unzip_result;
@@ -1448,18 +1457,18 @@ class AIOVG_Admin_Import_Export {
 
 				$filetype = wp_check_filetype( $file->getFilename() );
 				if ( empty( $filetype['type'] ) ) {
-					unlink( $file->getPathname() );
+					wp_delete_file( $file->getPathname() );
 				}
 			}
 		}
 
 		// Security cleanup
 		if ( file_exists( $htaccess_file ) ) {
-			unlink( $htaccess_file );
+			wp_delete_file( $htaccess_file );
 		}
 
 		if ( file_exists( $webconfig_file ) ) {
-			unlink( $webconfig_file );
+			wp_delete_file( $webconfig_file );
 		}
 
 		return untrailingslashit( $extract_path );
@@ -1641,7 +1650,8 @@ class AIOVG_Admin_Import_Export {
 				$response['failed'][] = $csv_row_number;
 
 				$response['errors'][] = sprintf(
-					__( '<strong>Line #%d:</strong> %s', 'all-in-one-video-gallery' ),
+					/* translators: 1: CSV line number, 2: Error message. */
+					__( '<strong>Line #%1$d:</strong> %2$s', 'all-in-one-video-gallery' ),
 					$csv_row_number,
 					esc_html( $row['error'] )
 				);
@@ -1653,6 +1663,7 @@ class AIOVG_Admin_Import_Export {
 				$response['failed'][] = $csv_row_number;
 
 				$response['errors'][] = sprintf(
+					/* translators: %d: CSV line number. */
 					__( '<strong>Line #%d:</strong> Invalid video title or source.', 'all-in-one-video-gallery' ),
 					$csv_row_number
 				);
@@ -1680,7 +1691,8 @@ class AIOVG_Admin_Import_Export {
 				$response['failed'][] = $csv_row_number;
 
 				$response['errors'][] = sprintf(
-					__( '<strong>Line #%d:</strong> %s - Invalid video source.', 'all-in-one-video-gallery' ),
+					/* translators: 1: CSV line number, 2: Video title. */
+					__( '<strong>Line #%1$d:</strong> %2$s - Invalid video source.', 'all-in-one-video-gallery' ),
 					$csv_row_number,
 					$post_title
 				);
@@ -1732,7 +1744,8 @@ class AIOVG_Admin_Import_Export {
 					$response['skipped'][] = $csv_row_number;
 
 					$response['errors'][] = sprintf(
-						__( '<strong>Line #%d:</strong> %s - Video already exists.', 'all-in-one-video-gallery' ),
+						/* translators: 1: CSV line number, 2: Video title. */
+						__( '<strong>Line #%1$d:</strong> %2$s - Video already exists.', 'all-in-one-video-gallery' ),
 						$csv_row_number,
 						$post_title
 					);
@@ -1775,7 +1788,8 @@ class AIOVG_Admin_Import_Export {
 					$args['post_author'] = (int) $post_author;
 				} else {
 					$response['errors'][] = sprintf(
-						__( '<strong>Line #%d:</strong> %s - %s', 'all-in-one-video-gallery' ),
+						/* translators: 1: CSV line number, 2: Video title, 3: Error message. */
+						__( '<strong>Line #%1$d:</strong> %2$s - %3$s', 'all-in-one-video-gallery' ),
 						$csv_row_number,
 						$post_title,
 						$post_author->get_error_message()
@@ -1822,7 +1836,8 @@ class AIOVG_Admin_Import_Export {
 							}
 						} else {
 							$response['errors'][] = sprintf(
-								__( '<strong>Line #%d:</strong> %s - %s', 'all-in-one-video-gallery' ),
+								/* translators: 1: CSV line number, 2: Video title, 3: Error message. */
+								__( '<strong>Line #%1$d:</strong> %2$s - %3$s', 'all-in-one-video-gallery' ),
 								$csv_row_number,
 								$post_title,
 								$categories->get_error_message()
@@ -1844,7 +1859,8 @@ class AIOVG_Admin_Import_Export {
 							}
 						} else {
 							$response['errors'][] = sprintf(
-								__( '<strong>Line #%d:</strong> %s - %s', 'all-in-one-video-gallery' ),
+								/* translators: 1: CSV line number, 2: Video title, 3: Error message. */
+								__( '<strong>Line #%1$d:</strong> %2$s - %3$s', 'all-in-one-video-gallery' ),
 								$csv_row_number,
 								$post_title,
 								$tags->get_error_message()
@@ -2147,7 +2163,8 @@ class AIOVG_Admin_Import_Export {
 				$response['failed'][] = $csv_row_number;
 
 				$response['errors'][] = sprintf(
-					__( '<strong>Line #%d:</strong> %s - %s', 'all-in-one-video-gallery' ),
+					/* translators: 1: CSV line number, 2: Video title, 3: Error message. */
+					__( '<strong>Line #%1$d:</strong> %2$s - %3$s', 'all-in-one-video-gallery' ),
 					$csv_row_number,
 					$post_title,
 					$post_id->get_error_message()
@@ -2350,7 +2367,8 @@ class AIOVG_Admin_Import_Export {
 							return new WP_Error(
 								'term_insert_failed',
 								sprintf(
-									__( 'Failed to create term "%s" in taxonomy "%s".', 'all-in-one-video-gallery' ),
+									/* translators: 1: Term name, 2: Taxonomy name. */
+									__( 'Failed to create term "%1$s" in taxonomy "%2$s".', 'all-in-one-video-gallery' ),
 									$term_name,
 									$taxonomy
 								)
@@ -2362,7 +2380,8 @@ class AIOVG_Admin_Import_Export {
 						return new WP_Error(
 							'term_not_found',
 							sprintf(
-								__( 'Term "%s" not found in taxonomy "%s" and adding new terms is disabled.', 'all-in-one-video-gallery' ),
+								/* translators: 1: Term name, 2: Taxonomy name. */
+								__( 'Term "%1$s" not found in taxonomy "%2$s" and adding new terms is disabled.', 'all-in-one-video-gallery' ),
 								$term_name,
 								$taxonomy
 							)
@@ -2427,6 +2446,7 @@ class AIOVG_Admin_Import_Export {
 				return $new_user_id;
 			}
 
+			/* translators: %s: Email address. */
 			return new WP_Error( 'invalid_user', sprintf( __( 'User with email "%s" does not exist.', 'all-in-one-video-gallery' ), $email ) );
 		}
 
@@ -2437,6 +2457,7 @@ class AIOVG_Admin_Import_Export {
 			return $user_id;
 		}
 
+		/* translators: %s: User login, email or ID. */
 		return new WP_Error( 'invalid_user', sprintf( __( 'User "%s" does not exist.', 'all-in-one-video-gallery' ), $post_author ) );
 	}
 
@@ -2528,28 +2549,25 @@ class AIOVG_Admin_Import_Export {
 	private function add_post_meta_bulk( $post_id, $data ) {
 		global $wpdb;
 
-		$meta_table = _get_meta_table( 'post' );
-
 		// Basic sanity check.
 		if ( empty( $post_id ) || empty( $data ) ) {
 			return;
 		}
 
 		// Bulk insert all new meta entries.
-		$placeholders = array();
-		$values       = array();
+		$values = array();
 
 		foreach ( $data as $key => $value ) {
-			$placeholders[] = "(%d, %s, %s)";
-			$values[]       = $post_id;
-			$values[]       = $key;
-			$values[]       = maybe_serialize( $value );
+			$values[] = $post_id;
+			$values[] = $key;
+			$values[] = maybe_serialize( $value );
 		}
 
-		$sql  = "INSERT INTO $meta_table (`post_id`, `meta_key`, `meta_value`) VALUES ";
-		$sql .= implode( ',', $placeholders );
-
-		$wpdb->query( $wpdb->prepare( $sql, $values ) );
+		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- One "(%d, %s, %s)" per row; $values holds three per row.
+		$wpdb->query( $wpdb->prepare(
+			"INSERT INTO {$wpdb->postmeta} (`post_id`, `meta_key`, `meta_value`) VALUES " . implode( ',', array_fill( 0, count( $data ), '(%d, %s, %s)' ) ),
+			$values
+		) );
 	}
 
 	/**
@@ -2591,25 +2609,25 @@ class AIOVG_Admin_Import_Export {
 			// Step 1: Delete existing meta for the given keys.
 			$meta_keys = array_keys( $data );
 
-			$placeholders = implode( ', ', array_fill( 0, count( $meta_keys ), '%s' ) );
-			$sql_delete   = "DELETE FROM {$meta_table} WHERE post_id = %d AND meta_key IN ($placeholders)";
-			$wpdb->query( $wpdb->prepare( $sql_delete, array_merge( array( $post_id ), $meta_keys ) ) );
+			$wpdb->query( $wpdb->prepare(
+				"DELETE FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key IN (" . implode( ', ', array_fill( 0, count( $meta_keys ), '%s' ) ) . ')',
+				array_merge( array( $post_id ), $meta_keys )
+			) );
 
 			// Step 2: Bulk insert all new meta entries.
-			$placeholders = array();
-			$values       = array();
+			$values = array();
 
 			foreach ( $data as $key => $value ) {
-				$placeholders[] = "(%d, %s, %s)";
-				$values[]       = $post_id;
-				$values[]       = $key;
-				$values[]       = maybe_serialize( $value );
+				$values[] = $post_id;
+				$values[] = $key;
+				$values[] = maybe_serialize( $value );
 			}
 
-			$sql_insert  = "INSERT INTO {$meta_table} (`post_id`, `meta_key`, `meta_value`) VALUES ";
-			$sql_insert .= implode( ',', $placeholders );
-
-			$wpdb->query( $wpdb->prepare( $sql_insert, $values ) );
+			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- One "(%d, %s, %s)" per row; $values holds three per row.
+			$wpdb->query( $wpdb->prepare(
+				"INSERT INTO {$wpdb->postmeta} (`post_id`, `meta_key`, `meta_value`) VALUES " . implode( ',', array_fill( 0, count( $data ), '(%d, %s, %s)' ) ),
+				$values
+			) );
 
 			// Commit if all went well.
 			if ( $supports_transactions ) {

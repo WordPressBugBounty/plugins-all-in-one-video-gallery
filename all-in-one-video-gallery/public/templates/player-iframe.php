@@ -8,6 +8,11 @@
  *
  * @package All_In_One_Video_Gallery
  */
+
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
  
 $player_html            = '';
 $maybe_shortcode        = false;
@@ -50,7 +55,7 @@ if ( ! empty( $post_meta ) ) {
 } else {
     if ( in_array( $current_video_provider, $thirdparty_providers_all ) ) {
         if ( isset( $_GET[ $current_video_provider ] ) ) {
-            $embed_url = aiovg_base64_decode( $_GET[ $current_video_provider ] );
+            $embed_url = aiovg_base64_decode( sanitize_text_field( wp_unslash( $_GET[ $current_video_provider ] ) ) );
         }
     }
 }
@@ -84,7 +89,7 @@ if ( ! empty( $embed_url ) ) {
             $embed_url = add_query_arg( $name, $time, $embed_url );
         } 
 
-        $autoplay = isset( $_GET['autoplay'] ) ? $_GET['autoplay'] : $player_settings['autoplay'];
+        $autoplay = isset( $_GET['autoplay'] ) ? sanitize_text_field( wp_unslash( $_GET['autoplay'] ) ) : $player_settings['autoplay'];
         $embed_url = add_query_arg( 'autoplay', (int) $autoplay, $embed_url );
 
         $embed_url = add_query_arg( 'cc_load_policy', (int) $player_settings['cc_load_policy'], $embed_url );        
@@ -97,10 +102,10 @@ if ( ! empty( $embed_url ) ) {
             $embed_url = add_query_arg( 'fs', 0, $embed_url );
         } 
 
-        $loop = isset( $_GET['loop'] ) ? $_GET['loop'] : $player_settings['loop'];
+        $loop = isset( $_GET['loop'] ) ? sanitize_text_field( wp_unslash( $_GET['loop'] ) ) : $player_settings['loop'];
         $embed_url = add_query_arg( 'loop', (int) $loop, $embed_url );
 
-        $muted = isset( $_GET['muted'] ) ? $_GET['muted'] : $player_settings['muted'];
+        $muted = isset( $_GET['muted'] ) ? sanitize_text_field( wp_unslash( $_GET['muted'] ) ) : $player_settings['muted'];
         $embed_url = add_query_arg( 'mute', (int) $muted, $embed_url ); 
 
         $playsinline = ! empty( $player_settings['playsinline'] ) ? 1 : 0;
@@ -118,7 +123,7 @@ if ( ! empty( $embed_url ) ) {
 
         if ( ! empty( $oembed['html'] ) ) {
             if ( $iframe_src = aiovg_extract_iframe_src( $oembed['html'] ) ) {
-                $parsed_url = parse_url( $iframe_src, PHP_URL_QUERY );
+                $parsed_url = wp_parse_url( $iframe_src, PHP_URL_QUERY );
                 parse_str( $parsed_url, $queries );
 
                 if ( isset( $queries['app_id'] ) ) {
@@ -131,13 +136,13 @@ if ( ! empty( $embed_url ) ) {
             }
         }
 
-        $autoplay = isset( $_GET['autoplay'] ) ? $_GET['autoplay'] : $player_settings['autoplay'];
+        $autoplay = isset( $_GET['autoplay'] ) ? sanitize_text_field( wp_unslash( $_GET['autoplay'] ) ) : $player_settings['autoplay'];
         $embed_url = add_query_arg( 'autoplay', (int) $autoplay, $embed_url );
 
-        $loop = isset( $_GET['loop'] ) ? $_GET['loop'] : $player_settings['loop'];
+        $loop = isset( $_GET['loop'] ) ? sanitize_text_field( wp_unslash( $_GET['loop'] ) ) : $player_settings['loop'];
         $embed_url = add_query_arg( 'loop', (int) $loop, $embed_url );
 
-        $muted = isset( $_GET['muted'] ) ? $_GET['muted'] : $player_settings['muted'];
+        $muted = isset( $_GET['muted'] ) ? sanitize_text_field( wp_unslash( $_GET['muted'] ) ) : $player_settings['muted'];
         $embed_url = add_query_arg( 'muted', (int) $muted, $embed_url );
 
         $playsinline = ! empty( $player_settings['playsinline'] ) ? 1 : 0;
@@ -160,7 +165,7 @@ if ( ! empty( $embed_url ) ) {
             // The iframe player only reads "loop"; the rest is set on the player in Dailymotion Studio.
             $embed_url = 'https://geo.dailymotion.com/player/' . $dailymotion_player_id . '.html?video=' . aiovg_get_dailymotion_id_from_url( $embed_url );
 
-            $loop = isset( $_GET['loop'] ) ? $_GET['loop'] : $player_settings['loop'];
+            $loop = isset( $_GET['loop'] ) ? sanitize_text_field( wp_unslash( $_GET['loop'] ) ) : $player_settings['loop'];
             if ( ! empty( $loop ) ) {
                 $embed_url = add_query_arg( 'loop', 'true', $embed_url );
             }
@@ -173,7 +178,7 @@ if ( ! empty( $embed_url ) ) {
             $dailymotion_image = '';
 
             if ( isset( $_GET['poster'] ) ) {
-                $dailymotion_image = aiovg_base64_decode( $_GET['poster'] );
+                $dailymotion_image = aiovg_base64_decode( sanitize_text_field( wp_unslash( $_GET['poster'] ) ) );
             } elseif ( ! empty( $post_meta ) ) {
                 $image_data = aiovg_get_image( $post_id, 'large' );
                 $dailymotion_image = $image_data['src'];
@@ -209,13 +214,13 @@ if ( ! empty( $embed_url ) ) {
     if ( 'facebook' == $current_video_provider ) {
         $embed_url = 'https://www.facebook.com/plugins/video.php?href=' . urlencode( $embed_url ) . '&width=560&height=315&show_text=false&appId';
     
-        $autoplay = isset( $_GET['autoplay'] ) ? $_GET['autoplay'] : $player_settings['autoplay'];
+        $autoplay = isset( $_GET['autoplay'] ) ? sanitize_text_field( wp_unslash( $_GET['autoplay'] ) ) : $player_settings['autoplay'];
         $embed_url = add_query_arg( 'autoplay', (int) $autoplay, $embed_url );
 
-        $loop = isset( $_GET['loop'] ) ? $_GET['loop'] : $player_settings['loop'];
+        $loop = isset( $_GET['loop'] ) ? sanitize_text_field( wp_unslash( $_GET['loop'] ) ) : $player_settings['loop'];
         $embed_url = add_query_arg( 'loop', (int) $loop, $embed_url );
 
-        $muted = isset( $_GET['muted'] ) ? $_GET['muted'] : $player_settings['muted'];
+        $muted = isset( $_GET['muted'] ) ? sanitize_text_field( wp_unslash( $_GET['muted'] ) ) : $player_settings['muted'];
         $embed_url = add_query_arg( 'muted', (int) $muted, $embed_url );
 
         $embed_url = apply_filters( 'aiovg_facebook_embed_url', $embed_url, $post_id );
@@ -223,26 +228,26 @@ if ( ! empty( $embed_url ) ) {
 
     // Bunny Stream
     if ( 'bunny_stream' == $current_video_provider ) {
-        $autoplay = isset( $_GET['autoplay'] ) ? $_GET['autoplay'] : $player_settings['autoplay'];
+        $autoplay = isset( $_GET['autoplay'] ) ? sanitize_text_field( wp_unslash( $_GET['autoplay'] ) ) : $player_settings['autoplay'];
         $autoplay = ! empty( $autoplay ) ? 'true' : 'false';
         $embed_url = add_query_arg( 'autoplay', $autoplay, $embed_url );
 
-        $preload = isset( $_GET['preload'] ) ? $_GET['preload'] : $player_settings['preload'];
+        $preload = isset( $_GET['preload'] ) ? sanitize_text_field( wp_unslash( $_GET['preload'] ) ) : $player_settings['preload'];
         $preload = ( 'none' == $preload ) ? 'false' : 'true';
         $embed_url = add_query_arg( 'preload', $preload, $embed_url );
 
-        $muted = isset( $_GET['muted'] ) ? $_GET['muted'] : $player_settings['muted'];
+        $muted = isset( $_GET['muted'] ) ? sanitize_text_field( wp_unslash( $_GET['muted'] ) ) : $player_settings['muted'];
         $muted = ! empty( $muted ) ? 'true' : 'false';
         $embed_url = add_query_arg( 'muted', $muted, $embed_url );
 
-        $loop = isset( $_GET['loop'] ) ? $_GET['loop'] : $player_settings['loop'];
+        $loop = isset( $_GET['loop'] ) ? sanitize_text_field( wp_unslash( $_GET['loop'] ) ) : $player_settings['loop'];
         $loop = ! empty( $loop ) ? 'true' : 'false';
         $embed_url = add_query_arg( 'loop', $loop, $embed_url );
 
         $playsinline = ! empty( $player_settings['playsinline'] ) ? 'true' : 'false';
         $embed_url = add_query_arg( 'playsinline', $playsinline, $embed_url );
 
-        $speed = isset( $_GET['speed'] ) ? $_GET['speed'] : isset( $player_settings['controls']['speed'] );
+        $speed = isset( $_GET['speed'] ) ? sanitize_text_field( wp_unslash( $_GET['speed'] ) ) : isset( $player_settings['controls']['speed'] );
         $speed = ! empty( $speed ) ? 'true' : 'false';
         $embed_url = add_query_arg( 'showSpeed', $speed, $embed_url );
     }
@@ -265,6 +270,12 @@ if ( ! empty( $embed_url ) ) {
         );
     }
 }
+
+// Update views count. Before any output: it may set the views cookie.
+$update_views = isset( $general_settings['statistics'] ) ? (int) $general_settings['statistics'] : 1;
+if ( ! empty( $update_views ) && empty( $is_trailer ) && 'aiovg_videos' == $post_type ) {
+    aiovg_update_views_count( $post_id );
+}
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -278,20 +289,27 @@ if ( ! empty( $embed_url ) ) {
         <link rel="canonical" href="<?php echo esc_url( $post_url ); ?>" />
     <?php endif; ?>
     
-	<style type="text/css">
-        html, 
-        body, 
-        iframe {            
-            margin: 0 !important; 
-            padding: 0 !important; 
+    <?php
+    // No file: carries the inline styles; printed here, before wp_head() on shortcode embeds.
+    wp_register_style( AIOVG_PLUGIN_SLUG . '-iframe-player', false, array(), AIOVG_PLUGIN_VERSION );
+
+    ob_start();
+    ?>
+        html,
+        body,
+        iframe {
+            margin: 0 !important;
+            padding: 0 !important;
             width: 100% !important;
             height: 100% !important;
             overflow: hidden;
         }
-    </style>
+    <?php
+    wp_add_inline_style( AIOVG_PLUGIN_SLUG . '-iframe-player', ob_get_clean() );
 
-    <?php if ( ! empty( $dailymotion_watch_url ) ) : ?>
-        <style type="text/css">
+    if ( ! empty( $dailymotion_watch_url ) ) :
+        ob_start();
+        ?>
             #aiovg-dailymotion-link {
                 display: flex;
                 position: relative;
@@ -337,26 +355,28 @@ if ( ! empty( $embed_url ) ) {
                 outline: 2px solid #fff;
                 outline-offset: 2px;
             }
-        </style>
-    <?php endif; ?>
+        <?php
+        wp_add_inline_style( AIOVG_PLUGIN_SLUG . '-iframe-player', ob_get_clean() );
+    endif;
 
-    <?php if ( isset( $general_settings['custom_css'] ) && ! empty( $general_settings['custom_css'] ) ) : ?>
-        <style type="text/css">
-		    <?php echo esc_html( $general_settings['custom_css'] ); ?>
-        </style>
-	<?php endif; ?>
-    
+    if ( isset( $general_settings['custom_css'] ) && ! empty( $general_settings['custom_css'] ) ) {
+        wp_add_inline_style( AIOVG_PLUGIN_SLUG . '-iframe-player', wp_strip_all_tags( $general_settings['custom_css'] ) );
+    }
+
+    wp_print_styles( AIOVG_PLUGIN_SLUG . '-iframe-player' );
+    ?>
+
     <?php if ( $maybe_shortcode ) wp_head(); ?>
     <?php do_action( 'aiovg_player_iframe_head' ); ?>
 </head>
 <body>    
-    <?php echo $maybe_shortcode ? do_shortcode( $player_html ) : $player_html; ?>
+    <?php echo $maybe_shortcode ? do_shortcode( $player_html ) : $player_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Embed code sanitized on save; the rest is built escaped. ?>
     <?php if ( $maybe_shortcode ) wp_footer(); ?>
     <?php do_action( 'aiovg_player_iframe_footer' ); ?>
 
     <?php if ( $is_youtube ) : ?>
-        <script src="https://www.youtube.com/iframe_api"></script>
-        <script type="text/javascript">
+        <?php wp_print_script_tag( array( 'src' => 'https://www.youtube.com/iframe_api' ) ); ?>
+        <?php ob_start(); ?>
             let player     = null;
             let isApiReady = false;
 
@@ -417,13 +437,13 @@ if ( ! empty( $embed_url ) ) {
                         }
                         break;
                 }
-            });          
-        </script>
+            });
+        <?php wp_print_inline_script_tag( ob_get_clean() ); ?>
     <?php endif; ?>
 
     <?php if ( $is_vimeo ) : ?>
-        <script src="https://player.vimeo.com/api/player.js"></script>
-        <script type="text/javascript">
+        <?php wp_print_script_tag( array( 'src' => 'https://player.vimeo.com/api/player.js' ) ); ?>
+        <?php ob_start(); ?>
             let iframe     = document.querySelector( '#aiovg-player-iframe' );
             let player     = new Vimeo.Player( iframe );
             let isApiReady = false;
@@ -478,16 +498,9 @@ if ( ! empty( $embed_url ) ) {
                         }
                         break;
                 }
-            });          
-        </script>
-    <?php endif; ?>  
+            });
+        <?php wp_print_inline_script_tag( ob_get_clean() ); ?>
+    <?php endif; ?>
     
-    <?php
-    // Update views count.
-    $update_views = isset( $general_settings['statistics'] ) ? (int) $general_settings['statistics'] : 1;
-    if ( ! empty( $update_views ) && empty( $is_trailer ) && 'aiovg_videos' == $post_type ) {
-        aiovg_update_views_count( $post_id );
-    }
-    ?>
 </body>
 </html>

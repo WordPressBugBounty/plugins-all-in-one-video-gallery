@@ -9,6 +9,11 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $general_settings = aiovg_get_option( 'aiovg_general_settings' );
 $images_settings  = aiovg_get_option( 'aiovg_images_settings' );
 $trailer_settings = aiovg_get_option( 'aiovg_trailer_settings' );
@@ -65,7 +70,7 @@ if ( ! $has_access && ! empty( $trailer_settings['enable_trailers'] ) && ! aiovg
     }
 
     // After Thumbnail Image
-    the_aiovg_content_after_thumbnail_image( $attributes );
+    aiovg_the_content_after_thumbnail_image( $attributes );
 
     echo '</a>';
     ?>
@@ -79,7 +84,7 @@ if ( ! $has_access && ! empty( $trailer_settings['enable_trailers'] ) && ! aiovg
                 $filtered_title .= '</a>';
                 $filtered_title = apply_filters( 'aiovg_the_title', $filtered_title, $post->ID );
 
-                echo $filtered_title;
+                echo $filtered_title; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped above; aiovg_the_title filter output.
                 ?>
             </div>
         <?php endif; ?>
@@ -182,7 +187,7 @@ if ( ! $has_access && ! empty( $trailer_settings['enable_trailers'] ) && ! aiovg
 
             foreach ( $meta as $meta_class => $meta_content ) {
                 echo '<div class="aiovg-' . esc_attr( $meta_class ) . ' aiovg-flex aiovg-gap-1 aiovg-items-center">';
-                echo $meta_content;
+                echo $meta_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built from escaped values and fixed SVG icons above.
 
                 if ( $i < $last_index ) {
                     echo '<span class="aiovg-text-separator">•</span>';
@@ -221,7 +226,7 @@ if ( ! $has_access && ! empty( $trailer_settings['enable_trailers'] ) && ! aiovg
                 echo '<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="aiovg-flex-shrink-0">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
                 </svg>';
-                echo '<div class="aiovg-item-category">' . implode( '<span class="aiovg-separator">,</span></div><div class="aiovg-item-category">', $meta ) . '</div>';
+                echo '<div class="aiovg-item-category">' . wp_kses_post( implode( '<span class="aiovg-separator">,</span></div><div class="aiovg-item-category">', $meta ) ) . '</div>';
                 echo '</div>';
             }
         }
@@ -253,14 +258,14 @@ if ( ! $has_access && ! empty( $trailer_settings['enable_trailers'] ) && ! aiovg
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
                 </svg>';
-                echo '<div class="aiovg-item-tag">' . implode( '<span class="aiovg-separator">,</span></div><div class="aiovg-item-tag">', $meta ) . '</div>';
+                echo '<div class="aiovg-item-tag">' . wp_kses_post( implode( '<span class="aiovg-separator">,</span></div><div class="aiovg-item-tag">', $meta ) ) . '</div>';
                 echo '</div>';
             }
         }
         ?>         
 
         <?php if ( $attributes['show_excerpt'] ) : ?>
-            <div class="aiovg-excerpt aiovg-hide-if-empty"><?php the_aiovg_excerpt( $attributes['excerpt_length'] ); ?></div>
+            <div class="aiovg-excerpt aiovg-hide-if-empty"><?php aiovg_the_excerpt( $attributes['excerpt_length'] ); ?></div>
         <?php endif; ?>
 
         <?php
@@ -306,6 +311,6 @@ if ( ! $has_access && ! empty( $trailer_settings['enable_trailers'] ) && ! aiovg
         }
         ?>
 
-        <?php the_aiovg_content_after_thumbnail( $attributes ); // After Thumbnail ?>
+        <?php aiovg_the_content_after_thumbnail( $attributes ); // After Thumbnail ?>
     </div>
 </div>

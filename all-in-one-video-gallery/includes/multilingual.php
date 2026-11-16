@@ -244,7 +244,7 @@ abstract class AIOVG_Multilingual {
 			$url = aiovg_add_path_to_url( $page_url, $term->slug );
 		}
 
-		return apply_filters( $filter, $url, $term );
+		return apply_filters( $filter, $url, $term ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- One of our own aiovg_*_page_url filters, from the map above.
 	}
 
 	/**

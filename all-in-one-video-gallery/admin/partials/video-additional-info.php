@@ -9,6 +9,11 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $duration = isset( $post_meta['duration'] ) ? $post_meta['duration'][0] : '';
 $views    = isset( $post_meta['views'] ) ? $post_meta['views'][0] : '';
 $likes    = isset( $post_meta['likes'] ) ? $post_meta['likes'][0] : '';

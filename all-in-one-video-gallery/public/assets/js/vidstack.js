@@ -421,7 +421,8 @@
 		}
 
 		_getVastUrl() {
-			let url = this._params.player.ads.tagUrl;
+			// The saved tag URL has its macro brackets percent-encoded
+			let url = this._params.player.ads.tagUrl.replace( /%5B/gi, '[' ).replace( /%5D/gi, ']' );
 
 			url = url.replace( '[domain]', encodeURIComponent( this._params.site_url ) );
 			url = url.replace( '[player_width]', this._player.elements.container.offsetWidth );

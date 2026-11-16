@@ -425,9 +425,9 @@ class AIOVG_Admin {
 	 * @since 1.6.5
 	 */
 	public function handle_form_actions() {
-		if ( 'POST' == $_SERVER['REQUEST_METHOD'] && ! empty( $_POST['issues'] ) && isset( $_POST['aiovg_issues_nonce'] ) ) {
+		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' == $_SERVER['REQUEST_METHOD'] && ! empty( $_POST['issues'] ) && isset( $_POST['aiovg_issues_nonce'] ) ) {
 			// Verify that the nonce is valid
-    		if ( wp_verify_nonce( $_POST['aiovg_issues_nonce'], 'aiovg_fix_ignore_issues' ) ) {
+    		if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['aiovg_issues_nonce'] ) ), 'aiovg_fix_ignore_issues' ) ) {
 				// The nonce proves intent, not permission
 				if ( ! current_user_can( 'manage_aiovg_options' ) ) {
 					return;
@@ -463,7 +463,7 @@ class AIOVG_Admin {
 				}
 
 				// Redirect
-				wp_redirect( $redirect_url );
+				wp_safe_redirect( $redirect_url );
         		exit;
 			}
 		}		
@@ -505,7 +505,7 @@ class AIOVG_Admin {
             'all-in-one-video-gallery',
             array( $this, 'display_dashboard_content' ),
             'dashicons-playlist-video',
-            5
+            30
 		);	
 		
 		add_submenu_page(
@@ -529,7 +529,7 @@ class AIOVG_Admin {
 			'help'              => __( 'Help & Tutorials', 'all-in-one-video-gallery' )
 		);
 		
-		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'shortcode-builder';
+		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : 'shortcode-builder';
 
 		// Issues
 		$issues = $this->check_issues();
@@ -614,8 +614,8 @@ class AIOVG_Admin {
 	public function fix_issues() {		
 		$fixed = array();
 
-		// Apply the fixes
-		$_issues = aiovg_sanitize_array( $_POST['issues'] );
+		// Apply the fixes (nonce and capability checked in handle_form_actions())
+		$_issues = isset( $_POST['issues'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['issues'] ) ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 		foreach ( $_issues as $issue ) {
 			switch ( $issue ) {
@@ -650,12 +650,10 @@ class AIOVG_Admin {
 							$insert_id = 0;
 
 							if ( ! empty( $pattern ) ) {
-								$query = $wpdb->prepare(
+								$ids = $wpdb->get_col( $wpdb->prepare(
 									"SELECT ID FROM {$wpdb->posts} WHERE `post_content` LIKE %s",
 									'%' . $wpdb->esc_like( sanitize_text_field( $pattern ) ) . '%'
-								);
-
-								$ids = $wpdb->get_col( $query );
+								) );
 							} else {
 								$ids = array();
 							}
@@ -727,8 +725,8 @@ class AIOVG_Admin {
 	public function ignore_issues() {
 		$ignored = array();
 
-		// Ignore the issues
-		$_issues = aiovg_sanitize_array( $_POST['issues'] );		
+		// Ignore the issues (nonce and capability checked in handle_form_actions())
+		$_issues = isset( $_POST['issues'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['issues'] ) ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Missing		
 
 		foreach ( $_issues as $issue ) {
 			switch ( $issue ) {
@@ -769,6 +767,7 @@ class AIOVG_Admin {
 			'pages_misconfigured' => array(
 				'title'       => __( 'Pages Misconfigured', 'all-in-one-video-gallery' ),
 				'description' => sprintf(
+					/* translators: %s: Pages settings URL. */
 					__( 'During activation, our plugin adds few <a href="%s" target="_blank">pages</a> dynamically on your website that are required for the internal logic of the plugin. We found some of those pages are missing, misconfigured or having a wrong shortcode.', 'all-in-one-video-gallery' ),
 					esc_url( admin_url( 'admin.php?page=aiovg_settings&tab=advanced&section=aiovg_page_settings' ) )
 				)
@@ -791,15 +790,7 @@ class AIOVG_Admin {
 
 		wp_enqueue_style( 'wp-color-picker' );
 
-		wp_enqueue_style( 
-			AIOVG_PLUGIN_SLUG . '-magnific-popup', 
-			AIOVG_PLUGIN_URL . 'vendor/magnific-popup/magnific-popup.min.css', 
-			array(), 
-			'1.2.0', 
-			'all' 
-		);
-
-		wp_register_style( 
+		wp_register_style(
 			AIOVG_PLUGIN_SLUG . '-driverjs', 
 			AIOVG_PLUGIN_URL . 'vendor/driverjs/driver.css', 
 			array(), 
@@ -832,7 +823,7 @@ class AIOVG_Admin {
 
 		wp_enqueue_style( 
 			AIOVG_PLUGIN_SLUG . '-admin', 
-			AIOVG_PLUGIN_URL . 'admin/assets/css/admin.min.css', 
+			AIOVG_PLUGIN_URL . 'admin/assets/css/admin.min.css',
 			array(), 
 			AIOVG_PLUGIN_VERSION, 
 			'all' 
@@ -865,15 +856,7 @@ class AIOVG_Admin {
 		
         wp_enqueue_script( 'wp-color-picker' );
 
-		wp_enqueue_script( 
-			AIOVG_PLUGIN_SLUG . '-magnific-popup', 
-			AIOVG_PLUGIN_URL . 'vendor/magnific-popup/magnific-popup.min.js', 
-			array( 'jquery' ), 
-			'1.2.0', 
-			array( 'strategy' => 'defer' ) 
-		);
-
-		wp_register_script( 
+		wp_register_script(
 			AIOVG_PLUGIN_SLUG . '-driverjs', 
 			AIOVG_PLUGIN_URL . 'vendor/driverjs/driver.js.iife.js',
 			array( 'jquery' ), 
@@ -908,7 +891,7 @@ class AIOVG_Admin {
 
 		wp_enqueue_script( 
 			AIOVG_PLUGIN_SLUG . '-admin', 
-			AIOVG_PLUGIN_URL . 'admin/assets/js/admin.min.js', 
+			AIOVG_PLUGIN_URL . 'admin/assets/js/admin.min.js',
 			array( 'jquery' ), 
 			AIOVG_PLUGIN_VERSION, 
 			array( 'strategy' => 'defer' ) 
@@ -929,6 +912,7 @@ class AIOVG_Admin {
 					'remove'             => __( 'Remove', 'all-in-one-video-gallery' ),
 					'preparing_upload'   => __( 'Preparing upload', 'all-in-one-video-gallery' ),
 					'cancel_upload'      => __( 'Cancel', 'all-in-one-video-gallery' ),
+					/* translators: %d: Upload progress, in percent. */
 					'upload_status'      => __( 'Uploaded %d%', 'all-in-one-video-gallery' ),
 					'upload_processing'  => __( '<strong>Processing:</strong> Your video is being processed. This usually happens quickly, but during busy times, it may take a little longer. You can safely continue and save the form — no need to wait. The video will automatically become playable once processing is complete.', 'all-in-one-video-gallery' ),
 					'trailer'            => __( 'Trailer', 'all-in-one-video-gallery' )
@@ -970,7 +954,8 @@ class AIOVG_Admin {
 						'export_zip_success_status_heading'   => __( 'Your export is ready. Download the ZIP files below.', 'all-in-one-video-gallery' ),
 						'export_zip_failed_status_heading'    => __( 'Sorry, the following files could not be exported. Each one is either larger than the maximum ZIP size or not a media file on this site.', 'all-in-one-video-gallery' ),
 						'export_zip_empty_status'             => sprintf(
-							__( 'Your export is complete. %s video records processed, and %s skipped. However, no ZIP file was created because no files were found.', 'all-in-one-video-gallery' ),
+							/* translators: 1: Number of videos processed, 2: Number of videos skipped. */
+							__( 'Your export is complete. %1$s video records processed, and %2$s skipped. However, no ZIP file was created because no files were found.', 'all-in-one-video-gallery' ),
 							'%%exported%%',
 							'%%skipped%%'
 						),
@@ -1158,9 +1143,9 @@ class AIOVG_Admin {
 
 		// Fallback — Subtitle structure validation
 		if ( substr( $filename, -4 ) === '.vtt' ) {
-			$handle = fopen( $file['tmp_name'], 'r' );
+			$handle = fopen( $file['tmp_name'], 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Reads the first lines of the uploaded temp file.
 			$first_line = trim( fgets( $handle ) );
-			fclose( $handle );
+			fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- See above.
 
 			if ( strpos( $first_line, 'WEBVTT' ) !== 0 ) {
 				$file['error'] = __( 'Invalid WebVTT file — must start with "WEBVTT".', 'all-in-one-video-gallery' );
@@ -1169,10 +1154,10 @@ class AIOVG_Admin {
 
 		// Fallback Validate SRT
 		if ( substr( $filename, -4 ) === '.srt' ) {
-			$handle = fopen( $file['tmp_name'], 'r' );
+			$handle = fopen( $file['tmp_name'], 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Reads the first lines of the uploaded temp file.
 			$first_line  = trim( fgets( $handle ) );
 			$second_line = trim( fgets( $handle ) );
-			fclose( $handle );
+			fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- See above.
 
 			$valid_index = preg_match( '/^\d+$/', $first_line );
 			$valid_time  = preg_match( '/^\d{2}:\d{2}:\d{2},\d{3} --> \d{2}:\d{2}:\d{2},\d{3}$/', $second_line );
@@ -1269,7 +1254,7 @@ class AIOVG_Admin {
 			wp_die();
 		}
 
-		$value = isset( $_POST['value'] ) ? trim( $_POST['value'] ) : 0;
+		$value = isset( $_POST['value'] ) ? sanitize_text_field( wp_unslash( $_POST['value'] ) ) : 0;
 		if ( 'completed' !== $value ) {
 			$value = (int) $value;
 		}

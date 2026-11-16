@@ -105,10 +105,10 @@ class AIOVG_Widget_Categories extends WP_Widget {
 		}
 
 		// Process output
-		echo $args['before_widget'];
+		echo wp_kses_post( $args['before_widget'] );
 		
 		if ( ! empty( $instance['title'] ) ) {
-			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
+			echo wp_kses_post( $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'] );
 		}			
 
 		if ( 'list' == $template ) {
@@ -205,7 +205,7 @@ class AIOVG_Widget_Categories extends WP_Widget {
 			}		
 		}
 	
-		echo $args['after_widget'];
+		echo wp_kses_post( $args['after_widget'] );
 	}
 	
 	/**
@@ -270,7 +270,7 @@ class AIOVG_Widget_Categories extends WP_Widget {
 	public function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 		
-		$instance['title']            = isset( $new_instance['title'] ) ? strip_tags( $new_instance['title'] ) : '';	
+		$instance['title']            = isset( $new_instance['title'] ) ? wp_strip_all_tags( $new_instance['title'] ) : '';	
 		$instance['template']         = isset( $new_instance['template'] ) ? sanitize_text_field( $new_instance['template'] ) : 'grid';	
 		$instance['child_of']         = isset( $new_instance['child_of'] ) ? (int) $new_instance['child_of'] : 0;		
 		$instance['columns']          = isset( $new_instance['columns'] ) ? (int) $new_instance['columns'] : 1;

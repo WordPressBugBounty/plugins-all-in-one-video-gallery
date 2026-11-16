@@ -8,6 +8,11 @@
  *
  * @package All_In_One_Video_Gallery
  */
+
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 ?>
 
 <div id="aiovg-dashboard" class="aiovg aiovg-dashboard wrap about-wrap full-width-layout">
@@ -36,7 +41,7 @@
     </p>
         
 	<div class="wp-badge">
-        <?php printf( esc_html__( 'Version %s', 'all-in-one-video-gallery' ), AIOVG_PLUGIN_VERSION ); ?>
+        <?php printf( /* translators: %s: Plugin version. */ esc_html__( 'Version %s', 'all-in-one-video-gallery' ), esc_html( AIOVG_PLUGIN_VERSION ) ); ?>
     </div>
     
     <br />
@@ -57,9 +62,9 @@
 
             printf( 
                 '<a href="%s" class="%s">%s</a>', 
-                esc_url( $url ), 
-                implode( ' ', $classes ), 
-                $title 
+                esc_url( $url ),
+                esc_attr( implode( ' ', $classes ) ),
+                wp_kses( $title, array( 'span' => array( 'class' => array() ) ) )
             );
         }
         ?>

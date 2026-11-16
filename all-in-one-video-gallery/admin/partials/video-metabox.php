@@ -9,6 +9,11 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
 $restrictions_settings  = aiovg_get_option( 'aiovg_restrictions_settings' );
 $trailer_settings       = aiovg_get_option( 'aiovg_trailer_settings' );

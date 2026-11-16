@@ -9,6 +9,11 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $email_capture              = isset( $post_meta['email_capture'] ) ? $post_meta['email_capture'][0] : -1;
 $email_capture_notification = isset( $post_meta['email_capture_notification_email'] ) ? $post_meta['email_capture_notification_email'][0] : '';
 

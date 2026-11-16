@@ -9,6 +9,11 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $chapters = array();
 
 if ( ! empty( $post_meta['chapter'] ) ) {
@@ -20,7 +25,7 @@ if ( ! empty( $post_meta['chapter'] ) ) {
 
 <div class="aiovg-form-controls aiovg-repeatable-ui">
 	<p class="description">
-		<?php printf( __( 'The chapters can also be included in the video description. Kindly <a href="%s" target="_blank" rel="noopener noreferrer">follow this link</a>.', 'all-in-one-video-gallery' ), 'https://plugins360.com/all-in-one-video-gallery/adding-chapters/' ); ?>
+		<?php printf( wp_kses_post( /* translators: %s: Chapters guide URL. */ __( 'The chapters can also be included in the video description. Kindly <a href="%s" target="_blank" rel="noopener noreferrer">follow this link</a>.', 'all-in-one-video-gallery' ) ), 'https://plugins360.com/all-in-one-video-gallery/adding-chapters/' ); ?>
 	</p>
 
 	<table id="aiovg-chapters" class="aiovg-repeatable-table form-table striped">

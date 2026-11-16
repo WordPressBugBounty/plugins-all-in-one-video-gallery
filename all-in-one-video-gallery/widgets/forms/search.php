@@ -8,6 +8,11 @@
  *
  * @package All_In_One_Video_Gallery
  */
+
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 ?>
 
 <div class="aiovg aiovg-widget-form aiovg-widget-form-search">
@@ -29,7 +34,7 @@
 				foreach ( $options as $key => $value ) {
 					printf( 
 						'<option value="%s"%s>%s</option>', 
-						$key, 
+						esc_attr( $key ),
 						selected( $key, $instance['template'], false ), 
 						esc_html( $value )
 					);
@@ -92,7 +97,7 @@
 				foreach ( $options as $key => $value ) {
 					printf( 
 						'<option value="%s"%s>%s</option>', 
-						$key, 
+						esc_attr( $key ),
 						selected( $key, $instance['target'], false ), 
 						esc_html( $value )
 					);

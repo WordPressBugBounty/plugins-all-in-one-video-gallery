@@ -511,13 +511,28 @@
 			});
 		}
 
-		// Common: Init the popup.
-		if ( $.fn.magnificPopup ) {
-			$( '.aiovg-modal-button' ).magnificPopup({
-				type: 'inline',
-				mainClass: 'mfp-fade'
-			});
-		}
+		// Common: Open a dialog. Delegated, so the button's own click handler runs first.
+		$( document ).on( 'click', '.aiovg-dialog-button', function( event ) {
+			event.preventDefault();
+
+			const dialog = document.getElementById( $( this ).data( 'target' ) );
+
+			if ( dialog && dialog.showModal ) {
+				dialog.showModal();
+			}
+		});
+
+		// Common: Close a dialog on a backdrop click.
+		$( document ).on( 'click', 'dialog.aiovg-modal', function( event ) {
+			if ( event.target === this ) {
+				this.close();
+			}
+		});
+
+		// Common: Close a dialog with its close button.
+		$( document ).on( 'click', '.aiovg-modal-close', function() {
+			$( this ).closest( 'dialog' ).get( 0 ).close();
+		});
 
 		// Common: Repeatable fields.
 		$( '.aiovg-repeatable-ui' ).each(function() {

@@ -9,12 +9,17 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $video_id  = 0;
 $video_url = '';
 $image_url = '';
 
 if ( ! empty( $_GET['poster'] ) ) {
-    $image_url = aiovg_base64_decode( $_GET['poster'] );
+    $image_url = aiovg_base64_decode( sanitize_text_field( wp_unslash( $_GET['poster'] ) ) );
     $image_url = aiovg_make_url_absolute( $image_url );
 }
 
@@ -34,7 +39,7 @@ if ( 'aiovg_videos' == $post_type && ! empty( $post_id ) ) {
             continue;
         }
 
-        $video_url = aiovg_base64_decode( $_GET[ $provider ] );
+        $video_url = aiovg_base64_decode( sanitize_text_field( wp_unslash( $_GET[ $provider ] ) ) );
 
         if ( ! empty( $image_url ) ) {
             continue;
@@ -93,7 +98,12 @@ $settings = array(
         <link rel="canonical" href="<?php echo esc_url( get_permalink( $post_id ) ); ?>" />
     <?php endif; ?>
 
-	<style type="text/css">
+	<?php
+	// No file: carries the inline styles.
+	wp_register_style( AIOVG_PLUGIN_SLUG . '-iframe-player', false, array(), AIOVG_PLUGIN_VERSION );
+
+	ob_start();
+	?>
         html,
         body {
             margin: 0 !important;
@@ -268,15 +278,17 @@ $settings = array(
             padding: 0;        
             width: 36px;
             height: 36px;
-            animation: aiovg-spin 0.7s linear infinite;            
+            animation: aiovg-spin 0.7s linear infinite;
         }
-    </style>
+	<?php
+	wp_add_inline_style( AIOVG_PLUGIN_SLUG . '-iframe-player', ob_get_clean() );
 
-    <?php if ( ! empty( $general_settings['custom_css'] ) ) : ?>
-        <style type="text/css">
-		    <?php echo esc_html( $general_settings['custom_css'] ); ?>
-        </style>
-	<?php endif; ?>
+	if ( ! empty( $general_settings['custom_css'] ) ) {
+		wp_add_inline_style( AIOVG_PLUGIN_SLUG . '-iframe-player', wp_strip_all_tags( $general_settings['custom_css'] ) );
+	}
+
+	wp_print_styles( AIOVG_PLUGIN_SLUG . '-iframe-player' );
+	?>
 </head>
 <body>
 	<div id="aiovg-email-capture" data-capture_key="<?php echo esc_attr( $settings['capture_key'] ); ?>"<?php if ( ! empty( $image_url ) ) : ?> style="background-image: url('<?php echo esc_url( $image_url ); ?>')"<?php endif; ?>>
@@ -315,7 +327,7 @@ $settings = array(
 		</div>
 	</div>
 
-	<script type="text/javascript">
+	<?php ob_start(); ?>
 		document.addEventListener( 'DOMContentLoaded', function() {
 			'use strict';
 
@@ -515,6 +527,6 @@ $settings = array(
                 firstInput.focus();
             }
 		} );
-	</script>
+	<?php wp_print_inline_script_tag( ob_get_clean() ); ?>
 </body>
 </html>

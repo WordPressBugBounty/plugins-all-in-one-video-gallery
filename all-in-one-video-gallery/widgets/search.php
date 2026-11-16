@@ -95,15 +95,15 @@ class AIOVG_Widget_Search extends WP_Widget {
 		}
 
 		// Process output
-		echo $args['before_widget'];
+		echo wp_kses_post( $args['before_widget'] );
 		
 		if ( ! empty( $instance['title'] ) ) {
-			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
+			echo wp_kses_post( $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'] );
 		}
 
 		include apply_filters( 'aiovg_load_template', AIOVG_PLUGIN_DIR . 'public/templates/search-form-template-' . sanitize_file_name( $attributes['template'] ) . '.php' );
 		
-		echo $args['after_widget'];		
+		echo wp_kses_post( $args['after_widget'] );		
 	}
 	
 	/**   
@@ -116,7 +116,7 @@ class AIOVG_Widget_Search extends WP_Widget {
 	public function update( $new_instance, $old_instance ) {	
 		$instance = array();
 		
-		$instance['title']             = isset( $new_instance['title'] ) ? strip_tags( $new_instance['title'] ) : '';
+		$instance['title']             = isset( $new_instance['title'] ) ? wp_strip_all_tags( $new_instance['title'] ) : '';
 		$instance['template']          = isset( $new_instance['template'] ) ? sanitize_text_field( $new_instance['template'] ) : 'vertical';
 		$instance['has_keyword']       = isset( $new_instance['has_keyword'] ) ? (int) $new_instance['has_keyword'] : 0;
 		$instance['has_category']      = isset( $new_instance['has_category'] ) ? (int) $new_instance['has_category'] : 0;

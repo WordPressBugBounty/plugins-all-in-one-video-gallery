@@ -141,7 +141,7 @@ class AIOVG_Public_Videos {
 			}
 			
 			$sub_categories = do_shortcode( '[aiovg_categories ' . implode( ' ', $_attributes ) . ']' );				
-			if ( strip_tags( $sub_categories ) == aiovg_get_message( 'categories_empty' ) ) {
+			if ( wp_strip_all_tags( $sub_categories ) == aiovg_get_message( 'categories_empty' ) ) {
 				$sub_categories = '';
 			}
 			
@@ -378,7 +378,7 @@ class AIOVG_Public_Videos {
 
 			if ( empty( $likes_settings['login_required_to_vote'] ) ) {
 				if ( isset( $_COOKIE['aiovg_videos_likes'] ) ) {
-					$liked = explode( '|', $_COOKIE['aiovg_videos_likes'] );
+					$liked = explode( '|', sanitize_text_field( wp_unslash( $_COOKIE['aiovg_videos_likes'] ) ) );
 					$liked = array_map( 'intval', $liked );
 				}
 			} else {
@@ -433,7 +433,7 @@ class AIOVG_Public_Videos {
 
 			if ( empty( $likes_settings['login_required_to_vote'] ) ) {
 				if ( isset( $_COOKIE['aiovg_videos_dislikes'] ) ) {
-					$disliked = explode( '|', $_COOKIE['aiovg_videos_dislikes'] );
+					$disliked = explode( '|', sanitize_text_field( wp_unslash( $_COOKIE['aiovg_videos_dislikes'] ) ) );
 					$disliked = array_map( 'intval', $disliked );
 				}
 			} else {
@@ -478,17 +478,11 @@ class AIOVG_Public_Videos {
 		check_ajax_referer( 'aiovg_public_ajax_nonce', 'security' );
 
 		// Proceed safe
-		$attributes = array();
-
-		foreach ( $_POST as $key => $value ) {
-			if ( $value == 'false' ) {
-				$attributes[ $key ] = 0;
-			} elseif ( $value == 'true' ) {
-				$attributes[ $key ] = 1;
-			} else {
-				$attributes[ $key ] = is_array( $value ) ? array_map( 'intval', $value ) : sanitize_text_field( $value );
-			}
-		}
+		$attributes = aiovg_sanitize_ajax_attributes(
+			$_POST, // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Allowlisted and sanitized key by key.
+			$this->get_defaults(),
+			array( 'shortcode', 'search_query', 'category_exclude', 'user_slug' )
+		);
 
 		$content = $this->get_content( $attributes );
 
@@ -535,7 +529,7 @@ class AIOVG_Public_Videos {
 		}
 		
 		if ( ! empty( $attributes['search_query'] ) ) { // Search
-			$args['s'] = sanitize_text_field( $attributes['search_query'] );
+			$args['s'] = wp_slash( sanitize_text_field( $attributes['search_query'] ) ); // WP_Query unslashes "s" itself
 		}	
 		
 		if ( ! empty( $attributes['user_slug'] ) ) { // User
@@ -785,14 +779,13 @@ class AIOVG_Public_Videos {
 			! empty( $attributes['filters_tag'] ) ||
 			! empty( $attributes['filters_sort'] )
 		) {
-			$search_query = isset( $_GET['vi'] ) ? sanitize_text_field( $_GET['vi'] ) : ''; 
+			$search_query = isset( $_GET['vi'] ) ? sanitize_text_field( wp_unslash( $_GET['vi'] ) ) : '';
 
 			if ( ! empty( $search_query ) ) {
 				$attributes['search_query'] = $search_query;
 			}
 
-			$categories = isset( $_GET['ca'] ) ? (array) $_GET['ca'] : array();
-			$categories = array_map( 'intval', $categories );
+			$categories = isset( $_GET['ca'] ) ? array_map( 'intval', (array) $_GET['ca'] ) : array();
 			$categories = array_filter( $categories );
 
 			if ( ! empty( $categories ) ) {
@@ -815,8 +808,7 @@ class AIOVG_Public_Videos {
 				}
 			}
 	
-			$tags = isset( $_GET['ta'] ) ? (array) $_GET['ta'] : array();
-			$tags = array_map( 'intval', $tags );
+			$tags = isset( $_GET['ta'] ) ? array_map( 'intval', (array) $_GET['ta'] ) : array();
 			$tags = array_filter( $tags );
 
 			if ( ! empty( $tags ) ) {

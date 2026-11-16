@@ -52,6 +52,9 @@ class AIOVG_Activator {
 		// Create the email leads table
 		aiovg_email_capture_create_table();
 		
+		// Rebuild rewrite rules on the next load, after the post types are registered
+		delete_option( 'aiovg_rewrite_rules_flushed' );
+
 		// Insert the plugin version
 		add_option( 'aiovg_version', AIOVG_PLUGIN_VERSION );
 	}

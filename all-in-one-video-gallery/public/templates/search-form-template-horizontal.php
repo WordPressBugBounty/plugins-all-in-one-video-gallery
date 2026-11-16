@@ -9,6 +9,11 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 $is_form_submitted = false;
 if ( isset( $_GET['vi'] ) || isset( $_GET['ca'] ) || isset( $_GET['ta'] ) ) {
 	$is_form_submitted = true;
@@ -36,12 +41,12 @@ $search_page_url = aiovg_get_search_page_url( $search_page_id );
 <div class="aiovg aiovg-search-form aiovg-search-form-template-horizontal aiovg-search-form-mode-<?php echo esc_attr( $search_form_mode ); ?>">
 	<form method="get" action="<?php echo esc_url( $search_page_url ); ?>">
     	<?php if ( ! get_option( 'permalink_structure' ) ) : ?>
-       		<input type="hidden" name="page_id" value="<?php echo $search_page_id; ?>" />
+       		<input type="hidden" name="page_id" value="<?php echo (int) $search_page_id; ?>" />
     	<?php endif; ?>
 
 		<?php if ( $attributes['has_keyword'] ) : ?>
 			<div class="aiovg-form-group aiovg-field-keyword">
-				<input type="text" name="vi" class="aiovg-form-control" placeholder="<?php esc_attr_e( 'Enter your Keyword', 'all-in-one-video-gallery' ); ?>" value="<?php echo isset( $_GET['vi'] ) ? esc_attr( stripslashes( $_GET['vi'] ) ) : ''; ?>" />
+				<input type="text" name="vi" class="aiovg-form-control" placeholder="<?php esc_attr_e( 'Enter your Keyword', 'all-in-one-video-gallery' ); ?>" value="<?php echo isset( $_GET['vi'] ) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['vi'] ) ) ) : ''; ?>" />
 			</div>
 		<?php endif; ?>
 		
@@ -55,7 +60,7 @@ $search_page_url = aiovg_get_search_page_url( $search_page_id );
 				$categories_selected = array();
 
 				if ( isset( $_GET['ca'] ) ) {
-					$categories_selected = (array) $_GET['ca'];
+					$categories_selected = array_map( 'intval', (array) $_GET['ca'] );
 				} elseif ( isset( $attributes['categories_selected'] ) ) {
 					$categories_selected = is_array( $attributes['categories_selected'] ) ? $attributes['categories_selected'] : explode( ',', $attributes['categories_selected'] );
 				}
@@ -110,7 +115,7 @@ $search_page_url = aiovg_get_search_page_url( $search_page_id );
 				$tags_selected = array();
 
 				if ( isset( $_GET['ta'] ) ) {
-					$tags_selected = (array) $_GET['ta'];
+					$tags_selected = array_map( 'intval', (array) $_GET['ta'] );
 				} elseif ( isset( $attributes['tags_selected'] ) ) {
 					$tags_selected = is_array( $attributes['tags_selected'] ) ? $attributes['tags_selected'] : explode( ',', $attributes['tags_selected'] );
 				}
@@ -149,10 +154,10 @@ $search_page_url = aiovg_get_search_page_url( $search_page_id );
 			<div class="aiovg-form-group aiovg-field-sort">
 				<?php
 				$sort_options  = aiovg_get_search_form_sort_options();
-				$sort_selected = isset( $_GET['sort'] ) ? sanitize_text_field( $_GET['sort'] ) : '';			
+				$sort_selected = isset( $_GET['sort'] ) ? sanitize_text_field( wp_unslash( $_GET['sort'] ) ) : '';			
 
 				echo '<select name="sort" class="aiovg-form-control">';
-				echo sprintf( '<option value="">— %s —</option>', __( 'Sort By', 'all-in-one-video-gallery' ) );
+				echo sprintf( '<option value="">— %s —</option>', esc_html__( 'Sort By', 'all-in-one-video-gallery' ) );
 
 				foreach ( $sort_options as $key => $value ) {
 					echo sprintf(
@@ -180,7 +185,7 @@ $search_page_url = aiovg_get_search_page_url( $search_page_id );
 		
 		<?php if ( $has_reset_button ) : ?>
 			<div class="aiovg-form-group aiovg-field-reset"<?php if ( 'ajax' === $search_form_mode ) echo ' hidden'; ?>>
-				<input type="button" class="aiovg-button aiovg-button-reset" onclick="location.href=<?php echo aiovg_esc_js_url( $search_page_url ); ?>;" value="<?php esc_attr_e( 'Reset', 'all-in-one-video-gallery' ); ?>" />
+				<input type="button" class="aiovg-button aiovg-button-reset" onclick="location.href=<?php echo aiovg_esc_js_url( $search_page_url ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in aiovg_esc_js_url(). ?>;" value="<?php esc_attr_e( 'Reset', 'all-in-one-video-gallery' ); ?>" />
 			</div>
 		<?php endif; ?>
 

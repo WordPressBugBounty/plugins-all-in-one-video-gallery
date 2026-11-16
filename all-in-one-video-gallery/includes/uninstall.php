@@ -50,10 +50,14 @@ class AIOVG_Uninstall {
         // Delete all the terms & taxonomies
         $aiovg_taxonomies = array('aiovg_categories', 'aiovg_tags');
         foreach ( $aiovg_taxonomies as $taxonomy ) {
-            $terms = $wpdb->get_results( $wpdb->prepare( "SELECT t.*, tt.* FROM {$wpdb->terms} AS t INNER JOIN {$wpdb->term_taxonomy} AS tt ON t.term_id = tt.term_id WHERE tt.taxonomy IN ('%s') ORDER BY t.name ASC", $taxonomy ) );
+            $terms = $wpdb->get_results( $wpdb->prepare( "SELECT t.*, tt.* FROM {$wpdb->terms} AS t INNER JOIN {$wpdb->term_taxonomy} AS tt ON t.term_id = tt.term_id WHERE tt.taxonomy = %s ORDER BY t.name ASC", $taxonomy ) );
             // Delete terms
             if ( count( $terms ) ) {
                 foreach ( $terms as $term ) {
+                    // The direct SQL below skips "pre_delete_term"; follows "Delete Media Files on Delete"
+                    if ( 'aiovg_categories' == $taxonomy ) {
+                        aiovg_delete_category_attachments( $term->term_id );
+                    }
                     $wpdb->delete( $wpdb->term_taxonomy, array(
                         'term_taxonomy_id' => $term->term_taxonomy_id,
                     ) );
@@ -139,24 +143,31 @@ class AIOVG_Uninstall {
         // Delete capabilities
         $roles = new AIOVG_Roles();
         $roles->remove_caps();
-        // Delete the plugin's working folders; "imports" holds Media Library files, so it stays
+        // Delete the plugin's working folders
         require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
         require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
         $upload_dir = wp_upload_dir();
         $dir = trailingslashit( $upload_dir['basedir'] ) . 'all-in-one-video-gallery';
         $fileSystemDirect = new WP_Filesystem_Direct(false);
-        foreach ( array('exports', 'temp') as $folder ) {
-            $fileSystemDirect->rmdir( $dir . '/' . $folder, true );
-        }
-        // Remove folders left empty; rmdir() without recursion never deletes a file
-        $import_dirs = glob( $dir . '/imports/*', GLOB_ONLYDIR );
-        if ( is_array( $import_dirs ) ) {
-            foreach ( $import_dirs as $import_dir ) {
-                $fileSystemDirect->rmdir( $import_dir );
+        // Read before the options were deleted, as aiovg_delete_video_attachments() reads it
+        if ( !empty( $general_settings['delete_media_files'] ) ) {
+            // "imports" too: its ZIP-imported videos have no Media Library item to delete them
+            $fileSystemDirect->rmdir( $dir, true );
+        } else {
+            // "imports" holds files still linked from the site's media, so it stays
+            foreach ( array('exports', 'temp') as $folder ) {
+                $fileSystemDirect->rmdir( $dir . '/' . $folder, true );
             }
+            // Remove folders left empty; rmdir() without recursion never deletes a file
+            $import_dirs = glob( $dir . '/imports/*', GLOB_ONLYDIR );
+            if ( is_array( $import_dirs ) ) {
+                foreach ( $import_dirs as $import_dir ) {
+                    $fileSystemDirect->rmdir( $import_dir );
+                }
+            }
+            $fileSystemDirect->rmdir( $dir . '/imports' );
+            $fileSystemDirect->rmdir( $dir );
         }
-        $fileSystemDirect->rmdir( $dir . '/imports' );
-        $fileSystemDirect->rmdir( $dir );
     }
 
 }

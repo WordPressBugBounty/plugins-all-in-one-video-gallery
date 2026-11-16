@@ -81,15 +81,15 @@ class AIOVG_Widget_Video extends WP_Widget {
 		}
 
 		// Process output
-		echo $args['before_widget'];
+		echo wp_kses_post( $args['before_widget'] );
 		
 		if ( ! empty( $instance['title'] ) ) {
-			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
+			echo wp_kses_post( $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'] );
 		}
 
-		the_aiovg_player( $post_id, $instance );
+		aiovg_the_player( $post_id, $instance );
 	
-		echo $args['after_widget'];
+		echo wp_kses_post( $args['after_widget'] );
 	}
 	
 	/**
@@ -104,7 +104,7 @@ class AIOVG_Widget_Video extends WP_Widget {
 
 		$instance = $old_instance;
 		
-		$instance['title']      = isset( $new_instance['title'] ) ? strip_tags( $new_instance['title'] ) : '';
+		$instance['title']      = isset( $new_instance['title'] ) ? wp_strip_all_tags( $new_instance['title'] ) : '';
 		$instance['id']         = isset( $new_instance['id'] ) ? (int) $new_instance['id'] : '';
 		$instance['width']      = isset( $new_instance['width'] ) ? sanitize_text_field( $new_instance['width'] ) : '';
 		$instance['ratio']      = isset( $new_instance['ratio'] ) ? (float) $new_instance['ratio'] : 0;		
@@ -204,7 +204,7 @@ class AIOVG_Widget_Video extends WP_Widget {
 		);
 
 		if ( isset( $_POST['term'] ) && ! empty( $_POST['term'] ) ) {
-			$args['s'] = sanitize_text_field( $_POST['term'] );
+			$args['s'] = wp_slash( sanitize_text_field( wp_unslash( $_POST['term'] ) ) ); // WP_Query unslashes "s"
 		} else {
 			$args['orderby']     = 'title';
 			$args['order']       = 'ASC';

@@ -14,21 +14,6 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// If your PHP version is < 8
-if ( ! function_exists( 'str_contains' ) ) {
-    /**
-     * Based on original work from the PHP Laravel framework.
-     *
-     * @since  3.5.0
-     * @param  string  $haystack The string to search in.
-     * @param  string  $needle   The substring to search for in the haystack.
-     * @return boolean           Returns true if needle is in haystack, false otherwise.
-     */
-    function str_contains( $haystack, $needle ) {
-        return $needle !== '' && mb_strpos( $haystack, $needle ) !== false;
-    }
-}
-
 /**
  * Adds extra code to a registered script.
  *
@@ -42,7 +27,7 @@ function aiovg_add_inline_script( $handle, $data, $position = 'before' ) {
 	// $is_script_added = wp_add_inline_script( $handle, $data, $position );
 
 	add_action( 'wp_footer', function() use ( $data ) {
-		echo '<script type="text/javascript">' . $data . '</script>';
+		wp_print_inline_script_tag( $data );
 	});
 }
 
@@ -218,7 +203,7 @@ function aiovg_create_attachment_from_external_image_url( $image_url, $post_id )
     $file_info = wp_check_filetype( basename( $image_url ), $allowed_mimes );
 
     if ( $file_info['type'] == false ) {
-        $parsed_url = parse_url( $image_url );
+        $parsed_url = wp_parse_url( $image_url );
 
         // URLs from Vimeo/Dailymotion don't have a file extension. So, manually set the file info.
         if ( strpos( $parsed_url['host'], '.vimeocdn.com' ) !== false || strpos( $parsed_url['host'], '.dmcdn.net' ) !== false ) {
@@ -249,7 +234,7 @@ function aiovg_create_attachment_from_external_image_url( $image_url, $post_id )
     }
 
     // Fetch once, so the bytes checked below are the bytes saved
-    $image_data = @file_get_contents( $resolved_url );
+    $image_data = @file_get_contents( $resolved_url ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Fetches the IP pinned above; wp_remote_get() would resolve the host again.
 
     aiovg_pin_url_to_ip(); // Reset the default stream context
 
@@ -272,7 +257,7 @@ function aiovg_create_attachment_from_external_image_url( $image_url, $post_id )
     $file_path = $upload_dir . '/' . $file_name;
 
     // Create the image file on the server
-	if ( false === @file_put_contents( $file_path, $image_data ) ) {
+	if ( false === @file_put_contents( $file_path, $image_data ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Into uploads, often during AJAX; WP_Filesystem may ask for FTP credentials.
 		return 0;
 	}
 
@@ -280,7 +265,7 @@ function aiovg_create_attachment_from_external_image_url( $image_url, $post_id )
     $mime_type = wp_get_image_mime( $file_path );
 
     if ( ! in_array( $mime_type, array_values( $allowed_mimes ) ) ) {
-        @unlink( $file_path );
+        wp_delete_file( $file_path );
         return 0;
     }
 
@@ -687,11 +672,11 @@ function aiovg_format_count( $number ) {
 
 	if ( isset( $general_settings['number_format'] ) && 'short' === $general_settings['number_format'] ) {
 		if ( $number >= 1000000000 ) {
-			$formatted = sprintf( _x( '%sB', 'billion short form', 'all-in-one-video-gallery' ), round( $number / 1000000000, 1 ) );
+			$formatted = sprintf( /* translators: %s: Number in billions. */ _x( '%sB', 'billion short form', 'all-in-one-video-gallery' ), round( $number / 1000000000, 1 ) );
 		} elseif ( $number >= 1000000 ) {
-			$formatted = sprintf( _x( '%sM', 'million short form', 'all-in-one-video-gallery' ), round( $number / 1000000, 1 ) );
+			$formatted = sprintf( /* translators: %s: Number in millions. */ _x( '%sM', 'million short form', 'all-in-one-video-gallery' ), round( $number / 1000000, 1 ) );
 		} elseif ( $number >= 1000 ) {
-			$formatted = sprintf( _x( '%sK', 'thousand short form', 'all-in-one-video-gallery' ), round( $number / 1000, 1 ) );
+			$formatted = sprintf( /* translators: %s: Number in thousands. */ _x( '%sK', 'thousand short form', 'all-in-one-video-gallery' ), round( $number / 1000, 1 ) );
 		} else {
 			$formatted = number_format_i18n( $number );
 		}
@@ -757,14 +742,18 @@ function aiovg_get_attachment_id( $url, $media = 'image' ) {
 			}	
 		}	
 	} else {
-		$url = wp_make_link_relative( $url );
-		
-		if ( ! empty( $url ) ) {
-			global $wpdb;
-			
-			$query = $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid RLIKE %s", $url );
-			$attachment_id = $wpdb->get_var( $query );
-		}		
+		global $wpdb;
+
+		$attachment_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $url ) );
+
+		// The same file on another scheme or host
+		if ( empty( $attachment_id ) ) {
+			$path = wp_make_link_relative( $url );
+
+			if ( ! empty( $path ) ) {
+				$attachment_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid LIKE %s", '%' . $wpdb->esc_like( $path ) ) );
+			}
+		}
 	}
 
 	return $attachment_id;	
@@ -791,6 +780,25 @@ function aiovg_get_current_page_id() {
     return 0; // Default to 0 if no valid page ID is found
 }
 
+/**
+ * Get the URL of the current request.
+ *
+ * The host comes from the site URL, never from the request's Host header.
+ *
+ * @since  5.2.0
+ * @return string Current URL.
+ */
+function aiovg_get_current_url() {
+	$home = wp_parse_url( home_url() );
+
+	if ( empty( $home['host'] ) ) {
+		return home_url( aiovg_get_request_uri() );
+	}
+
+	$origin = 'http://' . $home['host'] . ( isset( $home['port'] ) ? ':' . (int) $home['port'] : '' );
+
+	return set_url_scheme( $origin ) . aiovg_get_request_uri();
+}
 
 /**
  * Get the list of custom plugin pages.
@@ -1276,22 +1284,23 @@ function aiovg_get_image_url( $id, $size = "large", $default = '', $type = 'gall
  * @return string $ip_address The client IP Address.
  */
 function aiovg_get_ip_address() {
-	// Whether ip is from share internet
-	if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
-		$ip_address = $_SERVER['HTTP_CLIENT_IP'];
+	$headers = array( 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR' );
+
+	foreach ( $headers as $header ) {
+		if ( empty( $_SERVER[ $header ] ) ) {
+			continue;
+		}
+
+		// X-Forwarded-For may list several addresses; the first is the client
+		$values     = explode( ',', sanitize_text_field( wp_unslash( $_SERVER[ $header ] ) ) );
+		$ip_address = trim( $values[0] );
+
+		if ( filter_var( $ip_address, FILTER_VALIDATE_IP ) ) {
+			return $ip_address;
+		}
 	}
-	
-	// Whether ip is from proxy
-	elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-		$ip_address = $_SERVER['HTTP_X_FORWARDED_FOR'];
-	}
-	
-	// Whether ip is from remote address
-	else {
-		$ip_address = $_SERVER['REMOTE_ADDR'];
-	}
-	
-	return $ip_address;		
+
+	return isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 }
 
 /**
@@ -1369,28 +1378,16 @@ function aiovg_get_orderby_rand_seed( $paged = 'no_longer_required' ) {
 function aiovg_get_page_by_title( $page_title, $output = OBJECT, $post_type = 'page' ) {
 	global $wpdb;
 
-	if ( is_array( $post_type ) ) {
-		$post_type           = esc_sql( $post_type );
-		$post_type_in_string = "'" . implode( "','", $post_type ) . "'";
-		$sql                 = $wpdb->prepare(
-			"SELECT ID
-			FROM $wpdb->posts
-			WHERE post_title = %s
-			AND post_type IN ($post_type_in_string)",
-			$page_title
-		);
-	} else {
-		$sql = $wpdb->prepare(
-			"SELECT ID
-			FROM $wpdb->posts
-			WHERE post_title = %s
-			AND post_type = %s",
-			$page_title,
-			$post_type
-		);
+	$post_types = array_values( (array) $post_type );
+
+	if ( empty( $post_types ) ) {
+		return null;
 	}
 
-	$page = $wpdb->get_var( $sql );
+	$page = $wpdb->get_var( $wpdb->prepare(
+		"SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type IN (" . implode( ', ', array_fill( 0, count( $post_types ), '%s' ) ) . ')',
+		array_merge( array( $page_title ), $post_types )
+	) );
 
 	if ( $page ) {
 		return get_post( $page, $output );
@@ -1497,6 +1494,16 @@ function aiovg_get_page_settings() {
  */
 function aiovg_get_private_base_url() {
 	return untrailingslashit( get_site_url() ) . '/private/';
+}
+
+/**
+ * Get the path and query of the current request.
+ *
+ * @since  5.2.0
+ * @return string Request URI, or an empty string outside a web request.
+ */
+function aiovg_get_request_uri() {
+	return isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 }
 
 /**
@@ -1819,7 +1826,7 @@ function aiovg_get_shortcode_fields() {
 						array(
 							'name'        => 'template',
 							'label'       => __( 'Select Template', 'all-in-one-video-gallery' ),
-							'description' => ( aiovg_fs()->is_not_paying() ? sprintf( __( '<a href="%s" target="_blank">Upgrade Pro</a> for more templates (Popup, Inline, Slider, Playlist, Compact, etc.)', 'all-in-one-video-gallery' ), esc_url( aiovg_fs()->get_upgrade_url() ) ) : '' ),
+							'description' => ( aiovg_fs()->is_not_paying() ? sprintf( /* translators: %s: Upgrade page URL. */ __( '<a href="%s" target="_blank">Upgrade Pro</a> for more templates (Popup, Inline, Slider, Playlist, Compact, etc.)', 'all-in-one-video-gallery' ), esc_url( aiovg_fs()->get_upgrade_url() ) ) : '' ),
 							'type'        => 'select',
 							'options'     => aiovg_get_video_templates(),
 							'value'       => $videos_settings['template']
@@ -2393,15 +2400,16 @@ function aiovg_get_shortcode_fields() {
  * 
  * @since  2.6.1
  * @param  string $path File path.
- * @return string       Download ID. 
+ * @return string       Download ID (the MD5 of the path), for the "vdl" query arg.
  */
 function aiovg_get_temporary_file_download_id( $path ) {
-	$transient_key = md5( $path );
-	
+	$download_id   = md5( $path );
+	$transient_key = 'aiovg_download_' . $download_id;
+
 	delete_transient( $transient_key );
 	set_transient( $transient_key, $path, 1 * HOUR_IN_SECONDS );
-	
-	return $transient_key;
+
+	return $download_id;
 }
 
 /**
@@ -2417,6 +2425,7 @@ function aiovg_get_the_date() {
 		$date = get_the_date( $general_settings['datetime_format'] );
 	} else {
 		$date = sprintf( 
+			/* translators: %s: Human-readable time difference, e.g. "2 days". */
 			__( '%s ago', 'all-in-one-video-gallery' ), 
 			human_time_diff( get_the_time( 'U' ), current_time( 'timestamp' ) ) 
 		);
@@ -2921,7 +2930,7 @@ function aiovg_is_video_password_required( $post_id ) {
  * @return bool  True if active, false if not.
  */
 function aiovg_is_yoast_or_rank_math_active() {
-	$active_plugins = apply_filters( 'active_plugins', get_option( 'active_plugins' ) );
+	$active_plugins = apply_filters( 'active_plugins', get_option( 'active_plugins' ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core option filter.
 
 	// Check if Yoast SEO plugin is active
 	if ( in_array( 'wordpress-seo/wp-seo.php', $active_plugins ) || in_array( 'wordpress-seo-premium/wp-seo-premium.php', $active_plugins ) ) {
@@ -2952,7 +2961,7 @@ function aiovg_make_url_absolute( $url ) {
     $url = trim( $url );
 
     // If there's no host, it's likely a relative URL
-	$host = parse_url( $url, PHP_URL_HOST );
+	$host = wp_parse_url( $url, PHP_URL_HOST );
 
 	if ( empty( $host ) ) {
 		// Prepend the site URL to make it absolute
@@ -3230,6 +3239,48 @@ function aiovg_resolve_url( $url ) {
 }
 
 /**
+ * Sanitize shortcode attributes posted back by an AJAX request.
+ *
+ * Keeps only the keys in $defaults or $extra_keys, and types each value by its default.
+ *
+ * @since  5.2.0
+ * @param  array $data       Posted attributes (slashed).
+ * @param  array $defaults   The shortcode's default attributes.
+ * @param  array $extra_keys Keys the shortcode adds to its attributes before the request.
+ * @return array             Sanitized attributes.
+ */
+function aiovg_sanitize_ajax_attributes( $data, $defaults, $extra_keys = array() ) {
+	$attributes = array();
+
+	foreach ( (array) $data as $key => $value ) {
+		if ( ! array_key_exists( $key, $defaults ) && ! in_array( $key, $extra_keys, true ) ) {
+			continue;
+		}
+
+		if ( is_array( $value ) ) {
+			$attributes[ $key ] = array_map( 'intval', $value );
+			continue;
+		}
+
+		$value   = sanitize_text_field( wp_unslash( $value ) );
+		$default = isset( $defaults[ $key ] ) ? $defaults[ $key ] : '';
+
+		if ( 'true' === $value || 'false' === $value ) {
+			$attributes[ $key ] = ( 'true' === $value ) ? 1 : 0;
+		} elseif ( ( is_int( $default ) || is_bool( $default ) ) && is_numeric( $value ) ) {
+			$attributes[ $key ] = (int) $value;
+		} elseif ( is_float( $default ) && is_numeric( $value ) ) {
+			$attributes[ $key ] = (float) $value;
+		} else {
+			// Strings, and comma-separated ID lists the shortcode splits itself
+			$attributes[ $key ] = $value;
+		}
+	}
+
+	return $attributes;
+}
+
+/**
  * Sanitize the array inputs.
  *
  * @since  1.0.0
@@ -3416,7 +3467,7 @@ function aiovg_truncate( $text, $char_length = 55, $append = '...' ) {
 		return $text;
 	}
 
-	$text = strip_tags( $text );
+	$text = wp_strip_all_tags( $text );
 	
 	if ( $char_length > 0 && strlen( $text ) > $char_length ) {
 		$tmp = substr( $text, 0, $char_length );
@@ -3460,7 +3511,7 @@ function aiovg_update_views_count( $post_id ) {
 		$visited = array();
 
 		if ( isset( $_COOKIE['aiovg_videos_views'] ) ) {
-			$visited = explode( '|', $_COOKIE['aiovg_videos_views'] );
+			$visited = explode( '|', sanitize_text_field( wp_unslash( $_COOKIE['aiovg_videos_views'] ) ) );
 			$visited = array_map( 'intval', $visited );
 		}
 

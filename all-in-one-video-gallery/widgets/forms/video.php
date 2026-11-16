@@ -9,6 +9,11 @@
  * @package All_In_One_Video_Gallery
  */
 
+// Exit if accessed directly
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 global $pagenow; 
 $email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
 ?>
@@ -60,7 +65,7 @@ $email_capture_settings = aiovg_get_option( 'aiovg_email_capture_settings' );
 						foreach ( $posts as $post ) {					
 							printf(
 								'<option value="%d"%s>%s</option>', 
-								$post->ID, 
+								(int) $post->ID,
 								selected( $post->ID, (int) $instance['id'], false ), 
 								esc_html( $post->post_title )
 							);

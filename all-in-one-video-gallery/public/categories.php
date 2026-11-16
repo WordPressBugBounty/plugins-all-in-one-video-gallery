@@ -51,7 +51,9 @@ class AIOVG_Public_Categories {
 
 		// Proceed safe
 		$json = array();
-		$json['html'] = $this->run_shortcode_categories( $_POST );
+		$json['html'] = $this->run_shortcode_categories(
+			aiovg_sanitize_ajax_attributes( $_POST, $this->get_defaults() ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Allowlisted and sanitized key by key.
+		);
 		
 		wp_send_json_success( $json );
 	}

@@ -110,7 +110,7 @@ function aiovg_email_capture_generate_csv( $leads, $file_name = 'aiovg-emails.cs
 	$output = fopen( 'php://output', 'w' );
 
 	// UTF-8 BOM so Excel opens the file correctly.
-	fputs( $output, "\xEF\xBB\xBF" );
+	fputs( $output, "\xEF\xBB\xBF" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fputs -- Writes the CSV download to php://output.
 
 	// Pass $escape explicitly; PHP 8.4 deprecates relying on its default.
 	fputcsv( $output, array(
@@ -145,7 +145,7 @@ function aiovg_email_capture_generate_csv( $leads, $file_name = 'aiovg-emails.cs
 		), ',', '"', '\\' );
 	}
 
-	fclose( $output );
+	fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- php://output, see above.
 	exit;
 }
 
@@ -165,37 +165,14 @@ function aiovg_email_capture_get_leads( $args = array() ) {
 	$date_from   = isset( $args['date_from'] ) ? sanitize_text_field( $args['date_from'] ) : '';
 	$date_to     = isset( $args['date_to'] ) ? sanitize_text_field( $args['date_to'] ) : '';
 
-	$where_parts = array();
-	$values      = array();
+	$from = ( '' !== $date_from ) ? $date_from . ' 00:00:00' : '';
+	$to   = ( '' !== $date_to ) ? $date_to . ' 23:59:59' : '';
 
-	if ( $video_id > 0 ) {
-		$where_parts[] = 'video_id = %d';
-		$values[]      = $video_id;
-	}
-
-	if ( '' !== $date_from ) {
-		$where_parts[] = 'created_at >= %s';
-		$values[]      = $date_from . ' 00:00:00';
-	}
-
-	if ( '' !== $date_to ) {
-		$where_parts[] = 'created_at <= %s';
-		$values[]      = $date_to . ' 23:59:59';
-	}
-
-	$where_clause = '';
-	if ( ! empty( $where_parts ) ) {
-		$where_clause = ' WHERE ' . implode( ' AND ', $where_parts );
-	}
-
-	$sql = "SELECT * FROM {$table}{$where_clause} ORDER BY id ASC";
-
-	if ( ! empty( $values ) ) {
-		$query_args = array_merge( array( $sql ), $values );
-		$sql        = call_user_func_array( array( $wpdb, 'prepare' ), $query_args );
-	}
-
-	return $wpdb->get_results( $sql );
+	// Each filter is skipped when it's empty
+	return $wpdb->get_results( $wpdb->prepare(
+		"SELECT * FROM %i WHERE ( %d = 0 OR video_id = %d ) AND ( %s = '' OR created_at >= %s ) AND ( %s = '' OR created_at <= %s ) ORDER BY id ASC",
+		$table, $video_id, $video_id, $from, $from, $to, $to
+	) );
 }
 
 /**

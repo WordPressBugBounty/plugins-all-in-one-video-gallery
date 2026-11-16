@@ -122,7 +122,7 @@ class AIOVG_Widget_Videos extends WP_Widget {
 		);
 		
 		if ( isset( $attributes['search_query'] ) && ! empty( $attributes['search_query'] ) ) { // Search
-			$query['s'] = sanitize_text_field( $attributes['search_query'] );
+			$query['s'] = wp_slash( sanitize_text_field( $attributes['search_query'] ) ); // WP_Query unslashes "s" itself
 		}
 
 		if ( isset( $attributes['exclude'] ) ) { // Exclude video IDs
@@ -292,10 +292,10 @@ class AIOVG_Widget_Videos extends WP_Widget {
 		wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-public' );
 		
 		// Process output
-		echo $args['before_widget'];
+		echo wp_kses_post( $args['before_widget'] );
 		
 		if ( ! empty( $instance['title'] ) ) {
-			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
+			echo wp_kses_post( $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'] );
 		}
 		
 		if ( $aiovg_query->have_posts() ) {			
@@ -312,9 +312,9 @@ class AIOVG_Widget_Videos extends WP_Widget {
 		}
 
 		$content = aiovg_wrap_with_filters( $content, $attributes );
-		echo $content;
+		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Gallery template output, escaped in the template.
 		
-		echo $args['after_widget'];
+		echo wp_kses_post( $args['after_widget'] );
 	}
 	
 	/**
@@ -426,14 +426,13 @@ class AIOVG_Widget_Videos extends WP_Widget {
 			! empty( $attributes['filters_tag'] ) ||
 			! empty( $attributes['filters_sort'] )
 		) {
-			$search_query = isset( $_GET['vi'] ) ? sanitize_text_field( $_GET['vi'] ) : ''; 
+			$search_query = isset( $_GET['vi'] ) ? sanitize_text_field( wp_unslash( $_GET['vi'] ) ) : '';
 
 			if ( ! empty( $search_query ) ) {
 				$attributes['search_query'] = $search_query;
 			}
 			
-			$categories = isset( $_GET['ca'] ) ? (array) $_GET['ca'] : array();
-			$categories = array_map( 'intval', $categories );
+			$categories = isset( $_GET['ca'] ) ? array_map( 'intval', (array) $_GET['ca'] ) : array();
 			$categories = array_filter( $categories );
 
 			if ( ! empty( $categories ) ) {
@@ -452,8 +451,7 @@ class AIOVG_Widget_Videos extends WP_Widget {
 				}
 			}
 	
-			$tags = isset( $_GET['ta'] ) ? (array) $_GET['ta'] : array();
-			$tags = array_map( 'intval', $tags );
+			$tags = isset( $_GET['ta'] ) ? array_map( 'intval', (array) $_GET['ta'] ) : array();
 			$tags = array_filter( $tags );
 
 			if ( ! empty( $tags ) ) {

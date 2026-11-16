@@ -70,7 +70,7 @@ function aiovg_dropdown_terms( $args ) {
 	$html .= '</div>';
 
 	if ( $echo ) {
-		echo $html;
+		echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built from escaped values above.
 	} else {
 		return $html;
 	}
@@ -194,12 +194,12 @@ function aiovg_get_like_button( $post_id ) {
 
 		if ( empty( $likes_settings['login_required_to_vote'] ) ) {
 			if ( isset( $_COOKIE['aiovg_videos_likes'] ) ) {
-				$liked = explode( '|', $_COOKIE['aiovg_videos_likes'] );
+				$liked = explode( '|', sanitize_text_field( wp_unslash( $_COOKIE['aiovg_videos_likes'] ) ) );
 				$liked = array_map( 'intval', $liked );
 			}
 
 			if ( isset( $_COOKIE['aiovg_videos_dislikes'] ) ) {
-				$disliked = explode( '|', $_COOKIE['aiovg_videos_dislikes'] );
+				$disliked = explode( '|', sanitize_text_field( wp_unslash( $_COOKIE['aiovg_videos_dislikes'] ) ) );
 				$disliked = array_map( 'intval', $disliked );
 			}
 		}
@@ -234,99 +234,13 @@ function aiovg_get_player_html( $post_id = 0, $atts = array() ) {
 }
 
 /**
- * Wraps the shortcode output HTML string with filters.
- *
- * @since  4.0.1
- * @param  string $content    Default shortcode HTML output (the gallery itself).
- * @param  array  $attributes An associative array of shortcode attributes.
- * @return string             Combined output of filters + gallery.
- */
-function aiovg_wrap_with_filters( $content, $attributes ) {
-	if (
-		empty( $attributes['filters_keyword'] ) &&
-		empty( $attributes['filters_category'] ) &&
-		empty( $attributes['filters_tag'] ) &&
-		empty( $attributes['filters_sort'] )
-	) {
-		return $content;
-	}
-
-	$json_params = aiovg_prepare_attributes_for_ajax( $attributes );
-
-	$attributes['template'] = sanitize_text_field( $attributes['filters_template'] );
-	$attributes['has_keyword'] = (int) $attributes['filters_keyword'];
-	$attributes['has_category'] = (int) $attributes['filters_category'];
-	$attributes['has_tag'] = (int) $attributes['filters_tag'];
-	$attributes['has_sort'] = (int) $attributes['filters_sort'];
-	$attributes['has_search_button'] = ( 'search' == $attributes['filters_mode'] ) ? 1 : 0;
-	$attributes['has_reset_button'] = (int) $attributes['filters_reset_button'];
-	$attributes['target'] = 'current';
-
-	$attributes['categories_selected'] = $attributes['category'];
-	$attributes['tags_selected'] = $attributes['tag'];
-
-	// Auto-switch to "compact" template if only the keyword field is shown
-	if ( 
-		empty( $attributes['has_category'] ) && 
-		empty( $attributes['has_tag'] ) && 
-		empty( $attributes['has_sort'] ) 
-	) {
-		$attributes['template'] = 'compact';
-	}
-
-	// Current page ID, useful for search form target
-	$attributes['search_page_id'] = aiovg_get_current_page_id();
-	
-	// Enqueue dependencies
-	wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-public' );
-
-	if ( 'search' != $attributes['filters_mode'] ) {
-		wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-search' );
-	}
-
-	if ( ! empty( $attributes['has_category'] ) || ! empty( $attributes['has_tag'] ) ) {
-		wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-select' );
-	}		
-
-	if ( ! empty( $attributes['show_pagination'] ) || ! empty( $attributes['show_more'] ) ) {     
-        wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-pagination' );
-    }
-
-	// Capture filter form output
-	ob_start();
-	include apply_filters( 'aiovg_load_template', AIOVG_PLUGIN_DIR . 'public/templates/search-form-template-' . sanitize_file_name( $attributes['template'] ) . '.php', $attributes );
-	$filters = ob_get_clean();
-
-	// Now load the combined layout (filters + videos)
-	$data_params = ( 'ajax' == $attributes['filters_mode'] ) ? wp_json_encode( $json_params ) : '';
-
-	$html = sprintf( 
-		'<div class="aiovg-videos-filters-wrapper aiovg-filters-position-%s" data-params="%s">', 
-		esc_attr( $attributes['filters_position'] ),
-		esc_attr( $data_params )
-	);
-
-	if ( 'ajax' == $attributes['filters_mode'] ) {
-		$html .= '<div class="aiovg-filters-progress-bar" style="display: none;">';
-		$html .= '<div class="aiovg-filters-progress-bar-inner"></div>';
-        $html .= '</div>';
-	}
-
-	$html .= $filters;
-	$html .= $content;
-	$html .= '</div>';
-
-	return $html;
-}
-
-/**
  * Category thumbnail HTML output.
  *
  * @since 1.5.7
  * @param WP_Term $term WP term object.
  * @param array   $atts Array of attributes.
  */
-function the_aiovg_category_thumbnail( $term, $attributes ) {
+function aiovg_the_category_thumbnail( $term, $attributes ) {
 	include apply_filters( 'aiovg_load_template', AIOVG_PLUGIN_DIR . 'public/templates/category-thumbnail.php', $attributes );
 }
 
@@ -337,7 +251,7 @@ function the_aiovg_category_thumbnail( $term, $attributes ) {
  * @param int   $post_id    Video post ID.
  * @param array $attributes Array of attributes.
  */
-function the_aiovg_content_after_player( $post_id, $attributes ) {
+function aiovg_the_content_after_player( $post_id, $attributes ) {
 	$post_id = (int) $post_id;	
 	$content = '';	
 	
@@ -368,7 +282,7 @@ function the_aiovg_content_after_player( $post_id, $attributes ) {
 
 	if ( ! empty( $content ) ) {
 		echo '<div class="aiovg-content-after-player aiovg-margin-top aiovg-hide-if-empty">';
-		echo $content;
+		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Add-on HTML from the aiovg_content_after_player filter.
 		echo '</div>';
 	}
 }
@@ -379,12 +293,12 @@ function the_aiovg_content_after_player( $post_id, $attributes ) {
  * @since 3.6.1
  * @param array $attributes Array of attributes.
  */
-function the_aiovg_content_after_thumbnail( $attributes ) {
+function aiovg_the_content_after_thumbnail( $attributes ) {
 	$content = apply_filters( 'aiovg_content_after_thumbnail', '', $attributes );
 
 	if ( ! empty( $content ) ) {
 		echo '<div class="aiovg-content-after-thumbnail">';
-		echo $content;
+		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Add-on HTML from the aiovg_content_after_thumbnail filter.
 		echo '</div>';
 	}
 }
@@ -395,11 +309,11 @@ function the_aiovg_content_after_thumbnail( $attributes ) {
  * @since 4.3.7
  * @param array $attributes Array of attributes.
  */
-function the_aiovg_content_after_thumbnail_image( $attributes ) {
+function aiovg_the_content_after_thumbnail_image( $attributes ) {
 	$content = apply_filters( 'aiovg_content_after_thumbnail_image', '', $attributes );
 
 	if ( ! empty( $content ) ) {
-		echo $content;
+		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Add-on HTML from the aiovg_content_after_thumbnail_image filter.
 	}
 }
 
@@ -409,14 +323,14 @@ function the_aiovg_content_after_thumbnail_image( $attributes ) {
  * @since 1.0.0
  * @param int   $char_length Excerpt length.
  */
-function the_aiovg_excerpt( $char_length ) {
+function aiovg_the_excerpt( $char_length ) {
 	$excerpt = aiovg_get_excerpt( 0, $char_length );
 	if ( ! empty( $excerpt ) ) {
 		$excerpt = wp_kses_post( $excerpt );
 		$excerpt = do_shortcode( $excerpt );
 	}
 
-	echo $excerpt;
+	echo $excerpt; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses_post() above, then shortcodes.
 }
 
 /**
@@ -426,7 +340,7 @@ function the_aiovg_excerpt( $char_length ) {
  * @param int   $numpages The total amount of pages.
  * @param array $atts     Array of attributes.
  */
-function the_aiovg_more_button( $numpages = '', $atts = array() ) {
+function aiovg_the_more_button( $numpages = '', $atts = array() ) {
 	if ( empty( $numpages ) ) {
     	$numpages = 1;
   	}
@@ -445,8 +359,8 @@ function the_aiovg_more_button( $numpages = '', $atts = array() ) {
 			echo sprintf( '<aiovg-pagination class="aiovg-more aiovg-more-ajax aiovg-text-center" data-params="%s">', esc_attr( wp_json_encode( $json_params ) ) );
 			echo sprintf( 
 				'<button type="button" class="aiovg-link-more" data-numpages="%d" data-paged="%d">%s</button>', 
-				$numpages,
-				$paged,
+				(int) $numpages,
+				(int) $paged,
 				esc_html( $atts['more_label'] ) 
 			);
 			echo '</aiovg-pagination>';
@@ -455,7 +369,7 @@ function the_aiovg_more_button( $numpages = '', $atts = array() ) {
 		echo '<aiovg-pagination class="aiovg-more aiovg-text-center">';
 		echo sprintf( 
 			'<button type="button" onclick="location.href=%s" class="aiovg-link-more">%s</button>',
-			aiovg_esc_js_url( $atts['more_link'] ),
+			aiovg_esc_js_url( $atts['more_link'] ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in aiovg_esc_js_url().
 			esc_html( $atts['more_label'] ) 
 		);
 		echo '</aiovg-pagination>';
@@ -471,7 +385,7 @@ function the_aiovg_more_button( $numpages = '', $atts = array() ) {
  * @param int   $paged     The current page number.
  * @param array $atts      Array of attributes.
  */
-function the_aiovg_pagination( $numpages = '', $pagerange = '', $paged = '', $atts = array() ) {
+function aiovg_the_pagination( $numpages = '', $pagerange = '', $paged = '', $atts = array() ) {
 	if ( empty( $numpages ) ) {
     	$numpages = 1;
   	}
@@ -493,9 +407,9 @@ function the_aiovg_pagination( $numpages = '', $pagerange = '', $paged = '', $at
   	// Construct the pagination arguments to enter into our paginate_links function
 	$arr_params = array();
 
-	parse_str( $_SERVER['QUERY_STRING'], $queries );
-	if ( ! empty( $queries ) ) {
-		$arr_params = array_keys( $queries );
+	// Only the keys are needed, to strip every current query arg from the base URL
+	if ( ! empty( $_GET ) ) {
+		$arr_params = array_map( 'sanitize_text_field', array_keys( $_GET ) );
 	}
 	 
 	$base = aiovg_remove_query_arg( $arr_params, get_pagenum_link( 1 ) );	
@@ -538,7 +452,7 @@ function the_aiovg_pagination( $numpages = '', $pagerange = '', $paged = '', $at
 			printf(
 				'<aiovg-pagination class="aiovg-pagination aiovg-pagination-ajax aiovg-text-center" data-params="%s" data-current="%d">',			
 				esc_attr( wp_json_encode( $json_params ) ),
-				$paged
+				(int) $paged
 			);
 		} else {
 			echo '<aiovg-pagination class="aiovg-pagination aiovg-text-center">';			
@@ -550,12 +464,12 @@ function the_aiovg_pagination( $numpages = '', $pagerange = '', $paged = '', $at
 				$page_link = preg_replace( '/\bhref=["\'][^"\']*["\']/', 'href="javascript:void(0)"', $page_link );
 			}
 			
-			echo $page_link;
+			echo $page_link; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Markup from paginate_links().
 		}
 		echo '</div>';	
 
 		echo '<div class="aiovg-pagination-info aiovg-text-muted aiovg-text-small">';
-		echo sprintf( __( 'Page %d of %d', 'all-in-one-video-gallery' ), $paged, $numpages );
+		echo sprintf( /* translators: 1: Current page number, 2: Total number of pages. */ esc_html__( 'Page %1$d of %2$d', 'all-in-one-video-gallery' ), (int) $paged, (int) $numpages );
 		echo '</div>';		
 		
 		echo '</aiovg-pagination>';
@@ -567,7 +481,7 @@ function the_aiovg_pagination( $numpages = '', $pagerange = '', $paged = '', $at
  *
  * @since 4.5.2
  */
-function the_aiovg_php_server_limits_notice() {
+function aiovg_the_php_server_limits_notice() {
     $recommended_memory = 256; // MB
     $recommended_time   = 120; // seconds
 
@@ -578,7 +492,7 @@ function the_aiovg_php_server_limits_notice() {
 
     if ( $current_memory < $recommended_memory ) {
         $errors[] = sprintf(
-            __( 'Your PHP memory limit is %dMB. It is recommended to have at least %dMB for smooth import/export operations.', 'all-in-one-video-gallery' ),
+            /* translators: 1: Current memory limit in MB, 2: Recommended memory limit in MB. */ __( 'Your PHP memory limit is %1$dMB. It is recommended to have at least %2$dMB for smooth import/export operations.', 'all-in-one-video-gallery' ),
             $current_memory,
             $recommended_memory
         );
@@ -586,7 +500,7 @@ function the_aiovg_php_server_limits_notice() {
 
     if ( $current_time < $recommended_time ) {
         $errors[] = sprintf(
-            __( 'Your PHP max execution time is %d seconds. It is recommended to have at least %d seconds to avoid timeouts during batch processing.', 'all-in-one-video-gallery' ),
+            /* translators: 1: Current max execution time in seconds, 2: Recommended time in seconds. */ __( 'Your PHP max execution time is %1$d seconds. It is recommended to have at least %2$d seconds to avoid timeouts during batch processing.', 'all-in-one-video-gallery' ),
             $current_time,
             $recommended_time
         );
@@ -609,8 +523,8 @@ function the_aiovg_php_server_limits_notice() {
  * @param int   $post_id Post ID.
  * @param array $atts    Player configuration data.
  */
-function the_aiovg_player( $post_id = 0, $atts = array() ) {
-	echo aiovg_get_player_html( $post_id, $atts );	
+function aiovg_the_player( $post_id = 0, $atts = array() ) {
+	echo aiovg_get_player_html( $post_id, $atts ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Player markup, escaped where it is built.	
 }
 
 /**
@@ -618,7 +532,7 @@ function the_aiovg_player( $post_id = 0, $atts = array() ) {
  *
  * @since 1.0.0
  */
-function the_aiovg_socialshare_buttons() {
+function aiovg_the_socialshare_buttons() {
 	if ( ! is_singular( 'aiovg_videos' ) ) { 
 		return false;
 	}
@@ -705,8 +619,10 @@ function the_aiovg_socialshare_buttons() {
 	}
 
 	if ( isset( $socialshare_settings['services']['email'] ) ) {
+		/* translators: %s: Video title. */
 		$email_subject = sprintf( __( 'Check out the "%s"', 'all-in-one-video-gallery' ), $title );
-		$email_body    = sprintf( __( 'Check out the "%s" at %s', 'all-in-one-video-gallery' ), $title, $url );
+		/* translators: 1: Video title, 2: Video URL. */
+		$email_body    = sprintf( __( 'Check out the "%1$s" at %2$s', 'all-in-one-video-gallery' ), $title, $url );
 		$email_url     = "mailto:?subject={$email_subject}&amp;body={$email_body}";
 
 		$buttons['email'] = array(		
@@ -735,7 +651,9 @@ function the_aiovg_socialshare_buttons() {
 
 		$html .= '</div>';
 
-		echo apply_filters( 'the_aiovg_socialshare_buttons', $html, $buttons );
+		$html = apply_filters_deprecated( 'the_aiovg_socialshare_buttons', array( $html, $buttons ), '5.2.0', 'aiovg_socialshare_buttons_html' );
+
+		echo apply_filters( 'aiovg_socialshare_buttons_html', $html, $buttons ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built from escaped values above; filterable.
 	}	
 }
 
@@ -745,8 +663,8 @@ function the_aiovg_socialshare_buttons() {
  * @since 1.0.0
  * @param array $atts Array of attributes.
  */
-function the_aiovg_video_attributes( $atts ) {
-	echo aiovg_combine_video_attributes( $atts );
+function aiovg_the_video_attributes( $atts ) {
+	echo aiovg_combine_video_attributes( $atts ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in aiovg_combine_video_attributes().
 }
 
 /**
@@ -756,7 +674,7 @@ function the_aiovg_video_attributes( $atts ) {
  * @param WP_Post $post WP post object.
  * @param array   $atts Array of attributes.
  */
-function the_aiovg_video_thumbnail( $post, $attributes ) {
+function aiovg_the_video_thumbnail( $post, $attributes ) {
 	$template = 'video-thumbnail.php';
 	
 	if ( isset( $attributes['thumbnail_style'] ) && 'image-left' == $attributes['thumbnail_style'] ) {
@@ -764,4 +682,228 @@ function the_aiovg_video_thumbnail( $post, $attributes ) {
 	}
 
 	include apply_filters( 'aiovg_load_template', AIOVG_PLUGIN_DIR . "public/templates/{$template}", $attributes );
+}
+
+/**
+ * Wraps the shortcode output HTML string with filters.
+ *
+ * @since  4.0.1
+ * @param  string $content    Default shortcode HTML output (the gallery itself).
+ * @param  array  $attributes An associative array of shortcode attributes.
+ * @return string             Combined output of filters + gallery.
+ */
+function aiovg_wrap_with_filters( $content, $attributes ) {
+	if (
+		empty( $attributes['filters_keyword'] ) &&
+		empty( $attributes['filters_category'] ) &&
+		empty( $attributes['filters_tag'] ) &&
+		empty( $attributes['filters_sort'] )
+	) {
+		return $content;
+	}
+
+	$json_params = aiovg_prepare_attributes_for_ajax( $attributes );
+
+	$attributes['template'] = sanitize_text_field( $attributes['filters_template'] );
+	$attributes['has_keyword'] = (int) $attributes['filters_keyword'];
+	$attributes['has_category'] = (int) $attributes['filters_category'];
+	$attributes['has_tag'] = (int) $attributes['filters_tag'];
+	$attributes['has_sort'] = (int) $attributes['filters_sort'];
+	$attributes['has_search_button'] = ( 'search' == $attributes['filters_mode'] ) ? 1 : 0;
+	$attributes['has_reset_button'] = (int) $attributes['filters_reset_button'];
+	$attributes['target'] = 'current';
+
+	$attributes['categories_selected'] = $attributes['category'];
+	$attributes['tags_selected'] = $attributes['tag'];
+
+	// Auto-switch to "compact" template if only the keyword field is shown
+	if (
+		empty( $attributes['has_category'] ) &&
+		empty( $attributes['has_tag'] ) &&
+		empty( $attributes['has_sort'] )
+	) {
+		$attributes['template'] = 'compact';
+	}
+
+	// Current page ID, useful for search form target
+	$attributes['search_page_id'] = aiovg_get_current_page_id();
+
+	// Enqueue dependencies
+	wp_enqueue_style( AIOVG_PLUGIN_SLUG . '-public' );
+
+	if ( 'search' != $attributes['filters_mode'] ) {
+		wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-search' );
+	}
+
+	if ( ! empty( $attributes['has_category'] ) || ! empty( $attributes['has_tag'] ) ) {
+		wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-select' );
+	}
+
+	if ( ! empty( $attributes['show_pagination'] ) || ! empty( $attributes['show_more'] ) ) {
+		wp_enqueue_script( AIOVG_PLUGIN_SLUG . '-pagination' );
+	}
+
+	// Capture filter form output
+	ob_start();
+	include apply_filters( 'aiovg_load_template', AIOVG_PLUGIN_DIR . 'public/templates/search-form-template-' . sanitize_file_name( $attributes['template'] ) . '.php', $attributes );
+	$filters = ob_get_clean();
+
+	// Now load the combined layout (filters + videos)
+	$data_params = ( 'ajax' == $attributes['filters_mode'] ) ? wp_json_encode( $json_params ) : '';
+
+	$html = sprintf(
+		'<div class="aiovg-videos-filters-wrapper aiovg-filters-position-%s" data-params="%s">',
+		esc_attr( $attributes['filters_position'] ),
+		esc_attr( $data_params )
+	);
+
+	if ( 'ajax' == $attributes['filters_mode'] ) {
+		$html .= '<div class="aiovg-filters-progress-bar" style="display: none;">';
+		$html .= '<div class="aiovg-filters-progress-bar-inner"></div>';
+		$html .= '</div>';
+	}
+
+	$html .= $filters;
+	$html .= $content;
+	$html .= '</div>';
+
+	return $html;
+}
+
+/**
+ * Category thumbnail HTML output.
+ *
+ * @since      1.5.7
+ * @deprecated 5.2.0 Use aiovg_the_category_thumbnail().
+ * @param      WP_Term $term       WP term object.
+ * @param      array   $attributes Array of attributes.
+ */
+function the_aiovg_category_thumbnail( $term, $attributes ) {
+	return aiovg_the_category_thumbnail( $term, $attributes );
+}
+
+/**
+ * Add content after player.
+ *
+ * @since      3.6.1
+ * @deprecated 5.2.0 Use aiovg_the_content_after_player().
+ * @param      int   $post_id    Video post ID.
+ * @param      array $attributes Array of attributes.
+ */
+function the_aiovg_content_after_player( $post_id, $attributes ) {
+	return aiovg_the_content_after_player( $post_id, $attributes );
+}
+
+/**
+ * Add content after thumbnail.
+ *
+ * @since      3.6.1
+ * @deprecated 5.2.0 Use aiovg_the_content_after_thumbnail().
+ * @param      array $attributes Array of attributes.
+ */
+function the_aiovg_content_after_thumbnail( $attributes ) {
+	return aiovg_the_content_after_thumbnail( $attributes );
+}
+
+/**
+ * Add content after thumbnail image.
+ *
+ * @since      4.3.7
+ * @deprecated 5.2.0 Use aiovg_the_content_after_thumbnail_image().
+ * @param      array $attributes Array of attributes.
+ */
+function the_aiovg_content_after_thumbnail_image( $attributes ) {
+	return aiovg_the_content_after_thumbnail_image( $attributes );
+}
+
+/**
+ * Display the video excerpt.
+ *
+ * @since      1.0.0
+ * @deprecated 5.2.0 Use aiovg_the_excerpt().
+ * @param      int $char_length Excerpt length.
+ */
+function the_aiovg_excerpt( $char_length ) {
+	return aiovg_the_excerpt( $char_length );
+}
+
+/**
+ * Display more button on gallery pages.
+ *
+ * @since      2.5.1
+ * @deprecated 5.2.0 Use aiovg_the_more_button().
+ * @param      int   $numpages The total amount of pages.
+ * @param      array $atts     Array of attributes.
+ */
+function the_aiovg_more_button( $numpages = '', $atts = array() ) {
+	return aiovg_the_more_button( $numpages, $atts );
+}
+
+/**
+ * Display paginated links on gallery pages.
+ *
+ * @since      1.0.0
+ * @deprecated 5.2.0 Use aiovg_the_pagination().
+ * @param      int   $numpages  The total amount of pages.
+ * @param      int   $pagerange How many numbers to either side of current page.
+ * @param      int   $paged     The current page number.
+ * @param      array $atts      Array of attributes.
+ */
+function the_aiovg_pagination( $numpages = '', $pagerange = '', $paged = '', $atts = array() ) {
+	return aiovg_the_pagination( $numpages, $pagerange, $paged, $atts );
+}
+
+/**
+ * Display a notice if PHP limits are below recommended values.
+ *
+ * @since      4.5.2
+ * @deprecated 5.2.0 Use aiovg_the_php_server_limits_notice().
+ */
+function the_aiovg_php_server_limits_notice() {
+	return aiovg_the_php_server_limits_notice();
+}
+
+/**
+ * Display a video player.
+ *
+ * @since      1.0.0
+ * @deprecated 5.2.0 Use aiovg_the_player().
+ * @param      int   $post_id Post ID.
+ * @param      array $atts    Player configuration data.
+ */
+function the_aiovg_player( $post_id = 0, $atts = array() ) {
+	return aiovg_the_player( $post_id, $atts );
+}
+
+/**
+ * Display social sharing buttons.
+ *
+ * @since      1.0.0
+ * @deprecated 5.2.0 Use aiovg_the_socialshare_buttons().
+ */
+function the_aiovg_socialshare_buttons() {
+	return aiovg_the_socialshare_buttons();
+}
+
+/**
+ * Build & display attributes using the $atts array.
+ *
+ * @since      1.0.0
+ * @deprecated 5.2.0 Use aiovg_the_video_attributes().
+ * @param      array $atts Array of attributes.
+ */
+function the_aiovg_video_attributes( $atts ) {
+	return aiovg_the_video_attributes( $atts );
+}
+
+/**
+ * Video thumbnail HTML output.
+ *
+ * @since      1.5.7
+ * @deprecated 5.2.0 Use aiovg_the_video_thumbnail().
+ * @param      WP_Post $post       WP post object.
+ * @param      array   $attributes Array of attributes.
+ */
+function the_aiovg_video_thumbnail( $post, $attributes ) {
+	return aiovg_the_video_thumbnail( $post, $attributes );
 }
